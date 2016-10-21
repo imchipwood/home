@@ -8,6 +8,7 @@
 import os
 
 class TableAccess(object):
+    sDB = ''
     sTable = ''
     sUser = ''
     sPW = ''
@@ -26,23 +27,31 @@ class TableAccess(object):
     def readFile(self):
         with open(self.sFile, 'r') as inf:
             for line in inf:
-                line = line.rstrip()
+                line = line.rstrip().split('=')
+                # database
+                if line[0] == 'db':
+                    self.sDB = line[-1]
+                # table
                 if line[0] == 't':
-                    self.sTable = line.split('=')[-1]
+                    self.sTable = line[-1]
+                # username
                 if line[0] == 'u':
-                    self.sUser = line.split('=')[-1]
+                    self.sUser = line[-1]
+                # password
                 if line[0] == 'p':
-                    self.sPW = line.split('=')[-1]
+                    self.sPW = line[-1]
+                # room
                 if line[0] == 'r':
-                    self.sRoom = line.split('=')[-1]
+                    self.sRoom = line[-1]
+                # columns to populate
                 if line[0] == 'c':
-                    self.lColumns = line.split('=')[-1].split[',']
-        assert not '' in [self.sTable, self.sUser, self.sPW]
+                    self.lColumns = line[-1].split[',']
+        assert not '' in [self.sDB, self.sTable, self.sUser, self.sPW]
         if not 'get' in self.sFile.lower():
             assert not '' in [self.sRoom]
             for col in self.lColumns:
                 assert not '' in col
         
     def getInfo(self):
-        return {'table':self.sTable, 'user':self.sUser, 'pw':self.sPW, 'room':self.sRoom, 'columns':self.lColumns}
+        return {'db':self.sDB, 'table':self.sTable, 'user':self.sUser, 'pw':self.sPW, 'room':self.sRoom, 'columns':self.lColumns}
 
