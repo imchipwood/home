@@ -60,8 +60,8 @@ def main():
         fHumidity /= float(iAvg)
         
         # Generate SQL command and execute
-        dbcmd =  "INSERT INTO data (tdate, ttime, room, temperature, humidity) values(CURRENT_DATE(),\
-        NOW(), {0}, {1:0.1f}, {2:0.1f})".format(sqlget['room'], fTemperature, fHumidity)
+        sColumns = ', '.join(sqlget['columns'])
+        dbcmd =  "INSERT INTO data {0} values(CURRENT_DATE(), NOW(), {1}, {2:0.1f}, {3:0.1f})".format(sColumns, sqlget['room'], fTemperature, fHumidity)
         if bDebug:
             print "-d- MySQL command (will not be run):\n-d- %s" % (dbcmd)
         else:
