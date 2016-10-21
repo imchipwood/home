@@ -16,6 +16,9 @@ global sQuery
 global bDebug
 sQuery = args.query
 bDebug = args.debug
+if bDebug:
+    print "args:"
+    print "sQuery: {}".format(sQuery)
 
 def main():
     global sQuery
