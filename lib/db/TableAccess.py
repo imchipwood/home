@@ -11,6 +11,7 @@ class TableAccess(object):
     sTable = ''
     sUser = ''
     sPW = ''
+    sRoom = ''
     sFile = ''
     
     def __init__(self, file):
@@ -31,8 +32,12 @@ class TableAccess(object):
                     self.sUser = line.split('=')[-1]
                 if line[0] == 'p':
                     self.sPW = line.split('=')[-1]
+                if line[0] == 'r':
+                    self.sRoom = line.split('=')[-1]
         assert not '' in [self.sTable, self.sUser, self.sPW]
+        if not 'get' in self.sFile.lower():
+            assert not '' in [self.sRoom]
         
     def getInfo(self):
-        return {'table':self.sTable, 'user':self.sUser, 'pw':self.sPW}
+        return {'table':self.sTable, 'user':self.sUser, 'pw':self.sPW, 'room':self.sRoom}
 
