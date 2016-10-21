@@ -53,7 +53,7 @@ def main():
         for i in xrange(0,iAvg):
             h.read()
             if bDebug:
-                print "Temperature[{0}]={1}, Humidity[{0}]={2}".format(i, h.getTemperature(), h.getHumidity())
+                print "-d- Temperature[{0}]={1:0.1f}, Humidity[{0:0.1f}]={2}".format(i, h.getTemperature(), h.getHumidity())
             fTemperature += h.getTemperature()
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
@@ -62,15 +62,15 @@ def main():
         # Generate SQL command and execute
         dbcmd =  "INSERT INTO data (tdate, ttime, room, temperature, humidity) values(CURRENT_DATE(), NOW(), 'media', {0:0.1f}, {1:0.1f})".format(fTemperature, fHumidity)
         if bDebug:
-            print "MySQL command:\n{}",format(dbcmd)
-#        if not bDebug:
-#            with db:
-#                curs.execute( dbcmd )
+            print "-d- MySQL command (will not be run):\n-d- %s" % (dbcmd)
+        else:
+            with db:
+                curs.execute( dbcmd )
     except KeyboardInterrupt:
-        print "\n\tKeyboardInterrupt, exiting gracefully\n"
+        print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
     except Exception as e:
-        print "\n\tSome exception: %s\n" % (e)
+        print "\n\t-E- Some exception: %s\n" % (e)
         raise e
     return True
 
