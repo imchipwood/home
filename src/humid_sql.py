@@ -14,31 +14,46 @@ from sensor_humidity import Humidity
 parser = argparse.ArgumentParser()
 parser.add_argument('-nAvg', '-n', type=int, default=5, help="Number of measurements to average before logging. Optional. Defaults to 5")
 parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to SQL database, while also printing extra stuff to console. Optional")
+
 args = parser.parse_args()
+global iAvg
+global bDebug
 iAvg = args.nAvg
 bDebug = args.debug
 
 
 def main():
+    global iAvg
+    global bDebug
     
     # user-defined args
     sSQLAccessFileName = 'sql.txt'
     
     # set up SQL db
-    ta = TableAccess(os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName)
+    sSQLCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName
+    if bDebug:
+        print "-d- Accessing SQL DB using credentials found here:"
+        print "-d- {}".format(sSQLCredentialsFile)
+    ta = TableAccess(sSQLCredentialsFile)
     sqlget = ta.getInfo()
     db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['table'])
     curs = db.cursor()
     
     # set up the sensor
+    if bDebug:
+        print "-d- Setting up humidity sensor"
     h = Humidity(sensor_type='22', pin=4, units='f')
     h.enable()
     try:
+        if bDebug:
+            print "-d- Beginning readings"
         # take N readings and average them
         fTemperature = 0.0
         fHumidity = 0.0
         for i in xrange(0,iAvg):
             h.read()
+            if bDebug:
+                print "Temperature[{0}]={1}, Humidity[{0}]={2}".format(i, h.getTemperature(), h.getHumidity())
             fTemperature += h.getTemperature()
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
@@ -48,9 +63,9 @@ def main():
         dbcmd =  "INSERT INTO data (tdate, ttime, room, temperature, humidity) values(CURRENT_DATE(), NOW(), 'media', {0:0.1f}, {1:0.1f})".format(fTemperature, fHumidity)
         if bDebug:
             print "MySQL command:\n{}",format(dbcmd)
-        if not bDebug:
-            with db:
-                curs.execute( dbcmd )
+#        if not bDebug:
+#            with db:
+#                curs.execute( dbcmd )
     except KeyboardInterrupt:
         print "\n\tKeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
