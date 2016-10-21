@@ -53,7 +53,7 @@ def main():
         for i in xrange(0,iAvg):
             h.read()
             if bDebug:
-                print "-d- Temperature[{0}]={1:0.1f}, Humidity[{0:0.1f}]={2}".format(i, h.getTemperature(), h.getHumidity())
+                print "-d- Temperature[{0}]={1:0.1f}, Humidity[{1}]={2:0.1f}".format(i, h.getTemperature(), h.getHumidity())
             fTemperature += h.getTemperature()
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
