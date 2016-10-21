@@ -45,12 +45,14 @@ class TableAccess(object):
                     self.sRoom = line[-1]
                 # columns to populate
                 if line[0] == 'c':
-                    self.lColumns = line[-1].split[',']
+                    self.lColumns = line[-1].split(',')
         assert not '' in [self.sDB, self.sTable, self.sUser, self.sPW]
         if not 'get' in self.sFile.lower():
             assert not '' in [self.sRoom]
-            for col in self.lColumns:
-                assert not '' in col
+            assert not '' in self.lColumns
+#            for col in self.lColumns:
+#                print col
+#                assert not '' in col
         
     def getInfo(self):
         return {'db':self.sDB, 'table':self.sTable, 'user':self.sUser, 'pw':self.sPW, 'room':self.sRoom, 'columns':self.lColumns}

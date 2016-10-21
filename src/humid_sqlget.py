@@ -9,7 +9,7 @@ def main():
     # open SQL db
     ta = TableAccess(os.path.dirname(os.path.realpath(__file__))+'/../conf/sqlget.txt')
     sqlget = ta.getInfo()
-    db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['table'])
+    db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['db'])
     curs = db.cursor()
     
     # set up the sensor
