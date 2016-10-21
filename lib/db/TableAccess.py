@@ -13,7 +13,7 @@ class TableAccess(object):
     sUser = ''
     sPW = ''
     sRoom = ''
-    lColumns
+    lColumns = ''
     sFile = ''
     
     def __init__(self, file):
