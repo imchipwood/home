@@ -2,19 +2,34 @@
 import sys 
 import os
 import MySQLdb
+import argparse
+
 sys.path.append('/home/pi/dev/home/lib/db')
 from TableAccess import TableAccess
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-query', '-q', type=str, default='recent', help="Type of query - how and what do you want data displayed")
+parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to SQL database, while also printing extra stuff to console. Optional")
+
+args = parser.parse_args()
+global sQuery
+global bDebug
+sQuery = args.query
+bDebug = args.debug
+
 def main():
+    global sQuery
+    global bDebug
+    
     # open SQL db
     ta = TableAccess(os.path.dirname(os.path.realpath(__file__))+'/../conf/sqlget.txt')
     sqlget = ta.getInfo()
     db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['db'])
     curs = db.cursor()
     
-    # set up the sensor
+    # do SQL query and format the data
     try:
-        dbcmd =  "SELECT * FROM data ORDER BY ID DESC LIMIT 5"
+        dbcmd = "SELECT * FROM data ORDER BY ID DESC LIMIT 5"
         with db:
             curs.execute( dbcmd )
         print "\nDate       | Time     | Room     | Temperature | Humidity"
