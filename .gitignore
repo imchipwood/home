@@ -1,2 +1,5 @@
 conf/
-**.pyc
+*.pyc
+*/*.pyc
+*/*/*.pyc
+*/*/*/*.pyc
