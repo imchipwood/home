@@ -24,11 +24,20 @@ def main():
     global sQuery
     global bDebug
     
-    # open SQL db
-    ta = TableAccess(os.path.dirname(os.path.realpath(__file__))+'/../conf/sqlget.txt')
-    sqlget = ta.getInfo()
+    # user-defined args
+    sSQLAccessFileName = 'sql.txt'
+    
+    # set up SQL db
+    sSQLCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName
+    if bDebug:
+        print "-d- Accessing SQL DB using credentials found here:"
+        print "-d- {}".format(sSQLCredentialsFile)
+    ta = TableAccess(sSQLCredentialsFile)
     db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['db'])
     curs = db.cursor()
+    
+    # figure out what query we're doin
+    sQueryParsed = queryCheck()
     
     # do SQL query and format the data
     try:
@@ -45,12 +54,31 @@ def main():
             humi = "{0:0.1f}".format(reading[4]) + "%"
             print date + " | " + time + " | " + room + " | " + temp + " | " + humi
     except KeyboardInterrupt:
-        print "\n\tKeyboardInterrupt, exiting gracefully\n"
+        print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
     except Exception as e:
-        print "\n\tSome exception: %s\n" % (e)
+        print "\n\t-E- Some exception: %s\n" % (e)
         raise e
     return True
+
+def queryCheck():
+    global sQuery
+    global bDebug
+    
+    lValidQueryTypes = ['days', 'date']
+    
+    # first, split by spaces - how many args are there?
+    # behave differently for 1 or 2 args
+    nArgs = sQuery.split(' ')
+    if len(nArgs) < 1 or len(nArgs) > 2:
+        raise Exception('-E- Too many or too few args, bruh, not sure what to do.\n\tArgs: {}'.format(sQuery))
+    elif len(nArgs) == 1:
+        print "-d- 1 arg"
+        return
+    elif len(nArgs) == 2:
+        print "-d- 2 args"
+        return
+    
 
 if __name__ == '__main__':
     main()
