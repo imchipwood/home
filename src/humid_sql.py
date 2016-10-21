@@ -70,7 +70,7 @@ def main():
             print '-d- Final Humidity:    {0:0.1f}'.format(fHumidity)
         # Generate SQL command and execute
         sColumns = ', '.join(sqlget['columns'])
-        dbcmd =  "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), {2}, {3:0.1f}, {4:0.1f})".format(sqlget['table'], sColumns, sqlget['room'], fTemperature, fHumidity)
+        dbcmd =  "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(sqlget['table'], sColumns, sqlget['room'], fTemperature, fHumidity)
         if bDebug:
             print "-d- MySQL command (will not be run):\n-d- %s" % (dbcmd)
         else:
