@@ -3,15 +3,29 @@
 import sys 
 import os
 import MySQLdb
+import argparse
+
 sys.path.append('/home/pi/dev/home/lib/db')
 from TableAccess import TableAccess
 sys.path.append('/home/pi/dev/home/lib/sensors')
 sys.path.append('/home/pi/dev/home/lib/sensors/humidity')
 from sensor_humidity import Humidity
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-nAvg', '-n', type=int, default=5, help="Number of measurements to average before logging. Optional. Defaults to 5")
+parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to SQL database, while also printing extra stuff to console. Optional")
+args = parser.parse_args()
+iAvg = args.nAvg
+bDebug = args.debug
+
+
 def main():
+    
+    # user-defined args
+    sSQLAccessFileName = 'sql.txt'
+    
     # set up SQL db
-    ta = TableAccess(os.path.dirname(os.path.realpath(__file__))+'/../conf/sql.txt')
+    ta = TableAccess(os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName)
     sqlget = ta.getInfo()
     db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['table'])
     curs = db.cursor()
@@ -20,10 +34,23 @@ def main():
     h = Humidity(sensor_type='22', pin=4, units='f')
     h.enable()
     try:
-        h.read()
-        dbcmd =  "INSERT INTO data (tdate, ttime, room, temperature, humidity) values(CURRENT_DATE(), NOW(), 'media', {0:0.1f}, {1:0.1f})".format(h.getTemperature(), h.getHumidity())
-        with db:
-            curs.execute( dbcmd )
+        # take N readings and average them
+        fTemperature = 0.0
+        fHumidity = 0.0
+        for i in xrange(0,iAvg):
+            h.read()
+            fTemperature += h.getTemperature()
+            fHumidity += h.getHumidity()
+        fTemperature /= float(iAvg)
+        fHumidity /= float(iAvg)
+        
+        # Generate SQL command and execute
+        dbcmd =  "INSERT INTO data (tdate, ttime, room, temperature, humidity) values(CURRENT_DATE(), NOW(), 'media', {0:0.1f}, {1:0.1f})".format(fTemperature, fHumidity)
+        if bDebug:
+            print "MySQL command:\n{}",format(dbcmd)
+        if not bDebug:
+            with db:
+                curs.execute( dbcmd )
     except KeyboardInterrupt:
         print "\n\tKeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
