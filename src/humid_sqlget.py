@@ -54,11 +54,12 @@ def main():
             #for reading in curs.fetchall():
             lData = curs.fetchall()
             for i in reversed(xrange(len(lData))):
-                date = "{}".format(lData.reading[0])
-                time = "{0:8s}".format(lData.reading[1])
-                room = "{0:8s}".format(lData.reading[2])
-                temp = "{0:11.1f}".format(lData.reading[3])
-                humi = "{0:0.1f}".format(lData.reading[4]) + "%"
+                reading = lData[i]
+                date = "{}".format(reading[0])
+                time = "{0:8s}".format(reading[1])
+                room = "{0:8s}".format(reading[2])
+                temp = "{0:11.1f}".format(reading[3])
+                humi = "{0:0.1f}".format(reading[4]) + "%"
                 print date + " | " + time + " | " + room + " | " + temp + " | " + humi
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
