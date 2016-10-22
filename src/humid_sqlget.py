@@ -102,7 +102,7 @@ def queryCheck():
     global bDebug
 
     if bDebug:
-        print '-d- Parsing query: {}'.format(sQuery)
+        print '-d- Parsing query: "{}"'.format(sQuery)
 
     # default query if no args are specified (or if empty args specified)
     parsedQuery = {}
@@ -111,6 +111,8 @@ def queryCheck():
     parsedQuery['room'] = '*'
     
     lArgs = sQuery.rstrip().lstrip().split(' ')
+    if bDebug:
+        print '-d- args split into: "{}"'.format(lArgs)
     # are they any args? If so, parse em. If not, assume default
     if len(lArgs) > 0:
         # loop thru each arg, populating the parsedQuery dictionary as we go
