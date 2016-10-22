@@ -40,10 +40,12 @@ def main():
     curs = db.cursor()
 
     # extract the date column - it's used by most query types
-    sDateCol = ''
+    sDateCol = sRoomCol = ''
     for col in sqlget['columns']:
         if 'date' in col.lower():
             sDateCol = col
+        if 'room' in col.lower():
+            sRoomCol = col
     
     
     # do SQL query and format the data
@@ -53,11 +55,11 @@ def main():
         
         # construct query
         if sQueryParsed[0] == 'nEntries':
-            dbcmd = "SELECT * FROM {0} ORDER BY ID DESC LIMIT {1}".format(sqlget['table'], sQueryParsed[1])
+            dbcmd = "SELECT * FROM {0} WHERE {1}={2} ORDER BY ID DESC LIMIT {3}".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sQueryParsed['qualifier'])
         elif sQueryParsed[0] == 'today':
-            dbcmd = "SELECT * FROM {0} WHERE {1} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sDateCol)
+            dbcmd = "SELECT * FROM {0} WHERE {1}={2} AND {3} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol)
         elif sQueryParsed[0] == 'date':
-            dbcmd = "SELECT * FROM {0} WHERE {1} BETWEEN '{2}' AND '{2} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sDateCol, sQueryParsed[1])
+            dbcmd = "SELECT * FROM {0} WHERE {1}={2} AND {3} BETWEEN '{4}' AND '{4} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol, sQueryParsed['qualifier'])
         # run query
         with db:
             curs.execute( dbcmd )
@@ -88,39 +90,55 @@ def queryCheck():
     global sQuery
     global bDebug
 
-    lValidQueryTypes = ['days', 'date']
+    #lValidQueryTypes = ['days', 'date']
 
-    # first, split by spaces - how many args are there?
-    # behave differently for 1 or 2 args
-    parsedQuery = []
-    lArgs = sQuery.lower().rstrip().lstrip().split(' ')
-    nArgs = len(lArgs)
-    if nArgs < 1 or nArgs > 2:
-        raise Exception('-E- Too many or too few args, bruh, not sure what to do.\n\tArgs: {}'.format(sQuery))
-    elif nArgs == 1:
-        if bDebug:
-            print "-d- 1 arg"
-        # check if user wants today or nEntries
-        if 'today' in lArgs[0]:
-            parsedQuery = ['today', '']
-        else:
-            parsedQuery = ['nEntries', int(lArgs[0])]
-    elif nArgs == 2:
-        if bDebug:
-            print "-d- 2 args"
-        # date
-        if lArgs[0] == 'date':
-            # check syntax of date
-            sDate = lArgs[1]
-            sDateSplit = sDate.split('-')
-            dDate = {'year':sDateSplit[0], 'month':sDateSplit[1], 'day':sDateSplit[2]}
-            if len(dDate['year']) != 4:
-                raise Exception('-E- Date entered incorrectly - check the year, should be 4 digits.\n\tYear: {}'.format(dDate['year']))
-            if len(dDate['month']) != 2:
-                raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
-            if len(dDate['day']) != 2:
-                raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
-            parsedQuery = ['date', sDate]
+    # default query if no args are specified (or if empty args specified)
+    parsedQuery = {}
+    parsedQuery['query'] = 'n'
+    parsedQuery['qualifier'] = '5'
+    parsedQuery['room'] == '*'
+    
+    lArgs = sQuery.rstrip().lstrip().split(' ')
+    # are they any args? If so, parse em. If not, assume default
+    if nArgs > len(lArgs):
+        # loop thru each arg, populating the parsedQuery dictionary as we go
+        for sArg in lArgs:
+            # first, deconstruct the arg into a key/value pair
+            sKey = value = ''
+            sArgSplit = sArg.split('=')
+            if len(sArgSplit) == 2:
+                sKey = sArgSplit[0].lower()
+                value = sArgSplit[1]
+            elif len(sArgSplit) == 1:
+                sKey = 'n'
+                value = sArgSplit[0]
+            else:
+                raise Exception('-E- Something\'s up with your args. Couldn\'t split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}'.format(sQuery, sArg))
+                
+            # room
+            if sKey == 'room':
+                parsedQuery['room'] = value
+            elif sKey == 'n':
+                parsedQuery['query'] = 'n'
+                parsedQuery['qualifier'] = int(value)
+            elif sKey == 'today':
+                parsedQuery['query'] = 'today'
+                parsedQuery['qualifier'] = ''
+            # date
+            elif sKey == 'date':
+                # check syntax of date
+                sDate = value
+                sDateSplit = sDate.split('-')
+                dDate = {'year':sDateSplit[0], 'month':sDateSplit[1], 'day':sDateSplit[2]}
+                if len(dDate['year']) != 4:
+                    raise Exception('-E- Date entered incorrectly - check the year, should be 4 digits.\n\tYear: {}'.format(dDate['year']))
+                if len(dDate['month']) != 2:
+                    raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
+                if len(dDate['day']) != 2:
+                    raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
+                parsedQuery['query'] = 'date'
+                parsedQuery['qualifier'] = sDate
+
     return parsedQuery
 
 
