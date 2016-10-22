@@ -42,18 +42,22 @@ def main():
     
     # do SQL query and format the data
     try:
-        dbcmd = "SELECT * FROM data ORDER BY ID DESC LIMIT 5"
-        with db:
-            curs.execute( dbcmd )
-        print "\nDate       | Time     | Room     | Temperature | Humidity"
-        print "----------------------------------------------------------"
-        for reading in curs.fetchall():
-            date = "{}".format(reading[0])
-            time = "{0:8s}".format(reading[1])
-            room = "{0:8s}".format(reading[2])
-            temp = "{0:11.1f}".format(reading[3])
-            humi = "{0:0.1f}".format(reading[4]) + "%"
-            print date + " | " + time + " | " + room + " | " + temp + " | " + humi
+        if sQueryParsed[0] == 'nEntries':
+        
+            dbcmd = "SELECT * FROM data ORDER BY ID DESC LIMIT {}".format(sQueryParsed[1])
+            with db:
+                curs.execute( dbcmd )
+            print "\nDate       | Time     | Room     | Temperature | Humidity"
+            print "----------------------------------------------------------"
+            #for reading in curs.fetchall():
+            lData = curs.fetchall()
+            for i in reversed(xrange(len(lData))):
+                date = "{}".format(lData.reading[0])
+                time = "{0:8s}".format(lData.reading[1])
+                room = "{0:8s}".format(lData.reading[2])
+                temp = "{0:11.1f}".format(lData.reading[3])
+                humi = "{0:0.1f}".format(lData.reading[4]) + "%"
+                print date + " | " + time + " | " + room + " | " + temp + " | " + humi
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
@@ -70,12 +74,13 @@ def queryCheck():
     
     # first, split by spaces - how many args are there?
     # behave differently for 1 or 2 args
-    nArgs = sQuery.split(' ')
+    nArgs = sQuery.rstrip().lstrip().split(' ')
     if len(nArgs) < 1 or len(nArgs) > 2:
         raise Exception('-E- Too many or too few args, bruh, not sure what to do.\n\tArgs: {}'.format(sQuery))
     elif len(nArgs) == 1:
         print "-d- 1 arg"
-        return
+        # user just wants to get last N entries, let em do it...
+        return ['nEntries', int(nArgs[0])]
     elif len(nArgs) == 2:
         print "-d- 2 args"
         return
