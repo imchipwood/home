@@ -10,7 +10,7 @@ sys.path.append('/home/pi/dev/home/lib/db')
 from TableAccess import TableAccess
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-query', '-q', type=str, default='recent', help="Type of query - how and what do you want data displayed")
+parser.add_argument('-query', '-q', type=str, default='', help="Type of query - how and what do you want data displayed")
 parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to SQL database, while also printing extra stuff to console. Optional")
 
 args = parser.parse_args()
@@ -19,8 +19,8 @@ global bDebug
 sQuery = args.query
 bDebug = args.debug
 if bDebug:
-    print "args:"
-    print "sQuery: {}".format(sQuery)
+    print "-d- args:"
+    print "-d- sQuery: {}".format(sQuery)
 
 def main():
     global sQuery
@@ -101,7 +101,8 @@ def queryCheck():
     global sQuery
     global bDebug
 
-    #lValidQueryTypes = ['days', 'date']
+    if bDebug:
+        print '-d- Parsing query: {}'.format(sQuery)
 
     # default query if no args are specified (or if empty args specified)
     parsedQuery = {}
