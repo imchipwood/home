@@ -3,6 +3,8 @@ import sys
 import os
 import MySQLdb
 import argparse
+import traceback
+
 
 sys.path.append('/home/pi/dev/home/lib/db')
 from TableAccess import TableAccess
@@ -63,6 +65,7 @@ def main():
         sys.exit(1)
     except Exception as e:
         print "\n\t-E- Some exception: %s\n" % (e)
+        traceback.print_exc()
         raise e
     return True
 
