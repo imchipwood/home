@@ -46,7 +46,8 @@ def main():
             sDateCol = col
         if 'room' in col.lower():
             sRoomCol = col
-    
+    if bDebug:
+        print "-d- Columns of interest:\n-d- date: {}\n-d- room: {}".format(sDateCol, sRoomCol)
     
     # do SQL query and format the data
     try:
@@ -60,6 +61,8 @@ def main():
             dbcmd = "SELECT * FROM {0} WHERE {1}={2} AND {3} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol)
         elif sQueryParsed['query'] == 'date':
             dbcmd = "SELECT * FROM {0} WHERE {1}={2} AND {3} BETWEEN '{4}' AND '{4} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol, sQueryParsed['qualifier'])
+        if bDebug:
+            print "-d- MySQL command:\n-d- %s" % (dbcmd)
         # run query
         with db:
             curs.execute( dbcmd )
