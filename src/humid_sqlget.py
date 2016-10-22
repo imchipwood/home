@@ -114,7 +114,7 @@ def queryCheck():
     if bDebug:
         print '-d- args split into: "{}"'.format(lArgs)
     # are they any args? If so, parse em. If not, assume default
-    if len(lArgs) > 0:
+    if len(lArgs) > 0 and lArgs != ['']:
         # loop thru each arg, populating the parsedQuery dictionary as we go
         for sArg in lArgs:
             # first, deconstruct the arg into a key/value pair
