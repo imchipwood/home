@@ -25,10 +25,10 @@ if bDebug:
 def main():
     global sQuery
     global bDebug
-    
+
     # user-defined args
     sSQLAccessFileName = 'sql.txt'
-    
+
     # set up SQL db
     sSQLCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName
     if bDebug:
@@ -38,25 +38,33 @@ def main():
     sqlget = ta.getInfo()
     db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['db'])
     curs = db.cursor()
+
+    # extract the date column - it's used by most query types
+    sDateCol = ''
+    for col in sqlget['columns']:
+        if 'date' in col.lower():
+            sDateCol = col
     
-    # figure out what query we're doin
-    sQueryParsed = queryCheck()
     
     # do SQL query and format the data
     try:
+        # figure out what query to run
+        sQueryParsed = queryCheck()
+        
+        # construct query
         if sQueryParsed[0] == 'nEntries':
             dbcmd = "SELECT * FROM {0} ORDER BY ID DESC LIMIT {1}".format(sqlget['table'], sQueryParsed[1])
         elif sQueryParsed[0] == 'today':
-            sDateCol = ''
-            for col in sqlget['columns']:
-                if 'date' in col.lower():
-                    sDateCol = col
             dbcmd = "SELECT * FROM {0} WHERE {1} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sDateCol)
+        elif sQueryParsed[0] == 'date':
+            dbcmd = "SELECT * FROM {0} WHERE {1} BETWEEN '{2}' AND '{2} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sDateCol, sQueryParsed[1])
+        # run query
         with db:
             curs.execute( dbcmd )
+
+        # display results
         print "\nDate       | Time     | Room     | Temperature | Humidity"
         print "----------------------------------------------------------"
-        #for reading in curs.fetchall():
         lData = curs.fetchall()
         for i in reversed(xrange(len(lData))):
             reading = lData[i]
@@ -66,7 +74,7 @@ def main():
             temp = "{0:11.1f}".format(reading[3])
             humi = "{0:0.1f}".format(reading[4]) + "%"
             print date + " | " + time + " | " + room + " | " + temp + " | " + humi
-            
+
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
@@ -79,27 +87,42 @@ def main():
 def queryCheck():
     global sQuery
     global bDebug
-    
+
     lValidQueryTypes = ['days', 'date']
-    
+
     # first, split by spaces - how many args are there?
     # behave differently for 1 or 2 args
     parsedQuery = []
-    nArgs = sQuery.rstrip().lstrip().split(' ')
-    if len(nArgs) < 1 or len(nArgs) > 2:
+    lArgs = sQuery.lower().rstrip().lstrip().split(' ')
+    nArgs = len(lArgs)
+    if nArgs < 1 or nArgs > 2:
         raise Exception('-E- Too many or too few args, bruh, not sure what to do.\n\tArgs: {}'.format(sQuery))
-    elif len(nArgs) == 1:
-        print "-d- 1 arg"
+    elif nArgs == 1:
+        if bDebug:
+            print "-d- 1 arg"
         # check if user wants today or nEntries
-        if 'today' in nArgs[0].lower():
+        if 'today' in lArgs[0]:
             parsedQuery = ['today', '']
         else:
-            parsedQuery = ['nEntries', int(nArgs[0])]
-    elif len(nArgs) == 2:
-        print "-d- 2 args"
-    
+            parsedQuery = ['nEntries', int(lArgs[0])]
+    elif nArgs == 2:
+        if bDebug:
+            print "-d- 2 args"
+        # date
+        if lArgs[0] == 'date':
+            # check syntax of date
+            sDate = lArgs[1]
+            sDateSplit = sDate.split('-')
+            dDate = {'year':sDateSplit[0], 'month':sDateSplit[1], 'day':sDateSplit[2]}
+            if len(dDate['year']) != 4:
+                raise Exception('-E- Date entered incorrectly - check the year, should be 4 digits.\n\tYear: {}'.format(dDate['year']))
+            if len(dDate['month']) != 2:
+                raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
+            if len(dDate['day']) != 2:
+                raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
+            parsedQuery = ['date', sDate]
     return parsedQuery
-    
+
 
 if __name__ == '__main__':
     main()
