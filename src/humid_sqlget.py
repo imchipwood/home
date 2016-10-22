@@ -64,7 +64,7 @@ def main():
             
         # construct query
         if sQueryParsed['query'] == 'n':
-            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(sqlget['table'], sRoomQuery if sQueryParsed['room'] != '*' else '', sQueryParsed['qualifier'])
+            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(sqlget['table'], sRoomQuery.replace('AND ', '') if sQueryParsed['room'] != '*' else '', sQueryParsed['qualifier'])
         elif sQueryParsed['query'] == 'today':
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sRoomQuery, sDateCol)
         elif sQueryParsed['query'] == 'date':
