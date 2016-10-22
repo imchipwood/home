@@ -33,6 +33,7 @@ def main():
         print "-d- Accessing SQL DB using credentials found here:"
         print "-d- {}".format(sSQLCredentialsFile)
     ta = TableAccess(sSQLCredentialsFile)
+    sqlget = ta.getInfo()
     db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['db'])
     curs = db.cursor()
     
