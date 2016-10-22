@@ -100,7 +100,7 @@ def queryCheck():
     
     lArgs = sQuery.rstrip().lstrip().split(' ')
     # are they any args? If so, parse em. If not, assume default
-    if nArgs > len(lArgs):
+    if len(lArgs) > 0:
         # loop thru each arg, populating the parsedQuery dictionary as we go
         for sArg in lArgs:
             # first, deconstruct the arg into a key/value pair
