@@ -57,6 +57,11 @@ def main():
         sRoomQuery = 'WHERE '
         if sQueryParsed['room'] != '*':
             sRoomQuery = 'WHERE {}={} AND'.format(sRoomCol, sQueryParsed['room'])
+            
+        if bDebug:
+            print "-d- sQueryParsed = {}".format(sQueryParsed)
+            print "-d- sRoomQuery = {}".format(sRoomQuery)
+            
         # construct query
         if sQueryParsed['query'] == 'n':
             dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(sqlget['table'], sQueryParsed['room'], sQueryParsed['qualifier'])
