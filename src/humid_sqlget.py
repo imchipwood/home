@@ -96,7 +96,7 @@ def queryCheck():
     parsedQuery = {}
     parsedQuery['query'] = 'n'
     parsedQuery['qualifier'] = '5'
-    parsedQuery['room'] == '*'
+    parsedQuery['room'] = '*'
     
     lArgs = sQuery.rstrip().lstrip().split(' ')
     # are they any args? If so, parse em. If not, assume default
