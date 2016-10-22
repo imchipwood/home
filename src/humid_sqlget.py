@@ -56,11 +56,11 @@ def main():
         
         # construct query
         if sQueryParsed['query'] == 'n':
-            dbcmd = "SELECT * FROM {0} WHERE {1}={2} ORDER BY ID DESC LIMIT {3}".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sQueryParsed['qualifier'])
+            dbcmd = "SELECT * FROM {0} WHERE {1}='{2}' ORDER BY ID DESC LIMIT {3}".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sQueryParsed['qualifier'])
         elif sQueryParsed['query'] == 'today':
-            dbcmd = "SELECT * FROM {0} WHERE {1}={2} AND {3} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol)
+            dbcmd = "SELECT * FROM {0} WHERE {1}='{2}' AND {3} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol)
         elif sQueryParsed['query'] == 'date':
-            dbcmd = "SELECT * FROM {0} WHERE {1}={2} AND {3} BETWEEN '{4}' AND '{4} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol, sQueryParsed['qualifier'])
+            dbcmd = "SELECT * FROM {0} WHERE {1}='{2}' AND {3} BETWEEN '{4}' AND '{4} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sRoomCol, sQueryParsed['room'], sDateCol, sQueryParsed['qualifier'])
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
         # run query
