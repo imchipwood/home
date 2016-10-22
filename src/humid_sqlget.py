@@ -64,11 +64,11 @@ def main():
             
         # construct query
         if sQueryParsed['query'] == 'n':
-            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(sqlget['table'], sQueryParsed['room'], sQueryParsed['qualifier'])
+            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(sqlget['table'], sRoomQuery, sQueryParsed['qualifier'])
         elif sQueryParsed['query'] == 'today':
-            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sQueryParsed['room'], sDateCol)
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sRoomQuery, sDateCol)
         elif sQueryParsed['query'] == 'date':
-            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sQueryParsed['room'], sDateCol, sQueryParsed['qualifier'])
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(sqlget['table'], sRoomQuery, sDateCol, sQueryParsed['qualifier'])
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
         # run query
