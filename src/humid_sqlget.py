@@ -91,7 +91,7 @@ def queryCheck():
     elif len(nArgs) == 1:
         print "-d- 1 arg"
         # check if user wants today or nEntries
-        if 'today' in nArgs[0].lower:
+        if 'today' in nArgs[0].lower():
             parsedQuery = ['today', '']
         else:
             parsedQuery = ['nEntries', int(nArgs[0])]
