@@ -114,7 +114,9 @@ def queryCheck():
                 value = sArgSplit[0]
             else:
                 raise Exception('-E- Something\'s up with your args. Couldn\'t split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}'.format(sQuery, sArg))
-                
+            if bDebug:
+                print "-d- key, value: ({}, {})".format(sKey, value)
+
             # room
             if sKey == 'room':
                 parsedQuery['room'] = value
