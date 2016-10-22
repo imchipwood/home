@@ -56,7 +56,7 @@ def main():
         
         sRoomQuery = 'WHERE '
         if sQueryParsed['room'] != '*':
-            sRoomQuery = 'WHERE {}={} AND'.format(sRoomCol, sQueryParsed['room'])
+            sRoomQuery += '{}={} AND'.format(sRoomCol, sQueryParsed['room'])
             
         if bDebug:
             print "-d- sQueryParsed = {}".format(sQueryParsed)
@@ -64,7 +64,11 @@ def main():
             
         # construct query
         if sQueryParsed['query'] == 'n':
-            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(sqlget['table'], sRoomQuery.replace(' AND', '') if sQueryParsed['room'] != '*' else '', sQueryParsed['qualifier'])
+            # special case for the room query
+            # 1) no ' and' at the end if a room WAS specified, and
+            # 2) if a room wasn't specified, just delete the whole thing (no need for 'WHERE')
+            sRoomQuery = sRoomQuery.replace(' AND', '') if sQueryParsed['room'] != '*' else ''
+            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(sqlget['table'], sRoomQuery, sQueryParsed['qualifier'])
         elif sQueryParsed['query'] == 'today':
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(sqlget['table'], sRoomQuery, sDateCol)
         elif sQueryParsed['query'] == 'date':
