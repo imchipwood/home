@@ -121,8 +121,12 @@ def queryCheck():
                 sKey = sArgSplit[0].lower()
                 value = sArgSplit[1]
             elif len(sArgSplit) == 1:
-                sKey = 'n'
-                value = sArgSplit[0]
+                if sArgSplit[0].lower() == 'today':
+                    sKey = 'today'
+                    value = ''
+                else:
+                    sKey = 'n'
+                    value = sArgSplit[0]
             else:
                 raise Exception('-E- Something\'s up with your args. Couldn\'t split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}'.format(sQuery, sArg))
             if bDebug:
