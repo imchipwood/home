@@ -6,6 +6,7 @@
 # sensor reading, data logging, etc.
 
 import os
+import MySQLdb
 
 class HomeDB(object):
     db = ''
