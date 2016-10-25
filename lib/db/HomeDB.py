@@ -200,7 +200,7 @@ class HomeDB(object):
         Returns:
             nothing
     """
-    def execute(self, sqlcmd, t='insert'):
+    def executeMySQLCmd(self, sqlcmd, t='insert'):
         with self.db:
             self.curs.execute(sqlcmd)
         if 'select' in t.lower():
@@ -239,7 +239,7 @@ class HomeDB(object):
     """
     def retrieveData(self, sQuery, bDebug=False):
         dbcmd = self.constructQuery(sQuery, bDebug)
-        self.executeQuery(dbcmd, 'select')
+        self.executeMySQLCmd(dbcmd, 'select')
         
     """ Display formatted results in console
         Inputs:
