@@ -193,7 +193,7 @@ class HomeDB(object):
             self.dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
         
     def command(self, sQuery):
-        dbcmd = self.constructQuery()
+        dbcmd = self.constructQuery(sQuery)
         self.executeQuery(dbcmd)
         
     def displayResults(self):
