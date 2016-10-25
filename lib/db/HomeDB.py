@@ -62,12 +62,15 @@ class HomeDB(object):
                     confTemp['columns'] = line[-1].split(',')
         # check for blanks
         validConf = not '' in [confTemp['db'], confTemp['table'], confTemp['user'], confTemp['pw']]
+        if not validConf:
+            print "-E- HomeDB Error: something's up with the db, table, user, or pw fields in your config file"
+        validConf = not '' in confTemp['columns']
+        if not validConf:
+            print "-E- HomeDB Error: something's up with the columns field in your config file"
         if not 'get' in self.sConfFile.lower():
             validConf = not '' in [confTemp['room']]
-            #for key, value in confTemp['columns']:
-            #    validConf = True if key != '' else False
-            #    validConf = True if value != '' else False
-            validConf = not '' in confTemp['columns']
+            if not validConf:
+                print "-E- HomeDB Error: something's up with the room field in your config file"
         if validConf:
             self.conf = confTemp
         return validConf
@@ -137,7 +140,7 @@ class HomeDB(object):
         
         # extract the date column - it's used by most query types
         sDateCol = sRoomCol = ''
-        for col in sqlget['columns']:
+        for col in self.conf['columns']:
             if 'date' in col.lower():
                 sDateCol = col
             if 'room' in col.lower():
