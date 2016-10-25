@@ -37,7 +37,7 @@ def main():
     
     # do SQL query and format the data
     try:
-        hdb.command(sQuery, bDebug)
+        hdb.retrieveData(sQuery, bDebug)
         hdb.displayResults()
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"

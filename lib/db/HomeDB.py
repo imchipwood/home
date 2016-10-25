@@ -7,6 +7,7 @@
 
 import os
 import MySQLdb
+import traceback
 
 class HomeDB(object):
     db = ''
@@ -37,6 +38,13 @@ class HomeDB(object):
         else:
             raise IOError('-E- HomeDB Error: Failed to properly parse DB config file: {}'.format(self.sConfFile))
 
+    """ Read config file and get MySQL database info out of it
+        Inputs:
+            None
+        Returns:
+            True if config was parsed properly, false otherwise
+        
+    """
     def readConfig(self):
         confTemp = {}
         with open(self.sConfFile, 'r') as inf:
@@ -75,6 +83,20 @@ class HomeDB(object):
             self.__conf = confTemp
         return validConf
         
+    """ Construct a query based on string input
+        Inputs:
+            sQuery - the query as a string. 
+                Valid query options:
+                    n=<number> - get the last <number> entries
+                    today - get all entries from today
+                    room=<room> - pull data only from <room>
+                    date=<year>-<month>-<day> - get all entries for a particular date where year is a 4 digit # and month/day are 2 digits
+                Default query if no options are specified - 'n=5 room=*'
+            bDebug - (optional) flag to print more info to console
+        Returns:
+            SQL command as a string
+                    
+    """
     def constructQuery(self, sQuery, bDebug=False):
         
         if bDebug:
@@ -171,32 +193,82 @@ class HomeDB(object):
     
         return dbcmd
     
-    def executeQuery(self, sqlcmd):
+    """ execute a command
+        Inputs:
+            sqlcmd - the sql command to execute
+            t - type of command to run. Valid values are 'insert' and 'select'
+        Returns:
+            nothing
+    """
+    def execute(self, sqlcmd, t='insert'):
         with self.db:
             self.curs.execute(sqlcmd)
-        self.dataRaw = self.curs.fetchall()
+        if 'select' in t.lower():
+            self.dataRaw = self.curs.fetchall()
         
+    """ Format retrieved data
+        Inputs:
+            none
+        Returns:
+            nothing
+    """
     def formatResults(self):
-        self.dataFormatted = []
-        self.dataFormatted.append("-----------------------------------------------------------")
-        self.dataFormatted.append(" Date       | Time     | Room     | Temperature | Humidity")
-        self.dataFormatted.append("-----------------------------------------------------------")
-        for i in reversed(xrange(len(self.dataRaw))):
-            reading = self.dataRaw[i]
-            date = "{}".format(reading[0])
-            time = "{0:8s}".format(reading[1])
-            room = "{0:8s}".format(reading[2])
-            temp = "{0:11.1f}".format(reading[3])
-            humi = "{0:0.1f}".format(reading[4]) + "%"
-            self.dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
-        self.dataFormatted.append("-----------------------------------------------------------")
+        if self.dataRaw != []:
+            self.dataFormatted = []
+            self.dataFormatted.append("----------------------------------------------------------")
+            self.dataFormatted.append("Date       | Time     | Room     | Temperature | Humidity")
+            self.dataFormatted.append("----------------------------------------------------------")
+            for i in reversed(xrange(len(self.dataRaw))):
+                reading = self.dataRaw[i]
+                date = "{}".format(reading[0])
+                time = "{0:8s}".format(reading[1])
+                room = "{0:8s}".format(reading[2])
+                temp = "{0:11.1f}".format(reading[3])
+                humi = "{0:0.1f}".format(reading[4]) + "%"
+                self.dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
+            self.dataFormatted.append("----------------------------------------------------------")
+        else:
+            self.dataFormatted = "rawData is empty. Didn't format anything."
         
-    def command(self, sQuery, bDebug=False):
+    """ Wrapper for constructing and executing a query in one go
+        Inputs:
+            sQuery - the type of query to execute
+            bDebug - (optional) flag to print more info to console
+        Returns:
+            nothing
+    """
+    def retrieveData(self, sQuery, bDebug=False):
         dbcmd = self.constructQuery(sQuery, bDebug)
-        self.executeQuery(dbcmd)
+        self.executeQuery(dbcmd, 'select')
         
+    """ Display formatted results in console
+        Inputs:
+            none
+        Returns:
+            nothing
+    """
     def displayResults(self):
         self.formatResults()
         for line in self.dataFormatted:
             print line
-
+            
+    """ Insert data into the database
+        Inputs:
+            dData - dict of data with keys 'temperature' and 'humidity'
+        Returns:
+            True if data insertion was successful, false otherwise
+    """
+    def insertData(self, dData, bDebug=False):
+        sColumns = ', '.join(self.__conf['columns'])
+        self.dbcmd = "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(self.__conf['table'], sColumns, self.__conf['room'], dData['temperature'], dData['humidity'])
+        if bDebug:
+            print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
+        else:
+            try:
+                self.execute(self.dbcmd, 'insert')
+            except Exception as E:
+                print "-E- HomeDB Error: Some exception while trying to insert data into db."
+                traceback.print_exc()
+                return False
+        return True
+        

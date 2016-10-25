@@ -6,7 +6,8 @@ import MySQLdb
 import argparse
 
 sys.path.append('/home/pi/dev/home/lib/db')
-from TableAccess import TableAccess
+#from TableAccess import TableAccess
+from HomeDB import HomeDB
 sys.path.append('/home/pi/dev/home/lib/sensors')
 sys.path.append('/home/pi/dev/home/lib/sensors/humidity')
 from sensor_humidity import Humidity
@@ -28,23 +29,13 @@ def main():
     
     # user-defined args
     sSQLAccessFileName = 'sql.txt'
-    
+
     # set up SQL db
     sSQLCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName
     if bDebug:
         print "-d- Accessing SQL DB using credentials found here:"
         print "-d- {}".format(sSQLCredentialsFile)
-    ta = TableAccess(sSQLCredentialsFile)
-    sqlget = ta.getInfo()
-    if bDebug:
-        print "-d- SQL Database info:"
-        print "-d- Database: {}".format(sqlget['db'])
-        print "-d- Table:    {}".format(sqlget['table'])
-        print "-d- User:     {}".format(sqlget['user'])
-        print "-d- Columns:  {}".format(sqlget['columns'])
-        print "-d- Room:     {}".format(sqlget['room'])
-    db = MySQLdb.connect('localhost', sqlget['user'], sqlget['pw'], sqlget['db'])
-    curs = db.cursor()
+    hdb = HomeDB(sSQLCredentialsFile)
     
     # set up the sensor
     if bDebug:
@@ -65,17 +56,22 @@ def main():
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
         fHumidity /= float(iAvg)
+        dData = {'temperature':fTemperature, 'humidity':fHumidity}
         if bDebug:
-            print '-d- Final Temperature: {0:0.1f}'.format(fTemperature)
-            print '-d- Final Humidity:    {0:0.1f}'.format(fHumidity)
+            print '-d- Final Temperature: {0:0.1f}'.format(dData['temperature'])
+            print '-d- Final Humidity:    {0:0.1f}'.format(dData['humidity'])
+        
+        # insert data into the database
+        hdb.insertData(dData, bDebug=True)
+        
         # Generate SQL command and execute
-        sColumns = ', '.join(sqlget['columns'])
-        dbcmd =  "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(sqlget['table'], sColumns, sqlget['room'], fTemperature, fHumidity)
-        if bDebug:
-            print "-d- MySQL command (will not be run):\n-d- %s" % (dbcmd)
-        else:
-            with db:
-                curs.execute( dbcmd )
+        #sColumns = ', '.join(sqlget['columns'])
+        #dbcmd =  "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(sqlget['table'], sColumns, sqlget['room'], fTemperature, fHumidity)
+        #if bDebug:
+        #    print "-d- MySQL command (will not be run):\n-d- %s" % (dbcmd)
+        #else:
+        #    with db:
+        #        curs.execute( dbcmd )
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
