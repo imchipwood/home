@@ -178,9 +178,9 @@ class HomeDB(object):
         
     def formatResults(self):
         self.dataFormatted = []
+        self.dataFormatted.append( "----------------------------------------------------------")
         self.dataFormatted.append("\nDate       | Time     | Room     | Temperature | Humidity")
         self.dataFormatted.append( "----------------------------------------------------------")
-        
         for i in reversed(xrange(len(self.dataRaw))):
             reading = self.dataRaw[i]
             date = "{}".format(reading[0])
@@ -189,6 +189,7 @@ class HomeDB(object):
             temp = "{0:11.1f}".format(reading[3])
             humi = "{0:0.1f}".format(reading[4]) + "%"
             self.dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
+        self.dataFormatted.append( "----------------------------------------------------------")
         
     def command(self, sQuery, bDebug=False):
         dbcmd = self.constructQuery(sQuery, bDebug)
