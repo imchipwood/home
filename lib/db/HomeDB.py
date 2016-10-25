@@ -75,8 +75,7 @@ class HomeDB(object):
             self.__conf = confTemp
         return validConf
         
-    def constructQuery(self, sQuery):
-        bDebug = True
+    def constructQuery(self, sQuery, bDebug=False):
         
         if bDebug:
             print '-d- Parsing query: "{}"'.format(sQuery)
