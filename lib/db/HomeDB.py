@@ -190,8 +190,8 @@ class HomeDB(object):
             humi = "{0:0.1f}".format(reading[4]) + "%"
             self.dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
         
-    def command(self, sQuery):
-        dbcmd = self.constructQuery(sQuery)
+    def command(self, sQuery, bDebug=False):
+        dbcmd = self.constructQuery(sQuery, bDebug)
         self.executeQuery(dbcmd)
         
     def displayResults(self):
