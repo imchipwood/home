@@ -27,7 +27,7 @@ def main():
     global bDebug
 
     # user-defined args
-    sSQLAccessFileName = 'sql.txt'
+    sSQLAccessFileName = 'sqlget.txt'
 
     # set up SQL db
     sSQLCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName
