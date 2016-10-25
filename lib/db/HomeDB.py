@@ -69,7 +69,7 @@ class HomeDB(object):
             #    validConf = True if value != '' else False
             validConf = not '' in confTemp['columns']
         if validConf:
-            self.conf = validConf
+            self.conf = confTemp
         return validConf
         
     def constructQuery(self, sQuery):
