@@ -15,7 +15,7 @@ class HomeDB(object):
     dataRaw = []
     dataFormatted = []
     
-    conf = {'db':'', 'table':'', 'user':'', 'pw':'', 'room':'', 'columns':[]}
+    __conf = {'db':'', 'table':'', 'user':'', 'pw':'', 'room':'', 'columns':[]}
     sConfFile = ''
     
     def __init__(self, f):
@@ -30,8 +30,7 @@ class HomeDB(object):
         if self.readConfig():
             # open up database
             try:
-                print self.conf
-                self.db = MySQLdb.connect('localhost', self.conf['user'], self.conf['pw'], self.conf['db'])
+                self.db = MySQLdb.connect('localhost', self.__conf['user'], self.__conf['pw'], self.__conf['db'])
                 self.curs = self.db.cursor()
             except:
                 raise IOError('-E- HomeDB Error: Failed to open database. Please check config')
@@ -73,7 +72,7 @@ class HomeDB(object):
             if not validConf:
                 print "-E- HomeDB Error: something's up with the room field in your config file"
         if validConf:
-            self.conf = confTemp
+            self.__conf = confTemp
         return validConf
         
     def constructQuery(self, sQuery):
@@ -141,7 +140,7 @@ class HomeDB(object):
         
         # extract the date column - it's used by most query types
         sDateCol = sRoomCol = ''
-        for col in self.conf['columns']:
+        for col in self.__conf['columns']:
             if 'date' in col.lower():
                 sDateCol = col
             if 'room' in col.lower():
@@ -163,11 +162,11 @@ class HomeDB(object):
             # 1) no ' and' at the end if a room WAS specified, and
             # 2) if a room wasn't specified, just delete the whole thing (no need for 'WHERE')
             sRoomQuery = sRoomQuery.replace(' AND', '') if dQuery['room'] != '*' else ''
-            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(self.conf['table'], sRoomQuery, dQuery['qualifier'])
+            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(self.__conf['table'], sRoomQuery, dQuery['qualifier'])
         elif dQuery['query'] == 'today':
-            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(self.conf['table'], sRoomQuery, sDateCol)
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(self.__conf['table'], sRoomQuery, sDateCol)
         elif dQuery['query'] == 'date':
-            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self.conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self.__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
     
@@ -200,7 +199,4 @@ class HomeDB(object):
         self.formatResults()
         for line in self.dataFormatted:
             print line
-        
-    def getInfo(self):
-        return self.conf
 
