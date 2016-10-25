@@ -265,7 +265,7 @@ class HomeDB(object):
             print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
         else:
             try:
-                self.execute(self.dbcmd, 'insert')
+                self.executeMySQLCmd(self.dbcmd, 'insert')
             except Exception as E:
                 print "-E- HomeDB Error: Some exception while trying to insert data into db."
                 traceback.print_exc()
