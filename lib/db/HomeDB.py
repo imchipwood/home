@@ -184,7 +184,7 @@ class HomeDB(object):
         self.dataFormatted.append( "----------------------------------------------------------")
         
         for i in reversed(xrange(len(self.dataRaw))):
-            reading = dataRaw[i]
+            reading = self.dataRaw[i]
             date = "{}".format(reading[0])
             time = "{0:8s}".format(reading[1])
             room = "{0:8s}".format(reading[2])
