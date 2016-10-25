@@ -29,10 +29,11 @@ class HomeDB(object):
         if self.readConfig():
             # open up database
             try:
+                print self.conf
                 self.db = MySQLdb.connect('localhost', self.conf['user'], self.conf['pw'], self.conf['db'])
                 self.curs = self.db.cursor()
             except:
-                raise IOError('Failed to open database. Please check config')
+                raise IOError('-E- HomeDB Error: Failed to open database. Please check config')
         else:
             raise IOError('-E- HomeDB Error: Failed to properly parse DB config file: {}'.format(self.sConfFile))
 
