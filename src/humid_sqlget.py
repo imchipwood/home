@@ -33,7 +33,7 @@ def main():
     if bDebug:
         print "-d- Accessing SQL DB using credentials found here:"
         print "-d- {}".format(sSQLCredentialsFile)
-    hdb = HomeDB(sSQLCredentialsFile)
+    hdb = DBHome(sSQLCredentialsFile)
 
     # do SQL query and format the data
     try:
