@@ -9,7 +9,7 @@ import os
 import MySQLdb
 import traceback
 
-class HomeDB(object):
+class DBHome(object):
     db = ''
     curs = ''
     dbcmd = ''

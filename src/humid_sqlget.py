@@ -6,7 +6,7 @@ import traceback
 
 
 sys.path.append('/home/pi/dev/home/lib/db')
-from HomeDB import HomeDB
+from db_home import DBHome
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-query', '-q', type=str, default='', help="Type of query - how and what do you want data displayed")

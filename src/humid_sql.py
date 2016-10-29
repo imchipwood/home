@@ -6,9 +6,8 @@ import MySQLdb
 import argparse
 
 sys.path.append('/home/pi/dev/home/lib/db')
-from HomeDB import HomeDB
+from db_home import DBHome
 sys.path.append('/home/pi/dev/home/lib/sensors')
-sys.path.append('/home/pi/dev/home/lib/sensors/humidity')
 from sensor_humidity import Humidity
 
 parser = argparse.ArgumentParser()
@@ -34,7 +33,7 @@ def main():
     if bDebug:
         print "-d- Accessing SQL DB using credentials found here:"
         print "-d- {}".format(sSQLCredentialsFile)
-    hdb = HomeDB(sSQLCredentialsFile)
+    hdb = DBHome(sSQLCredentialsFile)
 
     # set up the sensor
     if bDebug:

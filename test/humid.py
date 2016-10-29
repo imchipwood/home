@@ -3,7 +3,6 @@
 import sys
 import time
 sys.path.append('/home/pi/dev/home/lib/sensors')
-sys.path.append('/home/pi/dev/home/lib/sensors/humidity')
 from sensor_humidity import Humidity
 
 def main():
