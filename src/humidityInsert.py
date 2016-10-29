@@ -40,11 +40,18 @@ def main():
     h = SensorHumidity(sensor_type='22', pin=4, units='f')
     try:
         if bDebug:
-            print "-d- Beginning readings"
+            print "-d- Beginning 5 warmup readings"
+        for i in xrange(0, 5):
+            h.read()
+            if bDebug:
+                print "-d- Temperature[{0}]={1:0.1f}, Humidity[{0}]={2:0.1f}".format(i, h.getTemperature(), h.getHumidity())
+
         # take N readings and average them
+        if bDebug:
+            print "-d- Beginning {} readings for averaging".format(iAvg)
         fTemperature = 0.0
         fHumidity = 0.0
-        for i in xrange(0,iAvg):
+        for i in xrange(0, iAvg):
             h.read()
             if bDebug:
                 print "-d- Temperature[{0}]={1:0.1f}, Humidity[{0}]={2:0.1f}".format(i, h.getTemperature(), h.getHumidity())
