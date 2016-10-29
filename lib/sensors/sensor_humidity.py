@@ -4,12 +4,12 @@ from sensor import *
 class SensorHumidity(Sensor):
     humidity = 0.0
     temperature = 0.0
-    sensorType
-    units = 'c'
     validUnits = ['c', 'f']
     validSensorTypes = { '11'  : Adafruit_DHT.DHT11,
                          '22'  : Adafruit_DHT.DHT22,
                          '2302': Adafruit_DHT.AM2302 }
+    sensorType = self.validSensorTypes.values()[0]
+    units = self.validUnits[0]
     bDebug = False
 
     """ Initialize a Humidity sensor
