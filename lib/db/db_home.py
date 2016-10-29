@@ -1,7 +1,7 @@
-# SQL Library
+# Home Database
 #
 # The intention of this file is to consolidate all
-# SQL interactions into a single library,
+# database interactions into a single library,
 # thereby de-cluttering the scripts coordinating
 # sensor reading, data logging, etc.
 
