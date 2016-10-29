@@ -8,7 +8,7 @@ import argparse
 sys.path.append('/home/pi/dev/home/lib/db')
 from db_home import DBHome
 sys.path.append('/home/pi/dev/home/lib/sensors')
-from sensor_humidity import Humidity
+from sensor_humidity import SensorHumidity
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-nAvg', '-n', type=int, default=5, help="Number of measurements to average before logging. Optional. Defaults to 5")
@@ -38,8 +38,7 @@ def main():
     # set up the sensor
     if bDebug:
         print "-d- Setting up humidity sensor"
-    h = Humidity(sensor_type='22', pin=4, units='f')
-    h.enable()
+    h = SensorHumidity(sensor_type='22', pin=4, units='f')
     try:
         if bDebug:
             print "-d- Beginning readings"

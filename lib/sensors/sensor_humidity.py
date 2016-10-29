@@ -30,6 +30,7 @@ class SensorHumidity(Sensor):
         self.pin = pin
         # units
         self.setUnits(units)
+        self.enable()
 
     """ Force Humidity sensor to update readings
         Inputs:
