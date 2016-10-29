@@ -1,6 +1,6 @@
 # SQL Library
 #
-# The intention of this file is to consolidate all 
+# The intention of this file is to consolidate all
 # SQL interactions into a single library,
 # thereby de-cluttering the scripts coordinating
 # sensor reading, data logging, etc.
@@ -15,19 +15,19 @@ class HomeDB(object):
     dbcmd = ''
     dataRaw = []
     dataFormatted = []
-    
+
     __conf = {'db':'', 'table':'', 'user':'', 'pw':'', 'room':'', 'columns':[]}
     sConfFile = ''
-    
+
     def __init__(self, f):
         super(HomeDB, self).__init__()
-        
+
         # read config file
         if os.path.exists(f):
             self.sConfFile = f
         else:
             raise IOError('-E- HomeDB Error: Please check if the specified DB config file exists: {}'.format(f))
-        
+
         if self.readConfig():
             # open up database
             try:
@@ -43,7 +43,6 @@ class HomeDB(object):
             None
         Returns:
             True if config was parsed properly, false otherwise
-        
     """
     def readConfig(self):
         confTemp = {}
@@ -82,10 +81,10 @@ class HomeDB(object):
         if validConf:
             self.__conf = confTemp
         return validConf
-        
+
     """ Construct a query based on string input
         Inputs:
-            sQuery - the query as a string. 
+            sQuery - the query as a string.
                 Valid query options:
                     n=<number> - get the last <number> entries
                     today - get all entries from today
@@ -95,19 +94,18 @@ class HomeDB(object):
             bDebug - (optional) flag to print more info to console
         Returns:
             SQL command as a string
-                    
     """
     def constructQuery(self, sQuery, bDebug=False):
-        
+
         if bDebug:
             print '-d- Parsing query: "{}"'.format(sQuery)
-    
+
         # default query if no args are specified (or if empty args specified)
         dQuery = {}
         dQuery['query'] = 'n'
         dQuery['qualifier'] = '5'
         dQuery['room'] = '*'
-        
+
         lArgs = sQuery.rstrip().lstrip().split(' ')
         if bDebug:
             print '-d- args split into: "{}"'.format(lArgs)
@@ -132,7 +130,7 @@ class HomeDB(object):
                     raise Exception('-E- Something\'s up with your args. Couldn\'t split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}'.format(sQuery, sArg))
                 if bDebug:
                     print "-d- key, value: ({}, {})".format(sKey, value)
-    
+
                 # room specification
                 if sKey == 'room':
                     dQuery['room'] = '\'{}\''.format(value)
@@ -158,7 +156,7 @@ class HomeDB(object):
                         raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
                     dQuery['query'] = 'date'
                     dQuery['qualifier'] = sDate
-        
+
         # extract the date column - it's used by most query types
         sDateCol = sRoomCol = ''
         for col in self.__conf['columns']:
@@ -168,15 +166,15 @@ class HomeDB(object):
                 sRoomCol = col
         if bDebug:
             print "-d- Columns of interest:\n-d- date: {}\n-d- room: {}".format(sDateCol, sRoomCol)
-        
+
         sRoomQuery = 'WHERE '
         if dQuery['room'] != '*':
             sRoomQuery += '{}={} AND'.format(sRoomCol, dQuery['room'])
-            
+
         if bDebug:
             print "-d- dQuery = {}".format(dQuery)
             print "-d- sRoomQuery = {}".format(sRoomQuery)
-            
+
         # construct query
         if dQuery['query'] == 'n':
             # special case for the room query
@@ -190,9 +188,9 @@ class HomeDB(object):
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self.__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
-    
+
         return dbcmd
-    
+
     """ execute a command
         Inputs:
             sqlcmd - the sql command to execute
@@ -205,7 +203,7 @@ class HomeDB(object):
             self.curs.execute(sqlcmd)
         if 'select' in t.lower():
             self.dataRaw = self.curs.fetchall()
-        
+
     """ Format retrieved data
         Inputs:
             none
@@ -229,7 +227,7 @@ class HomeDB(object):
             self.dataFormatted.append("----------------------------------------------------------")
         else:
             self.dataFormatted = "rawData is empty. Didn't format anything."
-        
+
     """ Wrapper for constructing and executing a query in one go
         Inputs:
             sQuery - the type of query to execute
@@ -240,7 +238,7 @@ class HomeDB(object):
     def retrieveData(self, sQuery, bDebug=False):
         dbcmd = self.constructQuery(sQuery, bDebug)
         self.executeMySQLCmd(dbcmd, 'select')
-        
+
     """ Display formatted results in console
         Inputs:
             none
@@ -251,7 +249,7 @@ class HomeDB(object):
         self.formatResults()
         for line in self.dataFormatted:
             print line
-            
+
     """ Insert data into the database
         Inputs:
             dData - dict of data with keys 'temperature' and 'humidity'
@@ -271,4 +269,3 @@ class HomeDB(object):
                 traceback.print_exc()
                 return False
         return True
-        

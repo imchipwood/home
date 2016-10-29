@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys 
+import sys
 import os
 import argparse
 import traceback
@@ -34,7 +34,7 @@ def main():
         print "-d- Accessing SQL DB using credentials found here:"
         print "-d- {}".format(sSQLCredentialsFile)
     hdb = HomeDB(sSQLCredentialsFile)
-    
+
     # do SQL query and format the data
     try:
         hdb.retrieveData(sQuery, bDebug)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
-#from sensor_humidity import Humidity 
-import sys 
-import time 
+#from sensor_humidity import Humidity
+import sys
+import time
 sys.path.append('/home/pi/dev/home/lib/sensors')
 sys.path.append('/home/pi/dev/home/lib/sensors/humidity')
 from sensor_humidity import Humidity

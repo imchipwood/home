@@ -1,6 +1,6 @@
 #!/usr/bin/python
-#from sensor_humidity import Humidity 
-import sys 
+#from sensor_humidity import Humidity
+import sys
 import os
 import MySQLdb
 import argparse
@@ -25,7 +25,7 @@ bDebug = args.debug
 def main():
     global iAvg
     global bDebug
-    
+
     # user-defined args
     sSQLAccessFileName = 'sql.txt'
 
@@ -35,7 +35,7 @@ def main():
         print "-d- Accessing SQL DB using credentials found here:"
         print "-d- {}".format(sSQLCredentialsFile)
     hdb = HomeDB(sSQLCredentialsFile)
-    
+
     # set up the sensor
     if bDebug:
         print "-d- Setting up humidity sensor"
@@ -59,7 +59,7 @@ def main():
         if bDebug:
             print '-d- Final Temperature: {0:0.1f}'.format(dData['temperature'])
             print '-d- Final Humidity:    {0:0.1f}'.format(dData['humidity'])
-        
+
         # insert data into the database
         hdb.insertData(dData, bDebug)
     except KeyboardInterrupt:

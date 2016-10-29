@@ -5,13 +5,13 @@ class Sensor(object):
 
     def __init__(self):
         super(Sensor, self).__init__()
-        
+
     def enable(self):
         self.state = True
-        
+
     def disable(self):
         self.state = False
-        
+
     def getState(self):
         return self.state
 
