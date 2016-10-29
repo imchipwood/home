@@ -20,7 +20,7 @@ class DBHome(object):
     sConfFile = ''
 
     def __init__(self, f):
-        super(HomeDB, self).__init__()
+        super(DBHome, self).__init__()
 
         # read config file
         if os.path.exists(f):

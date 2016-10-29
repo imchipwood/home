@@ -22,7 +22,7 @@ class SensorHumidity(Sensor):
             Nothing
     """
     def __init__(self, sensor_type, pin, units, debug=False):
-        super(Humidity, self).__init__()
+        super(SensorHumidity, self).__init__()
         self.bDebug = debug
         # sensor type
         self.setSensorType(str(sensor_type))
