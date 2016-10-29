@@ -8,8 +8,8 @@ class SensorHumidity(Sensor):
     validSensorTypes = { '11'  : Adafruit_DHT.DHT11,
                          '22'  : Adafruit_DHT.DHT22,
                          '2302': Adafruit_DHT.AM2302 }
-    sensorType = self.validSensorTypes.values()[0]
-    units = self.validUnits[0]
+    sensorType = validSensorTypes.values()[0]
+    units = validUnits[0]
     bDebug = False
 
     """ Initialize a Humidity sensor
