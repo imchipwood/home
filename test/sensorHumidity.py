@@ -1,5 +1,4 @@
 #!/usr/bin/python
-#from sensor_humidity import Humidity
 import sys
 import time
 sys.path.append('/home/pi/dev/home/lib/sensors')

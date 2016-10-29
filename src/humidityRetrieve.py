@@ -4,13 +4,12 @@ import os
 import argparse
 import traceback
 
-
 sys.path.append('/home/pi/dev/home/lib/db')
 from db_home import DBHome
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-query', '-q', type=str, default='', help="Type of query - how and what do you want data displayed")
-parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to SQL database, while also printing extra stuff to console. Optional")
+parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to database, while also printing extra stuff to console. Optional")
 
 args = parser.parse_args()
 global sQuery
@@ -26,16 +25,16 @@ def main():
     global bDebug
 
     # user-defined args
-    sSQLAccessFileName = 'sqlget.txt'
+    sDBAccessFileName = 'sqlget.txt'
 
-    # set up SQL db
-    sSQLCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName
+    # set up db
+    sDBCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sDBAccessFileName
     if bDebug:
-        print "-d- Accessing SQL DB using credentials found here:"
-        print "-d- {}".format(sSQLCredentialsFile)
-    hdb = DBHome(sSQLCredentialsFile)
+        print "-d- Accessing DB using credentials found here:"
+        print "-d- {}".format(sDBCredentialsFile)
+    hdb = DBHome(sDBCredentialsFile)
 
-    # do SQL query and format the data
+    # do query and format the data
     try:
         hdb.retrieveData(sQuery, bDebug)
         hdb.displayResults()

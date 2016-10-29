@@ -1,9 +1,8 @@
 #!/usr/bin/python
-#from sensor_humidity import Humidity
 import sys
 import os
-import MySQLdb
 import argparse
+import traceback
 
 sys.path.append('/home/pi/dev/home/lib/db')
 from db_home import DBHome
@@ -12,7 +11,7 @@ from sensor_humidity import SensorHumidity
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-nAvg', '-n', type=int, default=5, help="Number of measurements to average before logging. Optional. Defaults to 5")
-parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to SQL database, while also printing extra stuff to console. Optional")
+parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to database, while also printing extra stuff to console. Optional")
 
 args = parser.parse_args()
 global iAvg
@@ -26,14 +25,14 @@ def main():
     global bDebug
 
     # user-defined args
-    sSQLAccessFileName = 'sql.txt'
+    sDBAccessFileName = 'sql.txt'
 
-    # set up SQL db
-    sSQLCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sSQLAccessFileName
+    # set up db
+    sDBCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sDBAccessFileName
     if bDebug:
-        print "-d- Accessing SQL DB using credentials found here:"
-        print "-d- {}".format(sSQLCredentialsFile)
-    hdb = DBHome(sSQLCredentialsFile)
+        print "-d- Accessing DB using credentials found here:"
+        print "-d- {}".format(sDBCredentialsFile)
+    hdb = DBHome(sDBCredentialsFile)
 
     # set up the sensor
     if bDebug:
@@ -65,6 +64,7 @@ def main():
         sys.exit(1)
     except Exception as e:
         print "\n\t-E- Some exception: %s\n" % (e)
+        traceback.print_exc()
         raise e
     return True
 
