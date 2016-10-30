@@ -60,9 +60,9 @@ def create_table(lData):
         sChartTable+=rowstr
 
     # ensure final row has no extra comma at the end
-    finalRow = sChartTable[-1]
-    finalRow.replace(',\n','\n')
-    sChartTable += finalRow
+    set = lData[-1]
+    rowstr="['{0}', {1}, {2}],\n".format(str(set[0]),str(set[1]), str(set[2]))
+    sChartTable += rowstr
     
     return sChartTable
 
