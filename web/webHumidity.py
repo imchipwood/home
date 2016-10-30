@@ -91,7 +91,7 @@ def main():
     sDBAccessFileName = 'sqlget.txt'
 
     # set up db
-    sDBCredentialsFile = "{}{}{}".format(os.environ.get('HOME_DIR')+'/conf/'+sDBAccessFileName)
+    sDBCredentialsFile = "{}{}{}".format(os.environ.get('HOME_DIR'), '/conf/', sDBAccessFileName)
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
