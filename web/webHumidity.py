@@ -10,6 +10,16 @@ import traceback
 sys.path.append('/home/pi/dev/home/lib/db')
 from db_humidity import DBHumidity
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-room', '-r', type=str, default='*', help="Room to get data from. Default is all rooms")
+parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to database, while also printing extra stuff to console. Optional")
+
+global sRoom
+global bDebug
+args    = parser.parse_args()
+sRoom   = args.room
+bDebug  = args.debug
+
 # print an HTTP header
 def printHTTPheader():
     print "Content-type: text/html"
@@ -24,9 +34,22 @@ def printHTMLhead(sTitle):
 
 
 #viewWindowMode: 'explicit', viewWindow:{ max=100, min=0} 
-def printChartCode(table):
+def printChartCode(table, sRooms):
     # this string contains the web page that will be served
     try:
+        # convert string of rooms into list
+        lRooms = [room for room in sRooms.split(',')]
+        
+        # Are we displaying data from multiple rooms?
+        columnHeaders = "['Date', "
+        if len(lRooms) > 1:
+            for room in lRooms:
+                columnHeaders += "'{} Temperature', '{} Humidity'".format(room)
+            roomStr = ""
+        else:
+            columnHeaders += "'Temperature', 'Humidity'"
+            roomStr = " in {} room".format(lRooms[0])
+        columnHeaders += "]"
         page_str="""
     <body>    
     <h1>Raspberry Pi Humidity/Temperature Logger</h1>
@@ -35,11 +58,12 @@ def printChartCode(table):
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
       function drawChart() {
-        var data = google.visualization.arrayToDataTable([ ['Date', 'Temperature', 'Humidity'],
+        <!--var data = google.visualization.arrayToDataTable([ ['Date', 'Temperature', 'Humidity'],-->
+        var data = google.visualization.arrayToDataTable([ %s,
 %s ]);
 
         var options = {
-          title: 'Media room Temperature/Humidity recordings for last 24 hours',
+          title: 'Temperature/Humidity measurements for last 24 hours%s',
           hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 8,
                    slantedText: true, slantedTextAngle: 45
                  },
@@ -58,7 +82,7 @@ def printChartCode(table):
       }
     </script>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
-    </body>""" % (table)
+    </body>""" % (table, columnHeaders, roomStr)
     except:
         print "-E- failed to create page_str"
         return
@@ -71,6 +95,7 @@ def printChartCode(table):
 
 
 def main():
+    global sRoom
     # enable tracebacks of exceptions
     cgitb.enable()
     
@@ -87,10 +112,10 @@ def main():
     # do query and format the data
     try:
         # pull 24 hours of data
-        hdb.retrieveData('n=96', bDebug=False)
+        hdb.retrieveData('n=96 room={}'.format(sRoom), bDebug=False)
         # convert to a format Google Charts can work with
         chartTable = hdb.formatDataForGoogleCharts()
-        printChartCode(chartTable)
+        printChartCode(chartTable, sRoom)
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)

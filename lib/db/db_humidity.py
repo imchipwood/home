@@ -47,7 +47,16 @@ class DBHumidity(DBHome):
 
         sRoomQuery = 'WHERE'
         if dQuery['room'] != '*':
-            sRoomQuery += ' {}={} AND'.format(sRoomCol, dQuery['room'])
+            lRooms = dQuery['room'].split(',')
+            if len(lRooms) == 1:
+                sRoomQuery += ' {}={} AND'.format(sRoomCol, lRooms[0])
+            else:
+                lRoomQueries = []
+                for room in lRooms:
+                    lRoomQueries.append( ' {}={}'.format(sRoomCol, room))
+                for q in lRoomQueries[:-1]:
+                    sRoomQuery += q + ' AND'
+                sRoomQuery += lRoomQueries[-1] + ' AND'
 
         if bDebug:
             print "-d- dQuery = {}".format(dQuery)
@@ -241,4 +250,4 @@ class DBHumidity(DBHome):
             rowstr          ="['{0}', {1}, {2}]\n".format(sDateTime, sTemp, sHumi)
             dataFormatted  += rowstr
         
-        return dataFormatted
+        return (dataFormatted, 
