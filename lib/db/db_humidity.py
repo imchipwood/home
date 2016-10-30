@@ -14,77 +14,6 @@ class DBHumidity(DBHome):
 
 ####################################################################################################
 
-    """ Deconstruct the input args into a dictionary of options
-    """
-    def parseInputs(self, bDebug=False):
-
-        if self.bDebug:
-            bDebug = True
-
-        if bDebug:
-            print '-d- Parsing query: "{}"'.format(self.sQuery)
-
-        # default query if no args are specified (or if empty args specified)
-        dQuery = {}
-        dQuery['query']     = 'n'
-        dQuery['qualifier'] = '5'
-        dQuery['room']      = '*'
-
-        lArgs = self.sQuery.rstrip().lstrip().split(' ')
-        if bDebug:
-            print '-d- args split into: "{}"'.format(lArgs)
-        # are they any args? If so, parse em. If not, assume default
-        if len(lArgs) > 0 and lArgs != ['']:
-            # loop thru each arg, populating the dQuery dictionary as we go
-            for sArg in lArgs:
-                # first, deconstruct the arg into a key/value pair
-                sKey = value = ''
-                sArgSplit = sArg.split('=')
-                if len(sArgSplit) == 2:
-                    sKey    = sArgSplit[0].lower()
-                    value   = sArgSplit[1]
-                elif len(sArgSplit) == 1:
-                    if sArgSplit[0].lower() == 'today':
-                        sKey = 'today'
-                        value = ''
-                    else:
-                        sKey = 'n'
-                        value = sArgSplit[0]
-                else:
-                    raise Exception('-E- Something\'s up with your args. Couldn\'t split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}'.format(sQuery, sArg))
-                if bDebug:
-                    print "-d- key, value: ({}, {})".format(sKey, value)
-
-                # room specification
-                if sKey == 'room':
-                    dQuery['room'] = '\'{}\''.format(value)
-                # nEntries
-                elif sKey == 'n':
-                    dQuery['query']     = 'n'
-                    dQuery['qualifier'] = int(value)
-                # today's entries
-                elif sKey == 'today':
-                    dQuery['query']     = 'today'
-                    dQuery['qualifier'] = ''
-                # entries for a particular date
-                elif sKey == 'date':
-                    # check syntax of date
-                    sDate       = value
-                    sDateSplit  = sDate.split('-')
-                    dDate       = {'year':sDateSplit[0], 'month':sDateSplit[1], 'day':sDateSplit[2]}
-                    if len(dDate['year']) != 4:
-                        raise Exception('-E- Date entered incorrectly - check the year, should be 4 digits.\n\tYear: {}'.format(dDate['year']))
-                    if len(dDate['month']) != 2:
-                        raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
-                    if len(dDate['day']) != 2:
-                        raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
-                    dQuery['query'] = 'date'
-                    dQuery['qualifier'] = sDate
-
-        return dQuery
-
-####################################################################################################
-
     """ Construct a query based on string input
         Inputs:
             sQuery - the query as a string.
@@ -133,12 +62,91 @@ class DBHumidity(DBHome):
             dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(self._DBHome__conf['table'], sRoomQuery, dQuery['qualifier'])
         elif dQuery['query'] == 'today':
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol)
+        elif dQuery['query'] == 'yesterday':
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE()-1 AND CURRENT_DATE()-1 ORDER BY ID ASC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol)
         elif dQuery['query'] == 'date':
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
+        elif dQuery['query'] == 'daterange':
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{4} 23:59:59' ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier']['start'], dQuery['qualifier']['end'])
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
 
         return dbcmd
+
+####################################################################################################
+
+    """ Deconstruct the input args into a dictionary of options
+    """
+    def parseInputs(self, bDebug=False):
+
+        if self.bDebug:
+            bDebug = True
+
+        if bDebug:
+            print '-d- Parsing query: "{}"'.format(self.sQuery)
+
+        # default query if no args are specified (or if empty args specified)
+        dQuery = {}
+        dQuery['query']     = 'n'
+        dQuery['qualifier'] = '8' # 2 hours of data
+        dQuery['room']      = '*'
+
+        lArgs = self.sQuery.rstrip().lstrip().split(' ')
+        if bDebug:
+            print '-d- args split into: "{}"'.format(lArgs)
+        # are they any args? If so, parse em. If not, assume default
+        if len(lArgs) > 0 and lArgs != ['']:
+            # loop thru each arg, populating the dQuery dictionary as we go
+            for sArg in lArgs:
+                # first, deconstruct the arg into a key/value pair
+                sKey = value = ''
+                sArgSplit = sArg.split('=')
+                if len(sArgSplit) == 2:
+                    sKey    = sArgSplit[0].lower()
+                    value   = sArgSplit[1]
+                elif len(sArgSplit) == 1:
+                    if sArgSplit[0].lower() == 'today':
+                        sKey = 'today'
+                        value = ''
+                    else:
+                        sKey = 'n'
+                        value = sArgSplit[0]
+                else:
+                    raise Exception('-E- Something\'s up with your args. Couldn\'t split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}'.format(sQuery, sArg))
+                if bDebug:
+                    print "-d- key, value: ({}, {})".format(sKey, value)
+
+                # room specification
+                if sKey == 'room':
+                    dQuery['room'] = '\'{}\''.format(value)
+                # nEntries
+                elif sKey == 'n':
+                    dQuery['query']     = 'n'
+                    dQuery['qualifier'] = int(value)
+                # today's entries
+                elif sKey == 'today':
+                    dQuery['query']     = 'today'
+                    dQuery['qualifier'] = ''
+                # yesterday's entries
+                elif sKey == 'yesterday':
+                    dQuery['query']     = 'yesterday'
+                    dQuery['qualifier'] = ''
+                # entries for a particular date
+                elif sKey == 'date':
+                    # check syntax of date
+                    self.verifyDateFormat(value)
+                    dQuery['query'] = 'date'
+                    dQuery['qualifier'] = sDate
+                elif sKey == 'daterange':
+                    sDateBeg = value.split(":")[0]
+                    self.verifyDateFormat(sDateBeg)
+                    sDateEnd = value.split(":")[1]
+                    self.verifyDateFormat(sDateEnd)
+                    dQuery['query'] = 'daterange'
+                    dQuery['qualifier'] = {'start': sDateBeg, 'end':sDateEnd}
+                    
+
+        return dQuery
 
 ####################################################################################################
 
@@ -191,3 +199,16 @@ class DBHumidity(DBHome):
                 traceback.print_exc()
                 return False
         return True
+
+####################################################################################################
+
+    def __verifyDateFormat(self, sDate):
+        sDateSplit  = sDate.split('-')
+        dDate       = {'year':sDateSplit[0], 'month':sDateSplit[1], 'day':sDateSplit[2]}
+        if len(dDate['year']) != 4:
+            raise Exception('-E- Date entered incorrectly - check the year, should be 4 digits.\n\tYear: {}'.format(dDate['year']))
+        if len(dDate['month']) != 2:
+            raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
+        if len(dDate['day']) != 2:
+            raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
+        return
