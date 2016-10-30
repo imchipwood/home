@@ -63,7 +63,7 @@ class DBHumidity(DBHome):
         elif dQuery['query'] == 'today':
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol)
         elif dQuery['query'] == 'yesterday':
-            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE()-1 AND CURRENT_DATE()-1 ORDER BY ID ASC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol)
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE()-1 AND CURRENT_DATE()-1 ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol)
         elif dQuery['query'] == 'date':
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
         elif dQuery['query'] == 'daterange':
