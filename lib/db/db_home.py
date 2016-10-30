@@ -27,10 +27,10 @@ class DBHome(object):
     """ Initialize database access
         Parse config file, connect to DB, set up cursor
     """
-    def __init__(self, f, debug):
+    def __init__(self, f, bDebug=False):
         super(DBHome, self).__init__()
 
-        self.bDebug = debug
+        self.bDebug = bDebug
         # read config file
         if os.path.exists(f):
             self.sConfFile = f

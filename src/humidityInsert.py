@@ -32,7 +32,7 @@ def main():
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
-    hdb = DBHumidity(sDBCredentialsFile, debug=bDebug)
+    hdb = DBHumidity(sDBCredentialsFile, bDebug=bDebug)
 
     # set up the sensor
     if bDebug:
