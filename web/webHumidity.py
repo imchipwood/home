@@ -42,13 +42,13 @@ def printChartCode(table):
 %s ]);
 
         var options = {
-          title: 'Google column chart',
-          hAxis: {title: 'Date', titleTextStyle: {color: 'blue'}},
+          title: 'Media room Temperature/Humidity recordings for today',
+          hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 5 },
           vAxes: {
-                  0: {title: 'Temperature in F', titleTextStyle: {color: 'red'} },
-                  1: {title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
+                  0: { title: 'Temperature in F', titleTextStyle: {color: 'red'} },
+                  1: { title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
                  },
-          colors:['red', 'blue']
+          colors: ['red', 'blue']
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
