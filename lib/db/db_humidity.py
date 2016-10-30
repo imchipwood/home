@@ -136,7 +136,7 @@ class DBHumidity(DBHome):
                     # check syntax of date
                     self.__verifyDateFormat(value)
                     dQuery['query'] = 'date'
-                    dQuery['qualifier'] = sDate
+                    dQuery['qualifier'] = value
                 elif sKey == 'daterange':
                     sDateBeg = value.split(":")[0]
                     self.__verifyDateFormat(sDateBeg)
@@ -211,4 +211,4 @@ class DBHumidity(DBHome):
             raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
         if len(dDate['day']) != 2:
             raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
-        return
+        return 
