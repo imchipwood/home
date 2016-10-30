@@ -74,6 +74,8 @@ def printChartCode(table):
 def create_table(lData):
     chart_table=""
 
+    print lData
+    print "--------------------------------------------------"
     for set in lData:
         print set
         rowstr="['{0}', {1}, {2}],\n".format(str(set[0]),str(set[1]), str(set[2]))
