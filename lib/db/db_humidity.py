@@ -227,6 +227,6 @@ class DBHumidity(DBHome):
                 reading = self.getDataRaw()[i]
                 datetime = "{} {}".format(reading[0], reading[1])
                 temp = "{0:0.1f}".format(reading[3])
-                humi = "{0:0.1f}".format(reading[4])
+                humi = "{0:0.1f}".format(reading[4]/100.0f)
                 dataFormatted.append( [datetime, temp, humi] )
         return dataFormatted
