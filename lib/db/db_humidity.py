@@ -134,14 +134,14 @@ class DBHumidity(DBHome):
                 # entries for a particular date
                 elif sKey == 'date':
                     # check syntax of date
-                    self.verifyDateFormat(value)
+                    self.__verifyDateFormat(value)
                     dQuery['query'] = 'date'
                     dQuery['qualifier'] = sDate
                 elif sKey == 'daterange':
                     sDateBeg = value.split(":")[0]
-                    self.verifyDateFormat(sDateBeg)
+                    self.__verifyDateFormat(sDateBeg)
                     sDateEnd = value.split(":")[1]
-                    self.verifyDateFormat(sDateEnd)
+                    self.__verifyDateFormat(sDateEnd)
                     dQuery['query'] = 'daterange'
                     dQuery['qualifier'] = {'start': sDateBeg, 'end':sDateEnd}
                     
