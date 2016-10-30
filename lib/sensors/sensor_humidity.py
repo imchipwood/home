@@ -98,7 +98,7 @@ class SensorHumidity(Sensor):
     """
     def getSensorType(self):
         return self.sensorType
-    
+
     """ Update sensor type
         Inputs:
             type as defined in self.sensorType

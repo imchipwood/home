@@ -77,7 +77,7 @@ class DBHome(object):
             True if data insertion was successful, false otherwise
     """
     @abstractmethod
-    def insertData(self, dData, bDebug=self.bDebug):
+    def insertData(self, dData, bDebug=False):
         """ Insert data into the database """
 
 ####################################################################################################
@@ -150,7 +150,7 @@ class DBHome(object):
         Returns:
             nothing
     """
-    def retrieveData(self, sQuery, bDebug=self.bDebug):
+    def retrieveData(self, sQuery, bDebug=False):
         self.dbcmd = self.constructQuery(sQuery, bDebug)
         self.executeCmd(self.dbcmd, 'select')
 

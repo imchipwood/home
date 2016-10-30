@@ -16,7 +16,10 @@ class DBHumidity(DBHome):
 
     """ Deconstruct the input args into a dictionary of options
     """
-    def parseInputs(self, bDebug=self.bDebug):
+    def parseInputs(self, bDebug=False):
+
+        if self.bDebug:
+            bDebug = True
 
         if bDebug:
             print '-d- Parsing query: "{}"'.format(self.sQuery)
@@ -95,7 +98,10 @@ class DBHumidity(DBHome):
         Returns:
             SQL command as a string
     """
-    def constructQuery(self, sQ, bDebug=self.bDebug):
+    def constructQuery(self, sQ, bDebug=False):
+
+        if self.bDebug:
+            bDebug = True
 
         self.sQuery = sQ
         dQuery = parseInputs(bDebug)
@@ -168,7 +174,11 @@ class DBHumidity(DBHome):
         Returns:
             True if data insertion was successful, false otherwise
     """
-    def insertData(self, dData, bDebug=self.bDebug):
+    def insertData(self, dData, bDebug=False):
+
+        if self.bDebug:
+            bDebug = True
+
         sColumns = ', '.join(self.__conf['columns'])
         self.dbcmd = "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(self.__conf['table'], sColumns, self.__conf['room'], dData['temperature'], dData['humidity'])
         if bDebug:
