@@ -82,7 +82,7 @@ def printChartCode(table, sRooms):
       }
     </script>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
-    </body>""" % (table, columnHeaders, roomStr)
+    </body>""" % (columnHeaders, table, roomStr)
     except:
         print "-E- failed to create page_str"
         return
