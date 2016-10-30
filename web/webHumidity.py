@@ -41,7 +41,7 @@ def printChartCode(table):
         var options = {
           title: 'Google column chart',
           hAxis: {title: 'Date', titleTextStyle: {color: 'blue'}},
-          vAxis: {
+          vAxes: {
                   0: {title: 'Temperature in F', titleTextStyle: {color: 'red'} },
                   1: {title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
                  },
