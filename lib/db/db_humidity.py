@@ -221,12 +221,24 @@ class DBHumidity(DBHome):
 ####################################################################################################
 
     def formatDataForGoogleCharts(self):
-        dataFormatted = []
+        dataFormatted = ""
         if self.getDataRaw() != []:
-            for i in reversed(xrange(len(self.getDataRaw()))):
-                reading = self.getDataRaw()[i]
-                datetime = "{} {}".format(reading[0], reading[1])
-                temp = "{0:0.1f}".format(reading[3])
-                humi = "{0:0.4f}".format(float(reading[4])/100.)
-                dataFormatted.append( [datetime, temp, humi] )
+            # build the majority of table rows, avoiding last row
+            for i in reversed(xrange(len(self.getDataRaw()))-1):
+                reading     = self.getDataRaw()[i]
+                sDateTime   = "{} {}".format(reading[0], reading[1])
+                #sTime       = "{}".format(reading[1])   # time only
+                sTemp       = "{0:0.1f}".format(reading[3])
+                sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
+                dataFormatted += "['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi)
+
+            # ensure last table row has no extra comma at the end                  
+            reading     = self.getDataRaw()[-1]
+            sDateTime   = "{} {}".format(reading[0], reading[1])
+            #sTime       = "{}".format(reading[1])   # time only
+            sTemp       = "{0:0.1f}".format(reading[3])
+            sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
+            rowstr          ="['{0}', {1}, {2}]\n".format(sTime, sTemp, sHumi)
+            dataFormatted  += rowstr
+        
         return dataFormatted

@@ -65,26 +65,6 @@ def printChartCode(table):
 
     print page_str
 
-# convert rows from database into a javascript table
-def create_table(lData):
-    sChartTable=""
-
-    # build table string for all rows except the final one
-    for set in lData[:-1]:
-        tTime = set[0].split(' ')[-1]   # time only
-        #tTime = set[0]                  # date & time
-        rowstr="['{0}', {1}, {2}],\n".format(str(tTime),str(set[1]), str(set[2]))
-        sChartTable+=rowstr
-
-    # ensure final row has no extra comma at the end                  
-    set = lData[-1]
-    tTime = set[0].split(' ')[-1]   # time only
-    #tTime = set[0]                  # date & time
-    rowstr="['{0}', {1}, {2}]\n".format(str(tTime),str(set[1]), str(set[2]))
-    sChartTable += rowstr
-    
-    return sChartTable
-
 
 
 
@@ -106,9 +86,10 @@ def main():
 
     # do query and format the data
     try:
-        hdb.retrieveData('today', bDebug=False)
-        chartData = hdb.formatDataForGoogleCharts()
-        chartTable = create_table(chartData)
+        # pull 24 hours of data
+        hdb.retrieveData('n=96', bDebug=False)
+        # convert to a format Google Charts can work with
+        chartTable = hdb.formatDataForGoogleCharts()
         printChartCode(chartTable)
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
