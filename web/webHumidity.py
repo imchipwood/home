@@ -10,23 +10,6 @@ import traceback
 sys.path.append('/home/pi/dev/home/lib/db')
 from db_humidity import DBHumidity
 
-
-# print data from a file formatted as a javascript array
-# return a string containing the table
-def print_table(filename,delimiter):
-    data_lines=[]
-    result=""
-    with open(filename) as data_file:
-        data_lines=data_file.readlines()
-        for line in data_lines[:-1]:
-            x, y=line.strip('\n').split(delimiter)
-            result += "['"+x+"', "+y+"],\n"
-        else:
-            x, y=data_lines[-1].strip('\n').split(delimiter)
-            result += "['"+x+"', "+y+"]"
-
-    return result
-
 # print an HTTP header
 def printHTTPheader():
     print "Content-type: text/html"
@@ -69,13 +52,19 @@ def printChartCode(table):
 
 # convert rows from database into a javascript table
 def create_table(lData):
-    chart_table=""
+    sChartTable=""
 
-    for set in lData:
+    # build table string for all rows except the final one
+    for set in lData[:-1]:
         rowstr="['{0}', {1}, {2}],\n".format(str(set[0]),str(set[1]), str(set[2]))
-        chart_table+=rowstr
+        sChartTable+=rowstr
 
-    return chart_table
+    # ensure final row has no extra comma at the end
+    finalRow = sChartTable[-1]
+    finalRow.replace(',\n','\n')
+    sChartTable += finalRow
+    
+    return sChartTable
 
 
 
