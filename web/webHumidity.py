@@ -45,6 +45,7 @@ def printChartCode(table):
                   0: {title: 'Temperature in F', titleTextStyle: {color: 'red'} },
                   1: {title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
                  },
+          colors:['red', 'blue']
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
