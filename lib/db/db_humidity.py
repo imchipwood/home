@@ -218,6 +218,13 @@ class DBHumidity(DBHome):
 
 ####################################################################################################
 
+    """ Verify Date Format for queries
+        private function to ensure SQL date queries are valid
+        Inputs:
+            sDate - date as a string 'year-month-day'
+        Returns:
+            Nothing - raises an exception if format is incorrect
+    """
     def __verifyDateFormat(self, sDate):
         sDateSplit  = sDate.split('-')
         dDate       = {'year':sDateSplit[0], 'month':sDateSplit[1], 'day':sDateSplit[2]}
@@ -231,9 +238,15 @@ class DBHumidity(DBHome):
 
 ####################################################################################################
 
+    """ Create Google Charts Javascript table
+        Inputs:
+            None
+        Returns:
+            dataFormatted - array of strings formatted for Google Charts Javascript
+    """
+    #TODO: Handle formatting when multiple rooms have been requested
     def formatDataForGoogleCharts(self):
         dataFormatted = ""
-        lRooms = []
         if self.getDataRaw() != []:
             # build the majority of table rows, avoiding last row
             for i in reversed(xrange(len(self.getDataRaw())-1)):
