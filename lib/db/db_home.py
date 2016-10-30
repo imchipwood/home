@@ -163,7 +163,28 @@ class DBHome(object):
             nothing
     """
     def displayResults(self):
-        self.formatResults()
+        self.dataFormatted = self.formatResults()
         for line in self.dataFormatted:
             print line
 
+####################################################################################################
+
+    """ return raw data array
+        Inputs:
+            none
+        Returns:
+            raw data array
+    """
+    def getDataRaw(self):
+        return self.dataRaw
+
+####################################################################################################
+
+    """ return formatted data array
+        Inputs:
+            none
+        Returns:
+            formatted data array
+    """
+    def getDataFormatted(self):
+        return self.dataFormatted

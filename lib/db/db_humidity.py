@@ -148,7 +148,7 @@ class DBHumidity(DBHome):
                     self.__verifyDateFormat(sDateEnd)
                     dQuery['query'] = 'daterange'
                     dQuery['qualifier'] = {'start': sDateBeg, 'end':sDateEnd}
-                    
+
 
         return dQuery
 
@@ -161,22 +161,23 @@ class DBHumidity(DBHome):
             nothing
     """
     def formatResults(self):
-        if self.dataRaw != []:
-            self.dataFormatted = []
-            self.dataFormatted.append("----------------------------------------------------------")
-            self.dataFormatted.append("Date       | Time     | Room     | Temperature | Humidity")
-            self.dataFormatted.append("----------------------------------------------------------")
-            for i in reversed(xrange(len(self.dataRaw))):
-                reading = self.dataRaw[i]
+        if self.getDataRaw() != []:
+            dataFormatted = []
+            dataFormatted.append("----------------------------------------------------------")
+            dataFormatted.append("Date       | Time     | Room     | Temperature | Humidity")
+            dataFormatted.append("----------------------------------------------------------")
+            for i in reversed(xrange(len(self.getDataRaw()))):
+                reading = self.getDataRaw()[i]
                 date = "{}".format(reading[0])
                 time = "{0:8s}".format(reading[1])
                 room = "{0:8s}".format(reading[2])
                 temp = "{0:11.1f}".format(reading[3])
                 humi = "{0:0.1f}".format(reading[4]) + "%"
-                self.dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
-            self.dataFormatted.append("----------------------------------------------------------")
+                dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
+            dataFormatted.append("----------------------------------------------------------")
         else:
-            self.dataFormatted = "rawData is empty. Didn't format anything."
+            dataFormatted = []
+        return dataFormatted
 
 ####################################################################################################
 
@@ -215,4 +216,17 @@ class DBHumidity(DBHome):
             raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
         if len(dDate['day']) != 2:
             raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
-        return 
+        return
+
+####################################################################################################
+
+    def formatDataForGoogleCharts(self):
+        dataFormatted = []
+        if self.getDataRaw() != []:
+            for i in reversed(xrange(len(self.getDataRaw()))):
+                reading = self.getDataRaw()[i]
+                datetime = "{} {}".format(reading[0], reading[1])
+                temp = "{0:11.1f}".format(reading[3])
+                humi = "{0:0.1f}".format(reading[4]) + "%"
+                dataFormatted.append( [datetime, temp, humi] )
+        return dataFormatted
