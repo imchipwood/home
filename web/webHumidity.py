@@ -39,7 +39,7 @@ def printChartCode(table):
 %s ]);
 
         var options = {
-          title: 'Media room Temperature/Humidity recordings for today',
+          title: 'Media room Temperature/Humidity recordings for last 24 hours',
           hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 8,
                    slantedText: true, slantedTextAngle: 45
                  },
