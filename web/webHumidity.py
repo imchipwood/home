@@ -99,7 +99,11 @@ def main():
     # do query and format the data
     try:
         hdb.retrieveData('today', bDebug=False)
-        printChartCode(create_table(hdb.formatDataForGoogleCharts()))
+        chartData = hdb.formatDataForGoogleCharts()
+        print chartData
+        chartTable = create_table(chartData)
+        print chartTable
+        printChartCode(chartTable)
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
