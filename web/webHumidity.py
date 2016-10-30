@@ -33,7 +33,7 @@ def printChartCode(table):
       google.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([ ['Date', 'Temperature', 'Humidity'],
-{} ]);
+%s ]);
 
         var options = {
           title: 'Google column chart',
@@ -52,7 +52,7 @@ def printChartCode(table):
       }
     </script>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
-    </body>""".format(table)
+    </body>""" % (table)
 
     print page_str
 
