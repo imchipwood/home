@@ -104,7 +104,7 @@ class DBHumidity(DBHome):
             bDebug = True
 
         self.sQuery = sQ
-        dQuery = parseInputs(bDebug)
+        dQuery = self.parseInputs(bDebug)
 
         # extract the date column - it's used by most query types
         sDateCol = sRoomCol = ''
