@@ -91,7 +91,7 @@ def main():
     sDBAccessFileName = 'sqlget.txt'
 
     # set up db
-    sDBCredentialsFile = "{}{}{}".format(os.environ.get('HOME_DIR'), '/conf/', sDBAccessFileName)
+    sDBCredentialsFile = "/home/pi/dev/home/conf/" + sDBAccessFileName
     hdb = DBHumidity(sDBCredentialsFile, bDebug=False)
 
     printHTTPheader()
