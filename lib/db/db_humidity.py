@@ -47,6 +47,8 @@ class DBHumidity(DBHome):
 
         sRoomQuery = 'WHERE'
         if dQuery['room'] != '*':
+            if bDebug:
+                print "-d- detected room query as: {}".format(dQuery['room'])
             lRooms = dQuery['room'].split(',')
             if len(lRooms) == 1:
                 sRoomQuery += ' {}={} AND'.format(sRoomCol, lRooms[0])
@@ -120,42 +122,42 @@ class DBHumidity(DBHome):
                     sQ = sArgSplit[0].lower()
                     if sQ == 'today' or sQ == 'yesterday':
                         sKey = sQ
-                        value = ''
+                        value = ""
                     else:
-                        sKey = 'n'
+                        sKey = "n"
                         value = sArgSplit[0]
                 else:
-                    raise Exception('-E- Something\'s up with your args. Couldn\'t split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}'.format(sQuery, sArg))
+                    raise Exception("-E- Something's up with your args. Couldn't split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}".format(sQuery, sArg))
                 if bDebug:
                     print "-d- key, value: ({}, {})".format(sKey, value)
 
                 # room specification
-                if sKey == 'room':
-                    dQuery['room'] = '\'{}\''.format(value)
+                if sKey == "room":
+                    dQuery['room'] = "{}".format(value)
                 # nEntries
-                elif sKey == 'n':
-                    dQuery['query']     = 'n'
+                elif sKey == "n":
+                    dQuery['query']     = "n"
                     dQuery['qualifier'] = int(value)
                 # today's entries
-                elif sKey == 'today':
-                    dQuery['query']     = 'today'
-                    dQuery['qualifier'] = ''
+                elif sKey == "today":
+                    dQuery['query']     = "today"
+                    dQuery['qualifier'] = ""
                 # yesterday's entries
-                elif sKey == 'yesterday':
-                    dQuery['query']     = 'yesterday'
-                    dQuery['qualifier'] = ''
+                elif sKey == "yesterday":
+                    dQuery['query']     = "yesterday"
+                    dQuery['qualifier'] = ""
                 # entries for a particular date
-                elif sKey == 'date':
+                elif sKey == "date":
                     # check syntax of date
                     self.__verifyDateFormat(value)
-                    dQuery['query'] = 'date'
+                    dQuery['query'] = "date"
                     dQuery['qualifier'] = value
-                elif sKey == 'daterange':
+                elif sKey == "daterange":
                     sDateBeg = value.split(":")[0]
                     self.__verifyDateFormat(sDateBeg)
                     sDateEnd = value.split(":")[1]
                     self.__verifyDateFormat(sDateEnd)
-                    dQuery['query'] = 'daterange'
+                    dQuery['query'] = "daterange"
                     dQuery['qualifier'] = {'start': sDateBeg, 'end':sDateEnd}
 
 
