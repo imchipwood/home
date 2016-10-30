@@ -5,7 +5,7 @@ import argparse
 import traceback
 
 sys.path.append('/home/pi/dev/home/lib/db')
-from db_home import DBHome
+from db_humidity import DBHumidity
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-query', '-q', type=str, default='', help="Type of query - how and what do you want data displayed")
@@ -32,7 +32,7 @@ def main():
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
-    hdb = DBHome(sDBCredentialsFile)
+    hdb = DBHumidity(sDBCredentialsFile)
 
     # do query and format the data
     try:
