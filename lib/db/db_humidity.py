@@ -238,7 +238,7 @@ class DBHumidity(DBHome):
             #sTime       = "{}".format(reading[1])   # time only
             sTemp       = "{0:0.1f}".format(reading[3])
             sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
-            rowstr          ="['{0}', {1}, {2}]\n".format(sTime, sTemp, sHumi)
+            rowstr          ="['{0}', {1}, {2}]\n".format(sDateTime, sTemp, sHumi)
             dataFormatted  += rowstr
         
         return dataFormatted
