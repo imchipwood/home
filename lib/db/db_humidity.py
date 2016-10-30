@@ -47,7 +47,7 @@ class DBHumidity(DBHome):
 
         sRoomQuery = 'WHERE'
         if dQuery['room'] != '*':
-            sRoomQuery += '{}={} AND'.format(sRoomCol, dQuery['room'])
+            sRoomQuery += ' {}={} AND'.format(sRoomCol, dQuery['room'])
 
         if bDebug:
             print "-d- dQuery = {}".format(dQuery)
