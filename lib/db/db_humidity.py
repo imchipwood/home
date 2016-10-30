@@ -250,4 +250,4 @@ class DBHumidity(DBHome):
             rowstr          ="['{0}', {1}, {2}]\n".format(sDateTime, sTemp, sHumi)
             dataFormatted  += rowstr
         
-        return (dataFormatted, 
+        return dataFormatted
