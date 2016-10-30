@@ -13,7 +13,6 @@ from db_humidity import DBHumidity
 
 # print data from a file formatted as a javascript array
 # return a string containing the table
-#
 def print_table(filename,delimiter):
     data_lines=[]
     result=""
@@ -29,7 +28,6 @@ def print_table(filename,delimiter):
     return result
 
 # print an HTTP header
-#
 def printHTTPheader():
     print "Content-type: text/html"
     print ""
@@ -42,7 +40,6 @@ def printHTMLhead(sTitle):
     print "    </head>"
 
 def printChartCode(table):
-
     # this string contains the web page that will be served
     page_str="""
     <body>
@@ -63,12 +60,10 @@ def printChartCode(table):
         chart.draw(data, options);
       }
     </script>
-    <div id="chart_div"></div>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
     </body>""" % table
 
-    # serve the page with the data table embedded in it
     print page_str
-    print '<div id="chart_div" style="width: 900px; height: 500px;"></div>'
 
 # convert rows from database into a javascript table
 def create_table(lData):
@@ -79,9 +74,11 @@ def create_table(lData):
         chart_table+=rowstr
 
     return chart_table
-    #row=rows[-1]
-    #rowstr="['{0}', {1}]\n".format(str(row[0]),str(row[1]))
-    #chart_table+=rowstr
+
+
+
+
+
 
 def main():
     # enable tracebacks of exceptions
@@ -102,7 +99,7 @@ def main():
         hdb.retrieveData('today', bDebug=False)
         chartData = hdb.formatDataForGoogleCharts()
         chartTable = create_table(chartData)
-        printChartCode(chartTable)
+        #printChartCode(chartTable)
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
