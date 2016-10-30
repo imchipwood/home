@@ -75,7 +75,9 @@ def create_table(lData):
     chart_table=""
 
     for set in lData:
+        print set
         rowstr="['{0}', {1}, {2}],\n".format(str(set[0]),str(set[1]), str(set[2]))
+        print rowstr
         chart_table+=rowstr
 
     #row=rows[-1]
@@ -101,7 +103,7 @@ def main():
         hdb.retrieveData('today', bDebug=False)
         chartData = hdb.formatDataForGoogleCharts()
         print chartData
-        chartTable = create_table(chartData)
+        #chartTable = create_table(chartData)
         print chartTable
         printChartCode(chartTable)
     except KeyboardInterrupt:
