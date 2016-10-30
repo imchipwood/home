@@ -80,6 +80,7 @@ def create_table(lData):
         print rowstr
         chart_table+=rowstr
 
+    return chart_table
     #row=rows[-1]
     #rowstr="['{0}', {1}]\n".format(str(row[0]),str(row[1]))
     #chart_table+=rowstr
