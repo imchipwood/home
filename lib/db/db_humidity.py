@@ -233,6 +233,7 @@ class DBHumidity(DBHome):
 
     def formatDataForGoogleCharts(self):
         dataFormatted = ""
+        lRooms = []
         if self.getDataRaw() != []:
             # build the majority of table rows, avoiding last row
             for i in reversed(xrange(len(self.getDataRaw())-1)):
