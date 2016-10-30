@@ -35,7 +35,7 @@ def printHTTPheader():
     print ""
     print ""
 
-def printHTMLhead(sTitle, lTable):
+def printHTMLhead(sTitle):
     print "<html>"
     print "    <head>"
     print "        <title>{}</title>".format(sTitle)
