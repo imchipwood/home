@@ -40,12 +40,11 @@ def printChartCode(table):
           title: 'Google column chart',
           hAxis: {title: 'Date', titleTextStyle: {color: 'blue'}},
           vAxis: {
-                  0: {title: 'Count', titleTextStyle: {color: 'red'} },
-                  1: {title: 'Count', titleTextStyle: {color: 'blue'}, format:"#%%",
+                  0: {title: 'Temperature in F', titleTextStyle: {color: 'red'} },
+                  1: {title: '% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%"<!--,
                       viewWindowMode: 'explicit',
-                      viewWindow:{ max=100, min=0} }
+                      viewWindow:{ max=100, min=0}--> }
                  },
-          colors: ['red', 'blue']
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
