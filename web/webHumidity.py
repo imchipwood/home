@@ -23,9 +23,6 @@ def printHTMLhead(sTitle):
     print "    </head>"
 
 
-#          series:{ 0: {targetAxisIndex:0},
-#                   1: {targetAxisIndex:1}
-#                 }
 #viewWindowMode: 'explicit', viewWindow:{ max=100, min=0} 
 def printChartCode(table):
     # this string contains the web page that will be served
@@ -48,7 +45,10 @@ def printChartCode(table):
                   0: { title: 'Temperature in F', titleTextStyle: {color: 'red'} },
                   1: { title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
                  },
-          colors: ['red', 'blue']
+          colors: ['red', 'blue'],
+          series: { 0: {targetAxisIndex:0},
+                    1: {targetAxisIndex:1}
+                  }
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
