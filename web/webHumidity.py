@@ -2,16 +2,16 @@
 
 import cgi
 import cgitb
-import sys
 import os
 import argparse
 import traceback
 
+import sys
 sys.path.append('/home/pi/dev/home/lib/db')
 from db_humidity import DBHumidity
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-room', '-r', type=str, default='*', help="Room to get data from. Default is all rooms")
+parser.add_argument('-room', '-r', type=str, default='media', help="Room to get data from. Default is all rooms")
 parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to database, while also printing extra stuff to console. Optional")
 
 global sRoom

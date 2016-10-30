@@ -133,7 +133,7 @@ class DBHumidity(DBHome):
 
                 # room specification
                 if sKey == "room":
-                    dQuery['room'] = "{}".format(value)
+                    dQuery['room'] = "'{}'".format(value)
                 # nEntries
                 elif sKey == "n":
                     dQuery['query']     = "n"
