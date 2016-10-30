@@ -49,7 +49,7 @@ def printChartCode(table):
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
       function drawChart() {
-        var data = google.visualization.arrayToDataTable([ ['Date', 'Humidity, Temperature'],
+        var data = google.visualization.arrayToDataTable([ ['Date', 'Temperature', 'Humidity'],
 %s ]);
 
         var options = {
