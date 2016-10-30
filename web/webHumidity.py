@@ -33,13 +33,13 @@ def printHTMLhead(sTitle):
     print "    </head>"
 
 
-#viewWindowMode: 'explicit', viewWindow:{ max=100, min=0} 
+#viewWindowMode: 'explicit', viewWindow:{ max=100, min=0}
 def printChartCode(table, sRooms):
     # this string contains the web page that will be served
     try:
         # convert string of rooms into list
         lRooms = [room for room in sRooms.split(',')]
-        
+
         # Are we displaying data from multiple rooms?
         columnHeaders = "['Date', "
         if len(lRooms) > 1:
@@ -53,7 +53,7 @@ def printChartCode(table, sRooms):
                 roomStr = " in {} room".format(lRooms[0])
         columnHeaders += "]"
         page_str="""
-    <body>    
+    <body>
     <h1>Raspberry Pi Humidity/Temperature Logger</h1>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -100,7 +100,7 @@ def main():
     global sRoom
     # enable tracebacks of exceptions
     cgitb.enable()
-    
+
     # user-defined args
     sDBAccessFileName = 'sqlget.txt'
 

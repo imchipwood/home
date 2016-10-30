@@ -21,9 +21,9 @@ class DBHome(object):
 
     __conf = {'db':'', 'table':'', 'user':'', 'pw':'', 'room':'', 'columns':[]}
     sConfFile = ''
-    
+
     bDebug = False
-    
+
     """ Initialize database access
         Parse config file, connect to DB, set up cursor
     """
