@@ -3,12 +3,10 @@
 import cgi
 import cgitb
 
-# enable tracebacks of exceptions
-cgitb.enable()
 
 # print data from a file formatted as a javascript array
 # return a string containing the table
-# 
+#
 def print_table(filename,delimiter):
     data_lines=[]
     result=""
@@ -30,25 +28,24 @@ def printHTTPheader():
     print ""
     print ""
 
+def printHTMLhead(sTitle, lTable):
+    print "<html>"
+    print "    <head>"
+    print "        <title>{}</title>".format(sTitle)
+    printGraphTable(lTable)
+    print "    </head>"
 
-def main():
-
-    printHTTPheader()
+def printChartCode(table):
 
     # this string contains the web page that will be served
     page_str="""
-    <h1>Charts with Python and Javascript</h1>
-
-    <script type="text/javascript" src="https://www.google.com/jsapi">
-</script>
+    <body>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
       function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-    ['Date', 'Count'],
-    %s 
-        ]);
+        var data = google.visualization.arrayToDataTable([ ['Date', 'Count'], %s ]);
 
         var options = {
           title: 'Google column chart',
@@ -56,18 +53,27 @@ def main():
           vAxis: {title: 'Count', titleTextStyle: {color: 'blue'}}
         };
 
-        var chart = new google.visualization.ColumnChart
-                (document.getElementById('chart_div'));
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
         chart.draw(data, options);
       }
     </script>
     <div id="chart_div"></div>
-
-    </body>
-    """ % print_table('/var/www/data.txt', ';')
+    </body>""" % table
 
     # serve the page with the data table embedded in it
     print page_str
+    print '<div id="chart_div" style="width: 900px; height: 500px;"></div>'
+
+def main():
+    # enable tracebacks of exceptions
+    cgitb.enable()
+
+    printHTTPheader()
+    printHTMLhead("Raspberry Pi Humidity/Temperature Tracker")
+    printChartCode(lDataTable)
+    print "</html>"
+    
+    return
 
 if __name__=="__main__":
     main()
