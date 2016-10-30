@@ -39,7 +39,6 @@ def printHTMLhead(sTitle, lTable):
     print "<html>"
     print "    <head>"
     print "        <title>{}</title>".format(sTitle)
-    printGraphTable(lTable)
     print "    </head>"
 
 def printChartCode(table):
