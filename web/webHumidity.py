@@ -48,7 +48,9 @@ def printChartCode(table, sRooms):
             roomStr = ""
         else:
             columnHeaders += "'Temperature', 'Humidity'"
-            roomStr = " in {} room".format(lRooms[0])
+            roomStr = " in all rooms"
+            if lRooms[0] != '*':
+                roomStr = " in {} room".format(lRooms[0])
         columnHeaders += "]"
         page_str="""
     <body>    
