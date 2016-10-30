@@ -5,6 +5,7 @@
 import os
 import MySQLdb
 import traceback
+from abc import abstractmethod
 
 """ Home Database
     Handles general access to database.
