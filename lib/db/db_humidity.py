@@ -224,7 +224,7 @@ class DBHumidity(DBHome):
         dataFormatted = ""
         if self.getDataRaw() != []:
             # build the majority of table rows, avoiding last row
-            for i in reversed(xrange(len(self.getDataRaw()))-1):
+            for i in reversed(xrange(len(self.getDataRaw())-1)):
                 reading     = self.getDataRaw()[i]
                 sDateTime   = "{} {}".format(reading[0], reading[1])
                 #sTime       = "{}".format(reading[1])   # time only
