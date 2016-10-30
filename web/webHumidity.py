@@ -92,17 +92,14 @@ def main():
 
     # set up db
     sDBCredentialsFile = "{}{}{}".format(os.environ.get('HOME_DIR'), '/conf/', sDBAccessFileName)
-    if bDebug:
-        print "-d- Accessing DB using credentials found here:"
-        print "-d- {}".format(sDBCredentialsFile)
-    hdb = DBHumidity(sDBCredentialsFile, bDebug=bDebug)
+    hdb = DBHumidity(sDBCredentialsFile, bDebug=False)
 
     printHTTPheader()
     printHTMLhead("Raspberry Pi Humidity/Temperature Tracker")
 
     # do query and format the data
     try:
-        hdb.retrieveData('today', bDebug)
+        hdb.retrieveData('today', bDebug=False)
         printChartCode(create_table(hdb.formatDataForGoogleCharts()))
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
