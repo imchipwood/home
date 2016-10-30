@@ -108,7 +108,7 @@ class DBHumidity(DBHome):
 
         # extract the date column - it's used by most query types
         sDateCol = sRoomCol = ''
-        for col in self.__conf['columns']:
+        for col in self._DBHome__conf['columns']:
             if 'date' in col.lower():
                 sDateCol = col
             if 'room' in col.lower():
@@ -130,11 +130,11 @@ class DBHumidity(DBHome):
             # 1) no ' and' at the end if a room WAS specified, and
             # 2) if a room wasn't specified, just delete the whole thing (no need for 'WHERE')
             sRoomQuery = sRoomQuery.replace(' AND', '') if dQuery['room'] != '*' else ''
-            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(self.__conf['table'], sRoomQuery, dQuery['qualifier'])
+            dbcmd = "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(self._DBHome__conf['table'], sRoomQuery, dQuery['qualifier'])
         elif dQuery['query'] == 'today':
-            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(self.__conf['table'], sRoomQuery, sDateCol)
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol)
         elif dQuery['query'] == 'date':
-            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self.__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
+            dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
 
@@ -179,8 +179,8 @@ class DBHumidity(DBHome):
         if self.bDebug:
             bDebug = True
 
-        sColumns = ', '.join(self.__conf['columns'])
-        self.dbcmd = "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(self.__conf['table'], sColumns, self.__conf['room'], dData['temperature'], dData['humidity'])
+        sColumns = ', '.join(self._DBHome__conf['columns'])
+        self.dbcmd = "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(self._DBHome__conf['table'], sColumns, self._DBHome__conf['room'], dData['temperature'], dData['humidity'])
         if bDebug:
             print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
         else:
