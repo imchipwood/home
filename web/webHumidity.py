@@ -44,7 +44,6 @@ def printChartCode(table):
                    slantedText: true, slantedTextAngle: 45
                  },
           vAxes: {
-                  gridlines: { color: 'black', count: 8},
                   0: { title: 'Temperature in F', titleTextStyle: {color: 'red'} },
                   1: { title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
                  },
