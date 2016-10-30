@@ -54,6 +54,7 @@ class DBHumidity(DBHome):
             print "-d- sRoomQuery = {}".format(sRoomQuery)
 
         # construct query
+        dbcmd = ''
         if dQuery['query'] == 'n':
             # special case for the room query
             # 1) no ' and' at the end if a room WAS specified, and
@@ -68,6 +69,8 @@ class DBHumidity(DBHome):
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier'])
         elif dQuery['query'] == 'daterange':
             dbcmd = "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{4} 23:59:59' ORDER BY ID DESC".format(self._DBHome__conf['table'], sRoomQuery, sDateCol, dQuery['qualifier']['start'], dQuery['qualifier']['end'])
+        else:
+            print "-E- DBHumidity: didn't recognize query type"
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
 
