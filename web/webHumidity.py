@@ -42,7 +42,8 @@ def printHTMLhead(sTitle):
 def printChartCode(table):
     # this string contains the web page that will be served
     page_str="""
-    <body>
+    <body>    
+    <h1>Raspberry Pi Humidity/Temperature Logger</h1>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
