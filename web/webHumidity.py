@@ -61,7 +61,7 @@ def create_table(lData):
 
     # ensure final row has no extra comma at the end
     set = lData[-1]
-    rowstr="['{0}', {1}, {2}],\n".format(str(set[0]),str(set[1]), str(set[2]))
+    rowstr="['{0}', {1}, {2}]\n".format(str(set[0]),str(set[1]), str(set[2]))
     sChartTable += rowstr
     
     return sChartTable
