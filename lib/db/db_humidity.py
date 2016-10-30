@@ -10,7 +10,7 @@ class DBHumidity(DBHome):
     sQuery = ''
 
     def __init__(self, f, bDebug=False):
-        super(DBHumidity, self).__init__()
+        super(DBHumidity, self).__init__(f, bDebug)
 
 ####################################################################################################
 
