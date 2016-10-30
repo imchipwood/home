@@ -104,8 +104,8 @@ def main():
         chartData = hdb.formatDataForGoogleCharts()
         print chartData
         #chartTable = create_table(chartData)
-        print chartTable
-        printChartCode(chartTable)
+        #print chartTable
+        #printChartCode(chartTable)
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
