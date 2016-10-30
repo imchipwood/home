@@ -40,7 +40,9 @@ def printChartCode(table):
 
         var options = {
           title: 'Media room Temperature/Humidity recordings for today',
-          hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 8 },
+          hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 8,
+                   slantedText: true, slantedTextAngle: 45
+                 },
           vAxes: {
                   0: { title: 'Temperature in F', titleTextStyle: {color: 'red'} },
                   1: { title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
