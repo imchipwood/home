@@ -105,8 +105,9 @@ class DBHumidity(DBHome):
                     sKey    = sArgSplit[0].lower()
                     value   = sArgSplit[1]
                 elif len(sArgSplit) == 1:
-                    if sArgSplit[0].lower() == 'today':
-                        sKey = 'today'
+                    sQ = sArgSplit[0].lower()
+                    if sQ == 'today' or sQ == 'yesterday':
+                        sKey = sQ
                         value = ''
                     else:
                         sKey = 'n'
