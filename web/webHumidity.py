@@ -27,7 +27,8 @@ def printHTMLhead(sTitle):
 #                      viewWindow:{ max=100, min=0} }
 def printChartCode(table):
     # this string contains the web page that will be served
-    page_str="""
+    try:
+        page_str="""
     <body>    
     <h1>Raspberry Pi Humidity/Temperature Logger</h1>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -53,6 +54,9 @@ def printChartCode(table):
     </script>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
     </body>""" % (table)
+    except:
+        print "-E- failed to create page_str"
+        return
 
     print page_str
 
