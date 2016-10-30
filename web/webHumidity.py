@@ -105,7 +105,8 @@ def main():
         print chartData
         print "--------------------------------------------------"
         chartTable = create_table(chartData)
-        #print chartTable
+        print chartTable
+        print "--------------------------------------------------"
         #printChartCode(chartTable)
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
