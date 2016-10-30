@@ -21,7 +21,9 @@ def printHTMLhead(sTitle):
     print "    <head>"
     print "        <title>{}</title>".format(sTitle)
     print "    </head>"
-
+#,
+#                      viewWindowMode: 'explicit',
+#                      viewWindow: max=100, min=0}
 def printChartCode(table):
     # this string contains the web page that will be served
     page_str="""
@@ -40,9 +42,7 @@ def printChartCode(table):
           hAxis: {title: 'Date', titleTextStyle: {color: 'blue'}},
           vAxis: {
                   0: {title: 'Count', titleTextStyle: {color: 'red'} },
-                  1: {title: 'Count', titleTextStyle: {color: 'blue'}, format:"#%%",
-                      viewWindowMode: 'explicit',
-                      viewWindow: max=100, min=0}
+                  1: {title: 'Count', titleTextStyle: {color: 'blue'}, format:"#%%" }
                  },
           colors: ['red', 'blue']
         };
