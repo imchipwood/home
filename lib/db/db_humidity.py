@@ -258,16 +258,10 @@ class DBHumidity(DBHome):
                 sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
                 dataFormattedArray.append("['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi))
 
+            # remove extra comma from final row
             dataFormattedArray[-1] = dataFormattedArray[-1].replace('],', ']')
+            # convert array into string
             for line in dataFormattedArray:
                     dataFormatted += line
-            ## ensure last table row has no extra comma at the end
-            #reading     = self.getDataRaw()[-1]
-            #sDateTime   = "{} {}".format(reading[0], reading[1])
-            ##sTime       = "{}".format(reading[1])   # time only
-            #sTemp       = "{0:0.1f}".format(reading[3])
-            #sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
-            #rowstr          ="['{0}', {1}, {2}]\n".format(sDateTime, sTemp, sHumi)
-            #dataFormattedArray.insert(-1, rowstr)
 
         return dataFormatted
