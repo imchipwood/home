@@ -250,7 +250,7 @@ class DBHumidity(DBHome):
         dataFormattedArray = []
         if self.getDataRaw() != []:
             # build all table rows
-            for i in xrange(len(self.getDataRaw())):
+            for i in reversed(xrange(len(self.getDataRaw()))):
                 reading     = self.getDataRaw()[i]
                 sDateTime   = "{} {}".format(reading[0], reading[1])
                 #sTime       = "{}".format(reading[1])   # time only
