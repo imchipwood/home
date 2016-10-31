@@ -247,23 +247,27 @@ class DBHumidity(DBHome):
     #TODO: Handle formatting when multiple rooms have been requested
     def formatDataForGoogleCharts(self):
         dataFormatted = ""
+        dataFormattedArray = []
         if self.getDataRaw() != []:
-            # build the majority of table rows, avoiding last row
-            for i in reversed(xrange(len(self.getDataRaw()))):
+            # build all table rows
+            for i in xrange(len(self.getDataRaw())):
                 reading     = self.getDataRaw()[i]
                 sDateTime   = "{} {}".format(reading[0], reading[1])
                 #sTime       = "{}".format(reading[1])   # time only
                 sTemp       = "{0:0.1f}".format(reading[3])
                 sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
-                dataFormatted += "['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi)
+                dataFormattedArray.append("['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi))
 
-            # ensure last table row has no extra comma at the end
-            reading     = self.getDataRaw()[-1]
-            sDateTime   = "{} {}".format(reading[0], reading[1])
-            #sTime       = "{}".format(reading[1])   # time only
-            sTemp       = "{0:0.1f}".format(reading[3])
-            sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
-            rowstr          ="['{0}', {1}, {2}]\n".format(sDateTime, sTemp, sHumi)
-            dataFormatted  += rowstr
+            dataFormattedArray[-1] = dataformattedArray[-1].replace('],', ']')
+            for line in dataFormattedArray:
+                    dataFormatted += line
+            ## ensure last table row has no extra comma at the end
+            #reading     = self.getDataRaw()[-1]
+            #sDateTime   = "{} {}".format(reading[0], reading[1])
+            ##sTime       = "{}".format(reading[1])   # time only
+            #sTemp       = "{0:0.1f}".format(reading[3])
+            #sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
+            #rowstr          ="['{0}', {1}, {2}]\n".format(sDateTime, sTemp, sHumi)
+            #dataFormattedArray.insert(-1, rowstr)
 
         return dataFormatted
