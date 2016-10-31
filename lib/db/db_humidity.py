@@ -258,7 +258,7 @@ class DBHumidity(DBHome):
                 dataFormatted += "['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi)
 
             # ensure last table row has no extra comma at the end
-            reading     = self.getDataRaw()[-1]
+            reading     = self.getDataRaw()[0]
             sDateTime   = "{} {}".format(reading[0], reading[1])
             #sTime       = "{}".format(reading[1])   # time only
             sTemp       = "{0:0.1f}".format(reading[3])
