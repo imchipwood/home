@@ -191,6 +191,20 @@ class DBHumidity(DBHome):
         return dataFormatted
 
 ####################################################################################################
+    
+    """Validate data to ensure no bad values are inserted into database
+    Inputs:
+        dData - dict of data with keys 'humidity' and 'temperature'
+    Returns:
+        True if data is valid, false otherwise
+    """
+    def validateData(self, dData, bDebug=False):
+        if dData['humidity'] != -999 and dData['temperature'] != -1766.2:
+            return True
+        return False
+
+
+####################################################################################################
 
     """ Insert data into the database
         Inputs:
@@ -203,18 +217,23 @@ class DBHumidity(DBHome):
         if self.bDebug:
             bDebug = True
 
-        sColumns = ', '.join(self._DBHome__conf['columns'])
-        self.dbcmd = "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(self._DBHome__conf['table'], sColumns, self._DBHome__conf['room'], dData['temperature'], dData['humidity'])
-        if bDebug:
-            print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
+        if self.validateData(dData, bDebug):
+            sColumns = ', '.join(self._DBHome__conf['columns'])
+            self.dbcmd = "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', {3:0.1f}, {4:0.1f})".format(self._DBHome__conf['table'], sColumns, self._DBHome__conf['room'], dData['temperature'], dData['humidity'])
+            if bDebug:
+                print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
+            else:
+                try:
+                    self.executeCmd(self.dbcmd, 'insert')
+                    return True
+                except Exception as E:
+                    print "-E- HomeDB Error: Some exception while trying to insert data into db."
+                    traceback.print_exc()
+                    return False
         else:
-            try:
-                self.executeCmd(self.dbcmd, 'insert')
-            except Exception as E:
-                print "-E- HomeDB Error: Some exception while trying to insert data into db."
-                traceback.print_exc()
-                return False
-        return True
+            if bDebug:
+                print "-e- HomeDB Error: Data invalid - sensor connections may be faulty"
+            return False
 
 ####################################################################################################
 

@@ -79,6 +79,16 @@ class DBHome(object):
     @abstractmethod
     def insertData(self, dData, bDebug=False):
         """ Insert data into the database """
+        
+    """ Validate data before inserting into database
+        Inputs:
+            dData - dict of data with keys 'temperature' and 'humidity'
+        Returns:
+            True if data is valid
+    """
+    @abstractmethod
+    def validateData(self, dData, bDebug=False):
+        """ Validate data before inserting """
 
 ####################################################################################################
 
