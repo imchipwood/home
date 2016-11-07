@@ -142,7 +142,10 @@ class DBHumidity(DBHome):
                 # nEntries
                 elif sKey == "n":
                     dQuery['query'] = "n"
-                    dQuery['qualifier'] = int(value)
+                    try:
+                        dQuery['qualifier'] = int(value)
+                    except:
+                        raise IOError("-E- HomeDB: 'n' query value invalid")
                 # today's entries
                 elif sKey == "today":
                     dQuery['query'] = "today"
