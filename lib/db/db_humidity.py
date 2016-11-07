@@ -188,7 +188,7 @@ class DBHumidity(DBHome):
                 temp = "{0:11.1f}".format(reading[3])
                 humi = "{0:0.1f}".format(reading[4]) + "%"
                 sData = "{} | {} | {}".format(date, time, room)
-                sData += " | {} | {}".format(room, temp, humi)
+                sData += " | {} | {}".format(temp, humi)
                 dataFormatted.append(sData)
             dataFormatted.append("----------------------------------------------------------")
         else:
