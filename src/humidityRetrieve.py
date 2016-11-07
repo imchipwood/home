@@ -8,8 +8,15 @@ sys.path.append('/home/pi/dev/home/lib/db')
 from db_humidity import DBHumidity
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-query', '-q', type=str, default='', help="Type of query - how and what do you want data displayed")
-parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to database, while also printing extra stuff to console. Optional")
+parser.add_argument('-query',
+                    '-q',
+                    type=str,
+                    default='',
+                    help="Type of query - how and what data to be displayed")
+parser.add_argument('-debug',
+                    '-d',
+                    action="store_true",
+                    help="Enable debug messages")
 
 args = parser.parse_args()
 global sQuery
@@ -20,6 +27,7 @@ if bDebug:
     print "-d- args:"
     print "-d- sQuery: {}".format(sQuery)
 
+
 def main():
     global sQuery
     global bDebug
@@ -28,7 +36,8 @@ def main():
     sDBAccessFileName = 'sqlget.txt'
 
     # set up db
-    sDBCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sDBAccessFileName
+    sDBCredentialsFile = os.path.dirname(os.path.realpath(__file__))
+    sDBCredentialsFile += '/../conf/' + sDBAccessFileName
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)

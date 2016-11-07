@@ -5,26 +5,34 @@ import cgitb
 import os
 import argparse
 import traceback
-
 import sys
 sys.path.append('/home/pi/dev/home/lib/db')
 from db_humidity import DBHumidity
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-room', '-r', type=str, default='media', help="Room to get data from. Default is all rooms")
-parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to database, while also printing extra stuff to console. Optional")
+parser.add_argument('-room',
+                    '-r',
+                    type=str,
+                    default='media',
+                    help="Room to get data from. Default='media'")
+parser.add_argument('-debug',
+                    '-d',
+                    action="store_true",
+                    help="Enable debug messages")
 
 global sRoom
 global bDebug
-args    = parser.parse_args()
-sRoom   = args.room
-bDebug  = args.debug
+args = parser.parse_args()
+sRoom = args.room
+bDebug = args.debug
+
 
 # print an HTTP header
 def printHTTPheader():
     print "Content-type: text/html"
     print ""
     print ""
+
 
 def printHTMLhead(sTitle):
     print "<html>"
@@ -33,7 +41,7 @@ def printHTMLhead(sTitle):
     print "    </head>"
 
 
-#viewWindowMode: 'explicit', viewWindow:{ max=100, min=0}
+# viewWindowMode: 'explicit', viewWindow:{ max=100, min=0}
 def printChartCode(table, sRooms):
     # this string contains the web page that will be served
     try:
@@ -52,7 +60,7 @@ def printChartCode(table, sRooms):
             if lRooms[0] != '*':
                 roomStr = " in {} room".format(lRooms[0])
         columnHeaders += "]"
-        page_str="""
+        page_str = """
     <body>
     <h1>Raspberry Pi Humidity/Temperature Logger</h1>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -92,10 +100,6 @@ def printChartCode(table, sRooms):
     print page_str
 
 
-
-
-
-
 def main():
     global sRoom
     # enable tracebacks of exceptions
@@ -129,5 +133,5 @@ def main():
     print "</html>"
     return
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

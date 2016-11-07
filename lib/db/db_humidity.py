@@ -1,3 +1,4 @@
+
 import traceback
 from db_home import DBHome
 
@@ -5,14 +6,15 @@ from db_home import DBHome
     Contains specifics for database interaction
     for humidity sensors.
 """
-class DBHumidity(DBHome):
 
+
+class DBHumidity(DBHome):
     sQuery = ''
 
     def __init__(self, f, bDebug=False):
         super(DBHumidity, self).__init__(f, bDebug)
 
-####################################################################################################
+###############################################################################
 
     """ Construct a query based on string input
         Inputs:
@@ -21,7 +23,9 @@ class DBHumidity(DBHome):
                     n=<number> - get the last <number> entries
                     today - get all entries from today
                     room=<room> - pull data only from <room>
-                    date=<year>-<month>-<day> - get all entries for a particular date where year is a 4 digit # and month/day are 2 digits
+                    date=<year>-<month>-<day> - get all entries for a
+                        particular date where year is a 4 digit #
+                        and month/day are 2 digits
                 Default query if no options are specified - 'n=5 room=*'
             bDebug - (optional) flag to print more info to console
         Returns:
@@ -43,7 +47,8 @@ class DBHumidity(DBHome):
             if 'room' in col.lower():
                 sRoomCol = col
         if bDebug:
-            print "-d- Columns of interest:\n-d- date: {}\n-d- room: {}".format(sDateCol, sRoomCol)
+            print "-d- Columns of interest:"
+            print "-d- date: {}\n-d- room: {}".format(sDateCol, sRoomCol)
 
         sRoomQuery = 'WHERE'
         if dQuery['room'] != '*':
@@ -55,7 +60,7 @@ class DBHumidity(DBHome):
             else:
                 lRoomQueries = []
                 for room in lRooms:
-                    lRoomQueries.append( ' {}={}'.format(sRoomCol, room))
+                    lRoomQueries.append(' {}={}'.format(sRoomCol, room))
                 for q in lRoomQueries[:-1]:
                     sRoomQuery += q + ' AND'
                 sRoomQuery += lRoomQueries[-1] + ' AND'
@@ -87,7 +92,7 @@ class DBHumidity(DBHome):
 
         return dbcmd
 
-####################################################################################################
+###############################################################################
 
     """ Deconstruct the input args into a dictionary of options
     """
@@ -101,9 +106,9 @@ class DBHumidity(DBHome):
 
         # default query if no args are specified (or if empty args specified)
         dQuery = {}
-        dQuery['query']     = 'n'
-        dQuery['qualifier'] = '8' # 2 hours of data
-        dQuery['room']      = '*'
+        dQuery['query'] = 'n'
+        dQuery['qualifier'] = '8'  # 2 hours of data
+        dQuery['room'] = '*'
 
         lArgs = self.sQuery.rstrip().lstrip().split(' ')
         if bDebug:
@@ -116,8 +121,8 @@ class DBHumidity(DBHome):
                 sKey = value = ''
                 sArgSplit = sArg.split('=')
                 if len(sArgSplit) == 2:
-                    sKey    = sArgSplit[0].lower()
-                    value   = sArgSplit[1]
+                    sKey = sArgSplit[0].lower()
+                    value = sArgSplit[1]
                 elif len(sArgSplit) == 1:
                     sQ = sArgSplit[0].lower()
                     if sQ == 'today' or sQ == 'yesterday':
@@ -127,7 +132,7 @@ class DBHumidity(DBHome):
                         sKey = "n"
                         value = sArgSplit[0]
                 else:
-                    raise Exception("-E- Something's up with your args. Couldn't split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}".format(sQuery, sArg))
+                    raise Exception("""-E- Something's up with your args. Couldn't split them into a key/value pair\n\tArgs: {0}\n\tFailed on: {1}""".format(sQuery, sArg))
                 if bDebug:
                     print "-d- key, value: ({}, {})".format(sKey, value)
 
@@ -136,15 +141,15 @@ class DBHumidity(DBHome):
                     dQuery['room'] = "'{}'".format(value)
                 # nEntries
                 elif sKey == "n":
-                    dQuery['query']     = "n"
+                    dQuery['query'] = "n"
                     dQuery['qualifier'] = int(value)
                 # today's entries
                 elif sKey == "today":
-                    dQuery['query']     = "today"
+                    dQuery['query'] = "today"
                     dQuery['qualifier'] = ""
                 # yesterday's entries
                 elif sKey == "yesterday":
-                    dQuery['query']     = "yesterday"
+                    dQuery['query'] = "yesterday"
                     dQuery['qualifier'] = ""
                 # entries for a particular date
                 elif sKey == "date":
@@ -158,12 +163,10 @@ class DBHumidity(DBHome):
                     sDateEnd = value.split(":")[1]
                     self.__verifyDateFormat(sDateEnd)
                     dQuery['query'] = "daterange"
-                    dQuery['qualifier'] = {'start': sDateBeg, 'end':sDateEnd}
-
-
+                    dQuery['qualifier'] = {'start': sDateBeg, 'end': sDateEnd}
         return dQuery
 
-####################################################################################################
+###############################################################################
 
     """ Format retrieved data
         Inputs:
@@ -184,19 +187,21 @@ class DBHumidity(DBHome):
                 room = "{0:8s}".format(reading[2])
                 temp = "{0:11.1f}".format(reading[3])
                 humi = "{0:0.1f}".format(reading[4]) + "%"
-                dataFormatted.append( date + " | " + time + " | " + room + " | " + temp + " | " + humi )
+                sData = "{} | {} | {}".format(date, time, room)
+                sData += " | {} | {}".format(room, temp, humi)
+                dataFormatted.append(sData)
             dataFormatted.append("----------------------------------------------------------")
         else:
             dataFormatted = []
         return dataFormatted
 
-####################################################################################################
-    
+###############################################################################
+
     """Validate data to ensure no bad values are inserted into database
     Inputs:
         dData - dict of data with keys 'humidity' and 'temperature'
     Returns:
-        True if data is valid, false otherwise
+        True if data is valid, False otherwise
     """
     def validateData(self, dData, bDebug=False):
         if dData['humidity'] != -999 and dData['temperature'] != -1766.2:
@@ -204,13 +209,13 @@ class DBHumidity(DBHome):
         return False
 
 
-####################################################################################################
+###############################################################################
 
     """ Insert data into the database
         Inputs:
             dData - dict of data with keys 'temperature' and 'humidity'
         Returns:
-            True if data insertion was successful, false otherwise
+            True if data insertion was successful, False otherwise
     """
     def insertData(self, dData, bDebug=False):
 
@@ -227,15 +232,15 @@ class DBHumidity(DBHome):
                     self.executeCmd(self.dbcmd, 'insert')
                     return True
                 except Exception as E:
-                    print "-E- HomeDB Error: Some exception while trying to insert data into db."
+                    print "-E- HomeDB: Error while inserting data into db."
                     traceback.print_exc()
                     return False
         else:
             if bDebug:
-                print "-e- HomeDB Error: Data invalid - sensor connections may be faulty"
+                print "-e- HomeDB: Data invalid - check sensor connections"
             return False
 
-####################################################################################################
+###############################################################################
 
     """ Verify Date Format for queries
         private function to ensure SQL date queries are valid
@@ -245,37 +250,47 @@ class DBHumidity(DBHome):
             Nothing - raises an exception if format is incorrect
     """
     def __verifyDateFormat(self, sDate):
-        sDateSplit  = sDate.split('-')
-        dDate       = {'year':sDateSplit[0], 'month':sDateSplit[1], 'day':sDateSplit[2]}
+        sDateSplit = sDate.split('-')
+        dDate = {'year': sDateSplit[0],
+                 'month': sDateSplit[1],
+                 'day': sDateSplit[2]}
         if len(dDate['year']) != 4:
-            raise Exception('-E- Date entered incorrectly - check the year, should be 4 digits.\n\tYear: {}'.format(dDate['year']))
+            print "-E- Date entered incorrectly - year should be 4 digits."
+            print "-E- Year: {}".format(dDate['year'])
+            return False
         if len(dDate['month']) != 2:
-            raise Exception('-E- Date entered incorrectly - check the month, should be 2 digits.\n\tMonth: {}'.format(dDate['month']))
+            print "-E- Date entered incorrectly - month should be 2 digits."
+            print "-E- Month: {}".format(dDate['month'])
+            return False
         if len(dDate['day']) != 2:
-            raise Exception('-E- Date entered incorrectly - check the day, should be 2 digits.\n\tDay: {}'.format(dDate['day']))
-        return
+            print "-E- Date entered incorrectly - day should be 2 digits."
+            print "-E- Day: {}".format(dDate['day'])
+            return False
+        return True
 
-####################################################################################################
+###############################################################################
 
     """ Create Google Charts Javascript table
         Inputs:
             None
         Returns:
-            dataFormatted - array of strings formatted for Google Charts Javascript
+            dataFormatted - array of strings formatted for Google Charts
+                Javascript: ['datetime', temperature, humidity]
     """
-    #TODO: Handle formatting when multiple rooms have been requested
+    # TODO: Handle formatting when multiple rooms have been requested
     def formatDataForGoogleCharts(self):
         dataFormatted = ""
         dataFormattedArray = []
         if self.getDataRaw() != []:
             # build all table rows
             for i in reversed(xrange(len(self.getDataRaw()))):
-                reading     = self.getDataRaw()[i]
-                sDateTime   = "{} {}".format(reading[0], reading[1])
-                #sTime       = "{}".format(reading[1])   # time only
-                sTemp       = "{0:0.1f}".format(reading[3])
-                sHumi       = "{0:0.4f}".format(float(reading[4])/100.)
-                dataFormattedArray.append("['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi))
+                reading = self.getDataRaw()[i]
+                sDateTime = "{} {}".format(reading[0], reading[1])
+                # sTime = "{}".format(reading[1])   # time only
+                sTemp = "{0:0.1f}".format(reading[3])
+                sHumi = "{0:0.4f}".format(float(reading[4])/100.)
+                sRow = "['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi)
+                dataFormattedArray.append(sRow)
 
             # remove extra comma from final row
             dataFormattedArray[-1] = dataFormattedArray[-1].replace('],', ']')

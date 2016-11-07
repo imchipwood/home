@@ -10,8 +10,15 @@ sys.path.append('/home/pi/dev/home/lib/sensors')
 from sensor_humidity import SensorHumidity
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-nAvg', '-n', type=int, default=5, help="Number of measurements to average before logging. Optional. Defaults to 5")
-parser.add_argument('-debug', '-d', action="store_true", help="Prevent updates to database, while also printing extra stuff to console. Optional")
+parser.add_argument('-nAvg',
+                    '-n',
+                    type=int,
+                    default=5,
+                    help="# measurements to average. Optional. Default=5")
+parser.add_argument('-debug',
+                    '-d',
+                    action="store_true",
+                    help="Enable debug messages, also disable SQL injection")
 
 args = parser.parse_args()
 global iAvg
@@ -59,7 +66,9 @@ def main():
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
         fHumidity /= float(iAvg)
-        dData = {'temperature':fTemperature, 'humidity':fHumidity}
+        dData = {'temperature': fTemperature,
+                 'humidity': fHumidity
+                 }
         if bDebug:
             print '-d- Final Temperature: {0:0.1f}'.format(dData['temperature'])
             print '-d- Final Humidity:    {0:0.1f}'.format(dData['humidity'])

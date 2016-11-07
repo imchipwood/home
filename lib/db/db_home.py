@@ -1,17 +1,15 @@
-# Home Database
-#
-# Provides basic database connectivity
+""" Home Database
+    Handles general access to database.
+    Child classes must define construction of DB query strings and
+    formatting of data for printing
+"""
 
 import os
 import MySQLdb
 import traceback
 from abc import abstractmethod
 
-""" Home Database
-    Handles general access to database.
-    Child classes must define construction of DB query strings and
-    formatting of data for printing
-"""
+
 class DBHome(object):
     db = ''
     curs = ''
@@ -19,7 +17,13 @@ class DBHome(object):
     dataRaw = []
     dataFormatted = []
 
-    __conf = {'db':'', 'table':'', 'user':'', 'pw':'', 'room':'', 'columns':[]}
+    __conf = {'db': '',
+              'table': '',
+              'user': '',
+              'pw': '',
+              'room': '',
+              'columns': []
+              }
     sConfFile = ''
 
     bDebug = False
@@ -35,19 +39,26 @@ class DBHome(object):
         if os.path.exists(f):
             self.sConfFile = f
         else:
-            raise IOError('-E- HomeDB Error: Please check if the specified DB config file exists: {}'.format(f))
+            print "-E- HomeDB: Check if file exists: {}".format(f)
+            raise IOError()
 
         if self.readConfig():
             # open up database
             try:
-                self.db = MySQLdb.connect('localhost', self.__conf['user'], self.__conf['pw'], self.__conf['db'])
+                self.db = MySQLdb.connect('localhost',
+                                          self.__conf['user'],
+                                          self.__conf['pw'],
+                                          self.__conf['db'])
                 self.curs = self.db.cursor()
             except:
-                raise IOError('-E- HomeDB Error: Failed to open database. Please check config')
+                print "-E- HomeDB Error: Failed to open database"
+                raise IOError
         else:
-            raise IOError('-E- HomeDB Error: Failed to properly parse DB config file: {}'.format(self.sConfFile))
+            print "-E- HomeDB Error: Failed to parse DB config file:"
+            print "\t-E- {}".format(self.sConfFile)
+            raise IOError
 
-####################################################################################################
+###############################################################################
 
     """ Construct a query based on string input
         Inputs:
@@ -58,7 +69,7 @@ class DBHome(object):
     """
     @abstractmethod
     def constructQuery(self, sQuery, bDebug=False):
-        """Build a query based on inputs - Must return the query as a string """
+        """Build a query based on inputs - Must return query as a string """
 
     """ Format retrieved data
         Inputs:
@@ -74,29 +85,29 @@ class DBHome(object):
         Inputs:
             dData - dict of data with keys 'temperature' and 'humidity'
         Returns:
-            True if data insertion was successful, false otherwise
+            True if data insertion was successful, False otherwise
     """
     @abstractmethod
     def insertData(self, dData, bDebug=False):
         """ Insert data into the database """
-        
+
     """ Validate data before inserting into database
         Inputs:
             dData - dict of data with keys 'temperature' and 'humidity'
         Returns:
-            True if data is valid
+            True if data is valid, False otherwise
     """
     @abstractmethod
     def validateData(self, dData, bDebug=False):
         """ Validate data before inserting """
 
-####################################################################################################
+###############################################################################
 
     """ Read config file and get MySQL database info out of it
         Inputs:
             None
         Returns:
-            True if config was parsed properly, false otherwise
+            True if config was parsed properly, False otherwise
     """
     def readConfig(self):
         confTemp = {}
@@ -122,21 +133,28 @@ class DBHome(object):
                 if line[0] == 'c':
                     confTemp['columns'] = line[-1].split(',')
         # check for blanks
-        validConf = not '' in [confTemp['db'], confTemp['table'], confTemp['user'], confTemp['pw']]
+        validConf = '' not in [confTemp['db'],
+                               confTemp['table'],
+                               confTemp['user'],
+                               confTemp['pw']
+                               ]
         if not validConf:
-            print "-E- HomeDB Error: something's up with the db, table, user, or pw fields in your config file"
-        validConf = not '' in confTemp['columns']
+            print "-E- HomeDB Error: Config file parameter error"
+            print "-E- 'db', 'table', 'user', or 'pw'"
+        validConf = '' not in confTemp['columns']
         if not validConf:
-            print "-E- HomeDB Error: something's up with the columns field in your config file"
-        if not 'get' in self.sConfFile.lower():
-            validConf = not '' in [confTemp['room']]
+            print "-E- HomeDB Error: Config file parameter error"
+            print "-E- 'columns'"
+        if 'get' not in self.sConfFile.lower():
+            validConf = '' not in [confTemp['room']]
             if not validConf:
-                print "-E- HomeDB Error: something's up with the room field in your config file"
+                print "-E- HomeDB Error: Config file parameter error"
+                print "-E- 'room'"
         if validConf:
             self.__conf = confTemp
         return validConf
 
-####################################################################################################
+###############################################################################
 
     """ execute a command
         Inputs:
@@ -151,7 +169,7 @@ class DBHome(object):
         if 'select' in t.lower():
             self.dataRaw = self.curs.fetchall()
 
-####################################################################################################
+###############################################################################
 
     """ Wrapper for constructing and executing a query in one go
         Inputs:
@@ -164,7 +182,7 @@ class DBHome(object):
         self.dbcmd = self.constructQuery(sQuery, bDebug)
         self.executeCmd(self.dbcmd, 'select')
 
-####################################################################################################
+###############################################################################
 
     """ Display formatted results in console
         Inputs:
@@ -177,7 +195,7 @@ class DBHome(object):
         for line in self.dataFormatted:
             print line
 
-####################################################################################################
+###############################################################################
 
     """ return raw data array
         Inputs:
@@ -188,7 +206,7 @@ class DBHome(object):
     def getDataRaw(self):
         return self.dataRaw
 
-####################################################################################################
+###############################################################################
 
     """ return formatted data array
         Inputs:

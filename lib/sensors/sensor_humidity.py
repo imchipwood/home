@@ -1,20 +1,22 @@
 import Adafruit_DHT
 from sensor import *
 
+
 class SensorHumidity(Sensor):
     humidity = 0.0
     temperature = 0.0
     validUnits = ['c', 'f']
-    validSensorTypes = { '11'  : Adafruit_DHT.DHT11,
-                         '22'  : Adafruit_DHT.DHT22,
-                         '2302': Adafruit_DHT.AM2302 }
+    validSensorTypes = {'11': Adafruit_DHT.DHT11,
+                        '22': Adafruit_DHT.DHT22,
+                        '2302': Adafruit_DHT.AM2302
+                        }
     sensorType = validSensorTypes.values()[0]
     units = validUnits[0]
     bDebug = False
 
     """ Initialize a Humidity sensor
         Inputs:
-            sensor_type (Integer or String - which kind of DHT. See self.sensorType for valid options)
+            sensor_type (Integer or String - which kind of DHT sensor.)
             pin number (Integer - GPIO pin)
             units (String - Celcius or Fahrenheit)
             debug (Boolean)
@@ -90,11 +92,16 @@ class SensorHumidity(Sensor):
         if units.lower() in self.validUnits:
             self.units = units.lower()
             if self.bDebug:
-                print "-d- SensorHumidity: units set to {}".format(self.getUnits())
+                print "-d- SensorHumidity: units set to %s" % (self.getUnits())
         else:
-            raise SensorException("Valid units: [" +"|".join(self.validUnits) + "]\nYou entered: %s" % (units))
+            sException = "Valid units: [" + "|".join(self.validUnits) + "]"
+            raise SensorException(sException)
 
-    """
+    """Sensor type
+    Inputs:
+        None
+    Returns:
+        self.sensorType as defined in Adafruit_DHT class
     """
     def getSensorType(self):
         return self.sensorType
@@ -109,7 +116,9 @@ class SensorHumidity(Sensor):
         if sensor_type in self.validSensorTypes:
             self.sensorType = self.validSensorTypes[sensor_type]
             if self.bDebug:
-                print "-d- SensorHumidity: sensorType set to {}={}".format(sensor_type, self.sensorType)
+                sType = "sensorType: %s=%s" % (sensor_type, self.sensorType)
+                print "-d- SensorHumidity: %s" % (sType)
         else:
-            raise SensorException("Valid sensor types: [" + "|".join(self.sensorType.keys()) + "]\nYou entered: %s" % (sensor_type))
-
+            sException = "Valid sensor types: ["
+            sException += "|".join(self.sensorType.keys()) + "]"
+            raise SensorException(sException)

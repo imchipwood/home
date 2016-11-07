@@ -1,4 +1,10 @@
+"""Sensor class
+
+Base class for all sensors of home network.
+"""
+
 from abc import abstractmethod
+
 
 class Sensor(object):
     state = False
@@ -6,12 +12,30 @@ class Sensor(object):
     def __init__(self):
         super(Sensor, self).__init__()
 
+    """Enable the sensor
+    Inputs:
+        None
+    Returns:
+        Nothing
+    """
     def enable(self):
         self.state = True
 
+    """Disable the sensor
+    Inputs:
+        None
+    Returns:
+        Nothing
+    """
     def disable(self):
         self.state = False
 
+    """Return state of sensor
+    Inputs:
+        None
+    Returns:
+        self.state - Boolean reflecting sensor status
+    """
     def getState(self):
         return self.state
 
@@ -26,6 +50,7 @@ class Sensor(object):
     @abstractmethod
     def getUnits(self):
         """Return the units this sensor is storing data in"""
+
 
 class SensorException(Exception):
     def __init__(self, message):
