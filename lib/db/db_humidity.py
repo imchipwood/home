@@ -1,11 +1,10 @@
+"""Humidity Database
+
+Contains specifics for database interaction for humidity sensors.
+"""
 
 import traceback
 from db_home import DBHome
-
-""" Humidity Database
-    Contains specifics for database interaction
-    for humidity sensors.
-"""
 
 
 class DBHumidity(DBHome):
@@ -80,37 +79,52 @@ class DBHumidity(DBHome):
                 sRoomQuery = sRoomQuery.replace(" AND", "")
             else:
                 sRoomQuery = ""
-            dbcmd = """SELECT * FROM {0} {1} ORDER
-BY ID DESC LIMIT {2}""".format(self._DBHome__conf['table'],
-                               sRoomQuery,
-                               dQuery['qualifier']
-                               )
+            dbcmd = (
+                "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(
+                    self._DBHome__conf['table'],
+                    sRoomQuery,
+                    dQuery['qualifier']
+                )
+            )
         elif dQuery['query'] == 'today':
-            dbcmd = """SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE()
-AND NOW() ORDER BY ID DESC""".format(self._DBHome__conf['table'],
-                                     sRoomQuery,
-                                     sDateCol
-                                     )
+            dbcmd = (
+                "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() "
+                "ORDER BY ID DESC".format(
+                    self._DBHome__conf['table'],
+                    sRoomQuery,
+                    sDateCol
+                )
+            )
         elif dQuery['query'] == 'yesterday':
-            dbcmd = """SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE()-1
-AND CURRENT_DATE()-1 ORDER BY ID DESC""".format(self._DBHome__conf['table'],
-                                                sRoomQuery,
-                                                sDateCol
-                                                )
+            dbcmd = (
+                "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE()-1 AND "
+                "CURRENT_DATE()-1 ORDER BY ID DESC".format(
+                    self._DBHome__conf['table'],
+                    sRoomQuery,
+                    sDateCol
+                )
+            )
         elif dQuery['query'] == 'date':
-            dbcmd = """SELECT * FROM {0} {1} {2} BETWEEN '{3}'
-AND '{3} 23:59:59' ORDER BY ID DESC""".format(self._DBHome__conf['table'],
-                                              sRoomQuery,
-                                              sDateCol,
-                                              dQuery['qualifier']
-                                              )
+            dbcmd = (
+                "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' "
+                "ORDER BY ID DESC".format(
+                    self._DBHome__conf['table'],
+                    sRoomQuery,
+                    sDateCol,
+                    dQuery['qualifier']
+                )
+            )
         elif dQuery['query'] == 'daterange':
-            dbcmd = """SELECT * FROM {0} {1} {2} BETWEEN '{3}'
-AND '{4} 23:59:59' ORDER BY ID DESC""".format(self._DBHome__conf['table'],
-                                              sRoomQuery,
-                                              sDateCol,
-                                              dQuery['qualifier']['start'],
-                                              dQuery['qualifier']['end'])
+            dbcmd = (
+                "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{4} 23:59:59' "
+                "ORDER BY ID DESC".format(
+                    self._DBHome__conf['table'],
+                    sRoomQuery,
+                    sDateCol,
+                    dQuery['qualifier']['start'],
+                    dQuery['qualifier']['end']
+                )
+            )
         else:
             print "-E- DBHumidity: didn't recognize query type"
         if bDebug:
@@ -158,9 +172,11 @@ AND '{4} 23:59:59' ORDER BY ID DESC""".format(self._DBHome__conf['table'],
                         sKey = "n"
                         value = sArgSplit[0]
                 else:
-                    raise Exception("""-E- Something's up with query args.
-Couldn't split them into a key/value pair\n\tArgs: {0}\n\t
-Failed on: {1}""".format(sQuery, sArg))
+                    sException = ("-E- Something's up with query args. "
+                                  "Couldn't split them into a key/value pair"
+                                  "\n\tArgs: {0}"
+                                  "\n\tFailed on: {1}".format(sQuery, sArg))
+                    raise Exception(sException)
                 if bDebug:
                     print "-d- key, value: ({}, {})".format(sKey, value)
 
@@ -208,13 +224,10 @@ Failed on: {1}""".format(sQuery, sArg))
     def formatResults(self):
         if self.getDataRaw() != []:
             dataFormatted = []
-            sSeparator = "----------------------------"
-            sSeparator += "----------------------------"
-            sHeader = "Date       | "
-            sHeader += "Time     | "
-            sHeader += "Room     | "
-            sHeader += "Temperature | "
-            sHeader += "Humidity"
+            sSeparator = ("----------------------------"
+                          "----------------------------")
+            sHeader = ("Date       | Time     | Room     | Temperature | "
+                       "Humidity")
             dataFormatted.append(sSeparator)
             dataFormatted.append(sHeader)
             dataFormatted.append(sSeparator)
@@ -262,13 +275,30 @@ Failed on: {1}""".format(sQuery, sArg))
 
         if self.validateData(dData, bDebug):
             sColumns = ', '.join(self._DBHome__conf['columns'])
-            self.dbcmd = """INSERT INTO {0} ({1}) values(CURRENT_DATE(),
-NOW(), '{2}', {3:0.1f}, {4:0.1f})""".format(self._DBHome__conf['table'],
-                                            sColumns,
-                                            self._DBHome__conf['room'],
-                                            dData['temperature'],
-                                            dData['humidity']
-                                            )
+#            sSQLTable = "INSERT INTO {0} ".format(self._DBHome__conf['table'])
+#            sSQLColumns = "({0}) ".format(sColumns)
+#            sSQLData = "values(CURRENT_DATE(), NOW(), "
+#            sSQLData += "'{0}', ".format(self._DBHome__conf['room'])
+#            sSQLData += "{0:0.1f}, {1:0.1f})".format(dData['temperature'],
+#                                                     dData['humidity'])
+#            self.dbcmd = sSQLTable + sSQLColumns + sSQLData
+            # god I hate long strings
+            self.dbcmd = (
+                "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', "
+                "{3:0.1f}, {4:0.1f})".format(self._DBHome__conf['table'],
+                                             sColumns,
+                                             self._DBHome__conf['room'],
+                                             dData['temperature'],
+                                             dData['humidity'])
+            )
+
+#            self.dbcmd = """INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(),
+# '{2}', {3:0.1f}, {4:0.1f})""".format(self._DBHome__conf['table'],
+#                                            sColumns,
+#                                            self._DBHome__conf['room'],
+#                                            dData['temperature'],
+#                                            dData['humidity']
+#                                            )
             if bDebug:
                 print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
             else:

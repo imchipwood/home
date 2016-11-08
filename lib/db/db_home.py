@@ -1,7 +1,8 @@
-""" Home Database
-    Handles general access to database.
-    Child classes must define construction of DB query strings and
-    formatting of data for printing
+"""Home Database
+
+Handles general access to database.
+Child classes must define construction of DB query strings and
+formatting of data for printing
 """
 
 import os
