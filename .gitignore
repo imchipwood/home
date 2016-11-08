@@ -1,5 +1,6 @@
-conf/
+conf/*
 *.pyc
 */*.pyc
 */*/*.pyc
 */*/*/*.pyc
+*/cpw*
