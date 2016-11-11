@@ -1,5 +1,4 @@
 import subprocess
-WLAN_check_flg = False
 
 
 def WLAN_check():
@@ -7,12 +6,18 @@ def WLAN_check():
     This function checks if the WLAN is still up by pinging the router.
     If there is no return, we'll reset the WLAN connection.
     If the resetting of the WLAN does not work, we need to reset the Pi.
-
     '''
 
+    flag = False
+    for i in xrange(0, 2):
+        loop(flag)
+    return flag
+
+
+def loop(WLAN_check_flg):
     ping_cmd = (
-        'ping -c 2 -w 1 -q 192.168.1.1 |grep "1 received" >'
-        ' /dev/null 2> /dev/null'
+        'ping -c 2 -w 1 -q 192.168.1.1 | grep "1 received" > '
+        '/dev/null 2> /dev/null'
     )
     ping_ret = subprocess.call([ping_cmd],
                                shell=True)
@@ -37,6 +42,8 @@ def WLAN_check():
                             shell=True)
     else:
         WLAN_check_flg = False
+
+    return WLAN_check_flg
 
 if __name__ == "__main__":
     WLAN_check()
