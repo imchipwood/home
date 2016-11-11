@@ -255,7 +255,7 @@ class DBHumidity(DBHome):
         True if data is valid, False otherwise
     """
     def validateData(self, dData, bDebug=False):
-        if dData['humidity'] != -999 and dData['temperature'] != -1766.2:
+        if 0 < dData['humidity'] < 100 and -100 < dData['temperature'] < 200:
             return True
         return False
 
