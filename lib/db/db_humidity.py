@@ -255,7 +255,7 @@ class DBHumidity(DBHome):
         True if data is valid, False otherwise
     """
     def validateData(self, dData, bDebug=False):
-        if 0 < dData['humidity'] < 100 and -100 < dData['temperature'] < 200:
+        if 0 <= dData['humidity'] <= 100 and -100 <= dData['temperature'] <= 200:
             return True
         return False
 
@@ -275,14 +275,7 @@ class DBHumidity(DBHome):
 
         if self.validateData(dData, bDebug):
             sColumns = ', '.join(self._DBHome__conf['columns'])
-#            sSQLTable = "INSERT INTO {0} ".format(self._DBHome__conf['table'])
-#            sSQLColumns = "({0}) ".format(sColumns)
-#            sSQLData = "values(CURRENT_DATE(), NOW(), "
-#            sSQLData += "'{0}', ".format(self._DBHome__conf['room'])
-#            sSQLData += "{0:0.1f}, {1:0.1f})".format(dData['temperature'],
-#                                                     dData['humidity'])
-#            self.dbcmd = sSQLTable + sSQLColumns + sSQLData
-            # god I hate long strings
+            # I hate long strings
             self.dbcmd = (
                 "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', "
                 "{3:0.1f}, {4:0.1f})".format(self._DBHome__conf['table'],
@@ -291,14 +284,6 @@ class DBHumidity(DBHome):
                                              dData['temperature'],
                                              dData['humidity'])
             )
-
-#            self.dbcmd = """INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(),
-# '{2}', {3:0.1f}, {4:0.1f})""".format(self._DBHome__conf['table'],
-#                                            sColumns,
-#                                            self._DBHome__conf['room'],
-#                                            dData['temperature'],
-#                                            dData['humidity']
-#                                            )
             if bDebug:
                 print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
             else:
