@@ -1,3 +1,6 @@
+import subprocess
+WLAN_check_flg = False
+
 def WLAN_check():
     '''
     This function checks if the WLAN is still up by pinging the router.
@@ -22,3 +25,6 @@ def WLAN_check():
             subprocess.call(['sudo /sbin/ifdown wlan0 && sleep 10 && sudo /sbin/ifup --force wlan0'], shell=True)
     else:
         WLAN_check_flg = False
+
+if __name__ == "__main__":
+    WLAN_check()
