@@ -31,7 +31,6 @@ class DBHumidity(DBHome):
             SQL command as a string
     """
     def constructQuery(self, sQ, bDebug=False):
-
         if self.bDebug:
             bDebug = True
 
@@ -129,7 +128,6 @@ class DBHumidity(DBHome):
             print "-E- DBHumidity: didn't recognize query type"
         if bDebug:
             print "-d- MySQL command:\n-d- %s" % (dbcmd)
-
         return dbcmd
 
 ###############################################################################
@@ -137,7 +135,6 @@ class DBHumidity(DBHome):
     """ Deconstruct the input args into a dictionary of options
     """
     def parseInputs(self, bDebug=False):
-
         if self.bDebug:
             bDebug = True
 
@@ -254,7 +251,7 @@ class DBHumidity(DBHome):
     Returns:
         True if data is valid, False otherwise
     """
-    def validateData(self, dData, bDebug=False):
+    def __validateData(self, dData, bDebug=False):
         if 0 <= dData['humidity'] <= 100 and -100 <= dData['temperature'] <= 200:
             return True
         return False
@@ -269,11 +266,10 @@ class DBHumidity(DBHome):
             True if data insertion was successful, False otherwise
     """
     def insertData(self, dData, bDebug=False):
-
         if self.bDebug:
             bDebug = True
 
-        if self.validateData(dData, bDebug):
+        if self.__validateData(dData, bDebug):
             sColumns = ', '.join(self._DBHome__conf['columns'])
             # I hate long strings
             self.dbcmd = (
@@ -313,19 +309,20 @@ class DBHumidity(DBHome):
         dDate = {'year': sDateSplit[0],
                  'month': sDateSplit[1],
                  'day': sDateSplit[2]}
+        valid = True
         if len(dDate['year']) != 4:
-            print "-E- Date entered incorrectly - year should be 4 digits."
-            print "-E- Year: {}".format(dDate['year'])
-            return False
+            print ("-E- Date entered incorrectly - year should be 4 digits. "
+                   "Year: {}".format(dDate['year']))
+            valid = False
         if len(dDate['month']) != 2:
-            print "-E- Date entered incorrectly - month should be 2 digits."
-            print "-E- Month: {}".format(dDate['month'])
-            return False
+            print ("-E- Date entered incorrectly - month should be 2 digits. "
+                   "Month: {}".format(dDate['month']))
+            valid = False
         if len(dDate['day']) != 2:
-            print "-E- Date entered incorrectly - day should be 2 digits."
-            print "-E- Day: {}".format(dDate['day'])
-            return False
-        return True
+            print ("-E- Date entered incorrectly - day should be 2 digits. "
+                   "Day: {}".format(dDate['day']))
+            valid = False
+        return valid
 
 ###############################################################################
 
@@ -356,5 +353,4 @@ class DBHumidity(DBHome):
             # convert array into string
             for line in dataFormattedArray:
                     dataFormatted += line
-
         return dataFormatted
