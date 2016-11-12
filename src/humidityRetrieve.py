@@ -4,9 +4,8 @@ import os
 import argparse
 import traceback
 
-os.path.dirname(os.path.realpath(__file__))+"../lib/db"
 #sys.path.append('/home/pi/dev/home/lib/db')
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"../lib/db")
+sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
 from db_humidity import DBHumidity
 
 parser = argparse.ArgumentParser()

@@ -5,11 +5,10 @@ import argparse
 import traceback
 
 #sys.path.append('/home/pi/dev/home/lib/db')
-print os.path.dirname(os.path.realpath(__file__))+"../lib/db"
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"../lib/db")
+sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
 from db_humidity import DBHumidity
 #sys.path.append('/home/pi/dev/home/lib/sensors')
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"../lib/sensors")
+sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/sensors")
 from sensor_humidity import SensorHumidity
 
 parser = argparse.ArgumentParser()
