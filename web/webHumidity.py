@@ -6,7 +6,7 @@ import os
 import argparse
 import traceback
 import sys
-sys.path.append('/home/pi/dev/home/lib/db')
+sys.path.append('/home/cpw/dev/home/lib/db')
 from db_humidity import DBHumidity
 
 parser = argparse.ArgumentParser()
