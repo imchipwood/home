@@ -4,7 +4,6 @@ import os
 import argparse
 import traceback
 
-#sys.path.append('/home/pi/dev/home/lib/db')
 sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
 from db_humidity import DBHumidity
 
@@ -34,7 +33,7 @@ def main():
     global bDebug
 
     # user-defined args
-    sDBAccessFileName = 'sqlget.txt'
+    sDBAccessFileName = 'sql_humidity_get.txt'
 
     # set up db
     sDBCredentialsFile = os.path.dirname(os.path.realpath(__file__))
