@@ -75,12 +75,18 @@ def printChartCode(table, sRooms):
 
         var options = {
           title: 'Temperature/Humidity measurements for last 24 hours%s',
-          hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 8,
-                   slantedText: true, slantedTextAngle: 90
+          hAxis: { title: 'Date',
+                   titleTextStyle: {color: 'blue'},
+                   showTextEvery: 8,
+                   slantedText: true,
+                   slantedTextAngle: 45
           },
           vAxes: {
-                  0: { title: 'Temperature in F', titleTextStyle: {color: 'red'} },
-                  1: { title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
+                  0: { title: 'Temperature in F',
+                       titleTextStyle: {color: 'red'} },
+                  1: { title: '%% Humidity',
+                       titleTextStyle: {color: 'blue'},
+                       format:"#%%" }
           },
           colors: ['red', 'blue'],
           series: { 0: {targetAxisIndex:0},
