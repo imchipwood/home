@@ -76,16 +76,20 @@ def printChartCode(table, sRooms):
         var options = {
           title: 'Temperature/Humidity measurements for last 24 hours%s',
           hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 8,
-                   slantedText: true, slantedTextAngle: 90
-                 },
+                   slantedText: true, slantedTextAngle: 90,
+                   chartArea: {
+                      top: 55,
+                      height: '40%' 
+                   }
+          },
           vAxes: {
                   0: { title: 'Temperature in F', titleTextStyle: {color: 'red'} },
                   1: { title: '%% Humidity', titleTextStyle: {color: 'blue'}, format:"#%%" }
-                 },
+          },
           colors: ['red', 'blue'],
           series: { 0: {targetAxisIndex:0},
                     1: {targetAxisIndex:1}
-                  }
+          }
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
