@@ -1,18 +1,19 @@
-"""Sensor class
-
-Base class for all sensors of home network.
-"""
-
 from abc import abstractmethod
 
 
 class Sensor(object):
+    """Sensor class
+
+    Base class for all sensors of home network.
+    """
     state = False
 
     def __init__(self):
         super(Sensor, self).__init__()
+        self.enable()
 
-    """Enable the sensor
+    """Enable sensor
+
     Inputs:
         None
     Returns:
@@ -21,7 +22,8 @@ class Sensor(object):
     def enable(self):
         self.state = True
 
-    """Disable the sensor
+    """Disable sensor
+
     Inputs:
         None
     Returns:
@@ -31,6 +33,7 @@ class Sensor(object):
         self.state = False
 
     """Return state of sensor
+
     Inputs:
         None
     Returns:
@@ -53,5 +56,9 @@ class Sensor(object):
 
 
 class SensorException(Exception):
+    """Sensor Exception class
+
+    Shell for throwing exceptions specific to sensor usage
+    """
     def __init__(self, message):
         super(SensorException, self).__init__(message)
