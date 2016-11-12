@@ -342,10 +342,10 @@ class DBHumidity(DBHome):
             for i in reversed(xrange(len(self.getDataRaw()))):
                 reading = self.getDataRaw()[i]
                 sDateTime = "{} {}".format(reading[0], reading[1])
-                # sTime = "{}".format(reading[1])   # time only
+                sTime = "{}".format(reading[1])   # time only
                 sTemp = "{0:0.1f}".format(reading[3])
                 sHumi = "{0:0.4f}".format(float(reading[4])/100.)
-                sRow = "['{0}', {1}, {2}],\n".format(sDateTime, sTemp, sHumi)
+                sRow = "['{0}', {1}, {2}],\n".format(sTime, sTemp, sHumi)
                 dataFormattedArray.append(sRow)
 
             # remove extra comma from final row
