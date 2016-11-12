@@ -6,7 +6,8 @@ import os
 import argparse
 import traceback
 import sys
-sys.path.append('/home/cpw/dev/home/lib/db')
+sHomePath = "/home/cpw/dev/home"
+sys.path.append(sHomePath+"/lib/db")
 from db_humidity import DBHumidity
 
 parser = argparse.ArgumentParser()
@@ -102,14 +103,15 @@ def printChartCode(table, sRooms):
 
 def main():
     global sRoom
+    global sHomePath
     # enable tracebacks of exceptions
     cgitb.enable()
 
     # user-defined args
-    sDBAccessFileName = 'sqlget.txt'
+    sDBAccessFileName = 'sql_humidity_get.txt'
 
     # set up db
-    sDBCredentialsFile = "/home/pi/dev/home/conf/" + sDBAccessFileName
+    sDBCredentialsFile = sHomePath+"/conf/"+sDBAccessFileName
     hdb = DBHumidity(sDBCredentialsFile, bDebug=False)
 
     printHTTPheader()
