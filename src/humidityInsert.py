@@ -35,7 +35,8 @@ def main():
     sDBAccessFileName = 'sql_humidity_media.txt'
 
     # set up db
-    sDBCredentialsFile = os.path.dirname(os.path.realpath(__file__))+'/../conf/'+sDBAccessFileName
+    sHomeDBPath = "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1])
+    sDBCredentialsFile = sHomeDBPath+'/conf/'+sDBAccessFileName
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
