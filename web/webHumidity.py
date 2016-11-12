@@ -74,10 +74,6 @@ def printChartCode(table, sRooms):
 %s ]);
 
         var options = {
-          chartArea: {
-             top: 55,
-             height: '40%' 
-          },
           title: 'Temperature/Humidity measurements for last 24 hours%s',
           hAxis: { title: 'Date', titleTextStyle: {color: 'blue'}, showTextEvery: 8,
                    slantedText: true, slantedTextAngle: 90
