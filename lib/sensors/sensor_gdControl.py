@@ -19,7 +19,7 @@ class GarageDoorController(Sensor):
         Nothing
     """
     def __init__(self, pin, debug=False):
-        super(GarageDoorOpener, self).__init__()
+        super(GarageDoorController, self).__init__()
         self.bDebug = debug
         # set up pins
         self.pin = pin

@@ -44,7 +44,7 @@ class GarageDoorMonitor(Sensor):
         Nothing
     """
     def __init__(self, sensorTypes, pins, debug=False):
-        super(GarageDoorDetector, self).__init__()
+        super(GarageDoorMonitor, self).__init__()
         self.bDebug = debug
 
         # determine sensor type
