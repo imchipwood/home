@@ -4,7 +4,6 @@ import RPi.GPIO as GPIO
 from sensor import Sensor, SensorException
 
 
-
 class GarageDoorDetector(Sensor):
     """Garage Door Detector Class
 
@@ -54,12 +53,12 @@ class GarageDoorDetector(Sensor):
 
         # initialize all GPIO
         self.initGPIO(pins)
-        
+
         # read limit switches to initialize states
         self.readLimitSwitches()
 
     """Initialize GPIO
-    
+
     Inputs:
         None
     Returns:
@@ -72,10 +71,20 @@ class GarageDoorDetector(Sensor):
         if self.sensorType["limit"]:
             self.pins["limit"]["closed"] = pins["limitClosed"]
             self.pins["limit"]["open"] = pins["limitOpen"]
-            
+
             GPIO.setup(self.pins["limit"]["closed"], GPIO.IN)
             GPIO.setup(self.pins["limit"]["open"], GPIO.IN)
         return
+
+    """Clean up GPIO
+
+    Inputs:
+        None
+    Returns:
+        Nothing
+    """
+    def cleanup(self):
+        GPIO.cleanup()
 
     """Take readings
 
@@ -183,7 +192,7 @@ class GarageDoorDetector(Sensor):
     def getUnits(self):
         return
 
-    """Update temperature units
+    """Update sensor units
 
     Inputs:
         units - whatever you want, it's unused

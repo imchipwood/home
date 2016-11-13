@@ -85,7 +85,10 @@ class GarageDoorOpener(Sensor):
         True if GPIO pin state matches internal state boolean, false otherwise
     """
     def checkState(self):
-        return GPIO.input(self.pin) != self.state
+        GPIO.setup(self.pin, GPIO.IN)
+        state = GPIO.input(self.pin) != self.state
+        GPIO.setup(self.pin, GPIO.OUT)
+        return state
 
     """Toggle the relay
 
