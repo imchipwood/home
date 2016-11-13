@@ -1,5 +1,8 @@
+from numpy import interp
 import Adafruit_DHT
+import RPi.GPIO as GPIO
 from sensor import Sensor, SensorException
+
 
 
 class GarageDoorDetector(Sensor):
@@ -12,11 +15,7 @@ class GarageDoorDetector(Sensor):
     1. Rotary Encoder (attached to motor, detect rotations)
     2. Limit switch(es) - top and bottom to detect only fully open and closed
     """
-    # bogus sensor types for now
-    validSensorTypes = {
-        "rotary": "rotary",
-        "limit": "limit"
-    }
+    validSensorTypes = ["rotary", "limit"]
     sensorType = {
         "rotary": False,
         "limit": False
@@ -25,13 +24,22 @@ class GarageDoorDetector(Sensor):
         "rotary": "",
         "limit": {}
     }
+    limitStates = {
+        "low": False,
+        "high": False
+    }
+    rotaryCount = 0
+    rotaryLimits = {
+        "closed": 0,
+        "open": 100
+    }
     bDebug = False
 
     """Initialize a Humidity sensor
 
     Inputs:
         sensor_type (Integer or String - which kind of DHT sensor.)
-        pin number (Integer - GPIO pin)
+        pins - dict with keys "rotary", "limitClosed", and "limitOpen"
         units (String - Celcius or Fahrenheit)
         debug (Boolean)
     Returns:
@@ -40,16 +48,39 @@ class GarageDoorDetector(Sensor):
     def __init__(self, sensorTypes, pins, debug=False):
         super(GarageDoorDetector, self).__init__()
         self.bDebug = debug
+
         # determine sensor type
         self.setSensorType(sensorTypes)
-        # based on sensor type, set pins
-        if self.sensorType["rotary"]:
-            self.pins["rotary"] = int(pins)
-        if self.sensorType["limit"]:
-            self.pins["limit"]["low"] = pins['low']
-            self.pins["limit"]["high"] = pins['high']
 
-    """Take readings based on sensorType
+        # initialize all GPIO
+        self.initGPIO(pins)
+        
+        # read limit switches to initialize states
+        self.readLimitSwitches()
+
+    """Initialize GPIO
+    
+    Inputs:
+        None
+    Returns:
+        Nothing
+    """
+    def initGPIO(self, pins):
+        GPIO.setmode(GPIO.BCM)
+        if self.sensorType["rotary"]:
+            self.pins["rotary"] = int(pins["rotary"])
+        if self.sensorType["limit"]:
+            self.pins["limit"]["closed"] = pins["limitClosed"]
+            self.pins["limit"]["open"] = pins["limitOpen"]
+            
+            GPIO.setup(self.pins["limit"]["closed"], GPIO.IN)
+            GPIO.setup(self.pins["limit"]["open"], GPIO.IN)
+        return
+
+    """Take readings
+
+    If limit switches are enabled, it also calls the rotary calibration
+    function to ensure the rotary limits are set up properly
 
     Inputs:
         None
@@ -57,6 +88,11 @@ class GarageDoorDetector(Sensor):
         Nothing
     """
     def read(self):
+        if sensorType["rotary"]:
+            self.readRotaryEncoder()
+        if sensorType["limit"]:
+            self.readLimitSwitches()
+            self.updateRotaryCalibration()
         return
 
     """Read Rotary Encoder
@@ -75,18 +111,74 @@ class GarageDoorDetector(Sensor):
     Inputs:
         None
     Returns:
-        dict with 'low' and 'high' keys representing state of limit switches
+        Nothing
     """
     def readLimitSwitches(self):
-        # read pins["limit"]["low"] and pins["limit"]["high"]
+        self.limitStates["closed"] = GPIO.input(self.pins["limit"]["closed"])
+        self.limitStates["open"] = GPIO.input(self.pins["limit"]["open"])
         return
+
+    """Determine state of garage door
+
+    Inputs:
+        None
+    Returns:
+        integer between 0-100 representing % door is open
+    """
+    def getDoorState(self):
+        doorState = 0
+        limitState = False
+        # priority is given to limit switches
+        # if a limit switch is ON, the door is either fully open or closed
+        # don't bother using the rotary encoder in this case
+        if self.sensorType["limit"]:
+            if self.limitStates["closed"] and self.limitStates["open"]:
+                return -999
+            elif self.limitStates["closed"] or self.limitStates["open"]:
+                limitState = True
+                doorState = 0 if limitStates["closed"] else 100
+        # only check rotary encoder if enabled and neither limit switch was ON
+        if self.sensorType["rotary"] and not limitState:
+            doorState = int(interp(rotaryCount,
+                                   [rotaryLimits["closed"],
+                                    rotaryLimits["open"]],
+                                   [0, 100]
+                                   )
+                            )
+        return doorState
+
+    """On the fly rotary calibration
+
+    When a limit switch is triggered, this means the door is either fully
+    closed or fully open. We can use this info to make sure the rotary
+    encoder count limits are up to date.
+
+    If CLOSED limit switch is True, can reset the rotary count to 0
+    If OPEN limit switch is True, the current rotary count is
+        the maximum limit. Update the maximum limit.
+
+    Inputs:
+        None
+    Returns:
+        True if no issues, False otherwise
+    """
+    def updateRotaryCalibration(self):
+        if sensorType["rotary"]:
+            if self.limitStates["closed"] and self.limitStates["open"]:
+                return False
+            elif self.limitStates["closed"]:
+                # rotaryLimits["closed"] = rotaryCount
+                rotaryCount = 0
+            elif self.limitStates["open"]:
+                rotaryLimits["open"] = rotaryCount
+        return True
 
     """Get current units - not relevant for garage door detector
 
     Inputs:
         None
     Returns:
-        None
+        Nothing
     """
     def getUnits(self):
         return
@@ -96,7 +188,7 @@ class GarageDoorDetector(Sensor):
     Inputs:
         units - whatever you want, it's unused
     Returns:
-        None
+        Nothing
     """
     def setUnits(self, units):
         return
@@ -113,9 +205,9 @@ class GarageDoorDetector(Sensor):
             if sensorType in self.validSensorTypes:
                 self.sensorType[sensorType] = True
                 if self.bDebug:
-                    sType = "sensorType: %s=%s" % (sensorType, self.sensorType)
-                    print "-d- SensorGarageDoorDetector: %s" % (sType)
+                    sType = "sensorType: %s" % (sensorType)
+                    print "-d- SensorGarageDoorDetector: Enablign %s" % (sType)
             else:
                 sException = "Valid sensor types: ["
-                sException += "|".join(self.validSensorTypes.keys()) + "]"
+                sException += "|".join(self.validSensorTypes) + "]"
                 raise SensorException(sException)

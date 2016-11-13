@@ -7,7 +7,7 @@ class GarageDoorOpener(Sensor):
     """Garage Door Opener Class
 
     This class houses all functions required to set up and use
-    a relay to control a garage door motor
+    a relay to control a garage door motor.
     """
     bDebug = False
 
@@ -22,9 +22,10 @@ class GarageDoorOpener(Sensor):
     def __init__(self, pin, debug=False):
         super(GarageDoorOpener, self).__init__()
         self.bDebug = debug
-        # pin
+        # set up pins
         self.pin = pin
         GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.pin, GPIO.OUT)
 
     """Take readings
 
