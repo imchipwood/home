@@ -1,5 +1,6 @@
 from sensor import Sensor, SensorException
 import RPi.GPIO as GPIO
+import time
 
 
 class GarageDoorController(Sensor):
@@ -9,7 +10,6 @@ class GarageDoorController(Sensor):
     a relay to control a garage door motor.
     """
     bDebug = False
-    bRelay = False
 
     """Initialize a Garage Door Opener
 
@@ -36,7 +36,6 @@ class GarageDoorController(Sensor):
     """
     def cleanup(self):
         GPIO.cleanup()
-        self.bRelay = False
 
     """Take readings
 
@@ -77,7 +76,6 @@ class GarageDoorController(Sensor):
     """
     def on(self):
         GPIO.output(self.pin, GPIO.HIGH)
-        self.bRelay = True
 
     """'off' relay
 
@@ -88,20 +86,16 @@ class GarageDoorController(Sensor):
     """
     def off(self):
         GPIO.output(self.pin, GPIO.LOW)
-        self.bRelay = False
 
     """Check the state of the relay
 
     Inputs:
         None
     Returns:
-        True if GPIO pin state matches internal state boolean, false otherwise
+        True if GPIO pin set HIGH, False otherwise
     """
     def checkRelay(self):
-        #GPIO.setup(self.pin, GPIO.IN)
-        bState = GPIO.input(self.pin) == self.bRelay
-        #GPIO.setup(self.pin, GPIO.OUT)
-        return bState
+        return GPIO.input(self.pin)
 
     """Toggle the relay
 
