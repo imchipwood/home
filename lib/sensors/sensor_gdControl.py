@@ -3,8 +3,8 @@ from sensor import Sensor, SensorException
 import RPi.GPIO as GPIO
 
 
-class GarageDoorOpener(Sensor):
-    """Garage Door Opener Class
+class GarageDoorController(Sensor):
+    """Garage Door Controller Class
 
     This class houses all functions required to set up and use
     a relay to control a garage door motor.
@@ -26,6 +26,16 @@ class GarageDoorOpener(Sensor):
         self.pin = pin
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
+
+    """Clean up GPIO
+
+    Inputs:
+        None
+    Returns:
+        Nothing
+    """
+    def cleanup(self):
+        GPIO.cleanup()
 
     """Take readings
 

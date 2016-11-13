@@ -4,8 +4,8 @@ import RPi.GPIO as GPIO
 from sensor import Sensor, SensorException
 
 
-class GarageDoorDetector(Sensor):
-    """Garage Door Detector Class
+class GarageDoorMonitor(Sensor):
+    """Garage Door Monitor Class
 
     This class houses all functions required monitor the state
     of a garage door.
