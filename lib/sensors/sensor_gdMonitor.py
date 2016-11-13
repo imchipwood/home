@@ -1,5 +1,4 @@
 from numpy import interp
-import Adafruit_DHT
 import RPi.GPIO as GPIO
 from sensor import Sensor, SensorException
 

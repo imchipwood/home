@@ -1,4 +1,3 @@
-import Adafruit_DHT
 from sensor import Sensor, SensorException
 import RPi.GPIO as GPIO
 
