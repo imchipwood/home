@@ -50,31 +50,10 @@ class GarageDoorMonitor(Sensor):
         self.bDebug = debug
 
         # determine sensor type
-        self.setSensorType(sensors)
-
-        # initialize all GPIO
-        self.initGPIO(sensors)
+        self.enableSensors(sensors)
 
         # read limit switches to initialize states
         self.readLimitSwitches()
-
-    """Initialize GPIO
-
-    Inputs:
-        None
-    Returns:
-        Nothing
-    """
-    def initGPIO(self, sensors):
-        GPIO.setmode(GPIO.BCM)
-        for sensor in sensors:
-            if sensors[sensor] is not None:
-                self.pins[sensor] = int(sensors[sensor])
-                GPIO.setup(self.pins[sensor], GPIO.IN)
-                if self.bDebug:
-                    print "-d- gdMonitor: setting up pin {}: {}".format(sensor,
-                                                             self.pins[sensor])
-        return
 
     """Clean up GPIO
 
@@ -184,17 +163,17 @@ class GarageDoorMonitor(Sensor):
     def updateRotaryCalibration(self):
         if self.sensorType["rotary"]:
             if self.bDebug:
-                print "-d- gdMonitor: rotary calibration"
+                print "-d- gdMonitor: rotary calib"
             if self.limitStates["open"] and self.limitStates["closed"]:
                 return False
             elif self.limitStates["open"]:
                 if self.bDebug:
-                    print "-d- gdMonitor: rotary calibration - new 'open' limit"
+                    print "-d- gdMonitor: rotary calib - new 'open' limit"
                 rotaryLimits["open"] = self.rotaryCount
             elif self.limitStates["closed"]:
                 self.rotaryCount = 0
                 if self.bDebug:
-                    print "-d- gdMonitor: rotary calibration - reset counter"
+                    print "-d- gdMonitor: rotary calib - reset counter"
         return True
 
     """Get current units - not relevant for garage door detector
@@ -217,19 +196,24 @@ class GarageDoorMonitor(Sensor):
     def setUnits(self, units):
         return
 
-    """Set sensor type
+    """Enable sensors
+
+    Sets up GPIO pins for all sensors
 
     Inputs:
-        sensorTypes - array of sensorTypes to enable
+        sensors - dict of sensors to enable
     Returns:
         Nothing, but does throw exception if it fails
     """
-    def setSensorType(self, sensors):
+    def enableSensors(self, sensors):
         for sensor in sensors:
             if sensors[sensor] is not None and sensors[sensor] != "":
                 self.sensorType[sensor] = True
+                self.pins[sensor] = int(sensors[sensor])
+                GPIO.setup(self.pins[sensor], GPIO.IN)
                 if self.bDebug:
-                    print "-d- gdMonitor: Enabling %s" % (sensor)
+                    print "-d- gdMonitor: {}: pin {}".format(sensor,
+                                                             self.pins[sensor])
             else:
                 sException = "Valid sensor types: ["
                 sException += "|".join(self.validSensorTypes) + "]"
