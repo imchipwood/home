@@ -98,10 +98,12 @@ def monitor(m):
                 m.read()
                 if bDebug:
                     print "-d- gd: state: {}".format(m.getDoorState())
-            except:
+            except Exception as e:
                 if bDebug:
                     print "-d- gd: monitor thread exception"
-                pass
+                traceback.print_exc()
+                endThread = True
+                raise
     return
 
 
