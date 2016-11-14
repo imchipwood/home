@@ -84,6 +84,11 @@ def main():
     # set up the sensor
     if bDebug:
         print "-d- gd: Setting up Garage Door Controller"
+        # print pin #s
+        print "-d- gd: pinRelay:       {}".format(nPinRelay)
+        print "-d- gd: pinRotary:      {}".format(nPinRotary)
+        print "-d- gd: pinLimitOpen:   {}".format(nPinLimitOpen)
+        print "-d- gd: pinLimitClosed: {}".format(nPinLimitClosed)
     gdc = Relay(nPinRelay)
     gdm = GarageDoorMonitor(
         {'rotary': nPinRotary,
@@ -92,12 +97,6 @@ def main():
         bDebug)
 
     try:
-        # print pin #s for debug
-        if bDebug:
-            print "-d- gd: pinRelay:       {}".format(nPinRelay)
-            print "-d- gd: pinRotary:      {}".format(nPinRotary)
-            print "-d- gd: pinLimitOpen:   {}".format(nPinLimitOpen)
-            print "-d- gd: pinLimitClosed: {}".format(nPinLimitClosed)
         
         # begin monitor thread
         monitorThread = threading.Thread(target=monitor, args=[gdm])
