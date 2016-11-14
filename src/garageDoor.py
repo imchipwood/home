@@ -82,7 +82,7 @@ def main():
         endThreads = True
         gdc.cleanup()
         gdm.cleanup()
-    return True
+    return
 
 
 
@@ -97,6 +97,10 @@ def monitor(m):
             lasttenhztime = now
             try:
                 m.read()
+                print m.getDoorState()
+            except:
+                pass
+    return
             
             
 

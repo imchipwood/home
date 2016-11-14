@@ -146,7 +146,7 @@ class GarageDoorMonitor(Sensor):
         # priority is given to limit switches
         # if a limit switch is ON, the door is either fully open or closed
         # don't bother using the rotary encoder in this case
-        if self.sensorType["limit"]:
+        if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
             # check for error state
             if self.limitStates["open"] and self.limitStates["closed"]:
                 return -999
