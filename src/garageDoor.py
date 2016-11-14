@@ -96,6 +96,7 @@ def monitor(m):
     #lasttenhztime = 0
     while not endThreads:
         now = float(timeit.default_timer())
+        print now
         if (now - lastonehztime) > onehz:
             lastonehztime = now
             if bDebug:
