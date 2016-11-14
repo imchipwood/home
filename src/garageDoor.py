@@ -29,12 +29,12 @@ from sensor_gdMonitor import GarageDoorMonitor
 # argument parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('-pinrelay',
-                    'pr',
+                    '-pr',
                     type=int,
                     default=None,
                     help="Pin # for relay")
 parser.add_argument('-pinrotary',
-                    'pro',
+                    '-pro',
                     type=int,
                     default=None,
                     help="Pin # for rotary sensor")
