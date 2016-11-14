@@ -98,9 +98,9 @@ class GarageDoorMonitor(Sensor):
         Nothing
     """
     def read(self):
-        if sensorType["rotary"]:
+        if self.sensorType["rotary"]:
             self.readRotaryEncoder()
-        if sensorType["limitOpen"] or sensorType["limitClosed"]:
+        if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
             self.readLimitSwitches()
             self.updateRotaryCalibration()
         return
@@ -182,7 +182,7 @@ class GarageDoorMonitor(Sensor):
         True if no issues, False otherwise
     """
     def updateRotaryCalibration(self):
-        if sensorType["rotary"]:
+        if self.sensorType["rotary"]:
             if self.limitStates["open"] and self.limitStates["closed"]:
                 return False
             elif self.limitStates["open"]:
