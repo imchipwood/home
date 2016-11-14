@@ -5,6 +5,7 @@ import argparse
 import traceback
 from time import sleep
 import timeit
+import threading
 
 # sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
 # from db_humidity import DBHumidity
@@ -30,6 +31,7 @@ global bDebug
 nPin = args.pin
 bDebug = args.debug
 
+global endThreads
 
 def main():
     global nPin
@@ -56,9 +58,9 @@ def main():
 
     try:
         # begin monitor thread
-        monitorThread = threading.Thread(target=monitor)
-        monitorThread.start()
-        monitorThread.join()
+        #monitorThread = threading.Thread(target=monitor)
+        #monitorThread.start()
+        #monitorThread.join()
         
         while True:
             sleep(1)

@@ -26,11 +26,3 @@ class Relay(object):
     @property
     def state(self):
         return GPIO.input(self.pin)
-
-    def toggle(self):
-        if self.state:
-            self.off()
-            self.on()
-        else:
-            self.on()
-            self.off()

@@ -68,8 +68,8 @@ class GarageDoorMonitor(Sensor):
     def initGPIO(self, sensors):
         GPIO.setmode(GPIO.BCM)
         for sensor in sensors:
-            print "{}, {}".format(sensor, sensors[sensor])
-            if sensors[sensor] != None:
+            print "-d- {}, {}".format(sensor, sensors[sensor])
+            if sensors[sensor] is not None:
                 self.pins[sensor] = sensors[sensor]
                 if self.bDebug:
                     print "-d- gdMonitor: pin {}: {}".format(sensor,
@@ -218,7 +218,7 @@ class GarageDoorMonitor(Sensor):
     """
     def setSensorType(self, sensors):
         for sensor in sensors:
-            if sensors[sensor] != None and sensors[sensor] != "":
+            if sensors[sensor] is not None and sensors[sensor] != "":
                 self.sensorType[sensor] = True
                 if self.bDebug:
                     print "-d- gdMonitor: Enabling %s" % (sensor)
