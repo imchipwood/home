@@ -66,7 +66,7 @@ class GarageDoorMonitor(Sensor):
     """
     def enableSensors(self, sensors):
         for sensor in sensors:
-            if sensor in validSensorTypes:
+            if sensor in self.validSensorTypes:
                 if sensors[sensor] is not None and sensors[sensor] != "":
                     self.sensorType[sensor] = True
                     self.pins[sensor] = int(sensors[sensor])
