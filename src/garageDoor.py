@@ -52,7 +52,7 @@ def main():
     if bDebug:
         print "-d- Setting up Garage Door Controller"
     gdc = Relay(nPin)
-    gdm = GarageDoorMonitor(pins={'rotary':5, 'limitOpen': 6, 'limitClosed': 7})
+    gdm = GarageDoorMonitor({'rotary':5, 'limitOpen': 6, 'limitClosed': 7}, bDebug)
 
     try:
         # begin monitor thread
