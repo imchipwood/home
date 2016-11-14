@@ -158,9 +158,9 @@ class GarageDoorMonitor(Sensor):
                 doorState = 0 if limitStates["closed"] else 100
         # only check rotary encoder if enabled and neither limit switch was ON
         if self.sensorType["rotary"] and not limitState:
-            doorState = int(interp(rotaryCount,
-                                   [rotaryLimits["closed"],
-                                    rotaryLimits["open"]],
+            doorState = int(interp(self.rotaryCount,
+                                   [self.rotaryLimits["closed"],
+                                    self.rotaryLimits["open"]],
                                    [0, 100]
                                    )
                             )
