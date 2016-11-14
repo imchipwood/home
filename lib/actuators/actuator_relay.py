@@ -42,7 +42,6 @@ class Relay(object):
     """
     def on(self):
         GPIO.output(self.pin, GPIO.HIGH)
-        self.state = True
 
     """'off' relay
 
@@ -53,7 +52,6 @@ class Relay(object):
     """
     def off(self):
         GPIO.output(self.pin, GPIO.LOW)
-        self.state = False
 
     @property
     def state(self):
