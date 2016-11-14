@@ -74,11 +74,11 @@ class GarageDoorMonitor(Sensor):
                     if self.bDebug:
                         print "-d- gdMonitor: {}: pin {}".format(sensor,
                                                                  self.pins[sensor])
-                else:
-                    sException = "Valid sensor types: ["
-                    sException += "|".join(self.validSensorTypes) + "]"
-                    sException += "\nYou entered: {}".format(sensor)
-                    raise SensorException(sException)
+                #else:
+                #    sException = "Valid sensor types: ["
+                #    sException += "|".join(self.validSensorTypes) + "]"
+                #    sException += "\nYou entered: {}".format(sensor)
+                #    raise SensorException(sException)
         return
 
     """Clean up GPIO
