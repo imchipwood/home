@@ -190,9 +190,9 @@ class GarageDoorMonitor(Sensor):
             elif self.limitStates["open"]:
                 if self.bDebug:
                     print "-d- gdMonitor: rotary calibration - new 'open' limit"
-                rotaryLimits["open"] = rotaryCount
+                rotaryLimits["open"] = self.rotaryCount
             elif self.limitStates["closed"]:
-                rotaryCount = 0
+                self.rotaryCount = 0
                 if self.bDebug:
                     print "-d- gdMonitor: rotary calibration - reset counter"
         return True
