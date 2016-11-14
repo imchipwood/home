@@ -7,11 +7,14 @@ from time import sleep
 import timeit
 import threading
 
-# sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
+global sHomePath
+sHomePath = os.path.dirname(os.path.realpath(__file__))
+sHomePath = sHomePath.split("/")[:-1]
+# sys.path.append(sHomePath+"/lib/db")
 # from db_humidity import DBHumidity
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/actuators")
+sys.path.append(sHomePath+"/lib/actuators")
 from actuator_relay import Relay
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/sensors")
+sys.path.append(sHomePath+"/lib/sensors")
 from sensor_gdMonitor import GarageDoorMonitor
 
 parser = argparse.ArgumentParser()
@@ -33,8 +36,10 @@ bDebug = args.debug
 
 global endThreads
 
+
 def main():
     global nPin
+    global sHomePath
     global bDebug
     global endThreads
     endThreads = False
@@ -43,8 +48,7 @@ def main():
     # sDBAccessFileName = 'sql_humidity_media.txt'
 
     # set up db
-    # sHomeDBPath = "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1])
-    # sDBCredentialsFile = sHomeDBPath+'/conf/'+sDBAccessFileName
+    # sDBCredentialsFile = sHomePath+'/conf/'+sDBAccessFileName
     # if bDebug:
     #     print "-d- Accessing DB using credentials found here:"
     #     print "-d- {}".format(sDBCredentialsFile)
@@ -54,13 +58,18 @@ def main():
     if bDebug:
         print "-d- gd: Setting up Garage Door Controller"
     gdc = Relay(nPin)
-    gdm = GarageDoorMonitor({'rotary': 5, 'limitOpen': 6, 'limitClosed': 7}, bDebug)
+    gdm = GarageDoorMonitor(
+        {'rotary': 5,
+         'limitOpen': 6,
+         'limitClosed': 7},
+        bDebug)
 
     try:
         # begin monitor thread
         monitorThread = threading.Thread(target=monitor, args=[gdm])
         monitorThread.start()
-        #monitorThread.join()
+        controlThread = threading.Thread(target=control, args=[gdc])
+        controlThread.start()
 
         while True:
             sleep(1)
@@ -93,18 +102,31 @@ def monitor(m):
         if (now - lastonehztime) > onehz:
             lastonehztime = now
             if bDebug:
-                print "-d- gd: monitor thread loop"
+                print "-d- gd: monitor thread"
             try:
                 m.read()
                 if bDebug:
-                    print "-d- gd: state: {}".format(m.getDoorState())
+                    print "-d- gd: monitor thread state: %s" % m.getDoorState()
             except Exception as e:
                 if bDebug:
-                    print "-d- gd: monitor thread exception"
+                    print "-d- gd: monitor exception"
                 traceback.print_exc()
                 endThread = True
                 raise
     return
+
+
+def control(c):
+    global endThreads
+    global bDebug
+    onehz = 1.0
+    lastonehztime = 0
+    while not endThreads:
+        now = float(timeit.default_timer())
+        if (now - lastonehztime) > onehz:
+            lastonehztime = now
+            if bDebug:
+                print "-d- gd: control thread"
 
 
 if __name__ == '__main__':

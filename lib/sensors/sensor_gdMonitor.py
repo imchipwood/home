@@ -55,6 +55,30 @@ class GarageDoorMonitor(Sensor):
         # read limit switches to initialize states
         self.readLimitSwitches()
 
+    """Enable sensors
+
+    Sets up GPIO pins for all sensors
+
+    Inputs:
+        sensors - dict of sensors to enable
+    Returns:
+        Nothing, but does throw exception if it fails
+    """
+    def enableSensors(self, sensors):
+        for sensor in sensors:
+            if sensors[sensor] is not None and sensors[sensor] != "":
+                self.sensorType[sensor] = True
+                self.pins[sensor] = int(sensors[sensor])
+                GPIO.setup(self.pins[sensor], GPIO.IN)
+                if self.bDebug:
+                    print "-d- gdMonitor: {}: pin {}".format(sensor,
+                                                             self.pins[sensor])
+            else:
+                sException = "Valid sensor types: ["
+                sException += "|".join(self.validSensorTypes) + "]"
+                raise SensorException(sException)
+        return
+
     """Clean up GPIO
 
     Inputs:
@@ -115,36 +139,6 @@ class GarageDoorMonitor(Sensor):
             print "-d- gdMonitor: Limit states: {}, {}".format(sOpen, sClosed)
         return
 
-    """Determine state of garage door
-
-    Inputs:
-        None
-    Returns:
-        integer between 0-100 representing % door is open
-    """
-    def getDoorState(self):
-        doorState = 0
-        limitState = False
-        # priority is given to limit switches
-        # if a limit switch is ON, the door is either fully open or closed
-        # don't bother using the rotary encoder in this case
-        if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
-            # check for error state
-            if self.limitStates["open"] and self.limitStates["closed"]:
-                return -999
-            elif self.limitStates["open"] or self.limitStates["closed"]:
-                limitState = True
-                doorState = 0 if limitStates["closed"] else 100
-        # only check rotary encoder if enabled and neither limit switch was ON
-        if self.sensorType["rotary"] and not limitState:
-            doorState = int(interp(self.rotaryCount,
-                                   [self.rotaryLimits["closed"],
-                                    self.rotaryLimits["open"]],
-                                   [0, 100]
-                                   )
-                            )
-        return doorState
-
     """On the fly rotary calibration
 
     When a limit switch is triggered, this means the door is either fully
@@ -176,6 +170,36 @@ class GarageDoorMonitor(Sensor):
                     print "-d- gdMonitor: rotary calib - reset counter"
         return True
 
+    """Determine state of garage door
+
+    Inputs:
+        None
+    Returns:
+        integer between 0-100 representing % door is open
+    """
+    def getDoorState(self):
+        doorState = 0
+        limitState = False
+        # priority is given to limit switches
+        # if a limit switch is ON, the door is either fully open or closed
+        # don't bother using the rotary encoder in this case
+        if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
+            # check for error state
+            if self.limitStates["open"] and self.limitStates["closed"]:
+                return -999
+            elif self.limitStates["open"] or self.limitStates["closed"]:
+                limitState = True
+                doorState = 0 if limitStates["closed"] else 100
+        # only check rotary encoder if enabled and neither limit switch was ON
+        if self.sensorType["rotary"] and not limitState:
+            doorState = int(interp(self.rotaryCount,
+                                   [self.rotaryLimits["closed"],
+                                    self.rotaryLimits["open"]],
+                                   [0, 100]
+                                   )
+                            )
+        return doorState
+
     """Get current units - not relevant for garage door detector
 
     Inputs:
@@ -194,28 +218,4 @@ class GarageDoorMonitor(Sensor):
         Nothing
     """
     def setUnits(self, units):
-        return
-
-    """Enable sensors
-
-    Sets up GPIO pins for all sensors
-
-    Inputs:
-        sensors - dict of sensors to enable
-    Returns:
-        Nothing, but does throw exception if it fails
-    """
-    def enableSensors(self, sensors):
-        for sensor in sensors:
-            if sensors[sensor] is not None and sensors[sensor] != "":
-                self.sensorType[sensor] = True
-                self.pins[sensor] = int(sensors[sensor])
-                GPIO.setup(self.pins[sensor], GPIO.IN)
-                if self.bDebug:
-                    print "-d- gdMonitor: {}: pin {}".format(sensor,
-                                                             self.pins[sensor])
-            else:
-                sException = "Valid sensor types: ["
-                sException += "|".join(self.validSensorTypes) + "]"
-                raise SensorException(sException)
         return
