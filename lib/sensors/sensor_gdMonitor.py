@@ -70,10 +70,10 @@ class GarageDoorMonitor(Sensor):
         for sensor in sensors:
             if sensors[sensor] is not None:
                 self.pins[sensor] = int(sensors[sensor])
+                GPIO.setup(self.pins[sensor], GPIO.IN)
                 if self.bDebug:
                     print "-d- gdMonitor: setting up pin {}: {}".format(sensor,
                                                              self.pins[sensor])
-                    GPIO.setup(self.pins[sensor], GPIO.IN)
         return
 
     """Clean up GPIO
