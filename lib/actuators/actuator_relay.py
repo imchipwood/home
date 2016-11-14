@@ -1,20 +1,10 @@
 import RPi.GPIO as GPIO
-import time
 
 
 class Relay(object):
     """Relay Controller Class
 
-    This class houses all functions required to set up and use
-    a relay.
-    """
-
-    """Initialize a Garage Door Opener
-
-    Inputs:
-        pin number (Integer - GPIO pin)
-    Returns:
-        Nothing
+    This class houses all functions required to set up and use a relay.
     """
     def __init__(self, pin):
         super(Relay, self).__init__()
@@ -23,33 +13,12 @@ class Relay(object):
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
 
-    """Clean up GPIO
-
-    Inputs:
-        None
-    Returns:
-        Nothing
-    """
     def cleanup(self):
         GPIO.cleanup()
 
-    """'on' relay
-
-    Inputs:
-        None
-    Returns:
-        Nothing
-    """
     def on(self):
         GPIO.output(self.pin, GPIO.HIGH)
 
-    """'off' relay
-
-    Inputs:
-        None
-    Returns:
-        Nothing
-    """
     def off(self):
         GPIO.output(self.pin, GPIO.LOW)
 
@@ -57,13 +26,6 @@ class Relay(object):
     def state(self):
         return GPIO.input(self.pin)
 
-    """Toggle the relay
-
-    Inputs:
-        None
-    Returns:
-        None
-    """
     def toggle(self):
         if self.state:
             self.off()
