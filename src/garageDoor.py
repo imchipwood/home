@@ -87,9 +87,7 @@ def monitor(m):
     global endThreads
     global bDebug
     onehz = 1.0
-    #tenhz = 0.1
     lastonehztime = 0
-    #lasttenhztime = 0
     while not endThreads:
         now = float(timeit.default_timer())
         if (now - lastonehztime) > onehz:

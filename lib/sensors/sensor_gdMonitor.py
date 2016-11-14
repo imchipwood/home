@@ -25,8 +25,8 @@ class GarageDoorMonitor(Sensor):
         "limitClosed": None
     }
     limitStates = {
-        "low": False,
-        "high": False
+        "open": False,
+        "closed": False
     }
     rotaryLimits = {
         "open": 100,
@@ -183,12 +183,18 @@ class GarageDoorMonitor(Sensor):
     """
     def updateRotaryCalibration(self):
         if self.sensorType["rotary"]:
+            if self.bDebug:
+                print "-d- gdMonitor: rotary calibration"
             if self.limitStates["open"] and self.limitStates["closed"]:
                 return False
             elif self.limitStates["open"]:
+                if self.bDebug:
+                    print "-d- gdMonitor: rotary calibration - new 'open' limit"
                 rotaryLimits["open"] = rotaryCount
             elif self.limitStates["closed"]:
                 rotaryCount = 0
+                if self.bDebug:
+                    print "-d- gdMonitor: rotary calibration - reset counter"
         return True
 
     """Get current units - not relevant for garage door detector
