@@ -89,16 +89,22 @@ def main():
 
 def monitor(m):
     global endThreads
-    tenhz = 1.0
-    lasttenhztime = 0
+    global bDebug
+    onehz = 10.0
+    #tenhz = 1.0
+    lastonehztime = 0
+    #lasttenhztime = 0
     while not endThreads:
         now = float(timeit.default_timer())
-        if (now - lasttenhztime) > tenhz:
-            lasttenhztime = now
+        if (now - lastonehztime) > onehz:
+            lastonehztime = now
+            if bDebug:
+                print "-d- gd: monitor thread loop"
             try:
                 m.read()
-                print m.getDoorState()
+                print "-d- gd: state: {}".format(m.getDoorState())
             except:
+                print "-d- gd: monitor thread exception"
                 pass
     return
             

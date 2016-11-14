@@ -68,11 +68,10 @@ class GarageDoorMonitor(Sensor):
     def initGPIO(self, sensors):
         GPIO.setmode(GPIO.BCM)
         for sensor in sensors:
-            print "-d- {}, {}".format(sensor, sensors[sensor])
             if sensors[sensor] is not None:
-                self.pins[sensor] = sensors[sensor]
+                self.pins[sensor] = int(sensors[sensor])
                 if self.bDebug:
-                    print "-d- gdMonitor: pin {}: {}".format(sensor,
+                    print "-d- gdMonitor: setting up pin {}: {}".format(sensor,
                                                              self.pins[sensor])
                     GPIO.setup(self.pins[sensor], GPIO.IN)
         return
@@ -115,6 +114,8 @@ class GarageDoorMonitor(Sensor):
     """
     def readRotaryEncoder(self):
         # read pins["rotary"]
+        if self.bDebug:
+            print "-d- gdMonitor: reading rotary encoder"
         return
 
     """Read limit switches
@@ -125,6 +126,8 @@ class GarageDoorMonitor(Sensor):
         Nothing
     """
     def readLimitSwitches(self):
+        if self.bDebug:
+            print "-d- gdMonitor: reading limit swiches"
         self.limitStates["open"] = GPIO.input(self.pins["limitOpen"])
         self.limitStates["closed"] = GPIO.input(self.pins["limitClosed"])
         if self.bDebug:
