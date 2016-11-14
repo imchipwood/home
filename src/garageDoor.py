@@ -9,7 +9,7 @@ import threading
 
 global sHomePath
 sHomePath = os.path.dirname(os.path.realpath(__file__))
-sHomePath = sHomePath.split("/")[:-1]
+sHomePath = "/".join(sHomePath.split("/")[:-1])
 # sys.path.append(sHomePath+"/lib/db")
 # from db_humidity import DBHumidity
 sys.path.append(sHomePath+"/lib/actuators")
