@@ -52,18 +52,16 @@ def main():
 
     # set up the sensor
     if bDebug:
-        print "-d- Setting up Garage Door Controller"
+        print "-d- gd: Setting up Garage Door Controller"
     gdc = Relay(nPin)
-    #gdm = GarageDoorMonitor({'rotary':5, 'limitOpen': 6, 'limitClosed': 7}, bDebug)
-    #gdm = GarageDoorMonitor({'rotary':5, 'limitOpen': 6, 'limitClosed': 7}, bDebug)
     gdm = GarageDoorMonitor({'limitOpen': 6, 'limitClosed': 7}, bDebug)
 
     try:
         # begin monitor thread
         monitorThread = threading.Thread(target=monitor, args=[gdm])
         monitorThread.start()
-        #monitorThread.join()
-        
+        monitorThread.join()
+
         while True:
             sleep(1)
 
@@ -71,11 +69,11 @@ def main():
         # hdb.insertData(dData, bDebug)
     except KeyboardInterrupt:
         endThreads = True
-        print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
+        print "\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n"
         raise
     except Exception as e:
         endThreads = True
-        print "\n\t-E- Some exception: %s\n" % (e)
+        print "\n\t-E- gd: Some exception: %s\n" % (e)
         traceback.print_exc()
         raise e
     finally:
@@ -83,8 +81,6 @@ def main():
         gdc.cleanup()
         gdm.cleanup()
     return
-
-
 
 
 def monitor(m):
@@ -100,15 +96,15 @@ def monitor(m):
             lastonehztime = now
             if bDebug:
                 print "-d- gd: monitor thread loop"
-            #try:
-            m.read()
-            print "-d- gd: state: {}".format(m.getDoorState())
-            #except:
-            #    print "-d- gd: monitor thread exception"
-            #    pass
+            try:
+                m.read()
+                if bDebug:
+                    print "-d- gd: state: {}".format(m.getDoorState())
+            except:
+                if bDebug:
+                    print "-d- gd: monitor thread exception"
+                pass
     return
-            
-            
 
 
 if __name__ == '__main__':
