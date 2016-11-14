@@ -74,8 +74,8 @@ class GarageDoorMonitor(Sensor):
                 if self.bDebug:
                     print "-d- gdMonitor: pin {}: {}".format(sensor,
                                                              self.pins[sensor])
-                    if "limit" in sensor:
-                        GPIO.setup(self.pins[sensor], GPIO.IN)
+                    #if "limit" in sensor:
+                    GPIO.setup(self.pins[sensor], GPIO.IN)
         return
 
     """Clean up GPIO
