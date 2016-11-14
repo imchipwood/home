@@ -27,7 +27,7 @@ parser.add_argument('-debug',
 args = parser.parse_args()
 global nPin
 global bDebug
-nPin = args.nPin
+nPin = args.pin
 bDebug = args.debug
 
 
