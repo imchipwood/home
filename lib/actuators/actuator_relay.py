@@ -3,25 +3,22 @@ import RPi.GPIO as GPIO
 import time
 
 
-class GarageDoorController(Sensor):
-    """Garage Door Controller Class
+class Relay(object):
+    """Relay Controller Class
 
     This class houses all functions required to set up and use
-    a relay to control a garage door motor.
+    a relay.
     """
-    bDebug = False
 
     """Initialize a Garage Door Opener
 
     Inputs:
         pin number (Integer - GPIO pin)
-        debug (Boolean)
     Returns:
         Nothing
     """
-    def __init__(self, pin, debug=False):
-        super(GarageDoorController, self).__init__()
-        self.bDebug = debug
+    def __init__(self, pin):
+        super(Relay, self).__init__()
         # set up pins
         self.pin = pin
         GPIO.setmode(GPIO.BCM)
@@ -37,36 +34,6 @@ class GarageDoorController(Sensor):
     def cleanup(self):
         GPIO.cleanup()
 
-    """Take readings
-
-    Inputs:
-        None
-    Returns:
-        Nothing
-    """
-    def read(self):
-        return
-
-    """Get current units - not relevant for garage door detector
-
-    Inputs:
-        None
-    Returns:
-        None
-    """
-    def getUnits(self):
-        return
-
-    """Update temperature units
-
-    Inputs:
-        units - whatever you want, it's unused
-    Returns:
-        None
-    """
-    def setUnits(self, units):
-        return
-
     """'on' relay
 
     Inputs:
@@ -76,6 +43,7 @@ class GarageDoorController(Sensor):
     """
     def on(self):
         GPIO.output(self.pin, GPIO.HIGH)
+        self.state = True
 
     """'off' relay
 
@@ -86,15 +54,10 @@ class GarageDoorController(Sensor):
     """
     def off(self):
         GPIO.output(self.pin, GPIO.LOW)
+        self.state = False
 
-    """Check the state of the relay
-
-    Inputs:
-        None
-    Returns:
-        True if GPIO pin set HIGH, False otherwise
-    """
-    def checkRelay(self):
+    @property
+    def state(self):
         return GPIO.input(self.pin)
 
     """Toggle the relay
@@ -105,5 +68,9 @@ class GarageDoorController(Sensor):
         None
     """
     def toggle(self):
-        self.on()
-        self.off()
+        if self.state:
+            self.off()
+            self.on()
+        else:
+            self.on()
+            self.off()
