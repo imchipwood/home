@@ -8,10 +8,11 @@ class Relay(object):
     """
     def __init__(self, pin):
         super(Relay, self).__init__()
-        # set up pins
-        self.pin = pin
         GPIO.setmode(GPIO.BCM)
+        # set up pin and drive low
+        self.pin = pin
         GPIO.setup(self.pin, GPIO.OUT)
+        self.off()
 
     def cleanup(self):
         GPIO.cleanup()
