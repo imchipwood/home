@@ -58,6 +58,7 @@ nPinRelay = args.pinrelay
 nPinRotary = args.pinrotary
 nPinLimitOpen = args.pinlimitopen
 nPinLimitClosed = args.pinlimitclosed
+bDebug = args.debug
 
 
 def main():
