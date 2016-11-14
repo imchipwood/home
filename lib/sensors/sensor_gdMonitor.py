@@ -13,7 +13,7 @@ class GarageDoorMonitor(Sensor):
     1. Rotary Encoder (attached to motor, detect rotations)
     2. Limit switch(es) - top and bottom to detect only fully open and closed
     """
-    #validSensorTypes = ["rotary", "limit"]
+    validSensorTypes = ["rotary", "limitOpen", "limitClosed"]
     sensorType = {
         "rotary": False,
         "limitOpen": False,
@@ -74,7 +74,6 @@ class GarageDoorMonitor(Sensor):
                 if self.bDebug:
                     print "-d- gdMonitor: pin {}: {}".format(sensor,
                                                              self.pins[sensor])
-                    #if "limit" in sensor:
                     GPIO.setup(self.pins[sensor], GPIO.IN)
         return
 
@@ -102,7 +101,7 @@ class GarageDoorMonitor(Sensor):
     def read(self):
         if sensorType["rotary"]:
             self.readRotaryEncoder()
-        if sensorType["limit"]:
+        if sensorType["limitOpen"] or sensorType["limitClosed"]:
             self.readLimitSwitches()
             self.updateRotaryCalibration()
         return

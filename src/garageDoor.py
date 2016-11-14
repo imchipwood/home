@@ -54,13 +54,15 @@ def main():
     if bDebug:
         print "-d- Setting up Garage Door Controller"
     gdc = Relay(nPin)
-    gdm = GarageDoorMonitor({'rotary':5, 'limitOpen': 6, 'limitClosed': 7}, bDebug)
+    #gdm = GarageDoorMonitor({'rotary':5, 'limitOpen': 6, 'limitClosed': 7}, bDebug)
+    #gdm = GarageDoorMonitor({'rotary':5, 'limitOpen': 6, 'limitClosed': 7}, bDebug)
+    gdm = GarageDoorMonitor({'limitOpen': 6, 'limitClosed': 7}, bDebug)
 
     try:
         # begin monitor thread
-        #monitorThread = threading.Thread(target=monitor)
-        #monitorThread.start()
-        #monitorThread.join()
+        monitorThread = threading.Thread(target=monitor, args=[gdm])
+        monitorThread.start()
+        monitorThread.join()
         
         while True:
             sleep(1)
@@ -85,7 +87,7 @@ def main():
 
 
 
-def monitor():
+def monitor(m):
     global endThreads
     tenhz = 1.0
     lasttenhztime = 0
@@ -93,8 +95,8 @@ def monitor():
         now = float(timeit.default_timer())
         if (now - lasttenhztime) > tenhz:
             lasttenhztime = now
-            #try:
-                
+            try:
+                m.read()
             
             
 
