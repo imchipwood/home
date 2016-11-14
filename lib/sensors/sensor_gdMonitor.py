@@ -66,17 +66,18 @@ class GarageDoorMonitor(Sensor):
     """
     def enableSensors(self, sensors):
         for sensor in sensors:
-            if sensors[sensor] is not None and sensors[sensor] != "":
-                self.sensorType[sensor] = True
-                self.pins[sensor] = int(sensors[sensor])
-                GPIO.setup(self.pins[sensor], GPIO.IN)
-                if self.bDebug:
-                    print "-d- gdMonitor: {}: pin {}".format(sensor,
-                                                             self.pins[sensor])
-            else:
-                sException = "Valid sensor types: ["
-                sException += "|".join(self.validSensorTypes) + "]"
-                raise SensorException(sException)
+            if sensor in validSensorTypes:
+                if sensors[sensor] is not None and sensors[sensor] != "":
+                    self.sensorType[sensor] = True
+                    self.pins[sensor] = int(sensors[sensor])
+                    GPIO.setup(self.pins[sensor], GPIO.IN)
+                    if self.bDebug:
+                        print "-d- gdMonitor: {}: pin {}".format(sensor,
+                                                                 self.pins[sensor])
+                else:
+                    sException = "Valid sensor types: ["
+                    sException += "|".join(self.validSensorTypes) + "]"
+                    raise SensorException(sException)
         return
 
     """Clean up GPIO
