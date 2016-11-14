@@ -90,13 +90,12 @@ def main():
 def monitor(m):
     global endThreads
     global bDebug
-    onehz = 10.0
-    #tenhz = 1.0
+    onehz = 1.0
+    #tenhz = 0.1
     lastonehztime = 0
     #lasttenhztime = 0
     while not endThreads:
         now = float(timeit.default_timer())
-        print now
         if (now - lastonehztime) > onehz:
             lastonehztime = now
             if bDebug:
