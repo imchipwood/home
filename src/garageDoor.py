@@ -92,6 +92,13 @@ def main():
         bDebug)
 
     try:
+        # print pin #s for debug
+        if bDebug:
+            print "-d- gd: pinRelay:       {}".format(nPinRelay)
+            print "-d- gd: pinRotary:      {}".format(nPinRotary)
+            print "-d- gd: pinLimitOpen:   {}".format(nPinLimitOpen)
+            print "-d- gd: pinLimitClosed: {}".format(nPinLimitClosed)
+        
         # begin monitor thread
         monitorThread = threading.Thread(target=monitor, args=[gdm])
         monitorThread.start()
