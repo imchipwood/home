@@ -100,12 +100,12 @@ def monitor(m):
             lastonehztime = now
             if bDebug:
                 print "-d- gd: monitor thread loop"
-            try:
-                m.read()
-                print "-d- gd: state: {}".format(m.getDoorState())
-            except:
-                print "-d- gd: monitor thread exception"
-                pass
+            #try:
+            m.read()
+            print "-d- gd: state: {}".format(m.getDoorState())
+            #except:
+            #    print "-d- gd: monitor thread exception"
+            #    pass
     return
             
             
