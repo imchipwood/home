@@ -89,7 +89,8 @@ def main():
         print "-d- gd: pinRotary:      {}".format(nPinRotary)
         print "-d- gd: pinLimitOpen:   {}".format(nPinLimitOpen)
         print "-d- gd: pinLimitClosed: {}".format(nPinLimitClosed)
-    gdc = Relay(nPinRelay)
+    if nPinRelay is not None:
+        gdc = Relay(nPinRelay)
     gdm = GarageDoorMonitor(
         {'rotary': nPinRotary,
          'limitOpen': nPinLimitOpen,
@@ -97,12 +98,14 @@ def main():
         bDebug)
 
     try:
-        
+
         # begin monitor thread
         monitorThread = threading.Thread(target=monitor, args=[gdm])
         monitorThread.start()
-        controlThread = threading.Thread(target=control, args=[gdc])
-        controlThread.start()
+        
+        if nPinRelay is not None:
+            controlThread = threading.Thread(target=control, args=[gdc])
+            controlThread.start()
 
         while True:
             sleep(1)

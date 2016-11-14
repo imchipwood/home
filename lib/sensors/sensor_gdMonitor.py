@@ -72,13 +72,8 @@ class GarageDoorMonitor(Sensor):
                     self.pins[sensor] = int(sensors[sensor])
                     GPIO.setup(self.pins[sensor], GPIO.IN)
                     if self.bDebug:
-                        print "-d- gdMonitor: {}: pin {}".format(sensor,
-                                                                 self.pins[sensor])
-                #else:
-                #    sException = "Valid sensor types: ["
-                #    sException += "|".join(self.validSensorTypes) + "]"
-                #    sException += "\nYou entered: {}".format(sensor)
-                #    raise SensorException(sException)
+                        s = "{}: pin {}".format(sensor, self.pins[sensor])
+                        print "-d- gdMonitor: %s" % s
         return
 
     """Clean up GPIO
@@ -103,13 +98,9 @@ class GarageDoorMonitor(Sensor):
         Nothing
     """
     def read(self):
-        if self.sensorType["rotary"]:
-            self.readRotaryEncoder()
-        if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
-            print "-d- gdMonitor: limitOpen: {}".format(sensorType["limitOpen"])
-            print "-d- gdMonitor: limitClosed: {}".format(sensorType["limitClosed"])
-            self.readLimitSwitches()
-            self.updateRotaryCalibration()
+        self.readRotaryEncoder()
+        self.readLimitSwitches()
+        self.updateRotaryCalibration()
         return
 
     """Read Rotary Encoder
@@ -121,8 +112,9 @@ class GarageDoorMonitor(Sensor):
     """
     def readRotaryEncoder(self):
         # read pins["rotary"]
-        if self.bDebug:
-            print "-d- gdMonitor: reading rotary encoder"
+        if self.sensorType["rotary"]:
+            if self.bDebug:
+                print "-d- gdMonitor: reading rotary encoder"
         return
 
     """Read limit switches
@@ -133,14 +125,16 @@ class GarageDoorMonitor(Sensor):
         Nothing
     """
     def readLimitSwitches(self):
-        if self.bDebug:
-            print "-d- gdMonitor: reading limit swiches"
-        self.limitStates["open"] = GPIO.input(self.pins["limitOpen"])
-        self.limitStates["closed"] = GPIO.input(self.pins["limitClosed"])
-        if self.bDebug:
-            sOpen = "o{}".format(self.limitStates["open"])
-            sClosed = "c{}".format(self.limitStates["closed"])
-            print "-d- gdMonitor: Limit states: {}, {}".format(sOpen, sClosed)
+        if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
+            if self.bDebug:
+                print "-d- gdMonitor: reading limit swiches"
+            self.limitStates["open"] = GPIO.input(self.pins["limitOpen"])
+            self.limitStates["closed"] = GPIO.input(self.pins["limitClosed"])
+            if self.bDebug:
+                sOpen = "o{}".format(self.limitStates["open"])
+                sClosed = "c{}".format(self.limitStates["closed"])
+                print "-d- gdMonitor: Limit states: {}, {}".format(sOpen,
+                                                                   sClosed)
         return
 
     """On the fly rotary calibration
@@ -159,7 +153,9 @@ class GarageDoorMonitor(Sensor):
         True if no issues, False otherwise
     """
     def updateRotaryCalibration(self):
-        if self.sensorType["rotary"]:
+        if (self.sensorType["rotary"]
+                and (self.sensorType["limitOpen"]
+                     or self.sensorType["limitClosed"])):
             if self.bDebug:
                 print "-d- gdMonitor: rotary calib"
             if self.limitStates["open"] and self.limitStates["closed"]:
