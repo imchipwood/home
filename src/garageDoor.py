@@ -62,7 +62,7 @@ def main():
         # begin monitor thread
         monitorThread = threading.Thread(target=monitor, args=[gdm])
         monitorThread.start()
-        monitorThread.join()
+        #monitorThread.join()
         
         while True:
             sleep(1)
