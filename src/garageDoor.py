@@ -52,7 +52,7 @@ def main():
     if bDebug:
         print "-d- Setting up Garage Door Controller"
     gdc = Relay(nPin)
-    gdm = GarageDoorMonitor(pins={'rotary':5, {'limitOpen': 6, 'limitClosed': 7}}
+    gdm = GarageDoorMonitor(pins={'rotary':5, 'limitOpen': 6, 'limitClosed': 7})
 
     try:
         # begin monitor thread
@@ -77,6 +77,7 @@ def main():
     finally:
         endThreads = True
         gdc.cleanup()
+        gdm.cleanup()
     return True
 
 
@@ -90,7 +91,7 @@ def monitor():
         now = float(timeit.default_timer())
         if (now - lasttenhztime) > tenhz:
             lasttenhztime = now
-            try:
+            #try:
                 
             
             
