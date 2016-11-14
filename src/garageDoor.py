@@ -7,7 +7,16 @@ from time import sleep
 import timeit
 import threading
 
+# all globals
 global sHomePath
+global nPinRelay
+global nPinRotary
+global nPinLimitOpen
+global nPinLimitClosed
+global endThreads
+global bDebug
+
+# stupidity until I figure out how to package my libs properly
 sHomePath = os.path.dirname(os.path.realpath(__file__))
 sHomePath = "/".join(sHomePath.split("/")[:-1])
 # sys.path.append(sHomePath+"/lib/db")
@@ -17,28 +26,45 @@ from actuator_relay import Relay
 sys.path.append(sHomePath+"/lib/sensors")
 from sensor_gdMonitor import GarageDoorMonitor
 
+# argument parsing
 parser = argparse.ArgumentParser()
-parser.add_argument('-pin',
-                    '-p',
+parser.add_argument('-pinrelay',
+                    'pr',
                     type=int,
-                    default=5,
+                    default=None,
                     help="Pin # for relay")
+parser.add_argument('-pinrotary',
+                    'pro',
+                    type=int,
+                    default=None,
+                    help="Pin # for rotary sensor")
+parser.add_argument('-pinlimitopen',
+                    '-plo',
+                    type=int,
+                    default=None,
+                    help="Pin # for open-detecting limit switch ")
+parser.add_argument('-pinlimitclosed',
+                    '-plc',
+                    type=int,
+                    default=None,
+                    help="Pin # for closed-detecting limit switch ")
 parser.add_argument('-debug',
                     '-d',
                     action="store_true",
                     help="Enable debug messages, also disable SQL injection")
 
 args = parser.parse_args()
-global nPin
-global bDebug
-nPin = args.pin
-bDebug = args.debug
-
-global endThreads
+nPinRelay = args.pinrelay
+nPinRotary = args.pinrotary
+nPinLimitOpen = args.pinlimitopen
+nPinLimitClosed = args.pinlimitclosed
 
 
 def main():
-    global nPin
+    global nPinRelay
+    global nPinRotary
+    global nPinLimitOpen
+    global nPinLimitClosed
     global sHomePath
     global bDebug
     global endThreads
@@ -57,11 +83,11 @@ def main():
     # set up the sensor
     if bDebug:
         print "-d- gd: Setting up Garage Door Controller"
-    gdc = Relay(nPin)
+    gdc = Relay(nPinRelay)
     gdm = GarageDoorMonitor(
-        {'rotary': 5,
-         'limitOpen': 6,
-         'limitClosed': 7},
+        {'rotary': nPinRotary,
+         'limitOpen': nPinLimitOpen,
+         'limitClosed': nPinLimitClosed},
         bDebug)
 
     try:
