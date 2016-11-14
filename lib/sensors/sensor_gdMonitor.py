@@ -77,6 +77,7 @@ class GarageDoorMonitor(Sensor):
                 else:
                     sException = "Valid sensor types: ["
                     sException += "|".join(self.validSensorTypes) + "]"
+                    sException += "\nYou entered: {}".format(sensor)
                     raise SensorException(sException)
         return
 
