@@ -106,6 +106,8 @@ class GarageDoorMonitor(Sensor):
         if self.sensorType["rotary"]:
             self.readRotaryEncoder()
         if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
+            print "-d- gdMonitor: limitOpen: {}".format(sensorType["limitOpen"])
+            print "-d- gdMonitor: limitClosed: {}".format(sensorType["limitClosed"])
             self.readLimitSwitches()
             self.updateRotaryCalibration()
         return
