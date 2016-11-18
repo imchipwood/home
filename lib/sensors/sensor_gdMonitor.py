@@ -102,7 +102,7 @@ class GarageDoorMonitor(Sensor):
                     s = "{}: pin {}".format(pin, self.pins[pin])
                     print "-d- gdMonitor: %s" % s
                 # TODO - enable selection of pull-up or pull-down resistor
-                GPIO.setup(self.pins[pin],
+                GPIO.setup(int(self.pins[pin]),
                            GPIO.IN,
                            pull_up_down=GPIO.PUD_UP)
         return
