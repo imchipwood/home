@@ -59,6 +59,7 @@ class GarageDoorMonitor(Sensor):
     """Enable sensors
 
     Sets up GPIO pins for all sensors
+    Defaults to pull-up
 
     Inputs:
         sensors - dict of sensors to enable
@@ -71,7 +72,10 @@ class GarageDoorMonitor(Sensor):
                 if sensors[sensor] is not None and sensors[sensor] != "":
                     self.sensorType[sensor] = True
                     self.pins[sensor] = int(sensors[sensor])
-                    GPIO.setup(self.pins[sensor], GPIO.IN)
+                    # TODO - enable selection of pull-up or pull-down resistor
+                    GPIO.setup(self.pins[sensor],
+                               GPIO.IN,
+                               pull_up_down=GPIO.PUD_UP)
                     if self.bDebug:
                         s = "{}: pin {}".format(sensor, self.pins[sensor])
                         print "-d- gdMonitor: %s" % s
