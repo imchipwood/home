@@ -192,7 +192,7 @@ class GarageDoorMonitor(Sensor):
                 return -999
             elif self.limitStates["open"] or self.limitStates["closed"]:
                 limitState = True
-                doorState = 0 if limitStates["closed"] else 100
+                doorState = 0 if self.limitStates["closed"] else 100
         # only check rotary encoder if enabled and neither limit switch was ON
         if self.sensorType["rotary"] and not limitState:
             doorState = int(interp(self.rotaryCount,
