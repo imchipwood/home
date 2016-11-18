@@ -96,7 +96,7 @@ class GarageDoorMonitor(Sensor):
     """
     def enableSensors(self):
         for pin in self.pins:
-            if pins[pin] is not None:
+            if self.pins[pin] is not None:
                 self.sensorType[pin] = True
                 # TODO - enable selection of pull-up or pull-down resistor
                 GPIO.setup(self.pins[pin],
