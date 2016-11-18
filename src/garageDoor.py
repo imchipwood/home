@@ -19,8 +19,6 @@ global bDebug
 # stupidity until I figure out how to package my libs properly
 sHomePath = os.path.dirname(os.path.realpath(__file__))
 sHomePath = "/".join(sHomePath.split("/")[:-1])
-# sys.path.append(sHomePath+"/lib/db")
-# from db_humidity import DBHumidity
 sys.path.append(sHomePath+"/lib/actuators")
 from actuator_relay import Relay
 sys.path.append(sHomePath+"/lib/sensors")
@@ -164,6 +162,9 @@ def control(c):
             lastonehztime = now
             if bDebug:
                 print "-d- gd: control thread"
+            # Uh, to be honest, I hadn't thought about how to control it yet.
+            # Brilliant, I know
+            # TODO: control thread - where does signal to toggle relay come from?
 
 
 if __name__ == '__main__':
