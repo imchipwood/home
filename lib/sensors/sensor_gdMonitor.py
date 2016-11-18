@@ -1,3 +1,4 @@
+import os
 from numpy import interp
 import RPi.GPIO as GPIO
 from sensor import Sensor, SensorException
