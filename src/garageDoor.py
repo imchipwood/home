@@ -69,7 +69,8 @@ def main():
         print "-d- gd: Setting up Garage Door Controller"
     if nPinRelay is not None:
         gdc = Relay(nPinRelay)
-    gdm = GarageDoorMonitor(sGarageDoorFileName, bDebug)
+    sGarageDoorFile = sHomePath+"/conf/"+sGarageDoorFileName
+    gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
 
     try:
 
