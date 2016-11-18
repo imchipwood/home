@@ -11,8 +11,6 @@ import threading
 global sHomePath
 global nPinRelay
 global nPinRotary
-global nPinLimitOpen
-global nPinLimitClosed
 global endThreads
 global bDebug
 
@@ -36,16 +34,6 @@ parser.add_argument('-pinrotary',
                     type=int,
                     default=None,
                     help="Pin # for rotary sensor")
-parser.add_argument('-pinlimitopen',
-                    '-plo',
-                    type=int,
-                    default=None,
-                    help="Pin # for open-detecting limit switch ")
-parser.add_argument('-pinlimitclosed',
-                    '-plc',
-                    type=int,
-                    default=None,
-                    help="Pin # for closed-detecting limit switch ")
 parser.add_argument('-debug',
                     '-d',
                     action="store_true",
@@ -54,16 +42,12 @@ parser.add_argument('-debug',
 args = parser.parse_args()
 nPinRelay = args.pinrelay
 nPinRotary = args.pinrotary
-nPinLimitOpen = args.pinlimitopen
-nPinLimitClosed = args.pinlimitclosed
 bDebug = args.debug
 
 
 def main():
     global nPinRelay
     global nPinRotary
-    global nPinLimitOpen
-    global nPinLimitClosed
     global sHomePath
     global bDebug
     global endThreads
@@ -71,6 +55,7 @@ def main():
 
     # user-defined args
     # sDBAccessFileName = 'sql_humidity_media.txt'
+    sGarageDoorFileName = 'garageMonitor.txt'
 
     # set up db
     # sDBCredentialsFile = sHomePath+'/conf/'+sDBAccessFileName
@@ -82,18 +67,9 @@ def main():
     # set up the sensor
     if bDebug:
         print "-d- gd: Setting up Garage Door Controller"
-        # print pin #s
-        print "-d- gd: pinRelay:       {}".format(nPinRelay)
-        print "-d- gd: pinRotary:      {}".format(nPinRotary)
-        print "-d- gd: pinLimitOpen:   {}".format(nPinLimitOpen)
-        print "-d- gd: pinLimitClosed: {}".format(nPinLimitClosed)
     if nPinRelay is not None:
         gdc = Relay(nPinRelay)
-    gdm = GarageDoorMonitor(
-        {'rotary': nPinRotary,
-         'limitOpen': nPinLimitOpen,
-         'limitClosed': nPinLimitClosed},
-        bDebug)
+    gdm = GarageDoorMonitor(sGarageDoorFileName, bDebug)
 
     try:
 

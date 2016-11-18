@@ -38,23 +38,50 @@ class GarageDoorMonitor(Sensor):
     """Initialize a Garage Door Monitor
 
     Inputs:
-        sensorTypes - array of strings
-        pins - dict with keys "rotary", "limitClosed", and "limitOpen",
-                pin #s as values
+        f - name of file to read config from
         debug (Boolean)
     Returns:
         Nothing
     """
-    def __init__(self, sensors, debug=False):
+    def __init__(self, f, debug=False):
         super(GarageDoorMonitor, self).__init__()
         self.bDebug = debug
         GPIO.setmode(GPIO.BCM)
         
-        # determine sensor type
-        self.enableSensors(sensors)
+        # read config file
+        if os.path.exists(f):
+            self.sConfFile = f
+        else:
+            print "-E- HomeDB: Check if file exists: {}".format(f)
+            raise IOError()
+        
+        if self.readConfig():
+            
+            # determine sensor type
+            self.enableSensors()
 
-        # read limit switches to initialize states
-        self.readLimitSwitches()
+            # read limit switches to initialize states
+            self.readLimitSwitches()
+
+    def readConfig(self):
+        tmpPins = self.pins
+        with open(self.sConfFile, 'r') as inf:
+            for line in inf:
+                line = line.rstrip().split('=').lower()
+                if line[0] == "plo":
+                    tmpPins["limitOpen"] = line[-1]
+                if line[0] == "plc":
+                    tmpPins["limitClosed"] = line[-1]
+                if line[0] == "pro":
+                    tmpPins["rotary"] = line[-1]
+        validConf = True
+        for pin in tmpPins:
+            if 2 > pin > 27: # valid RPi pins are 2-27
+                validConf = False
+        if validConf:
+            self.pins = tmpPins
+        return validConf
+                
 
     """Enable sensors
 
@@ -66,19 +93,17 @@ class GarageDoorMonitor(Sensor):
     Returns:
         Nothing, but does throw exception if it fails
     """
-    def enableSensors(self, sensors):
-        for sensor in sensors:
-            if sensor in self.validSensorTypes:
-                if sensors[sensor] is not None and sensors[sensor] != "":
-                    self.sensorType[sensor] = True
-                    self.pins[sensor] = int(sensors[sensor])
-                    # TODO - enable selection of pull-up or pull-down resistor
-                    GPIO.setup(self.pins[sensor],
-                               GPIO.IN,
-                               pull_up_down=GPIO.PUD_UP)
-                    if self.bDebug:
-                        s = "{}: pin {}".format(sensor, self.pins[sensor])
-                        print "-d- gdMonitor: %s" % s
+    def enableSensors(self):
+        for pin in self.pins:
+            if pins[pin] is not None:
+                self.sensorType[pin] = True
+                # TODO - enable selection of pull-up or pull-down resistor
+                GPIO.setup(self.pins[pin],
+                           GPIO.IN,
+                           pull_up_down=GPIO.PUD_UP)
+                if self.bDebug:
+                    s = "{}: pin {}".format(pin, self.pins[pin])
+                    print "-d- gdMonitor: %s" % s
         return
 
     """Clean up GPIO
