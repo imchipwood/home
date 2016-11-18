@@ -98,13 +98,13 @@ class GarageDoorMonitor(Sensor):
         for pin in self.pins:
             if self.pins[pin] is not None:
                 self.sensorType[pin] = True
+                if self.bDebug:
+                    s = "{}: pin {}".format(pin, self.pins[pin])
+                    print "-d- gdMonitor: %s" % s
                 # TODO - enable selection of pull-up or pull-down resistor
                 GPIO.setup(self.pins[pin],
                            GPIO.IN,
                            pull_up_down=GPIO.PUD_UP)
-                if self.bDebug:
-                    s = "{}: pin {}".format(pin, self.pins[pin])
-                    print "-d- gdMonitor: %s" % s
         return
 
     """Clean up GPIO
