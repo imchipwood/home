@@ -48,7 +48,8 @@ class GarageDoorMonitor(Sensor):
     def __init__(self, sensors, debug=False):
         super(GarageDoorMonitor, self).__init__()
         self.bDebug = debug
-
+        GPIO.setmode(GPIO.BCM)
+        
         # determine sensor type
         self.enableSensors(sensors)
 
