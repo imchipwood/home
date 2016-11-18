@@ -68,7 +68,7 @@ class GarageDoorMonitor(Sensor):
         tmpPins = self.pins
         with open(self.sConfFile, 'r') as inf:
             for line in inf:
-                line = line.rstrip().split('=').lower()
+                line = line.rstrip().split('=')
                 if line[0] == "plo":
                     tmpPins["limitOpen"] = line[-1]
                 if line[0] == "plc":
