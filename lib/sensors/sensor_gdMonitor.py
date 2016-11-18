@@ -132,11 +132,11 @@ class GarageDoorMonitor(Sensor):
     def readLimitSwitches(self):
         tmp = self.limitStates
         if self.sensorType["limitOpen"]:
-            tmp = GPIO.input(self.pins["limitOpen"])
+            tmp["open"] = GPIO.input(self.pins["limitOpen"])
             if self.bDebug:
                 print "-d- gdMonitor: limit switch open: {}".format(tmp["open"])
         if self.sensorType["limitClosed"]:
-            tmp = GPIO.input(self.pins["limitClosed"])
+            tmp["closed"] = GPIO.input(self.pins["limitClosed"])
             if self.bDebug:
                 print "-d- gdMonitor: limit switch closed: {}".format(tmp["closed"])
         self.limitStates = tmp
