@@ -69,12 +69,13 @@ class GarageDoorMonitor(Sensor):
         with open(self.sConfFile, 'r') as inf:
             for line in inf:
                 line = line.rstrip().split('=')
+                iPinNum = int(line[-1])
                 if line[0] == "plo":
-                    tmpPins["limitOpen"] = line[-1]
+                    tmpPins["limitOpen"] = iPinNum
                 if line[0] == "plc":
-                    tmpPins["limitClosed"] = line[-1]
+                    tmpPins["limitClosed"] = iPinNum
                 if line[0] == "pro":
-                    tmpPins["rotary"] = line[-1]
+                    tmpPins["rotary"] = iPinNum
         validConf = True
         for pin in tmpPins:
             if 2 > pin > 27: # valid RPi pins are 2-27
@@ -102,7 +103,7 @@ class GarageDoorMonitor(Sensor):
                     s = "{}: pin {}".format(pin, self.pins[pin])
                     print "-d- gdMonitor: %s" % s
                 # TODO - enable selection of pull-up or pull-down resistor
-                GPIO.setup(int(self.pins[pin]),
+                GPIO.setup(self.pins[pin],
                            GPIO.IN,
                            pull_up_down=GPIO.PUD_UP)
         return
