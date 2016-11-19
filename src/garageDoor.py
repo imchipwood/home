@@ -70,20 +70,17 @@ def main():
     if nPinRelay is not None:
         gdc = Relay(nPinRelay)
     sGarageDoorFile = sHomePath+"/conf/"+sGarageDoorFileName
-    gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
 
     try:
+        gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
 
-        # begin monitor thread
-        monitorThread = threading.Thread(target=monitor, args=[gdm])
-        monitorThread.start()
-        
         if nPinRelay is not None:
             controlThread = threading.Thread(target=control, args=[gdc])
             controlThread.start()
 
         while True:
-            sleep(1)
+            # do nothing
+            1
 
         # insert data into the database
         # hdb.insertData(dData, bDebug)
@@ -104,30 +101,6 @@ def main():
     return
 
 
-def monitor(m):
-    global endThreads
-    global bDebug
-    onehz = 1.0
-    lastonehztime = 0
-    while not endThreads:
-        now = float(timeit.default_timer())
-        if (now - lastonehztime) > onehz:
-            lastonehztime = now
-            if bDebug:
-                print "-d- gd: monitor thread"
-            try:
-                m.read()
-                if bDebug:
-                    print "-d- gd: monitor thread state: %s" % m.getDoorState()
-            except Exception as e:
-                if bDebug:
-                    print "-d- gd: monitor exception"
-                traceback.print_exc()
-                endThread = True
-                raise
-    return
-
-
 def control(c):
     global endThreads
     global bDebug
@@ -141,7 +114,7 @@ def control(c):
                 print "-d- gd: control thread"
             # Uh, to be honest, I hadn't thought about how to control it yet.
             # Brilliant, I know
-            # TODO: control thread - where does signal to toggle relay come from?
+            # TODO: control thread - where to get relay toggle signal?
 
 
 if __name__ == '__main__':

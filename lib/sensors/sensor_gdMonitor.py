@@ -1,6 +1,8 @@
 import os
 from numpy import interp
 import RPi.GPIO as GPIO
+import multithreading
+import timeit
 from sensor import Sensor, SensorException
 
 
@@ -48,22 +50,37 @@ class GarageDoorMonitor(Sensor):
         super(GarageDoorMonitor, self).__init__()
         self.bDebug = debug
         GPIO.setmode(GPIO.BCM)
-        
+
         # read config file
         if os.path.exists(f):
             self.sConfFile = f
         else:
             print "-E- HomeDB: Check if file exists: {}".format(f)
             raise IOError()
-        
+
         if self.readConfig():
-            
+
             # determine sensor type
             self.enableSensors()
 
             # read limit switches to initialize states
             self.readLimitSwitches()
+            
+            try:
+                # begin monitoring sensors
+                self.monitorThread = multithreading.Process(target=self.monitor, args=[])
+                self.monitorThread.start()
+            except:
+                self.cleanup()
+                raise
 
+    """Read config file
+
+    Inputs:
+        None
+    Returns:
+        True if config was read and is valid, False otherwise
+    """
     def readConfig(self):
         tmpPins = self.pins
         with open(self.sConfFile, 'r') as inf:
@@ -78,12 +95,11 @@ class GarageDoorMonitor(Sensor):
                     tmpPins["rotary"] = iPinNum
         validConf = True
         for pin in tmpPins:
-            if 2 > pin > 27: # valid RPi pins are 2-27
+            if 2 > pin > 27:  # valid RPi pins are 2-27
                 validConf = False
         if validConf:
             self.pins = tmpPins
         return validConf
-                
 
     """Enable sensors
 
@@ -116,7 +132,39 @@ class GarageDoorMonitor(Sensor):
         Nothing
     """
     def cleanup(self):
+        self.monitorThread.terminate()
         GPIO.cleanup()
+        return
+
+    """Monitor thread
+
+    This function is intended to be launched as a thread to read sensors
+    on a one second interval
+
+    Inputs:
+        endThreads - a boolean to exit all threads
+    Returns:
+        Nothing
+    """
+    def monitor(self):
+        onehz = 1.0
+        lastonehztime = 0
+        while True:
+            now = float(timeit.default_timer())
+            if (now - lastonehztime) > onehz:
+                lastonehztime = now
+                if self.bDebug:
+                    print "-d- gd: monitor thread"
+                try:
+                    self.read()
+                    if self.bDebug:
+                        print "-d- gd: monitor thread state: %s" % m.getDoorState()
+                except Exception as e:
+                    if self.bDebug:
+                        print "-d- gd: monitor exception"
+                    traceback.print_exc()
+                    endThreads = True
+                    raise
         return
 
     """Take readings
