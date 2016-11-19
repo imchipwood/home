@@ -159,11 +159,9 @@ class GarageDoorMonitor(Sensor):
                     self.read()
                     if self.bDebug:
                         print "-d- gd: monitor thread state: %s" % m.getDoorState()
-                except Exception as e:
+                except:
                     if self.bDebug:
                         print "-d- gd: monitor exception"
-                    traceback.print_exc()
-                    endThreads = True
                     raise
         return
 
