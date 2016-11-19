@@ -1,7 +1,7 @@
 import os
 from numpy import interp
 import RPi.GPIO as GPIO
-import multithreading
+import multiprocessing
 import timeit
 from sensor import Sensor, SensorException
 
@@ -68,7 +68,7 @@ class GarageDoorMonitor(Sensor):
             
             try:
                 # begin monitoring sensors
-                self.monitorThread = multithreading.Process(target=self.monitor, args=[])
+                self.monitorThread = multiprocessing.Process(target=self.monitor, args=[])
                 self.monitorThread.start()
             except:
                 self.cleanup()
