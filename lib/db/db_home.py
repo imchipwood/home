@@ -52,8 +52,9 @@ class DBHome(object):
                                           passwd=self.__conf['pw'],
                                           db=self.__conf['db'])
                 self.curs = self.db.cursor()
-            except:
+            except Exception as e:
                 print "-E- HomeDB Error: Failed to open database"
+                print e
                 raise IOError
         else:
             print "-E- HomeDB Error: Failed to parse DB config file:"
