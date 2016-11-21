@@ -18,7 +18,8 @@ class DBHome(object):
     dataRaw = []
     dataFormatted = []
 
-    __conf = {'db': '',
+    __conf = {'host': '',
+              'db': '',
               'table': '',
               'user': '',
               'pw': '',
@@ -46,10 +47,10 @@ class DBHome(object):
         if self.readConfig():
             # open up database
             try:
-                self.db = MySQLdb.connect('localhost',
-                                          self.__conf['user'],
-                                          self.__conf['pw'],
-                                          self.__conf['db'])
+                self.db = MySQLdb.connect(host=self.__conf['host'],
+                                          user=self.__conf['user'],
+                                          passwd=self.__conf['pw'],
+                                          db=self.__conf['db'])
                 self.curs = self.db.cursor()
             except:
                 print "-E- HomeDB Error: Failed to open database"
@@ -115,6 +116,8 @@ class DBHome(object):
         with open(self.sConfFile, 'r') as inf:
             for line in inf:
                 line = line.rstrip().split('=')
+                if line[0] == 'h':
+                    confTemp['host'] = line[-1]
                 # database
                 if line[0] == 'db':
                     confTemp['db'] = line[-1]
@@ -137,7 +140,8 @@ class DBHome(object):
         validConf = '' not in [confTemp['db'],
                                confTemp['table'],
                                confTemp['user'],
-                               confTemp['pw']
+                               confTemp['pw'],
+                               confTemp['host']
                                ]
         if not validConf:
             print "-E- HomeDB Error: Config file parameter error"
