@@ -57,7 +57,7 @@ class DBHome(object):
             except Exception as e:
                 print "-E- HomeDB Error: Failed to open database"
                 print e
-                raise IOError
+                raise e
         else:
             print "-E- HomeDB Error: Failed to parse DB config file:"
             print "\t-E- {}".format(self.sConfFile)

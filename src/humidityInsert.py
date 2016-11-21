@@ -15,20 +15,30 @@ parser.add_argument('-nAvg',
                     type=int,
                     default=5,
                     help="# measurements to average. Optional. Default=5")
+parser.add_argument('-insert',
+                    '-i',
+                    action="store_false",
+                    default=True,
+                    help="Disable SQL insertion. Defaults to inserting")
 parser.add_argument('-debug',
                     '-d',
                     action="store_true",
-                    help="Enable debug messages, also disable SQL injection")
+                    help="Enable debug messages")
 
 args = parser.parse_args()
 global iAvg
+global bInsert
 global bDebug
 iAvg = args.nAvg
+bInsert = args.insert
 bDebug = args.debug
+
+print "bInsert = %s" % (bInsert)
 
 
 def main():
     global iAvg
+    global bInsert
     global bDebug
 
     # user-defined args
@@ -75,7 +85,7 @@ def main():
             print '-d- Final Humidity:    {0:0.1f}'.format(dData['humidity'])
 
         # insert data into the database
-        hdb.insertData(dData, bDebug)
+        hdb.insertData(dData, insert=bInsert, bDebug=bDebug)
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)

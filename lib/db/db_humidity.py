@@ -265,7 +265,7 @@ class DBHumidity(DBHome):
         Returns:
             True if data insertion was successful, False otherwise
     """
-    def insertData(self, dData, bDebug=False):
+    def insertData(self, dData, insert=True, bDebug=False):
         if self.bDebug:
             bDebug = True
 
@@ -282,7 +282,7 @@ class DBHumidity(DBHome):
             )
             if bDebug:
                 print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
-            else:
+            if insert:
                 try:
                     self.executeCmd(self.dbcmd, 'insert')
                     return True
