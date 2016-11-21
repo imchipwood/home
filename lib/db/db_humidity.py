@@ -45,13 +45,14 @@ class DBHumidity(DBHome):
             if 'room' in col.lower():
                 sRoomCol = col
         if bDebug:
-            print "-d- Columns of interest:"
-            print "-d- date: {}\n-d- room: {}".format(sDateCol, sRoomCol)
+            print "-d- DBHumidity: Columns of interest:"
+            print "-d- DBHumidity: date: {}".format(sDateCol)
+            print "-d- DBHumidity: room: {}".format(sRoomCol)
 
         sRoomQuery = 'WHERE'
         if dQuery['room'] != '*':
             if bDebug:
-                print "-d- detected room query as: {}".format(dQuery['room'])
+                print "-d- DBHumidity: room query: {}".format(dQuery['room'])
             lRooms = dQuery['room'].split(',')
             if len(lRooms) == 1:
                 sRoomQuery += ' {}={} AND'.format(sRoomCol, lRooms[0])
@@ -64,8 +65,8 @@ class DBHumidity(DBHome):
                 sRoomQuery += lRoomQueries[-1] + ' AND'
 
         if bDebug:
-            print "-d- dQuery = {}".format(dQuery)
-            print "-d- sRoomQuery = {}".format(sRoomQuery)
+            print "-d- DBHumidity: dQuery = {}".format(dQuery)
+            print "-d- DBHumidity: sRoomQuery = {}".format(sRoomQuery)
 
         # construct query
         dbcmd = ''
@@ -127,7 +128,7 @@ class DBHumidity(DBHome):
         else:
             print "-E- DBHumidity: didn't recognize query type"
         if bDebug:
-            print "-d- MySQL command:\n-d- %s" % (dbcmd)
+            print "-d- DBHumidity: MySQL command:\n-d- %s" % (dbcmd)
         return dbcmd
 
 ###############################################################################
@@ -139,7 +140,7 @@ class DBHumidity(DBHome):
             bDebug = True
 
         if bDebug:
-            print '-d- Parsing query: "{}"'.format(self.sQuery)
+            print '-d- DBHumidity: Parsing query: "{}"'.format(self.sQuery)
 
         # default query if no args are specified (or if empty args specified)
         dQuery = {}
@@ -149,7 +150,7 @@ class DBHumidity(DBHome):
 
         lArgs = self.sQuery.rstrip().lstrip().split(' ')
         if bDebug:
-            print '-d- args split into: "{}"'.format(lArgs)
+            print '-d- DBHumidity: args split into: "{}"'.format(lArgs)
         # are they any args? If so, parse em. If not, assume default
         if len(lArgs) > 0 and lArgs != ['']:
             # loop thru each arg, populating the dQuery dictionary as we go
@@ -169,7 +170,7 @@ class DBHumidity(DBHome):
                         sKey = "n"
                         value = sArgSplit[0]
                 else:
-                    sException = ("-E- Something's up with query args. "
+                    sException = ("-E- DBHumidity: Query args error."
                                   "Couldn't split them into a key/value pair"
                                   "\n\tArgs: {0}"
                                   "\n\tFailed on: {1}".format(sQuery, sArg))
@@ -186,7 +187,7 @@ class DBHumidity(DBHome):
                     try:
                         dQuery['qualifier'] = int(value)
                     except:
-                        raise IOError("-E- HomeDB: 'n' query value invalid")
+                        raise IOError("-E- DBHumidity: 'n' query value invalid")
                 # today's entries
                 elif sKey == "today":
                     dQuery['query'] = "today"
@@ -281,18 +282,20 @@ class DBHumidity(DBHome):
                                              dData['humidity'])
             )
             if bDebug:
-                print "-d- Insertion Command:\n\t{}".format(self.dbcmd)
+                print "-d- DBHumidity: Insertion Command\n\t{}".format(self.dbcmd)
             if insert:
                 try:
+                    if bDebug:
+                        "-d- DBHumidity: attempting insertion"
                     self.executeCmd(self.dbcmd, 'insert')
                     return True
                 except Exception as E:
-                    print "-E- HomeDB: Error while inserting data into db."
+                    print "-E- DBHumidity: Error while inserting data into db."
                     traceback.print_exc()
                     return False
         else:
             if bDebug:
-                print "-e- HomeDB: Data invalid - check sensor connections"
+                print "-e- DBHumidity: Data invalid - check sensor connections"
             return False
 
 ###############################################################################
@@ -311,16 +314,16 @@ class DBHumidity(DBHome):
                  'day': sDateSplit[2]}
         valid = True
         if len(dDate['year']) != 4:
-            print ("-E- Date entered incorrectly - year should be 4 digits. "
-                   "Year: {}".format(dDate['year']))
+            print ("-E- DBHumidity: Date entered incorrectly -"
+                   "year should be 4 digits. Year: {}".format(dDate['year']))
             valid = False
         if len(dDate['month']) != 2:
-            print ("-E- Date entered incorrectly - month should be 2 digits. "
-                   "Month: {}".format(dDate['month']))
+            print ("-E- DBHumidity: Date entered incorrectly -"
+                   "month should be 2 digits. Month: {}".format(dDate['month']))
             valid = False
         if len(dDate['day']) != 2:
-            print ("-E- Date entered incorrectly - day should be 2 digits. "
-                   "Day: {}".format(dDate['day']))
+            print ("-E- DBHumidity: Date entered incorrectly -"
+                   " day should be 2 digits. Day: {}".format(dDate['day']))
             valid = False
         return valid
 
