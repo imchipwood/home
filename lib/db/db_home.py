@@ -46,6 +46,8 @@ class DBHome(object):
 
         if self.readConfig():
             # open up database
+            if self.bDebug:
+                print self.__conf
             try:
                 self.db = MySQLdb.connect(host=self.__conf['host'],
                                           user=self.__conf['user'],
