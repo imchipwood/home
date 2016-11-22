@@ -30,7 +30,7 @@ def parseArgs():
     parser.add_argument("-configFileBackup",
                         "-cb",
                         type=str,
-                        default="sql_humidity_media_backup.txt",
+                        default="None",
                         help="Config file for backup SQL database interaction")
     parser.add_argument("-debug",
                         "-d",
@@ -49,15 +49,21 @@ def main():
     bInsert = parsedArgs.insert
     bDebug = parsedArgs.debug
 
+    bBackupEnable = True if sDBAccessBackupFileName is not None else False
     # set up db
     sHomeDBPath = "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1])
     sDBCredentialsFile = sHomeDBPath+"/conf/"+sDBAccessFileName
-    sDBCredentialsBackupFile = sHomeDBPath+"/conf/"+sDBAccessBackupFileName
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
     hdb = DBHumidity(sDBCredentialsFile, bDebug=bDebug)
-    hdbbackup = DBHumidity(sDBCredentialsBackupFile, bDebug=bDebug)
+    
+    if bBackupEnable:
+        sDBCredentialsBackupFile = sHomeDBPath+"/conf/"+sDBAccessBackupFileName
+        if bDebug:
+            print "-d- Accessing backup DB using credentials found here:"
+            print "-d- {}".format(sDBCredentialsFile)
+        hdbbackup = DBHumidity(sDBCredentialsBackupFile, bDebug=bDebug)
 
     # set up the sensor
     if bDebug:
@@ -94,8 +100,10 @@ def main():
         try:
             hdb.insertData(dData, insert=bInsert, bDebug=bDebug)
         except:
-            hdbback.insertData(dData, insert=bInsert, bDebug=bDebug)
-
+            if bBackupEnable:
+                hdbback.insertData(dData, insert=bInsert, bDebug=bDebug)
+            else:
+                raise
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
