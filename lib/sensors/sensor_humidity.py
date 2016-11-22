@@ -150,21 +150,3 @@ class SensorHumidity(Sensor):
             raise SensorException(sException)
 
 ###############################################################################
-
-    """Print data
-
-    Prints data in a debug format
-
-    Inputs:
-        None
-    Returns:
-        Nothing
-    """
-    def printData(self):
-        print ("-d- Temperature[{0}]={1:0.1f}, "
-               "Humidity[{0}]={2:0.1f}".format(i,
-                                               h.getTemperature(),
-                                               h.getHumidity()
-                                               )
-               )
-        return

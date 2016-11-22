@@ -40,6 +40,15 @@ def parseArgs():
     return args
 
 
+def printData(i, temperature, humidity):
+    print ("-d- Temperature[{0}]={1:0.1f}, "
+           "Humidity[{0}]={2:0.1f}".format(i,
+                                           temperature,
+                                           humidity
+                                           )
+           )
+    return
+
 def main():
 
     parsedArgs = parseArgs()
@@ -62,7 +71,7 @@ def main():
         sDBCredentialsBackupFile = sHomeDBPath+"/conf/"+sDBAccessBackupFileName
         if bDebug:
             print "-d- Accessing backup DB using credentials found here:"
-            print "-d- {}".format(sDBCredentialsFile)
+            print "-d- {}".format(sDBCredentialsBackupFile)
         hdbbackup = DBHumidity(sDBCredentialsBackupFile, bDebug=bDebug)
 
     # set up the sensor
@@ -75,7 +84,7 @@ def main():
         for i in xrange(0, 5):
             h.read()
             if bDebug:
-                h.printData()
+                printData()
 
         # take N readings and average them
         if bDebug:
@@ -85,7 +94,7 @@ def main():
         for i in xrange(0, iAvg):
             h.read()
             if bDebug:
-                h.printData()
+                printData()
             fTemperature += h.getTemperature()
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
