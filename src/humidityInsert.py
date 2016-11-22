@@ -30,7 +30,7 @@ def parseArgs():
     parser.add_argument("-configFileBackup",
                         "-cb",
                         type=str,
-                        default="None",
+                        default=None,
                         help="Config file for backup SQL database interaction")
     parser.add_argument("-debug",
                         "-d",
