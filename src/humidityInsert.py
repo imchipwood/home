@@ -66,7 +66,7 @@ def main():
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
     hdb = DBHumidity(sDBCredentialsFile, bDebug=bDebug)
-    
+
     if bBackupEnable:
         sDBCredentialsBackupFile = sHomeDBPath+"/conf/"+sDBAccessBackupFileName
         if bDebug:

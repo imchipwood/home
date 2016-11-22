@@ -33,7 +33,7 @@ class DBHome(object):
     """Initialize database access
 
     Parse config file, connect to DB, set up cursor
-    
+
     Inputs:
         f - full path to config file to parse
         bDebug - (Optional) boolean to enable debug messages
@@ -51,8 +51,8 @@ class DBHome(object):
 
         if self.readConfig():
             # open up database
-            if self.bDebug:
-                print self.__conf
+            # if self.bDebug:
+            #     print self.__conf
             try:
                 self.db = MySQLdb.connect(host=self.__conf["host"],
                                           user=self.__conf["user"],
