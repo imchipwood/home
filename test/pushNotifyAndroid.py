@@ -25,7 +25,7 @@ def main():
 def getConfig(f):
     with open(f, "r") as inf:
         for line in inf:
-            line = line.split("=")
+            line = line.rstrip().split("=")
             if line[0] == "code":
                 return line[1]
     return False
