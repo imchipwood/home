@@ -1,9 +1,9 @@
 import os
 from numpy import interp
-import RPi.GPIO as GPIO
-import multiprocessing
+from multiprocessing import Process
 import timeit
-from sensor import Sensor, SensorException
+import RPi.GPIO as GPIO
+from sensor import Sensor
 
 
 class GarageDoorMonitor(Sensor):
@@ -65,14 +65,16 @@ class GarageDoorMonitor(Sensor):
 
             # read limit switches to initialize states
             self.readLimitSwitches()
-            
+
             try:
                 # begin monitoring sensors
-                self.monitorThread = multiprocessing.Process(target=self.monitor, args=[])
+                self.monitorThread = Process(target=self.monitor, args=[])
                 self.monitorThread.start()
             except:
                 self.cleanup()
                 raise
+
+###############################################################################
 
     """Read config file
 
@@ -83,9 +85,9 @@ class GarageDoorMonitor(Sensor):
     """
     def readConfig(self):
         tmpPins = self.pins
-        with open(self.sConfFile, 'r') as inf:
+        with open(self.sConfFile, "r") as inf:
             for line in inf:
-                line = line.rstrip().split('=')
+                line = line.rstrip().split("=")
                 iPinNum = int(line[-1])
                 if line[0] == "plo":
                     tmpPins["limitOpen"] = iPinNum
@@ -95,11 +97,13 @@ class GarageDoorMonitor(Sensor):
                     tmpPins["rotary"] = iPinNum
         validConf = True
         for pin in tmpPins:
-            if 2 > pin > 27:  # valid RPi pins are 2-27
+            if 2 > pin > 27:  # valid RPi GPIO pins are 2-27
                 validConf = False
         if validConf:
             self.pins = tmpPins
         return validConf
+
+###############################################################################
 
     """Enable sensors
 
@@ -124,6 +128,8 @@ class GarageDoorMonitor(Sensor):
                            pull_up_down=GPIO.PUD_UP)
         return
 
+###############################################################################
+
     """Clean up GPIO
 
     Inputs:
@@ -135,6 +141,8 @@ class GarageDoorMonitor(Sensor):
         self.monitorThread.terminate()
         GPIO.cleanup()
         return
+
+###############################################################################
 
     """Monitor thread
 
@@ -154,16 +162,20 @@ class GarageDoorMonitor(Sensor):
             if (now - lastonehztime) > onehz:
                 lastonehztime = now
                 if self.bDebug:
-                    print "-d- gd: monitor thread"
+                    print "-d- gdMonitor: thread executing"
                 try:
                     self.read()
                     if self.bDebug:
-                        print "-d- gd: monitor thread state: %s" % self.getDoorState()
+                        print ("-d- gdMonitor: thread state: %s".format(
+                               self.getDoorState())
+                               )
                 except:
                     if self.bDebug:
-                        print "-d- gd: monitor exception"
+                        print "-d- gdMonitor: thread exception"
                     raise
         return
+
+###############################################################################
 
     """Take readings
 
@@ -180,6 +192,8 @@ class GarageDoorMonitor(Sensor):
         self.readRotaryEncoder()
         return
 
+###############################################################################
+
     """Read Rotary Encoder
 
     Inputs:
@@ -195,6 +209,8 @@ class GarageDoorMonitor(Sensor):
             self.updateRotaryCalibration()
         return
 
+###############################################################################
+
     """Read limit switches
 
     Inputs:
@@ -207,13 +223,15 @@ class GarageDoorMonitor(Sensor):
         if self.sensorType["limitOpen"]:
             tmp["open"] = not GPIO.input(self.pins["limitOpen"])
             if self.bDebug:
-                print "-d- gdMonitor: limit switch open: {}".format(tmp["open"])
+                print "-d- gdMonitor: switch open: {}".format(tmp["open"])
         if self.sensorType["limitClosed"]:
             tmp["closed"] = not GPIO.input(self.pins["limitClosed"])
             if self.bDebug:
-                print "-d- gdMonitor: limit switch closed: {}".format(tmp["closed"])
+                print "-d- gdMonitor: switch closed: {}".format(tmp["closed"])
         self.limitStates = tmp
         return
+
+###############################################################################
 
     """On the fly rotary calibration
 
@@ -246,6 +264,8 @@ class GarageDoorMonitor(Sensor):
                     print "-d- gdMonitor: rotary calib - reset counter"
         return True
 
+###############################################################################
+
     """Determine state of garage door
 
     Inputs:
@@ -266,11 +286,12 @@ class GarageDoorMonitor(Sensor):
             elif self.limitStates["open"] or self.limitStates["closed"]:
                 limitState = True
                 doorState = 0 if self.limitStates["closed"] else 100
-            elif not self.limitStates["open"] and not self.limitStates["closed"]:
+            elif True not in [self.limitStates["open"],
+                              self.limitStates["closed"]]:
                 # if no switch is touched, door must be open. set to a # that
                 # doesn't represent open or closed
                 doorState = 50
-        # only check rotary encoder if enabled and neither limit switch was ON
+        # only use rotary encoder count if neither limit switch was ON
         if self.sensorType["rotary"] and not limitState:
             doorState = int(interp(self.rotaryCount,
                                    [self.rotaryLimits["closed"],
@@ -280,7 +301,12 @@ class GarageDoorMonitor(Sensor):
                             )
         return doorState
 
-    """Get current units - not relevant for garage door detector
+###############################################################################
+
+    """Get current units
+
+    Not relevant until rotary encoder is enabled
+    No way to tell distance without it
 
     Inputs:
         None
@@ -290,12 +316,16 @@ class GarageDoorMonitor(Sensor):
     def getUnits(self):
         return
 
+###############################################################################
+
     """Update sensor units
 
     Inputs:
-        units - whatever you want, it's unused
+        units - whatever you want, it's unused for now
     Returns:
         Nothing
     """
     def setUnits(self, units):
         return
+
+###############################################################################

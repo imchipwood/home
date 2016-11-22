@@ -12,6 +12,8 @@ class Sensor(object):
         super(Sensor, self).__init__()
         self.enable()
 
+###############################################################################
+
     """Enable sensor
 
     Inputs:
@@ -21,6 +23,8 @@ class Sensor(object):
     """
     def enable(self):
         self.state = True
+
+###############################################################################
 
     """Disable sensor
 
@@ -32,6 +36,8 @@ class Sensor(object):
     def disable(self):
         self.state = False
 
+###############################################################################
+
     """Return state of sensor
 
     Inputs:
@@ -41,6 +47,8 @@ class Sensor(object):
     """
     def getState(self):
         return self.state
+
+###############################################################################
 
     @abstractmethod
     def read(self):
@@ -53,6 +61,8 @@ class Sensor(object):
     @abstractmethod
     def getUnits(self):
         """Return the units this sensor is storing data in"""
+
+###############################################################################
 
 
 class SensorException(Exception):

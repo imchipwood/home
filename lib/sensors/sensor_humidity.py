@@ -10,10 +10,10 @@ class SensorHumidity(Sensor):
     """
     humidity = 0.0
     temperature = 0.0
-    validUnits = ['c', 'f']
-    validSensorTypes = {'11': Adafruit_DHT.DHT11,
-                        '22': Adafruit_DHT.DHT22,
-                        '2302': Adafruit_DHT.AM2302
+    validUnits = ["c", "f"]
+    validSensorTypes = {"11": Adafruit_DHT.DHT11,
+                        "22": Adafruit_DHT.DHT22,
+                        "2302": Adafruit_DHT.AM2302
                         }
     sensorType = validSensorTypes.values()[0]
     units = validUnits[0]
@@ -39,6 +39,8 @@ class SensorHumidity(Sensor):
         # units
         self.setUnits(units)
 
+###############################################################################
+
     """Take readings
 
     Inputs:
@@ -58,6 +60,8 @@ class SensorHumidity(Sensor):
             if hum is not None:
                 self.humidity = hum
 
+###############################################################################
+
     """Get last Humidity reading
 
     Inputs:
@@ -68,6 +72,8 @@ class SensorHumidity(Sensor):
     def getHumidity(self):
         return self.humidity
 
+###############################################################################
+
     """Get last temperature reading
 
     Inputs:
@@ -76,10 +82,12 @@ class SensorHumidity(Sensor):
         Temperature in self.units
     """
     def getTemperature(self):
-        if self.getUnits().lower() == 'f':
+        if self.getUnits().lower() == "f":
             return self.temperature * 9.0/5.0 + 32.0
         else:
             return self.temperature
+
+###############################################################################
 
     """Get current units
 
@@ -90,6 +98,8 @@ class SensorHumidity(Sensor):
     """
     def getUnits(self):
         return self.units
+
+###############################################################################
 
     """Update temperature units
 
@@ -107,6 +117,8 @@ class SensorHumidity(Sensor):
             sException = "Valid units: [" + "|".join(self.validUnits) + "]"
             raise SensorException(sException)
 
+###############################################################################
+
     """Get sensor type
 
     Inputs:
@@ -116,6 +128,8 @@ class SensorHumidity(Sensor):
     """
     def getSensorType(self):
         return self.sensorType
+
+###############################################################################
 
     """Set sensor type
 
@@ -134,3 +148,23 @@ class SensorHumidity(Sensor):
             sException = "Valid sensor types: ["
             sException += "|".join(self.sensorType.keys()) + "]"
             raise SensorException(sException)
+
+###############################################################################
+
+    """Print data
+
+    Prints data in a debug format
+
+    Inputs:
+        None
+    Returns:
+        Nothing
+    """
+    def printData(self):
+        print ("-d- Temperature[{0}]={1:0.1f}, "
+               "Humidity[{0}]={2:0.1f}".format(i,
+                                               h.getTemperature(),
+                                               h.getHumidity()
+                                               )
+               )
+        return
