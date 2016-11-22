@@ -84,7 +84,7 @@ def main():
         for i in xrange(0, 5):
             h.read()
             if bDebug:
-                printData()
+                printData(i, h.getTemperature(), h.getHumidity())
 
         # take N readings and average them
         if bDebug:
@@ -94,7 +94,7 @@ def main():
         for i in xrange(0, iAvg):
             h.read()
             if bDebug:
-                printData()
+                printData(i, h.getTemperature(), h.getHumidity())
             fTemperature += h.getTemperature()
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
