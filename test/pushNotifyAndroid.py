@@ -11,7 +11,7 @@ def main():
 
     code = getConfig(sConfFilePath)
     if code != False:
-        print "code: {}".format(code)
+        print "code: '{}'".format(code)
         requests.post("https://api.simplepush.io/send", data={"key": code,
                                                               "title": "Test",
                                                               "msg": "Notification"
