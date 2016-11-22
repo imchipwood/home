@@ -1,0 +1,25 @@
+#!/usr/bin/python
+import requests
+
+
+def main():
+    sConfFile = "server.txt"
+
+    sHomeDBPath = "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1])
+    sConfFilePath = sHomeDBPath+"/conf/"+sConfFile
+
+    code = getConfig(sConfFilePath)
+    requests.post("https://api.simplepush.io/send", data={"key": code, "title": "Fuck", "msg": "you."})
+    return
+
+
+def getConfig(f):
+    with open(f, "r") as inf:
+        for line in inf:
+            line = line.split("=")
+            if line[0] == "code":
+                return line[1]
+    return False
+
+if __name__ == "__main__":
+    main()
