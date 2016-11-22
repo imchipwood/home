@@ -9,39 +9,45 @@ from db_humidity import DBHumidity
 sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/sensors")
 from sensor_humidity import SensorHumidity
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-nAvg",
-                    "-n",
-                    type=int,
-                    default=5,
-                    help="# measurements to average. Optional. Default=5")
-parser.add_argument("-insert",
-                    "-i",
-                    action="store_false",
-                    default=True,
-                    help="Disable SQL insertion. Defaults to inserting")
-parser.add_argument("-debug",
-                    "-d",
-                    action="store_true",
-                    help="Enable debug messages")
 
-args = parser.parse_args()
-global iAvg
-global bInsert
-global bDebug
-iAvg = args.nAvg
-bInsert = args.insert
-bDebug = args.debug
+def parseArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-nAvg",
+                        "-n",
+                        type=int,
+                        default=5,
+                        help="# measurements to average. Optional. Default=5")
+    parser.add_argument("-insert",
+                        "-i",
+                        action="store_false",
+                        default=True,
+                        help="Disable SQL insertion. Defaults to inserting")
+    parser.add_argument("-configFile",
+                        "-c",
+                        type=str,
+                        default="sql_humidity_media.txt",
+                        help="Config file for SQL database interaction")
+    parser.add_argument("-configFileBackup",
+                        "-cb",
+                        type=str,
+                        default="sql_humidity_media_backup.txt",
+                        help="Config file for backup SQL database interaction")
+    parser.add_argument("-debug",
+                        "-d",
+                        action="store_true",
+                        help="Enable debug messages")
+    args = parser.parse_args()
+    return args
 
 
 def main():
-    global iAvg
-    global bInsert
-    global bDebug
 
-    # user-defined args
-    sDBAccessFileName = "sql_humidity_media.txt"
-    sDBAccessBackupFileName = "sql_humidity_media_backup.txt"
+    parsedArgs = parseArgs()
+    iAvg = parsedArgs.nAvg
+    sDBAccessFileName = parsedArgs.configFile
+    sDBAccessBackupFileName = parsedArgs.configFileBackup
+    bInsert = parsedArgs.insert
+    bDebug = parsedArgs.debug
 
     # set up db
     sHomeDBPath = "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1])
@@ -98,6 +104,7 @@ def main():
         traceback.print_exc()
         raise e
     return True
+
 
 if __name__ == "__main__":
     main()
