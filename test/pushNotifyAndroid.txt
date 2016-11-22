@@ -10,7 +10,10 @@ def main():
     sConfFilePath = sHomeDBPath+"/conf/"+sConfFile
 
     code = getConfig(sConfFilePath)
-    requests.post("https://api.simplepush.io/send", data={"key": code, "title": "Fuck", "msg": "you."})
+    if code != False:
+        requests.post("https://api.simplepush.io/send", data={"key": code, "title": "Fuck", "msg": "you."})
+    else:
+        print "code not right. {}".format(code)
     return
 
 
