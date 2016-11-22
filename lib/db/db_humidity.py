@@ -191,7 +191,7 @@ class DBHumidity(DBHome):
                 elif sKey == "n":
                     dQuery["query"] = "n"
                     try:
-                        dQuery["qualifier] = int(value)
+                        dQuery["qualifier"] = int(value)
                     except:
                         raise IOError("-E- DBHumidity: 'n' query invalid")
                 # today's entries

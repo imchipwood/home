@@ -14,9 +14,7 @@ def main():
         print "code: '{}'".format(code)
         requests.post("https://api.simplepush.io/send", data={"key": code,
                                                               "title": "Test",
-                                                              "msg": "Notification"
-                                                              }
-                      )
+                                                              "msg": "Notification"})
     else:
         print "code not right. {}".format(code)
     return
