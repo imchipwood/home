@@ -89,7 +89,12 @@ class GarageDoorMonitor(Sensor):
         with open(self.sConfFile, "r") as inf:
             for line in inf:
                 line = line.rstrip().split("=")
-                iPinNum = int(line[-1])
+                # attempt to convert value to int but ignore fails
+                # value might be a string for some other config (DB, etc.)
+                try:
+                    iPinNum = int(line[-1])
+                except:
+                    pass
                 if line[0] == "plo":
                     tmpPins["limitOpen"] = iPinNum
                 if line[0] == "plc":
