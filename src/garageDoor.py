@@ -119,7 +119,7 @@ def updateDatabase(homeDB, bBackupEnable, homeDBbackup, gdMonitor, gdinsert, bDe
     global endThreads
     onehz = 1.0
     lastonehztime = 0
-    lastDoorState = -1
+    lastDoorState = -99
     while not endThreads:
         now = float(timeit.default_timer())
         if (now - lastonehztime) > onehz:
