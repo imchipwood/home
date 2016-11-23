@@ -37,7 +37,7 @@ class GarageDoorMonitor(Sensor):
     }
     rotaryCount = 0
     bDebug = False
-    doorState = ""
+    doorState = -1
 
     """Initialize a Garage Door Monitor
 
