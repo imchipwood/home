@@ -89,8 +89,8 @@ def main():
         databaseThread = threading.Thread(target=updateDatabase,
                                           args=[hdb,
                                                 bBackupEnable,
-                                                hdbackup.getDoorState(),
-                                                gdm,
+                                                hdbackup,
+                                                gdm.getDoorState(),
                                                 bInsert,
                                                 bDebug])
         databaseThread.start()
