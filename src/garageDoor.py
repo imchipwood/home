@@ -124,7 +124,7 @@ def updateDatabase(homeDB, bBackupEnable, homeDBbackup, gdMonitor, gdinsert, bDe
         now = float(timeit.default_timer())
         if (now - lastonehztime) > onehz:
             lastonehztime = now
-            doorState = gdMonitor.getDoorState
+            doorState = gdMonitor.getDoorState()
             if doorState != lastDoorState:
                 lastDoorState = doorState
                 if bDebug:
