@@ -76,7 +76,7 @@ def main():
         if bDebug:
             print "-d- Accessing backup DB using credentials found here:"
             print "-d- {}".format(sGarageDoorBackupFile)
-        hdbbackup = DBHumidity(sGarageDoorBackupFile, bDebug=bDebug)
+        hdbackup = DBHumidity(sGarageDoorBackupFile, bDebug=bDebug)
     try:
         gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
     except:
@@ -89,7 +89,7 @@ def main():
         databaseThread = threading.Thread(target=updateDatabase,
                                           args=[hdb,
                                                 bBackupEnable,
-                                                hdbbackup,
+                                                hdbackup,
                                                 gdm,
                                                 bInsert,
                                                 bDebug])
