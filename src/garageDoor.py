@@ -9,10 +9,7 @@ import threading
 
 # all globals
 global sHomePath
-global nPinRelay
-global nPinRotary
 global endThreads
-global bDebug
 
 # stupidity until I figure out how to package my libs properly
 sHomePath = os.path.dirname(os.path.realpath(__file__))
@@ -22,68 +19,79 @@ from actuator_relay import Relay
 sys.path.append(sHomePath+"/lib/sensors")
 from sensor_gdMonitor import GarageDoorMonitor
 
-# argument parsing
-parser = argparse.ArgumentParser()
-parser.add_argument('-pinrelay',
-                    '-pr',
-                    type=int,
-                    default=None,
-                    help="Pin # for relay")
-parser.add_argument('-pinrotary',
-                    '-pro',
-                    type=int,
-                    default=None,
-                    help="Pin # for rotary sensor")
-parser.add_argument('-debug',
-                    '-d',
-                    action="store_true",
-                    help="Enable debug messages, also disable SQL injection")
 
-args = parser.parse_args()
-nPinRelay = args.pinrelay
-nPinRotary = args.pinrotary
-bDebug = args.debug
+def parseArgs():
+    # argument parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-insert",
+                        "-i",
+                        action="store_false",
+                        default=True,
+                        help="Disable SQL insertion. Defaults to inserting")
+    parser.add_argument("-configFile",
+                        "-c",
+                        type=str,
+                        default="sql_humidity_media.txt",
+                        help="Config file for SQL database interaction")
+    parser.add_argument("-configFileBackup",
+                        "-cb",
+                        type=str,
+                        default=None,
+                        help="Config file for backup SQL database interaction")
+    parser.add_argument('-debug',
+                        '-d',
+                        action="store_true",
+                        help="Enable debug messages, also disable SQL injection")
+
+    args = parser.parse_args()
+    return args
 
 
 def main():
-    global nPinRelay
-    global nPinRotary
     global sHomePath
-    global bDebug
     global endThreads
     endThreads = False
 
-    # user-defined args
-    # sDBAccessFileName = 'sql_humidity_media.txt'
-    sGarageDoorFileName = 'garageMonitor.txt'
+    parsedArgs = parseArgs()
+    sGarageDoorFileName = parsedArgs.configFile
+    sGarageDoorBackupFileName = parsedArgs.configFileBackup
+    bInsert = parsedArgs.insert
+    bDebug = parsedArgs.debug
 
-    # set up db
-    # sDBCredentialsFile = sHomePath+'/conf/'+sDBAccessFileName
-    # if bDebug:
-    #     print "-d- Accessing DB using credentials found here:"
-    #     print "-d- {}".format(sDBCredentialsFile)
-    # hdb = DBHumidity(sDBCredentialsFile, bDebug=bDebug)
+    bBackupEnable = True if sGarageDoorBackupFileName is not None else False
 
-    # set up the sensor
-    if bDebug:
-        print "-d- gd: Setting up Garage Door Controller"
-    if nPinRelay is not None:
-        gdc = Relay(nPinRelay)
     sGarageDoorFile = sHomePath+"/conf/"+sGarageDoorFileName
 
+    # set up DBs
+    if bDebug:
+        print "-d- Accessing DB using credentials found here:"
+        print "-d- {}".format(sGarageDoorFile)
+    hdb = DBHome(sGarageDoorFile, bDebug=bDebug)
+
+    if bBackupEnable:
+        sGarageDoorBackupFile = sHomeDBPath+"/conf/"+sGarageDoorBackupFileName
+        if bDebug:
+            print "-d- Accessing backup DB using credentials found here:"
+            print "-d- {}".format(sGarageDoorBackupFile)
+        hdbbackup = DBHumidity(sGarageDoorBackupFile, bDebug=bDebug)
     try:
         gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
 
         if nPinRelay is not None:
-            controlThread = threading.Thread(target=control, args=[gdc])
+            controlThread = threading.Thread(target=control, args=[gdc, bDebug])
             controlThread.start()
+
+        databaseThread = threading.Thread(target=updateDatabase,
+                                          args=[hdb,
+                                                hdbbackup,
+                                                gdm,
+                                                bInsert,
+                                                bDebug])
+        databaseThread.start()
 
         while True:
             # do nothing
             1
-
-        # insert data into the database
-        # hdb.insertData(dData, bDebug)
     except KeyboardInterrupt:
         endThreads = True
         print "\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n"
@@ -101,9 +109,39 @@ def main():
     return
 
 
-def control(c):
+def updateDatabase(homeDB, homeDBbackup, gdMonitor, gdinsert, bDebug):
     global endThreads
-    global bDebug
+    onehz = 1.0
+    lastonehztime = 0
+    lastDoorState = -1
+    while not endThreads:
+        now = float(timeit.default_timer())
+        if (now - lastonehztime) > onehz:
+            lastonehztime = now
+            doorState = gdMonitor.getDoorState
+            if doorState != lastDoorState:
+                lastDoorState = doorState
+                if bDebug:
+                    print "-d- gd: detected door state change: %s" % doorState
+                if 0 <= doorState <= 100:
+                    if bDebug:
+                        print "-d- gd: door state valid"
+                    try:
+                        homeDB.insertData(dData={"state": doorState},
+                                          insert=gdInsert,
+                                          bDebug=bDebug)
+                    except:
+                        if bBackupEnable:
+                            homeDBbackup.insertData(dData={"state": doorState},
+                                                    insert=gdInsert,
+                                                    bDebug=bDebug)
+                        else:
+                            raise
+    return
+
+
+def control(c, bDebug):
+    global endThreads
     onehz = 1.0
     lastonehztime = 0
     while not endThreads:
@@ -115,6 +153,7 @@ def control(c):
             # Uh, to be honest, I hadn't thought about how to control it yet.
             # Brilliant, I know
             # TODO: control thread - where to get relay toggle signal?
+    return
 
 
 if __name__ == '__main__':

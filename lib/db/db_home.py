@@ -100,9 +100,36 @@ class DBHome(object):
     Returns:
         True if data insertion was successful, False otherwise
     """
-    @abstractmethod
-    def insertData(self, dData, bDebug=False):
+    # @abstractmethod
+    def insertData(self, dData, insert=True, bDebug=False):
         """ Insert data into the database """
+        sDataFormatted = []
+        for key, value in dData:
+            sDataFormatted.append("{}, ".format(value))
+        dataFormattedArray[-1] = dataFormattedArray[-1].replace(", ", "")
+        sData = ""
+        for s in dataFormattedArray:
+            sData += s
+        sColumns = ", ".join(self._DBHome__conf["columns"])
+        self.dbcmd = (
+            "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', "
+            "{3})".format(self._DBHome__conf["table"],
+                         sColumns,
+                         self._DBHome__conf["room"],
+                         sData)
+        )
+        if bDebug:
+            print "-d- DBHome: Insert Command\n\t{}".format(self.dbcmd)
+        if insert:
+            try:
+                if bDebug:
+                    "-d- DBHome: attempting insertion"
+                self.executeCmd(self.dbcmd, "insert")
+            except Exception as E:
+                print "-E- DBHome: Error while inserting data into db."
+                traceback.print_exc()
+                return False
+        return True
 
     """Validate data before inserting into database
 

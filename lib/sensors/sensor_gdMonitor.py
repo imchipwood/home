@@ -37,6 +37,7 @@ class GarageDoorMonitor(Sensor):
     }
     rotaryCount = 0
     bDebug = False
+    doorState = ""
 
     """Initialize a Garage Door Monitor
 
@@ -190,7 +191,20 @@ class GarageDoorMonitor(Sensor):
     def read(self):
         self.readLimitSwitches()
         self.readRotaryEncoder()
+        self.calcDoorState()
         return
+
+###############################################################################
+
+    """Return current state
+
+    Inputs:
+        None
+    Returns:
+        self.
+    """
+    def getDoorState(self):
+        return self.doorState
 
 ###############################################################################
 
@@ -273,7 +287,7 @@ class GarageDoorMonitor(Sensor):
     Returns:
         integer between 0-100 representing % door is open
     """
-    def getDoorState(self):
+    def calcDoorState(self):
         doorState = 0
         limitState = False
         # priority is given to limit switches
@@ -299,7 +313,8 @@ class GarageDoorMonitor(Sensor):
                                    [0, 100]
                                    )
                             )
-        return doorState
+        self.doorState = doorState
+        return
 
 ###############################################################################
 

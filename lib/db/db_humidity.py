@@ -297,11 +297,11 @@ class DBHumidity(DBHome):
                     if bDebug:
                         "-d- DBHumidity: attempting insertion"
                     self.executeCmd(self.dbcmd, "insert")
-                    return True
                 except Exception as E:
                     print "-E- DBHumidity: Error while inserting data into db."
                     traceback.print_exc()
                     return False
+            return True
         else:
             if bDebug:
                 print "-e- DBHumidity: Data invalid - check sensor connections"
