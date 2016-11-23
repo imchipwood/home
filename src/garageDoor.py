@@ -78,7 +78,9 @@ def main():
         hdbbackup = DBHumidity(sGarageDoorBackupFile, bDebug=bDebug)
     try:
         gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
-
+    except:
+        raise
+    try:
         # if nPinRelay is not None:
         #     controlThread = threading.Thread(target=control, args=[gdc, bDebug])
         #     controlThread.start()
