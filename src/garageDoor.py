@@ -132,17 +132,21 @@ def updateDatabase(homeDB, bBackupEnable, homeDBbackup, gdMonitor, gdinsert, bDe
                 if 0 <= doorState <= 100:
                     if bDebug:
                         print "-d- gd: door state valid"
-                    try:
-                        homeDB.insertData(dData={"state": doorState},
-                                          insert=gdInsert,
-                                          bDebug=bDebug)
-                    except:
-                        if bBackupEnable:
-                            homeDBbackup.insertData(dData={"state": doorState},
-                                                    insert=gdInsert,
-                                                    bDebug=bDebug)
-                        else:
-                            raise
+                    #try:
+                    #    homeDB.insertData(dData={"state": doorState},
+                    #                      insert=gdInsert,
+                    #                      bDebug=bDebug)
+                    #except:
+                    #    if bBackupEnable:
+                    #        homeDBbackup.insertData(dData={"state": doorState},
+                    #                                insert=gdInsert,
+                    #                                bDebug=bDebug)
+                    #    else:
+                    #        raise
+                else:
+                    if bDebug:
+                        print "-d- gd: door state invalid"
+                    
     return
 
 

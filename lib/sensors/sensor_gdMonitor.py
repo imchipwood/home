@@ -285,7 +285,7 @@ class GarageDoorMonitor(Sensor):
 
 ###############################################################################
 
-    """Determine state of garage door
+    """Calculate state of garage door
 
     Inputs:
         None
