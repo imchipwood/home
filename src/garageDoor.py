@@ -70,6 +70,7 @@ def main():
         print "-d- {}".format(sGarageDoorFile)
     hdb = DBHome(sGarageDoorFile, bDebug=bDebug)
 
+    hdbackup = None
     if bBackupEnable:
         sGarageDoorBackupFile = sHomeDBPath+"/conf/"+sGarageDoorBackupFileName
         if bDebug:
@@ -87,6 +88,7 @@ def main():
 
         databaseThread = threading.Thread(target=updateDatabase,
                                           args=[hdb,
+                                                bBackupEnable,
                                                 hdbbackup,
                                                 gdm,
                                                 bInsert,
@@ -113,7 +115,7 @@ def main():
     return
 
 
-def updateDatabase(homeDB, homeDBbackup, gdMonitor, gdinsert, bDebug):
+def updateDatabase(homeDB, bBackupEnable, homeDBbackup, gdMonitor, gdinsert, bDebug):
     global endThreads
     onehz = 1.0
     lastonehztime = 0
