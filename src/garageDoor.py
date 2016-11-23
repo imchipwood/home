@@ -105,8 +105,8 @@ def main():
         raise e
     finally:
         endThreads = True
-        if nPinRelay is not None:
-            gdc.cleanup()
+        # if nPinRelay is not None:
+        #     gdc.cleanup()
         gdm.cleanup()
     return
 
