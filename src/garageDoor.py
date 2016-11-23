@@ -22,7 +22,6 @@ sys.path.append(sHomePath+"/lib/db")
 from db_home import DBHome
 
 
-
 def parseArgs():
     # argument parsing
     parser = argparse.ArgumentParser()
@@ -80,9 +79,9 @@ def main():
     try:
         gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
 
-        if nPinRelay is not None:
-            controlThread = threading.Thread(target=control, args=[gdc, bDebug])
-            controlThread.start()
+        # if nPinRelay is not None:
+        #     controlThread = threading.Thread(target=control, args=[gdc, bDebug])
+        #     controlThread.start()
 
         databaseThread = threading.Thread(target=updateDatabase,
                                           args=[hdb,
