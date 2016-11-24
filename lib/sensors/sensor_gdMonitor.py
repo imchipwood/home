@@ -38,6 +38,7 @@ class GarageDoorMonitor(Sensor):
     rotaryCount = 0
     bDebug = False
     doorState = -1
+    db = ""
 
     """Initialize a Garage Door Monitor
 
@@ -51,6 +52,8 @@ class GarageDoorMonitor(Sensor):
         super(GarageDoorMonitor, self).__init__()
         self.bDebug = debug
         GPIO.setmode(GPIO.BCM)
+        
+        self.db = database
 
         # read config file
         if os.path.exists(f):
@@ -183,6 +186,10 @@ class GarageDoorMonitor(Sensor):
                         if 0 <= dState <= 100:
                             if self.bDebug:
                                 print "-d- gdMonitor: door state valid"
+                            try:
+                                self.db.insertData(dData={"state":dState}, insert=True, bDebug=self.bDebug)
+                            except:
+                                raise
                         else:
                             if self.bDebug:
                                 print "-d- gdMonitor: door state invalid"
