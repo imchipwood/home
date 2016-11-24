@@ -99,20 +99,20 @@ def main():
             onehz = 1.0
             lastonehztime = 0.0
             lastDoorState = -99
-            now = float(timeit.default_timer())
-            if (now - lastonehztime) > onehz:
-                lastonehztime = now
-                print "now: {}, lastonehztime: {}".format(now, lastonehztime)
-                dState = gdm.getDoorState()
-                if bDebug:
-                    print "-d- gd: door state: {}".format(dState)
-                #if dState != lastDoorState:
-                #    lastDoorState = dState
-                #    if bDebug:
-                #        print "-d- gd: detected door state change: %s" % dState
-                #    if 0 <= dState <= 100:
-                #        if bDebug:
-                #            print "-d- gd: door state valid"
+            #now = float(timeit.default_timer())
+            #if (now - lastonehztime) > onehz:
+            #    lastonehztime = now
+            #    print "now: {}, lastonehztime: {}".format(now, lastonehztime)
+            #    dState = gdm.getDoorState()
+            #    if bDebug:
+            #        print "-d- gd: door state: {}".format(dState)
+            #    #if dState != lastDoorState:
+            #    #    lastDoorState = dState
+            #    #    if bDebug:
+            #    #        print "-d- gd: detected door state change: %s" % dState
+            #    #    if 0 <= dState <= 100:
+            #    #        if bDebug:
+            #    #            print "-d- gd: door state valid"
     except KeyboardInterrupt:
         endThreads = True
         print "\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n"
