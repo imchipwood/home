@@ -163,6 +163,7 @@ class GarageDoorMonitor(Sensor):
     def monitor(self):
         onehz = 1.0
         lastonehztime = 0
+        lastDoorState = -99
         while True:
             now = float(timeit.default_timer())
             if (now - lastonehztime) > onehz:
@@ -171,10 +172,19 @@ class GarageDoorMonitor(Sensor):
                     print "-d- gdMonitor: thread executing"
                 try:
                     self.read()
+                    dState = self.getDoorState()
                     if self.bDebug:
-                        print ("-d- gdMonitor: thread state: {}".format(
-                               self.getDoorState())
+                        print ("-d- gdMonitor: thread state: {}".format(dState)
                                )
+                    if dState != lastDoorState:
+                        lastDoorState = dState
+                        if bDebug:
+                            print "-d- gdMonitor: detected door state change: %s" % dState
+                        if 0 <= dState <= 100:
+                            if bDebug:
+                                print "-d- gdMonitor: door state valid"
+                            
+                        
                 except:
                     if self.bDebug:
                         print "-d- gdMonitor: thread exception"
