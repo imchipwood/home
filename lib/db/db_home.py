@@ -103,9 +103,9 @@ class DBHome(object):
     # @abstractmethod
     def insertData(self, dData, insert=True, bDebug=False):
         """ Insert data into the database """
-        sDataFormatted = []
+        dataFormattedArray = []
         for key in dData:
-            sDataFormatted.append("{}, ".format(dData[key]))
+            dataFormattedArray.append("{}, ".format(dData[key]))
         dataFormattedArray[-1] = dataFormattedArray[-1].replace(", ", "")
         sData = ""
         for s in dataFormattedArray:
