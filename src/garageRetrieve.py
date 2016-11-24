@@ -18,7 +18,7 @@ def parseArgs():
     parser.add_argument("-configFile",
                         "-c",
                         type=str,
-                        default="sql_humidity_get.txt",
+                        default="sql_doors_get.txt",
                         help="Config file for SQL database interaction")
     parser.add_argument('-debug',
                         '-d',
