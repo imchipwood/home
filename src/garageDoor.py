@@ -86,18 +86,32 @@ def main():
         #     controlThread = threading.Thread(target=control, args=[gdc, bDebug])
         #     controlThread.start()
 
-        databaseThread = threading.Thread(target=updateDatabase,
-                                          args=[hdb,
-                                                bBackupEnable,
-                                                hdbackup,
-                                                gdm,
-                                                bInsert,
-                                                bDebug])
-        databaseThread.start()
+        # databaseThread = threading.Thread(target=updateDatabase,
+        #                                   args=[hdb,
+        #                                         bBackupEnable,
+        #                                         hdbackup,
+        #                                         gdm,
+        #                                         bInsert,
+        #                                         bDebug])
+        # databaseThread.start()
 
-        while True:
-            # do nothing
-            1
+        while not endThreads:
+            onehz = 1.0
+            lastonehztime = 0
+            lastDoorState = -99
+                now = float(timeit.default_timer())
+                if (now - lastonehztime) > onehz:
+                    lastonehztime = now
+                    dState = gdm.getDoorState()
+                    if bDebug:
+                        print "-d- gd: door state: {}".format(dState)
+                    if dState != lastDoorState:
+                        lastDoorState = dState
+                        if bDebug:
+                            print "-d- gd: detected door state change: %s" % dState
+                        if 0 <= dState <= 100:
+                            if bDebug:
+                                print "-d- gd: door state valid"
     except KeyboardInterrupt:
         endThreads = True
         print "\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n"
