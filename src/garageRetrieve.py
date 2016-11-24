@@ -5,7 +5,7 @@ import argparse
 import traceback
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
-from db_humidity import DBHumidity
+from db_home import DBHome
 
 
 def parseArgs():
@@ -44,7 +44,7 @@ def main():
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
-    hdb = DBHumidity(sDBCredentialsFile, bDebug=bDebug)
+    hdb = DBHome(sDBCredentialsFile, bDebug=bDebug)
 
     # do query and format the data
     try:
