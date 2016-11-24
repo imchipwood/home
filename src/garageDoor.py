@@ -105,13 +105,13 @@ def main():
                 dState = gdm.getDoorState()
                 if bDebug:
                     print "-d- gd: door state: {}".format(dState)
-                if dState != lastDoorState:
-                    lastDoorState = dState
-                    if bDebug:
-                        print "-d- gd: detected door state change: %s" % dState
-                    if 0 <= dState <= 100:
-                        if bDebug:
-                            print "-d- gd: door state valid"
+                #if dState != lastDoorState:
+                #    lastDoorState = dState
+                #    if bDebug:
+                #        print "-d- gd: detected door state change: %s" % dState
+                #    if 0 <= dState <= 100:
+                #        if bDebug:
+                #            print "-d- gd: door state valid"
     except KeyboardInterrupt:
         endThreads = True
         print "\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n"
