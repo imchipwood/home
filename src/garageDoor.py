@@ -99,19 +99,19 @@ def main():
             onehz = 1.0
             lastonehztime = 0
             lastDoorState = -99
-                now = float(timeit.default_timer())
-                if (now - lastonehztime) > onehz:
-                    lastonehztime = now
-                    dState = gdm.getDoorState()
+            now = float(timeit.default_timer())
+            if (now - lastonehztime) > onehz:
+                lastonehztime = now
+                dState = gdm.getDoorState()
+                if bDebug:
+                    print "-d- gd: door state: {}".format(dState)
+                if dState != lastDoorState:
+                    lastDoorState = dState
                     if bDebug:
-                        print "-d- gd: door state: {}".format(dState)
-                    if dState != lastDoorState:
-                        lastDoorState = dState
+                        print "-d- gd: detected door state change: %s" % dState
+                    if 0 <= dState <= 100:
                         if bDebug:
-                            print "-d- gd: detected door state change: %s" % dState
-                        if 0 <= dState <= 100:
-                            if bDebug:
-                                print "-d- gd: door state valid"
+                            print "-d- gd: door state valid"
     except KeyboardInterrupt:
         endThreads = True
         print "\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n"
@@ -148,21 +148,20 @@ def updateDatabase(homeDB, bBackupEnable, homeDBbackup, gdMonitor, gdinsert, bDe
                 if 0 <= dState <= 100:
                     if bDebug:
                         print "-d- gd: door state valid"
-                    #try:
-                    #    homeDB.insertData(dData={"state": dState},
-                    #                      insert=gdInsert,
-                    #                      bDebug=bDebug)
-                    #except:
-                    #    if bBackupEnable:
-                    #        homeDBbackup.insertData(dData={"state": dState},
-                    #                                insert=gdInsert,
-                    #                                bDebug=bDebug)
-                    #    else:
+                    # try:
+                    #     homeDB.insertData(dData={"state": dState},
+                    #                       insert=gdInsert,
+                    #                       bDebug=bDebug)
+                    # except:
+                    #     if bBackupEnable:
+                    #         homeDBbackup.insertData(dData={"state": dState},
+                    #                                 insert=gdInsert,
+                    #                                 bDebug=bDebug)
+                    #     else:
                     #        raise
                 else:
                     if bDebug:
                         print "-d- gd: door state invalid"
-                    
     return
 
 
