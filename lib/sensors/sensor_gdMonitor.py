@@ -47,7 +47,7 @@ class GarageDoorMonitor(Sensor):
     Returns:
         Nothing
     """
-    def __init__(self, f, debug=False):
+    def __init__(self, f, database, debug=False):
         super(GarageDoorMonitor, self).__init__()
         self.bDebug = debug
         GPIO.setmode(GPIO.BCM)
