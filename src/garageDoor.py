@@ -102,6 +102,7 @@ def main():
             now = float(timeit.default_timer())
             if (now - lastonehztime) > onehz:
                 lastonehztime = now
+                print "now: {}, lastonehztime: {}".format(now, lastonehztime)
                 dState = gdm.getDoorState()
                 if bDebug:
                     print "-d- gd: door state: {}".format(dState)
