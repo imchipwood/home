@@ -26,6 +26,7 @@ class DBHome(object):
               "room": "",
               "columns": []
               }
+    lDataColumns = []
     sConfFile = ""
 
     bDebug = False
@@ -59,6 +60,12 @@ class DBHome(object):
                                           passwd=self.__conf["pw"],
                                           db=self.__conf["db"])
                 self.curs = self.db.cursor()
+
+                # figure out what data columns are available
+                for col in self.__conf["columns"]:
+                    if col not in ["tdate", "ttime", "room"]:
+                        self.lDataColumns.append(col)
+
             except Exception as e:
                 print "-E- HomeDB Error: Failed to open database"
                 print e
@@ -70,16 +77,16 @@ class DBHome(object):
 
 ###############################################################################
 
-    """Format retrieved data
-
-    Inputs:
-        none
-    Returns:
-        nothing
-    """
-    @abstractmethod
-    def formatResults(self):
-        """ Format results into a readable/printable format """
+#    """Format retrieved data
+#
+#    Inputs:
+#        none
+#    Returns:
+#        nothing
+#    """
+#    @abstractmethod
+#    def formatResults(self):
+#        """ Format results into a readable/printable format """
 
     """Validate data before inserting into database
 
@@ -91,6 +98,47 @@ class DBHome(object):
     @abstractmethod
     def validateData(self, dData, bDebug=False):
         """ Validate data before inserting """
+
+###############################################################################
+
+    """Format retrieved data
+
+    Inputs:
+        none
+    Returns:
+        nothing
+    """
+    def formatResults(self):
+        if self.getDataRaw() != []:
+            dataFormatted = []
+            sSeparator = ("----------------------------"
+                          "----------------------------")
+            sHeader = "Date       | Time     | Room     | "
+            for col in self.lDataColumns:
+                sHeader += "{>12} | ".format(col)
+
+            dataFormatted.append(sSeparator)
+            dataFormatted.append(sHeader)
+            dataFormatted.append(sSeparator)
+            
+            lData = []
+            for i in reversed(xrange(len(self.getDataRaw()))):
+                reading = self.getDataRaw()[i]
+                date = "{}".format(reading[0])
+                time = "{0:8s}".format(reading[1])
+                room = "{0:8s}".format(reading[2])
+                sInfo = "{} | {} | {}".format(date, time, room)
+                for r in reading[3:]:
+                    lData.append("{>12}".format(r))
+                sData = ""
+                for d in lData:
+                    sData += "{} | ".format(d)
+                sData = sInfo + sData
+                dataFormatted.append(sData)
+            dataFormatted.append(sSeparator)
+        else:
+            dataFormatted = []
+        return dataFormatted
 
 ###############################################################################
 
