@@ -90,7 +90,7 @@ def main():
                                           args=[hdb,
                                                 bBackupEnable,
                                                 hdbackup,
-                                                gdm.getDoorState(),
+                                                gdm,
                                                 bInsert,
                                                 bDebug])
         databaseThread.start()
@@ -124,7 +124,7 @@ def updateDatabase(homeDB, bBackupEnable, homeDBbackup, gdMonitor, gdinsert, bDe
         now = float(timeit.default_timer())
         if (now - lastonehztime) > onehz:
             lastonehztime = now
-            dState = gdMonitor#.getDoorState()
+            dState = gdMonitor.getDoorState()
             if bDebug:
                 print "-d- gd: door state: {}".format(dState)
             if dState != lastDoorState:
