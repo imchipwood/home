@@ -133,7 +133,7 @@ class DBHome(object):
                     lData.append("{0:>12}".format(r))
                 sData = ""
                 for d in lData:
-                    sData += "{} | ".format(d)
+                    sData += " | {}".format(d)
                 sData = sInfo + sData
                 dataFormatted.append(sData)
             dataFormatted.append(sSeparator)
@@ -168,7 +168,7 @@ class DBHome(object):
 
         # extract the date column - it's used by most query types
         sDateCol = sRoomCol = ""
-        for col in self._DBHome__conf["columns"]:
+        for col in self.__conf["columns"]:
             if "date" in col.lower():
                 sDateCol = col
             if "room" in col.lower():
@@ -199,6 +199,10 @@ class DBHome(object):
 
         # construct query
         dbcmd = ""
+        sColumns = ""
+        for col in self.__conf["columns"]:
+            sColumns += "{},".format(col)
+        sColumns = sColumns[:-1]
         if dQuery["query"] == "n":
             # special case for the room query
             # 1) no " and" at the end if a room WAS specified, and
@@ -209,49 +213,54 @@ class DBHome(object):
             else:
                 sRoomQuery = ""
             dbcmd = (
-                "SELECT * FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(
-                    self._DBHome__conf["table"],
+                "SELECT {3} FROM {0} {1} ORDER BY ID DESC LIMIT {2}".format(
+                    self.__conf["table"],
                     sRoomQuery,
-                    dQuery["qualifier"]
+                    dQuery["qualifier"],
+                    sColumns
                 )
             )
         elif dQuery["query"] == "today":
             dbcmd = (
-                "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() "
+                "SELECT {3} FROM {0} {1} {2} BETWEEN CURRENT_DATE() AND NOW() "
                 "ORDER BY ID DESC".format(
-                    self._DBHome__conf["table"],
+                    self.__conf["table"],
                     sRoomQuery,
-                    sDateCol
+                    sDateCol,
+                    sColumns
                 )
             )
         elif dQuery["query"] == "yesterday":
             dbcmd = (
-                "SELECT * FROM {0} {1} {2} BETWEEN CURRENT_DATE()-1 AND "
+                "SELECT {3} FROM {0} {1} {2} BETWEEN CURRENT_DATE()-1 AND "
                 "CURRENT_DATE()-1 ORDER BY ID DESC".format(
-                    self._DBHome__conf["table"],
+                    self.__conf["table"],
                     sRoomQuery,
-                    sDateCol
+                    sDateCol,
+                    sColumns
                 )
             )
         elif dQuery["query"] == "date":
             dbcmd = (
-                "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' "
+                "SELECT {4} FROM {0} {1} {2} BETWEEN '{3}' AND '{3} 23:59:59' "
                 "ORDER BY ID DESC".format(
-                    self._DBHome__conf["table"],
+                    self.__conf["table"],
                     sRoomQuery,
                     sDateCol,
-                    dQuery["qualifier"]
+                    dQuery["qualifier"],
+                    sColumns
                 )
             )
         elif dQuery["query"] == "daterange":
             dbcmd = (
-                "SELECT * FROM {0} {1} {2} BETWEEN '{3}' AND '{4} 23:59:59' "
+                "SELECT {5} FROM {0} {1} {2} BETWEEN '{3}' AND '{4} 23:59:59' "
                 "ORDER BY ID DESC".format(
-                    self._DBHome__conf["table"],
+                    self.__conf["table"],
                     sRoomQuery,
                     sDateCol,
                     dQuery["qualifier"]["start"],
-                    dQuery["qualifier"]["end"]
+                    dQuery["qualifier"]["end"],
+                    sColumns
                 )
             )
         else:
@@ -364,12 +373,12 @@ class DBHome(object):
         sData = ""
         for s in dataFormattedArray:
             sData += s
-        sColumns = ", ".join(self._DBHome__conf["columns"])
+        sColumns = ", ".join(self.__conf["columns"])
         self.dbcmd = (
             "INSERT INTO {0} ({1}) values(CURRENT_DATE(), NOW(), '{2}', "
-            "{3})".format(self._DBHome__conf["table"],
+            "{3})".format(self.__conf["table"],
                           sColumns,
-                          self._DBHome__conf["room"],
+                          self.__conf["room"],
                           sData)
         )
         if bDebug:
