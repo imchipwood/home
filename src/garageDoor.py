@@ -33,7 +33,7 @@ def parseArgs():
     parser.add_argument("-configFile",
                         "-c",
                         type=str,
-                        default="sql_humidity_media.txt",
+                        default="garageMonitor.txt",
                         help="Config file for SQL database interaction")
     parser.add_argument("-configFileBackup",
                         "-cb",
