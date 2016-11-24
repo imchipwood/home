@@ -97,7 +97,7 @@ def main():
 
         while not endThreads:
             onehz = 1.0
-            lastonehztime = 0
+            lastonehztime = 0.0
             lastDoorState = -99
             now = float(timeit.default_timer())
             if (now - lastonehztime) > onehz:
