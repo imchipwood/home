@@ -178,10 +178,10 @@ class GarageDoorMonitor(Sensor):
                                )
                     if dState != lastDoorState:
                         lastDoorState = dState
-                        if bDebug:
+                        if self.bDebug:
                             print "-d- gdMonitor: detected door state change: %s" % dState
                         if 0 <= dState <= 100:
-                            if bDebug:
+                            if self.bDebug:
                                 print "-d- gdMonitor: door state valid"
                             
                         
