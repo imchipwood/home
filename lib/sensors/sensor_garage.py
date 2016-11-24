@@ -1,6 +1,6 @@
 
 import os
-import GarageDoorMonitor
+from sensor_gdMonitor import GarageDoorMonitor
 
 sHomePath = os.path.dirname(os.path.realpath(__file__))
 sHomePath = "/".join(sHomePath.split("/")[:-1])
