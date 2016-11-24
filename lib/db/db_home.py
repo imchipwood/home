@@ -121,13 +121,14 @@ class DBHome(object):
             dataFormatted.append(sHeader)
             dataFormatted.append(sSeparator)
             
-            lData = []
+            
             for i in reversed(xrange(len(self.getDataRaw()))):
                 reading = self.getDataRaw()[i]
                 date = "{}".format(reading[0])
                 time = "{0:8s}".format(reading[1])
                 room = "{0:8s}".format(reading[2])
                 sInfo = "{} | {} | {}".format(date, time, room)
+                lData = []
                 for r in reading[3:]:
                     lData.append("{0:>12}".format(r))
                 sData = ""
