@@ -115,7 +115,7 @@ class DBHome(object):
                           "----------------------------")
             sHeader = "Date       | Time     | Room     | "
             for col in self.lDataColumns:
-                sHeader += "{>12} | ".format(col)
+                sHeader += "{0:>12} | ".format(col)
 
             dataFormatted.append(sSeparator)
             dataFormatted.append(sHeader)
@@ -129,7 +129,7 @@ class DBHome(object):
                 room = "{0:8s}".format(reading[2])
                 sInfo = "{} | {} | {}".format(date, time, room)
                 for r in reading[3:]:
-                    lData.append("{>12}".format(r))
+                    lData.append("{0:>12}".format(r))
                 sData = ""
                 for d in lData:
                     sData += "{} | ".format(d)
