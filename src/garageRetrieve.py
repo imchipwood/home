@@ -49,6 +49,7 @@ def main():
     # do query and format the data
     try:
         hdb.retrieveData(sQuery, bDebug)
+        hdb.getDataRaw()
         hdb.displayResults()
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
