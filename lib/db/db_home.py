@@ -116,6 +116,7 @@ class DBHome(object):
             sHeader = "Date       | Time     | Room     | "
             for col in self.lDataColumns:
                 sHeader += "{0:>12} | ".format(col)
+            sHeader = sHeader[:-3]
 
             dataFormatted.append(sSeparator)
             dataFormatted.append(sHeader)
