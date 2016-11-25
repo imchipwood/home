@@ -4,6 +4,7 @@ from multiprocessing import Process
 import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
+from db_home import DBHome
 
 
 class GarageDoorMonitor(Sensor):
@@ -48,12 +49,10 @@ class GarageDoorMonitor(Sensor):
     Returns:
         Nothing
     """
-    def __init__(self, f, database, debug=False):
+    def __init__(self, f, debug=False):
         super(GarageDoorMonitor, self).__init__()
         self.bDebug = debug
         GPIO.setmode(GPIO.BCM)
-        
-        self.db = database
 
         # read config file
         if os.path.exists(f):
@@ -63,6 +62,8 @@ class GarageDoorMonitor(Sensor):
             raise IOError()
 
         if self.readConfig():
+
+            self.db = DBHome(self.sConfFile, bDebug=self.bDebug)
 
             # determine sensor type
             self.enableSensors()

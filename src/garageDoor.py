@@ -65,20 +65,20 @@ def main():
     sGarageDoorFile = sHomePath+"/conf/"+sGarageDoorFileName
 
     # set up DBs
-    if bDebug:
-        print "-d- Accessing DB using credentials found here:"
-        print "-d- {}".format(sGarageDoorFile)
-    hdb = DBHome(sGarageDoorFile, bDebug=bDebug)
+    # if bDebug:
+    #     print "-d- Accessing DB using credentials found here:"
+    #     print "-d- {}".format(sGarageDoorFile)
+    # hdb = DBHome(sGarageDoorFile, bDebug=bDebug)
 
-    hdbackup = None
-    if bBackupEnable:
-        sGarageDoorBackupFile = sHomeDBPath+"/conf/"+sGarageDoorBackupFileName
-        if bDebug:
-            print "-d- Accessing backup DB using credentials found here:"
-            print "-d- {}".format(sGarageDoorBackupFile)
-        hdbackup = DBHumidity(sGarageDoorBackupFile, bDebug=bDebug)
+    # hdbackup = None
+    # if bBackupEnable:
+    #     sGarageDoorBackupFile = sHomeDBPath+"/conf/"+sGarageDoorBackupFileName
+    #     if bDebug:
+    #         print "-d- Accessing backup DB using credentials found here:"
+    #         print "-d- {}".format(sGarageDoorBackupFile)
+    #     hdbackup = DBHumidity(sGarageDoorBackupFile, bDebug=bDebug)
     try:
-        gdm = GarageDoorMonitor(sGarageDoorFile, hdb, bDebug)
+        gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
     except:
         raise
     try:
