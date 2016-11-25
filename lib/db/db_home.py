@@ -59,6 +59,7 @@ class DBHome(object):
                                           user=self.__conf["user"],
                                           passwd=self.__conf["pw"],
                                           db=self.__conf["db"])
+                # http://www.neotitans.com/resources/python/mysql-python-connection-error-2006.html
                 self.db.ping(True)
                 self.curs = self.db.cursor()
 

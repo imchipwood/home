@@ -167,7 +167,8 @@ class GarageDoorMonitor(Sensor):
     """Monitor thread
 
     This function is intended to be launched as a thread to read sensors
-    on a one second interval
+    on a one second interval and update database with new data. Will update
+    database when first launched
 
     Inputs:
         endThreads - a boolean to exit all threads
@@ -198,7 +199,9 @@ class GarageDoorMonitor(Sensor):
                             if self.bDebug:
                                 print "-d- gdMonitor: door state valid"
                             try:
-                                self.db.insertData(dData={"state":dState}, insert=True, bDebug=self.bDebug)
+                                self.db.insertData(dData={"state":dState},
+                                                   insert=True,
+                                                   bDebug=self.bDebug)
                             except:
                                 raise
                         else:
