@@ -12,7 +12,7 @@ sHomePath = os.path.dirname(os.path.realpath(__file__))
 sHomePath = "/".join(sHomePath.split("/")[:-1])
 while "home" not in sHomePath.split("/"[-1]):
     sHomePath = "/".join(sHomePath.split("/")[:-1])
-
+print sHomePath
 sys.path.append(sHomePath+"/lib/db")
 from db_home import DBHome
 
