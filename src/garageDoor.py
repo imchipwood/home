@@ -7,13 +7,16 @@ from time import sleep
 import timeit
 import threading
 
-# all globals
+# globals
 global sHomePath
 global endThreads
 
 # stupidity until I figure out how to package my libs properly
 sHomePath = os.path.dirname(os.path.realpath(__file__))
 sHomePath = "/".join(sHomePath.split("/")[:-1])
+while "home" not in sHomePath.split("/"[-1]):
+    sHomePath = "/".join(sHomePath.split("/")[:-1])
+
 sys.path.append(sHomePath+"/lib/actuators")
 from actuator_relay import Relay
 sys.path.append(sHomePath+"/lib/sensors")

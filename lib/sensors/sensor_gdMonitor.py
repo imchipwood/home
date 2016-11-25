@@ -4,6 +4,15 @@ from multiprocessing import Process
 import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
+
+# stupidity until I figure out how to package my libs properly
+global sHomePath
+sHomePath = os.path.dirname(os.path.realpath(__file__))
+sHomePath = "/".join(sHomePath.split("/")[:-1])
+while "home" not in sHomePath.split("/"[-1]):
+    sHomePath = "/".join(sHomePath.split("/")[:-1])
+
+sys.path.append(sHomePath+"/lib/db")
 from db_home import DBHome
 
 

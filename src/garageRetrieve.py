@@ -4,7 +4,14 @@ import os
 import argparse
 import traceback
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
+# stupidity until I figure out how to package my libs properly
+global sHomePath
+sHomePath = os.path.dirname(os.path.realpath(__file__))
+sHomePath = "/".join(sHomePath.split("/")[:-1])
+while "home" not in sHomePath.split("/"[-1]):
+    sHomePath = "/".join(sHomePath.split("/")[:-1])
+
+sys.path.append(sHomePath+"/lib/db")
 from db_home import DBHome
 
 
@@ -30,6 +37,8 @@ def parseArgs():
 
 
 def main():
+    global sHomePath
+    
     parsedArgs = parseArgs()
     sQuery = parsedArgs.query
     sDBAccessFileName = parsedArgs.configFile
@@ -39,8 +48,8 @@ def main():
         print "-d- sQuery: {}".format(sQuery)
 
     # set up db
-    sHomeDBPath = "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1])
-    sDBCredentialsFile = sHomeDBPath+'/conf/'+sDBAccessFileName
+    
+    sDBCredentialsFile = sHomePath+'/conf/'+sDBAccessFileName
     if bDebug:
         print "-d- Accessing DB using credentials found here:"
         print "-d- {}".format(sDBCredentialsFile)
