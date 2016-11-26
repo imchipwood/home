@@ -6,6 +6,7 @@ formatting of data for printing
 """
 
 import os
+import time
 import MySQLdb
 import traceback
 from abc import abstractmethod
@@ -51,27 +52,22 @@ class DBHome(object):
             raise IOError()
 
         if self.readConfig():
+            # figure out what data columns are available
+            for col in self.__conf["columns"]:
+                if col not in ["tdate", "ttime", "room"]:
+                    self.lDataColumns.append(col)
+
             # open up database
-            # if self.bDebug:
-            #     print self.__conf
             try:
-                self.db = MySQLdb.connect(host=self.__conf["host"],
-                                          user=self.__conf["user"],
-                                          passwd=self.__conf["pw"],
-                                          db=self.__conf["db"])
-                # http://www.neotitans.com/resources/python/mysql-python-connection-error-2006.html
-                self.db.ping(True)
-                self.curs = self.db.cursor()
-
-                # figure out what data columns are available
-                for col in self.__conf["columns"]:
-                    if col not in ["tdate", "ttime", "room"]:
-                        self.lDataColumns.append(col)
-
-            except Exception as e:
-                print "-E- HomeDB Error: Failed to open database"
-                print e
-                raise e
+                self.connect()
+            except:
+                time.sleep(60)
+                try:
+                    self.connect()
+                except Exception as e:
+                    print "-E- HomeDB Error: Failed to open database"
+                    print e
+                    raise e
         else:
             print "-E- HomeDB Error: Failed to parse DB config file:"
             print "\t-E- {}".format(self.sConfFile)
@@ -103,6 +99,25 @@ class DBHome(object):
 
 ###############################################################################
 
+    """Connect to the database
+
+    Inputs:
+        none
+    Returns:
+        nothing
+    """
+    def connect(self):
+        self.db = MySQLdb.connect(host=self.__conf["host"],
+                                  user=self.__conf["user"],
+                                  passwd=self.__conf["pw"],
+                                  db=self.__conf["db"])
+        # http://www.neotitans.com/resources/python/mysql-python-connection-error-2006.html
+        self.db.ping(True)
+        self.curs = self.db.cursor()
+        return
+
+###############################################################################
+
     """Format retrieved data
 
     Inputs:
@@ -123,8 +138,8 @@ class DBHome(object):
             dataFormatted.append(sSeparator)
             dataFormatted.append(sHeader)
             dataFormatted.append(sSeparator)
-            
-            
+
+
             for i in reversed(xrange(len(self.getDataRaw()))):
                 reading = self.getDataRaw()[i]
                 date = "{}".format(reading[0])

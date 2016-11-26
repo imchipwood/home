@@ -27,7 +27,6 @@ class GarageDoorMonitor(Sensor):
     1. Rotary Encoder (attached to motor, detect rotations)
     2. Limit switch(es) - top and bottom to detect only fully open and closed
     """
-    validSensorTypes = ["rotary", "limitOpen", "limitClosed"]
     sensorType = {
         "rotary": False,
         "limitOpen": False,
@@ -68,7 +67,7 @@ class GarageDoorMonitor(Sensor):
         if os.path.exists(f):
             self.sConfFile = f
         else:
-            print "-E- HomeDB: Check if file exists: {}".format(f)
+            print "-E- gdMonitor: Check if file exists: {}".format(f)
             raise IOError()
 
         if self.readConfig():
@@ -188,22 +187,30 @@ class GarageDoorMonitor(Sensor):
                 try:
                     self.read()
                     dState = self.getDoorState()
-                    if self.bDebug:
-                        print ("-d- gdMonitor: thread state: {}".format(dState)
-                               )
+                    # if self.bDebug:
+                    #     print ("-d- gdMonitor: thread state: {}".format(dState)
+                    #            )
                     if dState != lastDoorState:
                         lastDoorState = dState
                         if self.bDebug:
                             print "-d- gdMonitor: state changed: %s" % dState
                         if 0 <= dState <= 100:
-                            if self.bDebug:
-                                print "-d- gdMonitor: door state valid"
+                            # if self.bDebug:
+                            #     print "-d- gdMonitor: door state valid"
+                            # try inserting into db
+                            # if it fails, try again
                             try:
                                 self.db.insertData(dData={"state":dState},
                                                    insert=True,
                                                    bDebug=self.bDebug)
                             except:
-                                raise
+                                self.db.connect()
+                                try:
+                                    self.db.insertData(dData={"state":dState},
+                                                       insert=True,
+                                                       bDebug=self.bDebug)
+                                except:
+                                    raise
                         else:
                             if self.bDebug:
                                 print "-d- gdMonitor: door state invalid"
