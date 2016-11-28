@@ -24,7 +24,7 @@ class DBHumidity(DBHome):
     """
     def formatResults(self):
         dataFormatted = []
-        if self.getDataRaw() != []:
+        if self.getDataRaw() != ():
             dataFormatted = []
             sSeparator = ("----------------------------"
                           "----------------------------")
@@ -150,7 +150,7 @@ class DBHumidity(DBHome):
     def formatDataForGoogleCharts(self):
         dataFormatted = ""
         dataFormattedArray = []
-        if self.getDataRaw() != []:
+        if self.getDataRaw() != ():
             # build all table rows
             for i in reversed(xrange(len(self.getDataRaw()))):
                 reading = self.getDataRaw()[i]
