@@ -154,11 +154,11 @@ def main():
         state = ddb.getDataRaw()[-1][-1]
         sGarageState = "<h1>Garage door is: "
         if state == 0:
-            sGarageState = '<span style="color:green">Closed</span>'
+            sGarageState += '<span style="color:green">Closed</span>'
         elif state == 50:
-            sGarageState = '<span style="color:yellow">Moving</span>'
+            sGarageState += '<span style="color:yellow">Moving</span>'
         elif state == 100:
-            sGarageState = '<span style="color:red">Open</span>'
+            sGarageState += '<span style="color:red">Open</span>'
         sGarageState += "</h1>"
         print sGarageState
         # make a refresh button
