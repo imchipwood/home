@@ -104,10 +104,10 @@ def chartOptions():
     print '<form action="/cgi-bin/webHome.py" method="post" target="_blank">/'
     print '<input type="checkbox" name="media" value="on" />media'
     print '<input type="checkbox" name="garage" value="on" />garage'
-    print '<input type="radio" name="today" value="on" />today'
-    print '<input type="radio" name="24hrs" value="on" />last 24 hours'
-    print '<input type="radio" name="12hrs" value="on" />last 12 hours'
-    print '<input type="radio" name="6hrs" value="on" />last 6 hours'
+    print '<input type="radio" name="query" value="today" />today'
+    print '<input type="radio" name="query" value="24hrs" />last 24 hours'
+    print '<input type="radio" name="query" value="12hrs" />last 12 hours'
+    print '<input type="radio" name="query" value="6hrs" />last 6 hours'
     print '<input type="submit" value="Execute Query" />'
     print '</form>'
 
@@ -176,20 +176,12 @@ def main():
         
         # handle query type
         sQuery = "n=96"
-        queries = {"today": form.getvalue("media"),
-                   "24hrs": form.getvalue("24hrs"),
-                   "12hrs": form.getvalue("12hrs"),
-                   "6hrs": form.getvalue("6hrs")}
-        for query in queries:
-            if queries[query] is "on":
-                if query == "24hrs":
-                    sQuery = "n=96"
-                elif query == "12hrs":
-                    sQuery = "n=48"
-                elif query == "6hrs":
-                    sQuery = "n=24"
-                elif query == "today":
-                    sQuery = "today"
+        queries = {"today": "today",
+                   "24hrs": "n=96",
+                   "12hrs": "n=48",
+                   "6hrs": "n=24"}
+        sQuery = queries[form.getvalue("query")]
+        dprint("sQuery={}".format(sQuery))
 
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
