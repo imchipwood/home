@@ -164,7 +164,7 @@ def main():
                   "garage": form.getvalue("garage")}
         for room in lRooms:
             dprint("lRooms[{}]={}".format(room, lRooms[room]))
-            if lRooms[room] == "ON":
+            if lRooms[room] == "on":
                 sRooms += room + ","
                 dprint("room({}) enabled".format(room))
         if len(sRooms) > 0:
