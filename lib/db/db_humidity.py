@@ -165,5 +165,5 @@ class DBHumidity(DBHome):
             dataFormattedArray[-1] = dataFormattedArray[-1].replace("],", "]")
             # convert array into string
             for line in dataFormattedArray:
-                    dataFormatted += line
+                dataFormatted += line
         return dataFormatted
