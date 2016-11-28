@@ -138,6 +138,8 @@ def main():
             state = "open"
         print "<h1>Garage Door is: {}</h1>".format(state)
         
+        print """<A HREF="javascript:history.go(0)">Click to refresh the page</A>"""
+        
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRoom), bDebug)
         # convert to a format Google Charts can work with
