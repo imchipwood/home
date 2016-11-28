@@ -112,7 +112,7 @@ def main():
     sQuery = form.getvalue("query")
     if sQuery is None:
         sQuery = "n=96"
-    sRroom  = form.getvalue("room")
+    sRoom  = form.getvalue("room")
 
     # user-defined args
     sDBAccessFileName = "sql_humidity_get.txt"
