@@ -54,6 +54,32 @@ def printGarageDoor(form, ddb):
         'onClick="history.go(0)" '
         'value="Refresh"></form>')
 
+
+def generateHumidityQuery(form):
+    sRooms = ""
+    lRooms = {"media": form.getvalue("media"),
+              "garage": form.getvalue("garage")}
+    for room in lRooms:
+        # dprint("lRooms[{}]={}".format(room, lRooms[room]))
+        if lRooms[room] == "on":
+            sRooms += room + ","
+    if len(sRooms) > 0:
+        sRooms = sRooms[:-1]
+    else:
+        sRooms = "media"
+
+    # handle query type
+    sQuery = "n=96"
+    queries = {"today": "today",
+               "24hrs": "n=96",
+               "12hrs": "n=48",
+               "6hrs": "n=24"}
+    fQuery = form.getvalue("query")
+    if fQuery is not None:
+        sQuery = queries[fQuery]
+    return "{} room={}".format(sQuery, sRooms)
+
+
 # viewWindowMode: 'explicit', viewWindow:{ max=100, min=0}
 def printChartCode(table, sQuery, sRooms):
     # this string contains the web page that will be served
@@ -178,47 +204,12 @@ def main():
     # do query and format the data
     try:
         # get garage door status
-        ddb.retrieveData("n=1 room=garage", bDebug)
-        state = ddb.getDataRaw()[-1][-1]
-        sGarageState = "<h1>Garage door is: "
-        if state == 0:
-            sGarageState += '<span style="color:green">Closed</span>'
-        elif 0 < state < 100:
-            sGarageState += '<span style="color:yellow">Moving</span>'
-        elif state == 100:
-            sGarageState += '<span style="color:red">Open</span>'
-        sGarageState += "</h1>"
-        print sGarageState
-        # make a refresh button
-        print ('<form><input type="button" '
-            'onClick="history.go(0)" '
-            'value="Refresh"></form>')
+        printGarageDoor(form, ddb)
 
         # handle room queries
-        sRooms = ""
-        lRooms = {"media": form.getvalue("media"),
-                  "garage": form.getvalue("garage")}
-        for room in lRooms:
-            # dprint("lRooms[{}]={}".format(room, lRooms[room]))
-            if lRooms[room] == "on":
-                sRooms += room + ","
-        if len(sRooms) > 0:
-            sRooms = sRooms[:-1]
-        else:
-            sRooms = "media"
-
-        # handle query type
-        sQuery = "n=96"
-        queries = {"today": "today",
-                   "24hrs": "n=96",
-                   "12hrs": "n=48",
-                   "6hrs": "n=24"}
-        fQuery = form.getvalue("query")
-        if fQuery is not None:
-            sQuery = queries[fQuery]
-
+        sQuery = generateHumidityQuery(form)
         # pull data based on query type, then display
-        hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
+        hdb.retrieveData(sQuery, bDebug)
         chartTable = hdb.formatDataForGoogleCharts()
         if chartTable is not "":
             printChartCode(chartTable, sQuery, sRooms)
