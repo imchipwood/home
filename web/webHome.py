@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 import cgi
 import cgitb
@@ -56,7 +56,7 @@ def printChartCode(table, sRooms):
                 roomStr = " in {} room".format(lRooms[0])
         columnHeaders += "]"
         page_str = """
-    <h1>Raspberry Pi Humidity/Temperature Logger</h1>
+    <h1>Humidity/Temperature</h1>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
@@ -104,13 +104,13 @@ def main():
     global bDebug
     # enable tracebacks of exceptions
     cgitb.enable()
-    
+
     # check for http args
     form = cgi.FieldStorage()
     sQuery = form.getvalue("query")
     if sQuery is None:
         sQuery = "n=96"
-    sRoom  = form.getvalue("room")
+    sRoom = form.getvalue("room")
     if sRoom is None:
         sRoom = "media"
 
@@ -121,7 +121,7 @@ def main():
     # set up db
     sDBCredentialsFile = sHomePath+"/conf/"+sDBAccessFileName
     hdb = DBHumidity(sDBCredentialsFile, bDebug)
-    
+
     sDBDoorsFile = sHomePath+"/conf/"+sDBDoorsFileName
     ddb = DBHome(sDBDoorsFile, bDebug)
 
@@ -131,23 +131,25 @@ def main():
 
     # do query and format the data
     try:
+        # get garage door status
         ddb.retrieveData("n=1 room=garage", bDebug)
-        garageDoor = ddb.getDataRaw()[-1][-1]
-        state = "closed"
-        if garageDoor == 50:
+        state = ddb.getDataRaw()[-1][-1]
+        if state == 0:
+            state = "closed"
+        elif state == 50:
             state = "moving"
-        elif garageDoor == 100:
+        elif state == 100:
             state = "open"
         print "<h1>Garage Door is: {}</h1>".format(state)
-        
+        # make a refresh button
         print """<FORM><INPUT TYPE="button" onClick="history.go(0)" VALUE="Refresh"></FORM>"""
-        
+
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRoom), bDebug)
         # convert to a format Google Charts can work with
         chartTable = hdb.formatDataForGoogleCharts()
         printChartCode(chartTable, sRoom)
-        
+
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
