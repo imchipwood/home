@@ -36,6 +36,24 @@ def printHTMLhead(sTitle):
     print "    </head>"
 
 
+def printGarageDoor(form, ddb):
+    # get garage door status
+    ddb.retrieveData("n=1 room=garage", bDebug)
+    state = ddb.getDataRaw()[-1][-1]
+    sGarageState = "    <h1>Garage door is: "
+    if state == 0:
+        sGarageState += '<span style="color:green">Closed</span>'
+    elif 0 < state < 100:
+        sGarageState += '<span style="color:yellow">Moving</span>'
+    elif state == 100:
+        sGarageState += '<span style="color:red">Open</span>'
+    sGarageState += "</h1>"
+    print sGarageState
+    # make a refresh button
+    print ('    <form><input type="button" '
+        'onClick="history.go(0)" '
+        'value="Refresh"></form>')
+
 # viewWindowMode: 'explicit', viewWindow:{ max=100, min=0}
 def printChartCode(table, sQuery, sRooms):
     # this string contains the web page that will be served
@@ -59,41 +77,46 @@ def printChartCode(table, sQuery, sRooms):
     <h1>Humidity/Temperature</h1>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([ %s,
-%s ]);
-
-        var options = {
-          title: 'Temperature/Humidity measurements for query="%s", room="%s"',
-          hAxis: { title: 'Date',
-                   titleTextStyle: {color: 'blue'},
-                   showTextEvery: 8,
-                   slantedText: true,
-                   slantedTextAngle: 45
-          },
-          vAxes: {
-                  0: { title: 'Temperature in F',
-                       titleTextStyle: {color: 'red'} },
-                  1: { title: '%% Humidity',
-                       titleTextStyle: {color: 'blue'},
-                       format:"#%%" }
-          },
-          colors: ['red', 'blue'],
-          series: { 0: {targetAxisIndex:0},
-                    1: {targetAxisIndex:1}
-          }
-        };
-
-        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-      }
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([ %s, %s ]);
+    
+            var options = {
+                title: 'Temperature/Humidity measurements for query="%s", room="%s"',
+                hAxis: {
+                    title: 'Date',
+                    titleTextStyle: {color: 'blue'},
+                    showTextEvery: 8,
+                    slantedText: true,
+                    slantedTextAngle: 45
+                },
+                vAxes: {
+                    0: {
+                        title: 'Temperature in F',
+                        titleTextStyle: {color: 'red'}
+                    },
+                    1: {
+                        title: '%% Humidity',
+                        titleTextStyle: {color: 'blue'},
+                        format:"#%%"
+                    }
+                },
+                colors: ['red', 'blue'],
+                series: {
+                    0: {targetAxisIndex: 0},
+                    1: {targetAxisIndex: 1}
+                }
+            };
+    
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
     </script>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders,
-                                                                          table,
-                                                                          sQuery,
-                                                                          sRooms)
+                                                                        table,
+                                                                        sQuery,
+                                                                        sRooms)
     except:
         print "-E- failed to create page_str"
         return
