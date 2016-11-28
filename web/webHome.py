@@ -164,6 +164,7 @@ def main():
         sRooms = ""
         lRooms = {"media": form.getvalue("media"),
                   "garage": form.getvalue("garage")}
+        dprint("lRooms={}".format(lRooms))
         for room in lRooms:
             dprint("lRooms[{}]={}".format(room, lRooms[room]))
             if lRooms[room] is "on":
