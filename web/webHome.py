@@ -168,17 +168,14 @@ def main():
         sRooms = ""
         lRooms = {"media": form.getvalue("media"),
                   "garage": form.getvalue("garage")}
-        dprint("lRooms={}".format(lRooms))
         for room in lRooms:
-            dprint("lRooms[{}]={}".format(room, lRooms[room]))
+            # dprint("lRooms[{}]={}".format(room, lRooms[room]))
             if lRooms[room] == "on":
                 sRooms += room + ","
-                dprint("room({}) enabled".format(room))
         if len(sRooms) > 0:
             sRooms = sRooms[:-1]
         else:
             sRooms = "media"
-        dprint("sRooms={}".format(sRooms))
         
         # handle query type
         sQuery = "n=96"
