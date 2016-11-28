@@ -102,12 +102,13 @@ def printChartCode(table, sQuery, sRooms):
 def chartOptions():
     # room choices
     print '<form action="/cgi-bin/webHome.py" method="post" target="_blank">/'
-    print '<input type="checkbox" name="media" value="on" />media'
+    print '<input type="checkbox" name="media" value="on" />media<br>'
     print '<input type="checkbox" name="garage" value="on" />garage'
-    print '<input type="radio" name="query" value="today" />today'
-    print '<input type="radio" name="query" value="24hrs" />last 24 hours'
-    print '<input type="radio" name="query" value="12hrs" />last 12 hours'
-    print '<input type="radio" name="query" value="6hrs" />last 6 hours'
+    print "<hr>"
+    print '<input type="radio" name="query" value="today" />today<br>'
+    print '<input type="radio" name="query" value="24hrs" />last 24 hours<br>'
+    print '<input type="radio" name="query" value="12hrs" />last 12 hours<br>'
+    print '<input type="radio" name="query" value="6hrs" />last 6 hours<br>'
     print '<input type="submit" value="Execute Query" />'
     print '</form>'
 
