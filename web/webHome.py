@@ -107,7 +107,7 @@ def chartOptions():
     print '<input type="submit" value="Select Room" />'
     print '</form>'
     # query choices
-    print '<form action="cgi
+    #print '<form action="cgi
 
 
 def main():
