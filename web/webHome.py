@@ -67,7 +67,6 @@ def generateHumidityQuery(form):
         sRooms = sRooms[:-1]
     else:
         sRooms = "media"
-
     # handle query type
     sQuery = "n=96"
     queries = {"today": "today",
@@ -77,7 +76,7 @@ def generateHumidityQuery(form):
     fQuery = form.getvalue("query")
     if fQuery is not None:
         sQuery = queries[fQuery]
-    return "{} room={}".format(sQuery, sRooms)
+    return (sQuery, sRooms)
 
 
 # viewWindowMode: 'explicit', viewWindow:{ max=100, min=0}
@@ -207,9 +206,9 @@ def main():
         printGarageDoor(form, ddb)
 
         # handle room queries
-        sQuery = generateHumidityQuery(form)
+        (sQuery, sRooms) = generateHumidityQuery(form)
         # pull data based on query type, then display
-        hdb.retrieveData(sQuery, bDebug)
+        hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
         chartTable = hdb.formatDataForGoogleCharts()
         if chartTable is not "":
             printChartCode(chartTable, sQuery, sRooms)
