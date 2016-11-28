@@ -114,7 +114,7 @@ def chartOptions():
     print '<input type="radio" name="query" value="12hrs" />last 12 hours<br>'
     print '<input type="radio" name="query" value="6hrs" />last 6 hours<br>'
     print '<input type="submit" value="Execute Query" /><br>'
-    print '<input type="button" onClick="history.go(0)" value="Execute Query" />'
+    print '<input type="button" onClick="submit" value="Execute Query" />'
     print '</form>'
 
 
