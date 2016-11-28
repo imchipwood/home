@@ -133,7 +133,7 @@ def main():
         garageDoor = ddb.getDataRaw()[-1][-1]
         state = "closed"
         if garageDoor == 50:
-            state = "transitioning"
+            state = "moving"
         elif garageDoor == 100:
             state = "open"
         print "<h1>Garage Door is: {}</h1>".format(state)
