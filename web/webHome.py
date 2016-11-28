@@ -104,10 +104,12 @@ def chartOptions():
     print '<form action="/cgi-bin/webHome.py" method="post" target="_blank">/'
     print '<input type="checkbox" name="media" value="on" />media'
     print '<input type="checkbox" name="garage" value="on" />garage'
-    print '<input type="submit" value="Select Room" />'
+    print 'input type="radio" name="today" value="on" />today'
+    print 'input type="rdaio" name="24hrs" value="on" />last 24 hours'
+    print 'input type="radio" name="12hrs" value="on" />last 12 hours'
+    print 'input type="radio" name="6hrs" value="on" />last 6 hours'
+    print '<input type="submit" value="Execute Query" />'
     print '</form>'
-    # query choices
-    #print '<form action="cgi
 
 def dprint(s):
     print "<!-- {} -->".format(s)
@@ -120,12 +122,12 @@ def main():
 
     # check for http args
     form = cgi.FieldStorage()
-    sQuery = form.getvalue("query")
-    if sQuery is None:
-        sQuery = "n=96"
-    #sRoom = form.getvalue("room")
-    #if sRoom is None:
-    #    sRoom = "media"
+    # sQuery = form.getvalue("query")
+    # if sQuery is None:
+    #     sQuery = "n=96"
+    # sRoom = form.getvalue("room")
+    # if sRoom is None:
+    #     sRoom = "media"
 
     # user-defined args
     sDBAccessFileName = "sql_humidity_get.txt"
@@ -157,14 +159,13 @@ def main():
         # make a refresh button
         print """<FORM><INPUT TYPE="button" onClick="history.go(0)" VALUE="Refresh"></FORM>"""
         
-        
-
+        # handle room queries
         sRooms = ""
         lRooms = {"media": form.getvalue("media"),
                   "garage": form.getvalue("garage")}
         for room in lRooms:
             dprint("lRooms[{}]={}".format(room, lRooms[room]))
-            if lRooms[room] == "on":
+            if lRooms[room] is "on":
                 sRooms += room + ","
                 dprint("room({}) enabled".format(room))
         if len(sRooms) > 0:
@@ -172,6 +173,22 @@ def main():
         else:
             sRooms = "media"
         dprint("sRooms={}".format(sRooms))
+        
+        # handle query type
+        queries = {"today": form.getvalue("media"),
+                   "24hrs": form.getValue("24hrs"),
+                   "12hrs": form.getValue("12hrs"),
+                   "6hrs": form.getValue("6hrs")}
+        for query in queries:
+            if queries[query] is "on":
+                if query == "24hrs":
+                    sQuery = "n=96"
+                elif query == "12hrs":
+                    sQuery = "n=48"
+                elif query == "6hrs":
+                    sQuery = "n=24"
+                elif query == "today":
+                    sQuery = "today"
 
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
