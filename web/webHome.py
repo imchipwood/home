@@ -37,7 +37,7 @@ def printHTMLhead(sTitle):
 
 
 # viewWindowMode: 'explicit', viewWindow:{ max=100, min=0}
-def printChartCode(table, sRooms):
+def printChartCode(table, sQuery, sRooms):
     # this string contains the web page that will be served
     try:
         # convert string of rooms into list
@@ -67,7 +67,7 @@ def printChartCode(table, sRooms):
 %s ]);
 
         var options = {
-          title: 'Temperature/Humidity measurements for last 24 hours%s',
+          title: 'Temperature/Humidity measurements for query="%s", room="%s"',
           hAxis: { title: 'Date',
                    titleTextStyle: {color: 'blue'},
                    showTextEvery: 8,
@@ -91,7 +91,7 @@ def printChartCode(table, sRooms):
         chart.draw(data, options);
       }
     </script>
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders, table, roomStr)
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders, table, sQuery, roomStr)
     except:
         print "-E- failed to create page_str"
         return
@@ -148,7 +148,7 @@ def main():
         hdb.retrieveData('{} room={}'.format(sQuery, sRoom), bDebug)
         # convert to a format Google Charts can work with
         chartTable = hdb.formatDataForGoogleCharts()
-        printChartCode(chartTable, sRoom)
+        printChartCode(chartTable, sQuery, sRoom)
 
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
