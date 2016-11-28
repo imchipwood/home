@@ -167,7 +167,7 @@ def main():
         dprint("lRooms={}".format(lRooms))
         for room in lRooms:
             dprint("lRooms[{}]={}".format(room, lRooms[room]))
-            if lRooms[room] is "on":
+            if lRooms[room] == "on":
                 sRooms += room + ","
                 dprint("room({}) enabled".format(room))
         if len(sRooms) > 0:
