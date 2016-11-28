@@ -90,7 +90,10 @@ def printChartCode(table, sQuery, sRooms):
         chart.draw(data, options);
       }
     </script>
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders, table, sQuery, sRooms)
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders,
+                                                                          table,
+                                                                          sQuery,
+                                                                          sRooms)
     except:
         print "-E- failed to create page_str"
         return
@@ -113,8 +116,10 @@ def chartOptions():
     print '<input type="submit" value="Execute Query" />'
     print '</form>'
 
+
 def dprint(s):
     print "<!-- {} -->".format(s)
+
 
 def main():
     global sHomePath
@@ -154,15 +159,17 @@ def main():
         sGarageState = "<h1>Garage door is: "
         if state == 0:
             sGarageState += '<span style="color:green">Closed</span>'
-        elif state == 50:
+        elif 0 < state < 100:
             sGarageState += '<span style="color:yellow">Moving</span>'
         elif state == 100:
             sGarageState += '<span style="color:red">Open</span>'
         sGarageState += "</h1>"
         print sGarageState
         # make a refresh button
-        print """<FORM><INPUT TYPE="button" onClick="history.go(0)" VALUE="Refresh"></FORM>"""
-        
+        print ('<form><input type="button" '
+            'onClick="history.go(0)" '
+            'value="Refresh"></form>')
+
         # handle room queries
         sRooms = ""
         lRooms = {"media": form.getvalue("media"),
@@ -175,7 +182,7 @@ def main():
             sRooms = sRooms[:-1]
         else:
             sRooms = "media"
-        
+
         # handle query type
         sQuery = "n=96"
         queries = {"today": "today",
@@ -194,7 +201,7 @@ def main():
             printChartCode(chartTable, sQuery, sRooms)
         else:
             print "<h2>SQL Query was empty, try a different room or query</h2>"
-        
+
         chartOptions()
 
     except KeyboardInterrupt:
