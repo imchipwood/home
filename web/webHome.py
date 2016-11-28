@@ -130,7 +130,7 @@ def main():
     # do query and format the data
     try:
         ddb.retrieveData("n=1 room=garage", bDebug)
-        garagedoor = ddb.getDataRaw()[-1][-1]
+        garageDoor = ddb.getDataRaw()[-1][-1]
         state = "closed"
         if garageDoor == 50:
             state = "transitioning"
