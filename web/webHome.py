@@ -130,8 +130,13 @@ def main():
     # do query and format the data
     try:
         ddb.retrieveData("n=1 room=garage", bDebug)
-        
-        print "<h1>Garage Door is: {}</h1>".format(ddb.getDataRaw()[-1][-1])
+        garagedoor = ddb.getDataRaw()[-1][-1]
+        state = "closed"
+        if garageDoor == 50:
+            state = "transitioning"
+        elif garageDoor == 100:
+            state = "open"
+        print "<h1>Garage Door is: {}</h1>".format(state)
         
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRoom), bDebug)
