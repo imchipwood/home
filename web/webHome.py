@@ -153,12 +153,12 @@ def main():
         ddb.retrieveData("n=1 room=garage", bDebug)
         state = ddb.getDataRaw()[-1][-1]
         if state == 0:
-            state = "closed"
+            state = '<h1 style="color:green;">closed<h1>'
         elif state == 50:
-            state = "moving"
+            state = '<h1 style="color:yellow;">moving<h1>'
         elif state == 100:
-            state = "open"
-        print "<h1>Garage Door is: {}</h1>".format(state)
+            state = '<h1 style="color:red;">open<h1>'
+        print state
         # make a refresh button
         print """<FORM><INPUT TYPE="button" onClick="history.go(0)" VALUE="Refresh"></FORM>"""
         
