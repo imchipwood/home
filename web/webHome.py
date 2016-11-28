@@ -126,12 +126,15 @@ def main():
     #    sRoom = "media"
 
     sRooms = ""
-    lRooms = {"media": form.getValue("media"),
-              "garage": form.getValue("garage")}
+    lRooms = {"media": form.getvalue("media"),
+              "garage": form.getvalue("garage")}
     for room in lRooms:
         if lRooms[room] == "ON":
             sRooms += room + ","
-    sRooms = sRooms[:-1]
+    if len(sRooms) > 0:
+        sRooms = sRooms[:-1]
+    else:
+        sRooms = "media"
 
     # user-defined args
     sDBAccessFileName = "sql_humidity_get.txt"
