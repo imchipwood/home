@@ -177,7 +177,10 @@ def main():
         hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
         # convert to a format Google Charts can work with
         chartTable = hdb.formatDataForGoogleCharts()
-        printChartCode(chartTable, sQuery, sRooms)
+        if chartTable is not "":
+            printChartCode(chartTable, sQuery, sRooms)
+        else:
+            print "<h2>SQL Query was empty, try a different room or query</h2>"
         
         chartOptions()
 
