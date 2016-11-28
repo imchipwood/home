@@ -23,6 +23,7 @@ class DBHumidity(DBHome):
         nothing
     """
     def formatResults(self):
+        dataFormatted = []
         if self.getDataRaw() != []:
             dataFormatted = []
             sSeparator = ("----------------------------"
@@ -43,8 +44,6 @@ class DBHumidity(DBHome):
                 sData += " | {} | {}".format(temp, humi)
                 dataFormatted.append(sData)
             dataFormatted.append(sSeparator)
-        else:
-            dataFormatted = []
         return dataFormatted
 
 ###############################################################################
