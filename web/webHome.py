@@ -113,7 +113,8 @@ def chartOptions():
     print '<input type="radio" name="query" value="24hrs" />last 24 hours<br>'
     print '<input type="radio" name="query" value="12hrs" />last 12 hours<br>'
     print '<input type="radio" name="query" value="6hrs" />last 6 hours<br>'
-    print '<input type="submit" value="Execute Query" />'
+    print '<input type="submit" value="Execute Query" /><br>'
+    print '<input type="button" onClick="history.go(0)" value="Execute Query" />'
     print '</form>'
 
 
@@ -193,15 +194,14 @@ def main():
         if fQuery is not None:
             sQuery = queries[fQuery]
 
-        # pull 24 hours of data
+        # pull data based on query type, then display
         hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
-        # convert to a format Google Charts can work with
         chartTable = hdb.formatDataForGoogleCharts()
         if chartTable is not "":
             printChartCode(chartTable, sQuery, sRooms)
         else:
-            print "<h2>SQL Query was empty, try a different room or query</h2>"
-
+            print "<h2>SQL Query was empty, try a different query</h2>"
+        # give some options for new queries
         chartOptions()
 
     except KeyboardInterrupt:
