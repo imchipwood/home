@@ -62,7 +62,6 @@ def printChartCode(table, sQuery, sRooms):
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
       function drawChart() {
-        <!--var data = google.visualization.arrayToDataTable([ ['Date', 'Temperature', 'Humidity'],-->
         var data = google.visualization.arrayToDataTable([ %s,
 %s ]);
 
