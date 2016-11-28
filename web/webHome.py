@@ -135,6 +135,7 @@ def main():
         sRooms = sRooms[:-1]
     #else:
     #    sRooms = "media"
+    print "<!-- rooms: {} -->".format(sRooms)
 
     # user-defined args
     sDBAccessFileName = "sql_humidity_get.txt"
