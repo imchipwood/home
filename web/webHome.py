@@ -175,6 +175,7 @@ def main():
         dprint("sRooms={}".format(sRooms))
         
         # handle query type
+        sQuery = "n=96"
         queries = {"today": form.getvalue("media"),
                    "24hrs": form.getvalue("24hrs"),
                    "12hrs": form.getvalue("12hrs"),
