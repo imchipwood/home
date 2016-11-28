@@ -51,9 +51,9 @@ def printChartCode(table, sQuery, sRooms):
             roomStr = ""
         else:
             columnHeaders += "'Temperature', 'Humidity'"
-            roomStr = " in all rooms"
-            if lRooms[0] != '*':
-                roomStr = " in {} room".format(lRooms[0])
+            # roomStr = " in all rooms"
+            # if lRooms[0] != '*':
+            #     roomStr = " in {} room".format(lRooms[0])
         columnHeaders += "]"
         page_str = """
     <h1>Humidity/Temperature</h1>
@@ -91,7 +91,7 @@ def printChartCode(table, sQuery, sRooms):
         chart.draw(data, options);
       }
     </script>
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders, table, sQuery, roomStr)
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders, table, sQuery, sRooms)
     except:
         print "-E- failed to create page_str"
         return
