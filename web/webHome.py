@@ -133,8 +133,8 @@ def main():
             sRooms += room + ","
     if len(sRooms) > 0:
         sRooms = sRooms[:-1]
-    else:
-        sRooms = "media"
+    #else:
+    #    sRooms = "media"
 
     # user-defined args
     sDBAccessFileName = "sql_humidity_get.txt"
