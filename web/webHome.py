@@ -176,9 +176,9 @@ def main():
         
         # handle query type
         queries = {"today": form.getvalue("media"),
-                   "24hrs": form.getValue("24hrs"),
-                   "12hrs": form.getValue("12hrs"),
-                   "6hrs": form.getValue("6hrs")}
+                   "24hrs": form.getvalue("24hrs"),
+                   "12hrs": form.getvalue("12hrs"),
+                   "6hrs": form.getvalue("6hrs")}
         for query in queries:
             if queries[query] is "on":
                 if query == "24hrs":
