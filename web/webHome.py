@@ -135,7 +135,6 @@ def main():
         sRooms = sRooms[:-1]
     else:
         sRooms = "media"
-    print "<!-- rooms: {} -->".format(sRooms)
 
     # user-defined args
     sDBAccessFileName = "sql_humidity_get.txt"
@@ -166,6 +165,7 @@ def main():
         print "<h1>Garage Door is: {}</h1>".format(state)
         # make a refresh button
         print """<FORM><INPUT TYPE="button" onClick="history.go(0)" VALUE="Refresh"></FORM>"""
+        print "<!-- rooms: {} -->".format(sRooms)
 
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
