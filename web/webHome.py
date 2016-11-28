@@ -99,6 +99,17 @@ def printChartCode(table, sQuery, sRooms):
     print page_str
 
 
+def chartOptions():
+    # room choices
+    print '<form action="/cgi-bin/webHome.py" method="post" target="_blank">/'
+    print '<input type="checkbox" name="media" value="on" />media'
+    print '<input type="checkbox" name="garage" value="on" />garage'
+    print '<input type="submit" value="Select Room" />'
+    print '</form>'
+    # query choices
+    print '<form action="cgi
+
+
 def main():
     global sHomePath
     global bDebug
@@ -110,9 +121,17 @@ def main():
     sQuery = form.getvalue("query")
     if sQuery is None:
         sQuery = "n=96"
-    sRoom = form.getvalue("room")
-    if sRoom is None:
-        sRoom = "media"
+    #sRoom = form.getvalue("room")
+    #if sRoom is None:
+    #    sRoom = "media"
+
+    sRooms = ""
+    lRooms = {"media": form.getValue("media"),
+              "garage": form.getValue("garage")}
+    for room in lRooms:
+        if lRooms[room] == "ON":
+            sRooms += room + ","
+    sRooms = sRooms[:-1]
 
     # user-defined args
     sDBAccessFileName = "sql_humidity_get.txt"
@@ -145,10 +164,12 @@ def main():
         print """<FORM><INPUT TYPE="button" onClick="history.go(0)" VALUE="Refresh"></FORM>"""
 
         # pull 24 hours of data
-        hdb.retrieveData('{} room={}'.format(sQuery, sRoom), bDebug)
+        hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
         # convert to a format Google Charts can work with
         chartTable = hdb.formatDataForGoogleCharts()
-        printChartCode(chartTable, sQuery, sRoom)
+        printChartCode(chartTable, sQuery, sRooms)
+        
+        chartOptions()
 
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
