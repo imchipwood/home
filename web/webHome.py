@@ -56,7 +56,6 @@ def printChartCode(table, sRooms):
                 roomStr = " in {} room".format(lRooms[0])
         columnHeaders += "]"
         page_str = """
-    <body>
     <h1>Raspberry Pi Humidity/Temperature Logger</h1>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -92,8 +91,7 @@ def printChartCode(table, sRooms):
         chart.draw(data, options);
       }
     </script>
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
-    </body>""" % (columnHeaders, table, roomStr)
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>""" % (columnHeaders, table, roomStr)
     except:
         print "-E- failed to create page_str"
         return
@@ -127,17 +125,19 @@ def main():
 
     printHTTPheader()
     printHTMLhead("Home Monitor")
+    print "    <body>"
 
     # do query and format the data
     try:
+        ddb.retrieveData("n=1 room=garage", bDebug)
+        
+        print "<h1>Garage Door is: {}</h1>".format(ddb.getDataRaw()[-1][-1])
+        
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRoom), bDebug)
         # convert to a format Google Charts can work with
         chartTable = hdb.formatDataForGoogleCharts()
         printChartCode(chartTable, sRoom)
-        
-        ddb.retrieveData("n=1 room=garage", bDebug)
-        print "<bodyGarage Door is: {}</body>".format(ddb.getDataRaw()[-1][-1])
         
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
@@ -147,6 +147,7 @@ def main():
         traceback.print_exc()
         raise e
 
+    print "    </body>"
     print "</html>"
     return
 
