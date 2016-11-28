@@ -180,11 +180,9 @@ def main():
                    "24hrs": "n=96",
                    "12hrs": "n=48",
                    "6hrs": "n=24"}
-        #sQuery = queries[form.getvalue("query")]
-        dprint("query={}".format(form.getvalue("query")))
-        dprint("sQuery={}".format(sQuery))
-        
-        sys.exit(1)
+        fQuery = form.getvalue("query")
+        if fQuery is not None:
+            sQuery = queries[fQuery]
 
         # pull 24 hours of data
         hdb.retrieveData('{} room={}'.format(sQuery, sRooms), bDebug)
