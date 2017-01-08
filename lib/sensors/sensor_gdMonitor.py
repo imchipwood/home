@@ -157,14 +157,14 @@ class GarageDoorMonitor(Sensor):
 ###############################################################################
 
     def mqttSetup(self):
-        # self.client = paho.Client(client_id="garageDoorMonitor")
-        # self.client.on_connect = on_connect
-        # self.client.on_publish = on_publish
-        # self.client.connect(self.mqttHost, self.mqttPort)
-        # self.client.loop_start()
-        # sleep(3) # wait time for client to connect
-        # if self.bDebug:
-        #     print("-d- mqtt client: {}".format(self.client))
+        self.client = paho.Client(client_id="garageDoorMonitor")
+        self.client.on_connect = on_connect
+        self.client.on_publish = on_publish
+        self.client.connect(self.mqttHost, self.mqttPort)
+        self.client.loop_start()
+        sleep(3) # wait time for client to connect
+        if self.bDebug:
+            print("-d- mqtt client: {}".format(self.client))
         return
 
 ###############################################################################
@@ -172,13 +172,14 @@ class GarageDoorMonitor(Sensor):
     def mqttPublish(self, data):
         if self.bDebug:
             print("-d- mqtt publishing data: {}".format(data))
-        publish.single(topic=self.mqttTopic, payload=str(data), qos=2,
-                       hostname=self.mqttHost, port=self.mqttPort,
-                       client_id="garageDoorMonitor")
+        #publish.single(topic=self.mqttTopic, payload=str(data), qos=2,
+        #               hostname=self.mqttHost, port=self.mqttPort,
+        #               client_id="garageDoorMonitor")
+        (rc, mid) = self.client.publish(self.mqttTopic, str(data), qos=2)
         if self.bDebug:
             print("-d- mqtt topic:  {}".format(self.mqttTopic))
             print("-d- mqtt port:   {}".format(self.mqttPort))
-            # print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
+            print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
             print("-d- mqtt client: {}".format(self.client))
         return
 
@@ -241,6 +242,10 @@ class GarageDoorMonitor(Sensor):
         onehz = 1.0
         lastonehztime = 0
         lastDoorState = -99
+        
+        # set up mqtt
+        self.mqttSetup()
+        
         while True:
             now = float(timeit.default_timer())
             if (now - lastonehztime) > onehz:
