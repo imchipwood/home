@@ -13,6 +13,10 @@ mqttHost = "192.168.1.130"
 mqttPort = 1883
 mqttTopic = "home-assistant/garage/door"
 
+print("mqtthost: {}".format(mqttHost))
+print("mqttPort: {}".format(mqttPort))
+print("mqttTopic: {}".format(mqttTopic))
+
 client = paho.Client(client_id="garageDoor")
 client.on_connect = on_connect
 client.on_publish = on_publish
