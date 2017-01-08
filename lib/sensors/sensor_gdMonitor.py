@@ -58,7 +58,7 @@ class GarageDoorMonitor(Sensor):
     
     # MQTT
     mqttHost = "0.0.0.0"
-    mqttPort = 1883
+    mqttPort = 0
     mqttTopic = ""
 
     """Initialize a Garage Door Monitor
