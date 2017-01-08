@@ -6,6 +6,7 @@ import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
 import paho.mqtt.client as paho
+from time import sleep
 
 # stupidity until I figure out how to package my libs properly
 global sHomePath
@@ -91,6 +92,7 @@ class GarageDoorMonitor(Sensor):
             self.client.on_publish = on_publish
             self.client.connect(self.mqttHost, self.mqttPort)
             self.client.loop_start()
+            sleep(3) # wait time for client to connect
             
             # determine sensor type
             self.enableSensors()
@@ -156,9 +158,12 @@ class GarageDoorMonitor(Sensor):
             print "-d- pin: limitOpen   : {}".format(self.pins["limitOpen"])
             print "-d- pin: limitClosed : {}".format(self.pins["limitClosed"])
             print "-d- pin: rotary      : {}".format(self.pins["rotary"])
-            print "-d- mqtt: host       : {}, {}".format(self.mqttHost, type(self.mqttHost))
-            print "-d- mqtt: port       : {}, {}".format(self.mqttPort, type(self.mqttPort))
-            print "-d- mqtt: topic      : {}, {}".format(self.mqttTopic, type(self.mqttTopic))
+            print "-d- mqtt: host       : {}, {}".format(self.mqttHost,
+                                                         type(self.mqttHost))
+            print "-d- mqtt: port       : {}, {}".format(self.mqttPort,
+                                                         type(self.mqttPort))
+            print "-d- mqtt: topic      : {}, {}".format(self.mqttTopic,
+                                                         type(self.mqttTopic))
         return
 
 ###############################################################################
