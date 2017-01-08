@@ -5,8 +5,14 @@ from multiprocessing import Process
 import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
-import paho.mqtt.client as paho
 from time import sleep
+
+
+
+import paho.mqtt.client as paho
+import paho.mqtt.publish as publish
+
+
 
 # stupidity until I figure out how to package my libs properly
 global sHomePath
@@ -166,14 +172,14 @@ class GarageDoorMonitor(Sensor):
 ###############################################################################
 
     def mqttSetup(self):
-        self.client = paho.Client(client_id="garageDoorMonitor")
-        self.client.on_connect = on_connect
-        self.client.on_publish = on_publish
-        self.client.connect(self.mqttHost, self.mqttPort)
-        self.client.loop_start()
-        sleep(3) # wait time for client to connect
-        if self.bDebug:
-            print("-d- mqtt client: {}".format(self.client))
+        #self.client = paho.Client(client_id="garageDoorMonitor")
+        #self.client.on_connect = on_connect
+        #self.client.on_publish = on_publish
+        #self.client.connect(self.mqttHost, self.mqttPort)
+        #self.client.loop_start()
+        #sleep(3) # wait time for client to connect
+        #if self.bDebug:
+        #    print("-d- mqtt client: {}".format(self.client))
         return
 
 ###############################################################################
@@ -181,7 +187,11 @@ class GarageDoorMonitor(Sensor):
     def mqttPublish(self, data):
         if self.bDebug:
             print("-d- mqtt publishing data: {}".format(data))
-        (rc, mid) = self.client.publish(self.mqttTopic, str(data), qos=1)
+        (rc, mid) = publish.single(topic=self.mqttTopic, payload=str(data),
+                                   qos=2, hostname=self.mqttHost,
+                                   port=self.mqttPort,
+                                   client_id="garageDoorMonitor")
+        #(rc, mid) = self.client.publish(self.mqttTopic, str(data), qos=1)
         if self.bDebug:
             print("-d- mqtt topic:  {}".format(self.mqttTopic))
             print("-d- mqtt port:   {}".format(self.mqttPort))
