@@ -133,11 +133,11 @@ class GarageDoorMonitor(Sensor):
                 if line[0] == "pro":
                     tmpPins["rotary"] = iPinNum
                 if line[0] == "h":
-                    self.mqttHost = line[1]
+                    self.mqttHost = line[-1]
                 if line[0] == "p":
-                    self.mqttPort = line[1]
+                    self.mqttPort = line[-1]
                 if line[0] == "t":
-                    self.mqttTopic = line[1]
+                    self.mqttTopic = int(line[-1])
         validConf = True
         for pin in tmpPins:
             if 2 > pin > 27:  # valid RPi GPIO pins are 2-27
@@ -154,9 +154,9 @@ class GarageDoorMonitor(Sensor):
             print "-d- pin: limitOpen   : {}".format(self.pins["limitOpen"])
             print "-d- pin: limitClosed : {}".format(self.pins["limitClosed"])
             print "-d- pin: rotary      : {}".format(self.pins["rotary"])
-            print "-d- pin: mqttHost    : {}".format(self.mqttHost)
-            print "-d- pin: mqttPort    : {}".format(self.mqttPort)
-            print "-d- pin: mqttTopic   : {}".format(self.mqttTopic)
+            print "-d- mqtt: host       : {}".format(self.mqttHost)
+            print "-d- mqtt: port       : {}".format(self.mqttPort)
+            print "-d- mqtt: topic      : {}".format(self.mqttTopic)
         return
 
 ###############################################################################
