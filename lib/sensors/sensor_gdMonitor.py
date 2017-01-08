@@ -229,6 +229,8 @@ class GarageDoorMonitor(Sensor):
                             print "-d- gdMonitor: state changed: %s" % dState
                         if 0 <= dState <= 100:
                             (rc, mid) = self.client.publish(self.mqttTopic, dState, qos=1)
+                            if self.bDebug:
+                                print "-d- mqtt rc/mid: {}/{}".format(rc, mid)
                         else:
                             if self.bDebug:
                                 print "-d- gdMonitor: door state invalid"
