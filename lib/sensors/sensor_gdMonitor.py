@@ -6,17 +6,8 @@ import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
 from time import sleep
-#import paho.mqtt.client as paho
+# import paho.mqtt.client as paho
 import paho.mqtt.publish as publish
-
-
-
-# stupidity until I figure out how to package my libs properly
-#global sHomePath
-#sHomePath = os.path.dirname(os.path.realpath(__file__))
-#sHomePath = "/".join(sHomePath.split("/")[:-1])
-#while "home" not in sHomePath.split("/")[-1]:
-#    sHomePath = "/".join(sHomePath.split("/")[:-1])
 
 
 def on_connect(client, userdata, flags, rc):
@@ -166,31 +157,28 @@ class GarageDoorMonitor(Sensor):
 ###############################################################################
 
     def mqttSetup(self):
-        #self.client = paho.Client(client_id="garageDoorMonitor")
-        #self.client.on_connect = on_connect
-        #self.client.on_publish = on_publish
-        #self.client.connect(self.mqttHost, self.mqttPort)
-        #self.client.loop_start()
-        #sleep(3) # wait time for client to connect
-        #if self.bDebug:
-        #    print("-d- mqtt client: {}".format(self.client))
+        # self.client = paho.Client(client_id="garageDoorMonitor")
+        # self.client.on_connect = on_connect
+        # self.client.on_publish = on_publish
+        # self.client.connect(self.mqttHost, self.mqttPort)
+        # self.client.loop_start()
+        # sleep(3) # wait time for client to connect
+        # if self.bDebug:
+        #     print("-d- mqtt client: {}".format(self.client))
         return
 
 ###############################################################################
-    
+
     def mqttPublish(self, data):
         if self.bDebug:
             print("-d- mqtt publishing data: {}".format(data))
-        #(rc, mid) = publish.single(topic=self.mqttTopic, payload=str(data),
-        publish.single(topic=self.mqttTopic, payload=str(data),
-                                   qos=2, hostname=self.mqttHost,
-                                   port=self.mqttPort,
-                                   client_id="garageDoorMonitor")
-        #(rc, mid) = self.client.publish(self.mqttTopic, str(data), qos=1)
+        publish.single(topic=self.mqttTopic, payload=str(data), qos=2,
+                       hostname=self.mqttHost, port=self.mqttPort,
+                       client_id="garageDoorMonitor")
         if self.bDebug:
             print("-d- mqtt topic:  {}".format(self.mqttTopic))
             print("-d- mqtt port:   {}".format(self.mqttPort))
-            #print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
+            # print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
             print("-d- mqtt client: {}".format(self.client))
         return
 
@@ -263,7 +251,7 @@ class GarageDoorMonitor(Sensor):
                     if dState != lastDoorState:
                         lastDoorState = dState
                         if self.bDebug:
-                            print("-d- gdMonitor: state changed: {}".format(dState))
+                            print("-d- gdMonitor: newState: {}".format(dState))
                         if 0 <= dState <= 100:
                             self.mqttPublish(dState)
                         else:
