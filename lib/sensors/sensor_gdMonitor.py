@@ -93,6 +93,8 @@ class GarageDoorMonitor(Sensor):
             self.client.connect(self.mqttHost, self.mqttPort)
             self.client.loop_start()
             sleep(3) # wait time for client to connect
+            if self.bDebug:
+                print "-d- mqtt client: {}".format(self.client)
             
             # determine sensor type
             self.enableSensors()
