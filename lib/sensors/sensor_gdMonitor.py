@@ -5,6 +5,7 @@ from multiprocessing import Process
 import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
+import paho.mqtt.client as paho
 
 # stupidity until I figure out how to package my libs properly
 global sHomePath
@@ -12,9 +13,6 @@ sHomePath = os.path.dirname(os.path.realpath(__file__))
 sHomePath = "/".join(sHomePath.split("/")[:-1])
 while "home" not in sHomePath.split("/")[-1]:
     sHomePath = "/".join(sHomePath.split("/")[:-1])
-
-sys.path.append(sHomePath+"/lib/db")
-from db_home import DBHome
 
 
 class GarageDoorMonitor(Sensor):
@@ -49,6 +47,11 @@ class GarageDoorMonitor(Sensor):
     bDebug = False
     doorState = -1
     db = ""
+    
+    # MQTT
+    mqttHost = "0.0.0.0"
+    mqttPort = 1883
+    mqttTopic = ""
 
     """Initialize a Garage Door Monitor
 
@@ -72,8 +75,12 @@ class GarageDoorMonitor(Sensor):
 
         if self.readConfig():
 
-            self.db = DBHome(self.sConfFile, bDebug=self.bDebug)
-
+            self.client = paho.Client(client_id="garageDoor")
+            self.client.on_connect = self.on_connect
+            self.client.on_publish = self.on_publish
+            self.client.connect(self.mqttHost, self.mqttPort)
+            self.client.loop_start()
+            
             # determine sensor type
             self.enableSensors()
 
@@ -114,6 +121,12 @@ class GarageDoorMonitor(Sensor):
                     tmpPins["limitClosed"] = iPinNum
                 if line[0] == "pro":
                     tmpPins["rotary"] = iPinNum
+                if line[0] == "h":
+                    self.host = line[1]
+                if line[0] == "p":
+                    self.port = line[1]
+                if line[0] == "t":
+                    self.topic = line[1]
         validConf = True
         for pin in tmpPins:
             if 2 > pin > 27:  # valid RPi GPIO pins are 2-27
@@ -159,7 +172,17 @@ class GarageDoorMonitor(Sensor):
     def cleanup(self):
         self.monitorThread.terminate()
         GPIO.cleanup()
+        self.client.loop_stop()
         return
+
+###############################################################################
+
+    def on_connect(client, userdata, flags, rc):
+        print("CONNACK received with code %d." % (rc))
+    
+    
+    def on_publish(client, userdata, mid):
+        print("mid: "+str(mid))
 
 ###############################################################################
 
@@ -182,35 +205,15 @@ class GarageDoorMonitor(Sensor):
             now = float(timeit.default_timer())
             if (now - lastonehztime) > onehz:
                 lastonehztime = now
-                # if self.bDebug:
-                #     print "-d- gdMonitor: thread executing"
                 try:
                     self.read()
                     dState = self.getDoorState()
-                    # if self.bDebug:
-                    #     print ("-d- gdMonitor: thread state: {}".format(dState)
-                    #            )
                     if dState != lastDoorState:
                         lastDoorState = dState
                         if self.bDebug:
                             print "-d- gdMonitor: state changed: %s" % dState
                         if 0 <= dState <= 100:
-                            # if self.bDebug:
-                            #     print "-d- gdMonitor: door state valid"
-                            # try inserting into db
-                            # if it fails, try again
-                            try:
-                                self.db.insertData(dData={"state":dState},
-                                                   insert=True,
-                                                   bDebug=self.bDebug)
-                            except:
-                                self.db.connect()
-                                try:
-                                    self.db.insertData(dData={"state":dState},
-                                                       insert=True,
-                                                       bDebug=self.bDebug)
-                                except:
-                                    raise
+                            (rc, mid) = client.publish(self.mqttTopic, dState, qos=1)
                         else:
                             if self.bDebug:
                                 print "-d- gdMonitor: door state invalid"

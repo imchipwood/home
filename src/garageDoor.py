@@ -28,21 +28,11 @@ from db_home import DBHome
 def parseArgs():
     # argument parsing
     parser = argparse.ArgumentParser()
-    parser.add_argument("-insert",
-                        "-i",
-                        action="store_false",
-                        default=True,
-                        help="Disable SQL insertion. Defaults to inserting")
     parser.add_argument("-configFile",
                         "-c",
                         type=str,
-                        default="garageMonitor.txt",
-                        help="Config file for SQL database interaction")
-    parser.add_argument("-configFileBackup",
-                        "-cb",
-                        type=str,
-                        default=None,
-                        help="Config file for backup SQL database interaction")
+                        default="garageMonitorMQTT.txt",
+                        help="Config file for pin setup and database interaction")
     parser.add_argument('-debug',
                         '-d',
                         action="store_true",
@@ -59,27 +49,9 @@ def main():
 
     parsedArgs = parseArgs()
     sGarageDoorFileName = parsedArgs.configFile
-    sGarageDoorBackupFileName = parsedArgs.configFileBackup
-    bInsert = parsedArgs.insert
     bDebug = parsedArgs.debug
 
-    bBackupEnable = True if sGarageDoorBackupFileName is not None else False
-
     sGarageDoorFile = sHomePath+"/conf/"+sGarageDoorFileName
-
-    # set up DBs
-    # if bDebug:
-    #     print "-d- Accessing DB using credentials found here:"
-    #     print "-d- {}".format(sGarageDoorFile)
-    # hdb = DBHome(sGarageDoorFile, bDebug=bDebug)
-
-    # hdbackup = None
-    # if bBackupEnable:
-    #     sGarageDoorBackupFile = sHomeDBPath+"/conf/"+sGarageDoorBackupFileName
-    #     if bDebug:
-    #         print "-d- Accessing backup DB using credentials found here:"
-    #         print "-d- {}".format(sGarageDoorBackupFile)
-    #     hdbackup = DBHumidity(sGarageDoorBackupFile, bDebug=bDebug)
     try:
         gdm = GarageDoorMonitor(sGarageDoorFile, bDebug)
     except:
