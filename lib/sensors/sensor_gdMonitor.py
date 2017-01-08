@@ -232,6 +232,7 @@ class GarageDoorMonitor(Sensor):
                         if 0 <= dState <= 100:
                             (rc, mid) = self.client.publish(self.mqttTopic, dState, qos=1)
                             if self.bDebug:
+                                print "-d- mqtt topic: {}".format(self.mqttTopic)
                                 print "-d- mqtt rc/mid: {}/{}".format(rc, mid)
                         else:
                             if self.bDebug:
