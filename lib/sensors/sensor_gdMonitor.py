@@ -154,9 +154,9 @@ class GarageDoorMonitor(Sensor):
             print "-d- pin: limitOpen   : {}".format(self.pins["limitOpen"])
             print "-d- pin: limitClosed : {}".format(self.pins["limitClosed"])
             print "-d- pin: rotary      : {}".format(self.pins["rotary"])
-            print "-d- mqtt: host       : {}".format(self.mqttHost, type(self.mqttHost))
-            print "-d- mqtt: port       : {}".format(self.mqttPort, type(self.mqttPort))
-            print "-d- mqtt: topic      : {}".format(self.mqttTopic, type(self.mqttTopic))
+            print "-d- mqtt: host       : {}, {}".format(self.mqttHost, type(self.mqttHost))
+            print "-d- mqtt: port       : {}, {}".format(self.mqttPort, type(self.mqttPort))
+            print "-d- mqtt: topic      : {}, {}".format(self.mqttTopic, type(self.mqttTopic))
         return
 
 ###############################################################################
