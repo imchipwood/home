@@ -147,7 +147,8 @@ class GarageDoorMonitor(Sensor):
                     self.mqttTopic = str(line[-1])
         validConf = True
         for pin in tmpPins:
-            if pin < 2 or pin  > 27:  # valid RPi GPIO pins are 2-27
+            pin = int(pin)
+            if 2 > pin > 27:  # valid RPi GPIO pins are 2-27
                 validConf = False
         if validConf:
             self.pins = tmpPins
