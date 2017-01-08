@@ -6,7 +6,7 @@ import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
 from time import sleep
-# import paho.mqtt.client as paho
+import paho.mqtt.client as paho
 import paho.mqtt.publish as publish
 
 
