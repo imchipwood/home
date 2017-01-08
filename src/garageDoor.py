@@ -65,11 +65,11 @@ def main():
             1
     except KeyboardInterrupt:
         endThreads = True
-        print "\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n"
+        print("\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n")
         raise
     except Exception as e:
         endThreads = True
-        print "\n\t-E- gd: Some exception: %s\n" % (e)
+        print("\n\t-E- gd: Some exception: %s\n" % (e))
         traceback.print_exc()
         raise e
     finally:
@@ -89,7 +89,7 @@ def control(c, bDebug):
         if (now - lastonehztime) > onehz:
             lastonehztime = now
             if bDebug:
-                print "-d- gd: control thread"
+                print("-d- gd: control thread")
             # Uh, to be honest, I hadn't thought about how to control it yet.
             # Brilliant, I know
             # TODO: control thread - where to get relay toggle signal?
