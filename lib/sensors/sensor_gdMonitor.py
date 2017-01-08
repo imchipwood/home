@@ -82,6 +82,9 @@ class GarageDoorMonitor(Sensor):
             raise IOError()
 
         if self.readConfig():
+            
+            if self.bDebug:
+                self.printConfig()
 
             self.client = paho.Client(client_id="garageDoor")
             self.client.on_connect = on_connect
@@ -142,6 +145,19 @@ class GarageDoorMonitor(Sensor):
         if validConf:
             self.pins = tmpPins
         return validConf
+
+###############################################################################
+
+    def printConfig(self):
+        if self.bDebug:
+            print "-d- garageDoor config"
+            print "-d- pin: limitOpen   : {}".format(self.pins["limitOpen"])
+            print "-d- pin: limitClosed : {}".format(self.pins["limitClosed"])
+            print "-d- pin: rotary      : {}".format(self.pins["rotary"])
+            print "-d- pin: mqttHost    : {}".format(self.mqttHost)
+            print "-d- pin: mqttPort    : {}".format(self.mqttPort)
+            print "-d- pin: mqttTopic   : {}".format(self.mqttTopic)
+        return
 
 ###############################################################################
 
