@@ -6,20 +6,17 @@ import timeit
 import RPi.GPIO as GPIO
 from sensor import Sensor
 from time import sleep
-
-
-
-import paho.mqtt.client as paho
+#import paho.mqtt.client as paho
 import paho.mqtt.publish as publish
 
 
 
 # stupidity until I figure out how to package my libs properly
-global sHomePath
-sHomePath = os.path.dirname(os.path.realpath(__file__))
-sHomePath = "/".join(sHomePath.split("/")[:-1])
-while "home" not in sHomePath.split("/")[-1]:
-    sHomePath = "/".join(sHomePath.split("/")[:-1])
+#global sHomePath
+#sHomePath = os.path.dirname(os.path.realpath(__file__))
+#sHomePath = "/".join(sHomePath.split("/")[:-1])
+#while "home" not in sHomePath.split("/")[-1]:
+#    sHomePath = "/".join(sHomePath.split("/")[:-1])
 
 
 def on_connect(client, userdata, flags, rc):
@@ -93,9 +90,6 @@ class GarageDoorMonitor(Sensor):
 
             if self.bDebug:
                 self.printConfig()
-
-            # setup connection to mqtt broker
-            self.mqttSetup()
 
             # determine sensor type
             self.enableSensors()
