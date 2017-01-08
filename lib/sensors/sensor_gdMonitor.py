@@ -126,12 +126,14 @@ class GarageDoorMonitor(Sensor):
                     iPinNum = int(line[-1])
                 except:
                     pass
+                # gpio
                 if line[0] == "plo":
                     tmpPins["limitOpen"] = iPinNum
                 if line[0] == "plc":
                     tmpPins["limitClosed"] = iPinNum
                 if line[0] == "pro":
                     tmpPins["rotary"] = iPinNum
+                # mqtt config
                 if line[0] == "h":
                     self.mqttHost = str(line[-1])
                 if line[0] == "p":
