@@ -197,6 +197,8 @@ class GarageDoorMonitor(Sensor):
         self.monitorThread.terminate()
         GPIO.cleanup()
         self.client.loop_stop()
+        self.client.unsubscribe(self.mqttTopic)
+        self.client.disconnect()
         return
 
 ###############################################################################
