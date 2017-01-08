@@ -1,4 +1,5 @@
 import paho.mqtt.client as paho
+from time import sleep
  
 def on_connect(client, userdata, flags, rc):
     print("CONNACK received with code %d." % (rc))
@@ -17,6 +18,7 @@ client.on_connect = on_connect
 client.on_publish = on_publish
 client.connect(mqttHost, mqttPort)
 client.loop_start()
+sleep(3)
 
 (rc, mid) = client.publish(mqttTopic, "0", qos=1)
 rc
