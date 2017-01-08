@@ -15,6 +15,14 @@ while "home" not in sHomePath.split("/")[-1]:
     sHomePath = "/".join(sHomePath.split("/")[:-1])
 
 
+def on_connect(client, userdata, flags, rc):
+    print("CONNACK received with code %d." % (rc))
+
+
+def on_publish(client, userdata, mid):
+    print("mid: "+str(mid))
+
+
 class GarageDoorMonitor(Sensor):
     """Garage Door Monitor Class
 
@@ -76,8 +84,8 @@ class GarageDoorMonitor(Sensor):
         if self.readConfig():
 
             self.client = paho.Client(client_id="garageDoor")
-            self.client.on_connect = self.on_connect
-            self.client.on_publish = self.on_publish
+            self.client.on_connect = on_connect
+            self.client.on_publish = on_publish
             self.client.connect(self.mqttHost, self.mqttPort)
             self.client.loop_start()
             
@@ -174,15 +182,6 @@ class GarageDoorMonitor(Sensor):
         GPIO.cleanup()
         self.client.loop_stop()
         return
-
-###############################################################################
-
-    def on_connect(client, userdata, flags, rc):
-        print("CONNACK received with code %d." % (rc))
-    
-    
-    def on_publish(client, userdata, mid):
-        print("mid: "+str(mid))
 
 ###############################################################################
 
