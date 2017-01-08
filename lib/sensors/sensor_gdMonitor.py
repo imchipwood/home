@@ -56,7 +56,7 @@ class GarageDoorMonitor(Sensor):
     bDebug = False
     doorState = -1
     db = ""
-    
+
     # MQTT
     mqttHost = "0.0.0.0"
     mqttPort = 0
@@ -79,14 +79,15 @@ class GarageDoorMonitor(Sensor):
         if os.path.exists(f):
             self.sConfFile = f
         else:
-            print "-E- gdMonitor: Check if file exists: {}".format(f)
+            print("-E- gdMonitor: Check if file exists: {}".format(f))
             raise IOError()
 
         if self.readConfig():
-            
+
             if self.bDebug:
                 self.printConfig()
 
+            # setup connection to mqtt broker
             self.client = paho.Client(client_id="garageDoor")
             self.client.on_connect = on_connect
             self.client.on_publish = on_publish
@@ -94,8 +95,8 @@ class GarageDoorMonitor(Sensor):
             self.client.loop_start()
             sleep(3) # wait time for client to connect
             if self.bDebug:
-                print "-d- mqtt client: {}".format(self.client)
-            
+                print("-d- mqtt client: {}".format(self.client))
+
             # determine sensor type
             self.enableSensors()
 
@@ -156,16 +157,16 @@ class GarageDoorMonitor(Sensor):
 
     def printConfig(self):
         if self.bDebug:
-            print "-d- garageDoor config"
-            print "-d- pin: limitOpen   : {}".format(self.pins["limitOpen"])
-            print "-d- pin: limitClosed : {}".format(self.pins["limitClosed"])
-            print "-d- pin: rotary      : {}".format(self.pins["rotary"])
-            print "-d- mqtt: host       : {}, {}".format(self.mqttHost,
-                                                         type(self.mqttHost))
-            print "-d- mqtt: port       : {}, {}".format(self.mqttPort,
-                                                         type(self.mqttPort))
-            print "-d- mqtt: topic      : {}, {}".format(self.mqttTopic,
-                                                         type(self.mqttTopic))
+            print("-d- garageDoor config"
+            print("-d- pin: limitOpen   : {}".format(self.pins["limitOpen"]))
+            print("-d- pin: limitClosed : {}".format(self.pins["limitClosed"]))
+            print("-d- pin: rotary      : {}".format(self.pins["rotary"]))
+            print("-d- mqtt: host       : {}, {}".format(self.mqttHost,
+                 (                                       type(self.mqttHost)))
+            print("-d- mqtt: port       : {}, {}".format(self.mqttPort,
+                 (                                       type(self.mqttPort)))
+            print("-d- mqtt: topic      : {}, {}".format(self.mqttTopic,
+                                                         type(self.mqttTopic)))
         return
 
 ###############################################################################
@@ -186,7 +187,7 @@ class GarageDoorMonitor(Sensor):
                 self.sensorType[pin] = True
                 if self.bDebug:
                     s = "{}: pin {}".format(pin, self.pins[pin])
-                    print "-d- gdMonitor: %s" % s
+                    print("-d- gdMonitor: {}".format(s))
                 # TODO - enable selection of pull-up or pull-down resistor
                 GPIO.setup(self.pins[pin],
                            GPIO.IN,
@@ -237,19 +238,19 @@ class GarageDoorMonitor(Sensor):
                     if dState != lastDoorState:
                         lastDoorState = dState
                         if self.bDebug:
-                            print "-d- gdMonitor: state changed: %s" % dState
+                            print("-d- gdMonitor: state changed: {}".format(dState))
                         if 0 <= dState <= 100:
                             (rc, mid) = self.client.publish(self.mqttTopic, dState, qos=1)
                             if self.bDebug:
-                                print "-d- mqtt topic: {}".format(self.mqttTopic)
-                                print "-d- mqtt rc/mid: {}/{}".format(rc, mid)
-                                print "-d- mqtt client: {}".format(self.client)
+                                print("-d- mqtt topic: {}".format(self.mqttTopic))
+                                print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
+                                print("-d- mqtt client: {}".format(self.client))
                         else:
                             if self.bDebug:
-                                print "-d- gdMonitor: door state invalid"
+                                print("-d- gdMonitor: door state invalid")
                 except:
                     if self.bDebug:
-                        print "-d- gdMonitor: thread exception"
+                        print("-d- gdMonitor: thread exception")
                     raise
         return
 
@@ -296,7 +297,7 @@ class GarageDoorMonitor(Sensor):
         # read pins["rotary"]
         if self.sensorType["rotary"]:
             if self.bDebug:
-                print "-d- gdMonitor: reading rotary encoder"
+                print("-d- gdMonitor: reading rotary encoder")
             self.updateRotaryCalibration()
         return
 
@@ -314,11 +315,11 @@ class GarageDoorMonitor(Sensor):
         if self.sensorType["limitOpen"]:
             tmp["open"] = not GPIO.input(self.pins["limitOpen"])
             if self.bDebug:
-                print "-d- gdMonitor: switch open: {}".format(tmp["open"])
+                print("-d- gdMonitor: switch open: {}".format(tmp["open"]))
         if self.sensorType["limitClosed"]:
             tmp["closed"] = not GPIO.input(self.pins["limitClosed"])
             if self.bDebug:
-                print "-d- gdMonitor: switch closed: {}".format(tmp["closed"])
+                print("-d- gdMonitor: switch closed: {}".format(tmp["closed"]))
         self.limitStates = tmp
         return
 
@@ -342,17 +343,17 @@ class GarageDoorMonitor(Sensor):
     def updateRotaryCalibration(self):
         if self.sensorType["limitOpen"] or self.sensorType["limitClosed"]:
             if self.bDebug:
-                print "-d- gdMonitor: rotary calib"
+                print("-d- gdMonitor: rotary calib")
             if self.limitStates["open"] and self.limitStates["closed"]:
                 return False
             elif self.limitStates["open"]:
                 if self.bDebug:
-                    print "-d- gdMonitor: rotary calib - new 'open' limit"
+                    print("-d- gdMonitor: rotary calib - new 'open' limit")
                 rotaryLimits["open"] = self.rotaryCount
             elif self.limitStates["closed"]:
                 self.rotaryCount = 0
                 if self.bDebug:
-                    print "-d- gdMonitor: rotary calib - reset counter"
+                    print("-d- gdMonitor: rotary calib - reset counter")
         return True
 
 ###############################################################################
