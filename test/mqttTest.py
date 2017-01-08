@@ -24,7 +24,7 @@ client.connect(mqttHost, mqttPort)
 client.loop_start()
 sleep(3)
 
-(rc, mid) = client.publish(mqttTopic, "1", qos=1)
+(rc, mid) = client.publish(mqttTopic, "0", qos=1)
 rc
 mid
 

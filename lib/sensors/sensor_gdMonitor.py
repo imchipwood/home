@@ -160,7 +160,9 @@ class GarageDoorMonitor(Sensor):
         self.client = paho.Client(client_id="garageDoorMonitor")
         self.client.on_connect = on_connect
         self.client.on_publish = on_publish
-        self.client.connect(self.mqttHost, self.mqttPort)
+        self.client.connect(host=self.mqttHost,
+                            port=self.mqttPort,
+                            keepalive=10)
         self.client.loop_start()
         sleep(3) # wait time for client to connect
         if self.bDebug:
