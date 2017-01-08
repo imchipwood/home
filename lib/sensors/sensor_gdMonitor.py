@@ -7,7 +7,7 @@ import RPi.GPIO as GPIO
 from sensor import Sensor
 from time import sleep
 import paho.mqtt.client as paho
-import paho.mqtt.publish as publish
+# import paho.mqtt.publish as publish
 
 
 def on_connect(client, userdata, flags, rc):
@@ -172,9 +172,9 @@ class GarageDoorMonitor(Sensor):
     def mqttPublish(self, data):
         if self.bDebug:
             print("-d- mqtt publishing data: {}".format(data))
-        #publish.single(topic=self.mqttTopic, payload=str(data), qos=2,
-        #               hostname=self.mqttHost, port=self.mqttPort,
-        #               client_id="garageDoorMonitor")
+        # publish.single(topic=self.mqttTopic, payload=str(data), qos=2,
+        #                hostname=self.mqttHost, port=self.mqttPort,
+        #                client_id="garageDoorMonitor")
         (rc, mid) = self.client.publish(self.mqttTopic, str(data), qos=2)
         if self.bDebug:
             print("-d- mqtt topic:  {}".format(self.mqttTopic))
