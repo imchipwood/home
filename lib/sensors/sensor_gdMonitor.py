@@ -89,14 +89,6 @@ class GarageDoorMonitor(Sensor):
                 self.printConfig()
 
             # setup connection to mqtt broker
-            self.client = paho.Client(client_id="garageDoorMonitor")
-            self.client.on_connect = on_connect
-            self.client.on_publish = on_publish
-            self.client.connect(self.mqttHost, self.mqttPort)
-            self.client.loop_start()
-            sleep(3) # wait time for client to connect
-            if self.bDebug:
-                print("-d- mqtt client: {}".format(self.client))
 
             # determine sensor type
             self.enableSensors()
@@ -172,6 +164,30 @@ class GarageDoorMonitor(Sensor):
 
 ###############################################################################
 
+    def mqttSetup(self):
+        self.client = paho.Client(client_id="garageDoorMonitor")
+        self.client.on_connect = on_connect
+        self.client.on_publish = on_publish
+        self.client.connect(self.mqttHost, self.mqttPort)
+        self.client.loop_start()
+        sleep(3) # wait time for client to connect
+        if self.bDebug:
+            print("-d- mqtt client: {}".format(self.client))
+        return
+
+###############################################################################
+    
+    def mqttPublish(self, data):
+        (rc, mid) = self.client.publish(self.mqttTopic, dState, qos=1)
+        if self.bDebug:
+            print("-d- mqtt topic:  {}".format(self.mqttTopic))
+            print("-d- mqtt port:   {}".format(self.mqttPort))
+            print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
+            print("-d- mqtt client: {}".format(self.client))
+        return
+
+###############################################################################
+
     """Enable sensors
 
     Sets up GPIO pins for all sensors
@@ -241,11 +257,7 @@ class GarageDoorMonitor(Sensor):
                         if self.bDebug:
                             print("-d- gdMonitor: state changed: {}".format(dState))
                         if 0 <= dState <= 100:
-                            (rc, mid) = self.client.publish(self.mqttTopic, dState, qos=1)
-                            if self.bDebug:
-                                print("-d- mqtt topic: {}".format(self.mqttTopic))
-                                print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
-                                print("-d- mqtt client: {}".format(self.client))
+                            self.mqttPublish(dState)
                         else:
                             if self.bDebug:
                                 print("-d- gdMonitor: door state invalid")
