@@ -21,8 +21,7 @@ sys.path.append(sHomePath+"/lib/actuators")
 from actuator_relay import Relay
 sys.path.append(sHomePath+"/lib/sensors")
 from sensor_gdMonitor import GarageDoorMonitor
-sys.path.append(sHomePath+"/lib/db")
-from db_home import DBHome
+
 
 
 def parseArgs():
