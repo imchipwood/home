@@ -89,6 +89,7 @@ class GarageDoorMonitor(Sensor):
                 self.printConfig()
 
             # setup connection to mqtt broker
+            self.mqttSetup()
 
             # determine sensor type
             self.enableSensors()
