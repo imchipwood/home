@@ -187,7 +187,8 @@ class GarageDoorMonitor(Sensor):
     def mqttPublish(self, data):
         if self.bDebug:
             print("-d- mqtt publishing data: {}".format(data))
-        (rc, mid) = publish.single(topic=self.mqttTopic, payload=str(data),
+        #(rc, mid) = publish.single(topic=self.mqttTopic, payload=str(data),
+        publish.single(topic=self.mqttTopic, payload=str(data),
                                    qos=2, hostname=self.mqttHost,
                                    port=self.mqttPort,
                                    client_id="garageDoorMonitor")
@@ -195,7 +196,7 @@ class GarageDoorMonitor(Sensor):
         if self.bDebug:
             print("-d- mqtt topic:  {}".format(self.mqttTopic))
             print("-d- mqtt port:   {}".format(self.mqttPort))
-            print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
+            #print("-d- mqtt rc/mid: {}/{}".format(rc, mid))
             print("-d- mqtt client: {}".format(self.client))
         return
 
