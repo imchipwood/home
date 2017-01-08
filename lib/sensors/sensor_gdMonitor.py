@@ -135,9 +135,9 @@ class GarageDoorMonitor(Sensor):
                 if line[0] == "h":
                     self.mqttHost = line[-1]
                 if line[0] == "p":
-                    self.mqttPort = line[-1]
+                    self.mqttPort = int(line[-1])
                 if line[0] == "t":
-                    self.mqttTopic = int(line[-1])
+                    self.mqttTopic = line[-1]
         validConf = True
         for pin in tmpPins:
             if 2 > pin > 27:  # valid RPi GPIO pins are 2-27
