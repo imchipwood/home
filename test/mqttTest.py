@@ -17,14 +17,14 @@ print("mqtthost: {}".format(mqttHost))
 print("mqttPort: {}".format(mqttPort))
 print("mqttTopic: {}".format(mqttTopic))
 
-client = paho.Client(client_id="garageDoor")
+client = paho.Client(client_id="garageDoorMonitor")
 client.on_connect = on_connect
 client.on_publish = on_publish
 client.connect(mqttHost, mqttPort)
 client.loop_start()
 sleep(3)
 
-(rc, mid) = client.publish(mqttTopic, "0", qos=1)
+(rc, mid) = client.publish(mqttTopic, "1", qos=1)
 rc
 mid
 

@@ -61,6 +61,7 @@ class GarageDoorMonitor(Sensor):
     mqttHost = "0.0.0.0"
     mqttPort = 0
     mqttTopic = ""
+    client = ""
 
     """Initialize a Garage Door Monitor
 
@@ -88,7 +89,7 @@ class GarageDoorMonitor(Sensor):
                 self.printConfig()
 
             # setup connection to mqtt broker
-            self.client = paho.Client(client_id="garageDoor")
+            self.client = paho.Client(client_id="garageDoorMonitor")
             self.client.on_connect = on_connect
             self.client.on_publish = on_publish
             self.client.connect(self.mqttHost, self.mqttPort)
