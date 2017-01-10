@@ -261,7 +261,10 @@ class GarageDoorMonitor(Sensor):
                         if self.bDebug:
                             print("-d- gdMonitor: newState: {}".format(dState))
                         if 0 <= dState <= 100:
-                            self.mqttPublish(dState)
+                            if dState == 0:
+                                self.mqttPublish("closed")
+                            else:
+                                self.mqttPublish("open")
                         else:
                             if self.bDebug:
                                 print("-d- gdMonitor: door state invalid")
