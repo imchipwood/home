@@ -142,13 +142,13 @@ def main():
                                             str(dData["temperature"]),
                                             qos=2,
                                             retain=True)
-            if not mid:
+            if mid:
                 print "-e- error sending temperature"
             (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
                                             str(dData["humidity"]),
                                             qos=2,
                                             retain=True)
-            if not mid:
+            if mid:
                 print "-e- error sending humidity"
         except:
             raise
