@@ -164,6 +164,8 @@ def main():
         traceback.print_exc()
         raise e
     finally:
+        if bDebug:
+            print "-d- cleaning up"
         client.loop_stop()
         client.unsubscribe(dConfig["mqtt_topic_t"])
         client.unsubscribe(dConfig["mqtt_topic_h"])
