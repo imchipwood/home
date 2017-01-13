@@ -4,6 +4,7 @@ import os
 import argparse
 import traceback
 import paho.mqtt.client as paho
+from time import sleep
 
 global sHomePath
 sHomePath = os.path.dirname(os.path.realpath(__file__))
@@ -96,6 +97,7 @@ def main():
     client.connect(host=dConfig["mqtt_broker"],
                    port=dConfig["mqtt_port"],
                    keepalive=10)
+    sleep(3)
     if bDebug:
         print "-d- mqtt info:"
         print "-d- mqtt_client_id: {}".format(dConfig["mqtt_client"])
@@ -108,7 +110,9 @@ def main():
     # set up the sensor
     if bDebug:
         print "-d- Setting up humidity sensor"
-    h = SensorHumidity(sensor_type=dConfig["dht_type"], pin=dConfig["dht_pin"], units="f")
+    h = SensorHumidity(sensor_type=dConfig["dht_type"],
+                       pin=dConfig["dht_pin"],
+                       units="f")
     try:
         if bDebug:
             print "-d- Beginning 5 warmup readings"
@@ -139,15 +143,15 @@ def main():
         # Send data to server
         try:
             (rc, mid) = client.publish(dConfig["mqtt_topic_t"],
-                                            str(dData["temperature"]),
-                                            qos=2,
-                                            retain=True)
+                                       str(dData["temperature"]),
+                                       qos=2,
+                                       retain=True)
             if mid:
                 print "-e- error sending temperature"
             (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
-                                            str(dData["humidity"]),
-                                            qos=2,
-                                            retain=True)
+                                       str(dData["humidity"]),
+                                       qos=2,
+                                       retain=True)
             if mid:
                 print "-e- error sending humidity"
         except:
