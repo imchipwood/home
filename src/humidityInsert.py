@@ -130,13 +130,13 @@ def main():
 
         # Send data to server
         try:
-            (rc, mid) = self.client.publish(dConfig["mqtt_topic_t"],
+            (rc, mid) = client.publish(dConfig["mqtt_topic_t"],
                                             str(dData["temperature"]),
                                             qos=2,
                                             retain=True)
             if not mid:
                 print "-e- error sending temperature"
-            (rc, mid) = self.client.publish(dConfig["mqtt_topic_h"],
+            (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
                                             str(dData["humidity"]),
                                             qos=2,
                                             retain=True)
