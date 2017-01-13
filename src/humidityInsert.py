@@ -147,14 +147,14 @@ def main():
                                        "{0:0.1f}".format(dData["temperature"]),
                                        qos=2,
                                        retain=True)
-            if mid:
-                print "-e- error sending temperature"
+#            if mid:
+#                print "-e- error sending temperature"
             (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
                                        "{0:0.1f}".format(dData["humidity"]),
                                        qos=2,
                                        retain=True)
-            if mid:
-                print "-e- error sending humidity"
+#            if mid:
+#                print "-e- error sending humidity"
         except:
             raise
     except KeyboardInterrupt:
