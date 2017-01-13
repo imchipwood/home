@@ -141,21 +141,21 @@ def main():
             print "-d- Humidity:    {0:0.1f}".format(dData["humidity"])
 
         # Send data to server
-        try:
-            (rc, mid) = client.publish(dConfig["mqtt_topic_t"],
-                                       str(dData["temperature"]),
-                                       qos=2,
-                                       retain=True)
-            if mid:
-                print "-e- error sending temperature"
-            (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
-                                       str(dData["humidity"]),
-                                       qos=2,
-                                       retain=True)
-            if mid:
-                print "-e- error sending humidity"
-        except:
-            raise
+        #try:
+        #    (rc, mid) = client.publish(dConfig["mqtt_topic_t"],
+        #                               str(dData["temperature"]),
+        #                               qos=2,
+        #                               retain=True)
+        #    if mid:
+        #        print "-e- error sending temperature"
+        #    (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
+        #                               str(dData["humidity"]),
+        #                               qos=2,
+        #                               retain=True)
+        #    if mid:
+        #        print "-e- error sending humidity"
+        #except:
+        #    raise
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         pass
