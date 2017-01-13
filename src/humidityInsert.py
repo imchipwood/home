@@ -97,6 +97,7 @@ def main():
     client.connect(host=dConfig["mqtt_broker"],
                    port=dConfig["mqtt_port"],
                    keepalive=10)
+    client.loop_start()
     sleep(3)
     if bDebug:
         print "-d- mqtt info:"
@@ -166,7 +167,7 @@ def main():
     finally:
         if bDebug:
             print "-d- cleaning up"
-        #client.loop_stop()
+        client.loop_stop()
         #client.unsubscribe(dConfig["mqtt_topic_t"])
         #client.unsubscribe(dConfig["mqtt_topic_h"])
         client.disconnect()
