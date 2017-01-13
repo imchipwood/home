@@ -167,8 +167,8 @@ def main():
         if bDebug:
             print "-d- cleaning up"
         #client.loop_stop()
-        client.unsubscribe(dConfig["mqtt_topic_t"])
-        client.unsubscribe(dConfig["mqtt_topic_h"])
+        #client.unsubscribe(dConfig["mqtt_topic_t"])
+        #client.unsubscribe(dConfig["mqtt_topic_h"])
         client.disconnect()
     return True
 
