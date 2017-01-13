@@ -96,6 +96,14 @@ def main():
     client.connect(host=dConfig["mqtt_broker"],
                    port=dConfig["mqtt_port"],
                    keepalive=10)
+    if bDebug:
+        print "-d- mqtt info:"
+        print "-d- mqtt_client_id: {}".format(dConfig["mqtt_client"])
+        print "-d- mqtt_broker:    {}".format(dConfig["mqtt_broker"])
+        print "-d- mqtt_port:      {}".format(dConfig["mqtt_port"])
+        print "-d- mqtt_topic_t:   {}".format(dConfig["mqtt_topic_t"])
+        print "-d- mqtt_topic_h:   {}".format(dConfig["mqtt_topic_h"])
+        print "-d- client: {}".format(client)
 
     # set up the sensor
     if bDebug:
