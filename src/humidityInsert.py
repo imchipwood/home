@@ -24,6 +24,13 @@ def on_publish(client, userdata, mid):
     print("mid: "+str(mid))
 
 
+def checkLimits(temperature, humidity):
+    if -20 <= temperature <= 150 and 0 <= humidity <= 100:
+        return True
+    else:
+        return False
+
+
 def parseArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument("-nAvg",
@@ -87,9 +94,9 @@ def main():
     iAvg = parsedArgs.nAvg
     sConfigFile = parsedArgs.configFile
     bDebug = parsedArgs.debug
-    
+
     dConfig = readConfig(sConfigFile, bDebug)
-    
+
     # connect to MQTT broker
     client = paho.Client(client_id=dConfig["mqtt_client"])
     client.on_connect = on_connect
@@ -135,28 +142,24 @@ def main():
             fHumidity += h.getHumidity()
         fTemperature /= float(iAvg)
         fHumidity /= float(iAvg)
-        dData = {"temperature": fTemperature, "humidity": fHumidity}
         if bDebug:
             print "-d- Final data:"
-            print "-d- Temperature: {0:0.1f}".format(dData["temperature"])
-            print "-d- Humidity:    {0:0.1f}".format(dData["humidity"])
+            print "-d- Temperature: {0:0.1f}".format(fTemperature)
+            print "-d- Humidity:    {0:0.1f}".format(fHumidity)
 
         # Send data to server
-        try:
-            (rc, mid) = client.publish(dConfig["mqtt_topic_t"],
-                                       "{0:0.1f}".format(dData["temperature"]),
-                                       qos=2,
-                                       retain=True)
-#            if mid:
-#                print "-e- error sending temperature"
-            (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
-                                       "{0:0.1f}".format(dData["humidity"]),
-                                       qos=2,
-                                       retain=True)
-#            if mid:
-#                print "-e- error sending humidity"
-        except:
-            raise
+        if checkLimits(fTemperature, fHumidity):
+            try:
+                (rc, mid) = client.publish(dConfig["mqtt_topic_t"],
+                                           "{0:0.1f}".format(fTemperature),
+                                           qos=2,
+                                           retain=True)
+                (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
+                                           "{0:0.1f}".format(fHumidity),
+                                           qos=2,
+                                           retain=True)
+            except:
+                raise
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         pass
