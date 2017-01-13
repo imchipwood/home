@@ -158,11 +158,16 @@ def main():
             raise
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
-        sys.exit(1)
+        pass
     except Exception as e:
         print "\n\t-E- Some exception: %s\n" % (e)
         traceback.print_exc()
         raise e
+    finally:
+        client.loop_stop()
+        client.unsubscribe(dConfig["mqtt_topic_t"])
+        client.unsubscribe(dConfig["mqtt_topic_h"])
+        client.disconnect()
     return True
 
 
