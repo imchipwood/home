@@ -3,11 +3,16 @@ import sys
 import os
 import argparse
 import traceback
+import paho.mqtt.client as paho
+from ..lib.sensors import SensorHumidity
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/db")
-from db_humidity import DBHumidity
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../lib/sensors")
-from sensor_humidity import SensorHumidity
+
+def on_connect(client, userdata, flags, rc):
+    print("CONNACK received with code %d." % (rc))
+
+
+def on_publish(client, userdata, mid):
+    print("mid: "+str(mid))
 
 
 def parseArgs():
@@ -17,21 +22,11 @@ def parseArgs():
                         type=int,
                         default=5,
                         help="# measurements to average. Optional. Default=5")
-    parser.add_argument("-insert",
-                        "-i",
-                        action="store_false",
-                        default=True,
-                        help="Disable SQL insertion. Defaults to inserting")
     parser.add_argument("-configFile",
                         "-c",
                         type=str,
-                        default="sql_humidity_media.txt",
-                        help="Config file for SQL database interaction")
-    parser.add_argument("-configFileBackup",
-                        "-cb",
-                        type=str,
-                        default=None,
-                        help="Config file for backup SQL database interaction")
+                        default="humidity.txt",
+                        help="Config file for sensor & MQTT info")
     parser.add_argument("-debug",
                         "-d",
                         action="store_true",
@@ -49,35 +44,55 @@ def printData(i, temperature, humidity):
            )
     return
 
+
+# read config file
+# expected keys:
+#   dht_type        - DHT type (11, 22, 2302). See Adafruit library for info
+#   dht_pin         - GPIO pin # for DHT sensor
+#   mqtt_client     - name for the client
+#   mqtt_broker     - IP address of MQTT broker
+#   mqtt_port       - Port to use for MQTT broker
+#   mqtt_topic_t    - topic for temperature readings
+#   mqtt_topic_h    - topic for humidity readings
+def readConfig(f, bDebug):
+    if bDebug:
+        print "-d- Using config file found here:"
+        print "-d- {}".format(f)
+    config = {}
+    with open(f, "r") as inf:
+        for line in inf:
+            line = line.rstrip().split("=")
+            key = line[0]
+            val = line[1]
+            if key in ["dht_pin", "mqtt_port"]:
+                val = int(val)
+            config[key] = val
+            if bDebug:
+                print "-d- config: found key {} with val {}".format(key, val)
+    return config
+
+
 def main():
 
     parsedArgs = parseArgs()
     iAvg = parsedArgs.nAvg
-    sDBAccessFileName = parsedArgs.configFile
-    sDBAccessBackupFileName = parsedArgs.configFileBackup
-    bInsert = parsedArgs.insert
+    sConfigFile = parsedArgs.configFile
     bDebug = parsedArgs.debug
-
-    bBackupEnable = True if sDBAccessBackupFileName is not None else False
-    # set up db
-    sHomeDBPath = "/".join(os.path.dirname(os.path.realpath(__file__)).split("/")[:-1])
-    sDBCredentialsFile = sHomeDBPath+"/conf/"+sDBAccessFileName
-    if bDebug:
-        print "-d- Accessing DB using credentials found here:"
-        print "-d- {}".format(sDBCredentialsFile)
-    hdb = DBHumidity(sDBCredentialsFile, bDebug=bDebug)
-
-    if bBackupEnable:
-        sDBCredentialsBackupFile = sHomeDBPath+"/conf/"+sDBAccessBackupFileName
-        if bDebug:
-            print "-d- Accessing backup DB using credentials found here:"
-            print "-d- {}".format(sDBCredentialsBackupFile)
-        hdbbackup = DBHumidity(sDBCredentialsBackupFile, bDebug=bDebug)
+    
+    dConfig = readConfig(sConfigFile, bDebug)
+    
+    # connect to MQTT broker
+    client = paho.Client(client_id=dConfig["mqtt_client"])
+    client.on_connect = on_connect
+    client.on_publish = on_publish
+    client.connect(host=dConfig["mqtt_broker"],
+                   port=dConfig["mqtt_port"],
+                   keepalive=10)
 
     # set up the sensor
     if bDebug:
         print "-d- Setting up humidity sensor"
-    h = SensorHumidity(sensor_type="22", pin=4, units="f")
+    h = SensorHumidity(sensor_type=dConfig["dht_type"], pin=dConfig["dht_pin"], units="f")
     try:
         if bDebug:
             print "-d- Beginning 5 warmup readings"
@@ -105,14 +120,22 @@ def main():
             print "-d- Temperature: {0:0.1f}".format(dData["temperature"])
             print "-d- Humidity:    {0:0.1f}".format(dData["humidity"])
 
-        # insert data into the database
+        # Send data to server
         try:
-            hdb.insertData(dData, insert=bInsert, bDebug=bDebug)
+            (rc, mid) = self.client.publish(dConfig["mqtt_topic_t"],
+                                            str(dData["temperature"]),
+                                            qos=2,
+                                            retain=True)
+            if not mid:
+                print "-e- error sending temperature"
+            (rc, mid) = self.client.publish(dConfig["mqtt_topic_h"],
+                                            str(dData["humidity"]),
+                                            qos=2,
+                                            retain=True)
+            if not mid:
+                print "-e- error sending humidity"
         except:
-            if bBackupEnable:
-                hdbback.insertData(dData, insert=bInsert, bDebug=bDebug)
-            else:
-                raise
+            raise
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         sys.exit(1)
