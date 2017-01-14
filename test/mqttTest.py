@@ -12,7 +12,8 @@ def on_publish(client, userdata, mid):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("client_id",
+parser.add_argument("-client_id",
+                    "-c",
                     type=str,
                     default="test",
                     help="client_id for MQTT connection")
