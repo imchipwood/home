@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 mqttHost = "192.168.1.130"
 mqttPort = 1883
-mqttTopic = "home-assistant/test/pub"
+mqttTopic = "home-assistant/test/sub"
 
 print("mqtthost: {}".format(mqttHost))
 print("mqttPort: {}".format(mqttPort))
