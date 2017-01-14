@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# https://www.raspberrypi.org/learning/getting-started-with-picamera/worksheet/
 from picamera import PiCamera
 from time import sleep
 
