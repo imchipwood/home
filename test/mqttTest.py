@@ -1,3 +1,4 @@
+import argparse
 import paho.mqtt.client as paho
 from time import sleep
  
@@ -9,15 +10,22 @@ def on_publish(client, userdata, mid):
     print("mid: "+str(mid))
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("client_id",
+                    type=str,
+                    default="test",
+                    help="client_id for MQTT connection")
+args = parser.parse_args()
+
 mqttHost = "192.168.1.130"
 mqttPort = 1883
-mqttTopic = "home-assistant/garage/door"
+mqttTopic = "home-assistant/test"
 
 print("mqtthost: {}".format(mqttHost))
 print("mqttPort: {}".format(mqttPort))
 print("mqttTopic: {}".format(mqttTopic))
 
-client = paho.Client(client_id="garageDoorMonitor")
+client = paho.Client(client_id=args.client_id)
 client.on_connect = on_connect
 client.on_publish = on_publish
 client.connect(mqttHost, mqttPort)
