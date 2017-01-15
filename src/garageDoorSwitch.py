@@ -66,11 +66,12 @@ class MQTTRelay(object):
 
     def __init__(self, config, bDebug):
         super(MQTTRelay, self).__init__()
+        self.bDebug = bDebug
         
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
         self.pin = config["relay_pin"]
-        if bDebug:
+        if self.bDebug:
             print("MQTTRelay - setting up pin: {}".format(self.pin))
         GPIO.setup(self.pin, GPIO.OUT)
         self.off()
@@ -81,7 +82,7 @@ class MQTTRelay(object):
         self.mqttTopic = config["mqtt_topic"]
 
     def start(self):
-        if bDebug:
+        if self.bDebug:
             print("MQTTRelay - iniitializing mqtt connection")
         self.client = paho.Client(client_id=self.mqttClientId)
         self.client.on_connect = self.on_connect
@@ -107,7 +108,7 @@ class MQTTRelay(object):
         self.toggle()
 
     def cleanup(self):
-        if bDebug:
+        if self.bDebug:
             print("MQTTRelay - cleaning up...")
         GPIO.cleanup()
         self.client.loop_stop()
@@ -115,20 +116,20 @@ class MQTTRelay(object):
         self.client.disconnect()
 
     def on(self):
-        if bDebug:
+        if self.bDebug:
             print("MQTTRelay - on")
         GPIO.output(self.pin, GPIO.HIGH)
 
     def off(self):
-        if bDebug:
+        if self.bDebug:
             print("MQTTRelay - off")
         GPIO.output(self.pin, GPIO.LOW)
 
     def toggle(self):
-        if bDebug:
+        if self.bDebug:
             print("MQTTRelay - toggle")
         self.on()
-        if bDebug:
+        if self.bDebug:
             print("MQTTrelay - sleep")
         sleep(0.3)
         self.off()
