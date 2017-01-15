@@ -9,7 +9,7 @@ camera.brightness = 50
 camera.contrast = 50
 camera.start_preview()
 sleep(5)
-camera.capture('/home/cpw/camera/captures/test000.jpg')
+camera.capture('/home/cpw/camera/captures/garage.jpg')
 
 # command to open video: omxplayer video.h264
 #camera.start_recording('/home/cpw/camera/recordings/video.h264')
