@@ -73,7 +73,7 @@ class MQTTRelay(object):
         self.off()
         
         self.mqttClientId = config["mqtt_client"]
-        self.mqttHost - config["mqtt_broker"]
+        self.mqttHost = config["mqtt_broker"]
         self.mqttPort = config["mqtt_port"]
         self.mqttTopic = config["mqtt_topic"]
 
