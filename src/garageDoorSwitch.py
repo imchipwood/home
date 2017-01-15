@@ -142,9 +142,9 @@ def main():
     try:
         gdr.start()
     except KeyboardInterrupt:
-        print("\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n")
+        print("\n\t-e- KeyboardInterrupt, exiting gracefully\n")
     except Exception as e:
-        print("\n\t-E- gd: Some exception: %s\n" % (e))
+        print("\n\t-E- Some exception: %s\n" % (e))
         traceback.print_exc()
         raise e
     return
