@@ -64,13 +64,14 @@ def readConfig(f, bDebug):
 
 class MQTTRelay(object):
 
-    def __init__(self, config):
+    def __init__(self, config, bDebug):
         super(MQTTRelay, self).__init__()
         
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
         self.pin = config["relay_pin"]
-        print("MQTTRelay - setting up pin: {}".format(self.pin))
+        if bDebug:
+            print("MQTTRelay - setting up pin: {}".format(self.pin))
         GPIO.setup(self.pin, GPIO.OUT)
         self.off()
         
@@ -80,7 +81,8 @@ class MQTTRelay(object):
         self.mqttTopic = config["mqtt_topic"]
 
     def start(self):
-        print("MQTTRelay - iniitializing mqtt connection")
+        if bDebug:
+            print("MQTTRelay - iniitializing mqtt connection")
         self.client = paho.Client(client_id=self.mqttClientId)
         self.client.on_connect = self.on_connect
         self.client.on_subscribe = self.on_subscribe
@@ -91,6 +93,7 @@ class MQTTRelay(object):
             self.client.loop_forever()
         except:
             self.cleanup()
+            raise
         return
 
     def on_connect(self, client, userdata, flags, rc):
@@ -104,24 +107,29 @@ class MQTTRelay(object):
         self.toggle()
 
     def cleanup(self):
-        print("MQTTRelay - cleaning up...")
+        if bDebug:
+            print("MQTTRelay - cleaning up...")
         GPIO.cleanup()
         self.client.loop_stop()
         self.client.unsubscribe(self.mqttTopic)
         self.client.disconnect()
 
     def on(self):
-        print("MQTTRelay - on")
+        if bDebug:
+            print("MQTTRelay - on")
         GPIO.output(self.pin, GPIO.HIGH)
 
     def off(self):
-        print("MQTTRelay - off")
+        if bDebug:
+            print("MQTTRelay - off")
         GPIO.output(self.pin, GPIO.LOW)
 
     def toggle(self):
-        print("MQTTRelay - toggle")
+        if bDebug:
+            print("MQTTRelay - toggle")
         self.on()
-        print("MQTTrelay - sleep")
+        if bDebug:
+            print("MQTTrelay - sleep")
         sleep(0.3)
         self.off()
 
@@ -148,8 +156,6 @@ def main():
         print("\n\t-E- gd: Some exception: %s\n" % (e))
         traceback.print_exc()
         raise e
-    finally:
-        gdr.cleanup()
     return
 
 
