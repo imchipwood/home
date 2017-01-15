@@ -69,7 +69,7 @@ class MQTTRelay(object):
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
         self.pin = config["relay_pin"]
-        print("setting up pin: {}".format(self.pin))
+        print("MQTTRelay - setting up pin: {}".format(self.pin))
         GPIO.setup(self.pin, GPIO.OUT)
         self.off()
         
@@ -79,7 +79,7 @@ class MQTTRelay(object):
         self.mqttTopic = config["mqtt_topic"]
 
     def start(self):
-        print("iniitializing mqtt connection")
+        print("MQTTRelay - iniitializing mqtt connection")
         self.client = paho.Client(client_id=self.mqttClientId)
         self.client.on_connect = self.on_connect
         self.client.on_subscribe = self.on_subscribe
@@ -93,28 +93,32 @@ class MQTTRelay(object):
         return
 
     def on_connect(self, client, userdata, flags, rc):
-        print("CONNACK received with code %d." % (rc))
+        print("mqtt: CONNACK received with code %d." % (rc))
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
-        print("Subscribed: "+str(mid)+" "+str(granted_qos))
+        print("mqtt: Subscribed: "+str(mid)+" "+str(granted_qos))
 
     def on_message(self, client, userdata, msg):
-        print("rx: "+msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
+        print("mqtt: rx: "+msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
         self.toggle()
 
     def cleanup(self):
+        print("MQTTRelay - cleaning up...")
         GPIO.cleanup()
         self.client.loop_stop()
         self.client.unsubscribe(self.mqttTopic)
         self.client.disconnect()
 
     def on(self):
+        print("MQTTRelay - on")
         GPIO.output(self.pin, GPIO.HIGH)
 
     def off(self):
+        print("MQTTRelay - off")
         GPIO.output(self.pin, GPIO.LOW)
 
     def toggle(self):
+        print("MQTTRelay - toggle")
         self.on()
         sleep(0.3)
         self.off()
