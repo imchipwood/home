@@ -120,6 +120,7 @@ class MQTTRelay(object):
     def toggle(self):
         print("MQTTRelay - toggle")
         self.on()
+        print("MQTTrelay - sleep")
         sleep(0.3)
         self.off()
 
