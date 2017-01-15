@@ -35,7 +35,7 @@ def parseArgs():
     parser.add_argument('-debug',
                         '-d',
                         action="store_true",
-                        help="Enable debug messages, also disable SQL injection")
+                        help="Enable debug messages")
 
     args = parser.parse_args()
     return args

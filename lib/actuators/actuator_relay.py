@@ -1,5 +1,5 @@
 import RPi.GPIO as GPIO
-
+from time import sleep
 
 class Relay(object):
     """Relay Controller Class
@@ -22,6 +22,11 @@ class Relay(object):
 
     def off(self):
         GPIO.output(self.pin, GPIO.LOW)
+
+    def toggle(self):
+        self.on()
+        sleep(0.3)
+        self.off()
 
     @property
     def state(self):

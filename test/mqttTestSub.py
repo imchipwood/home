@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import argparse
 import paho.mqtt.client as paho
-from time import sleep
 
 
 def on_connect(client, userdata, flags, rc):
