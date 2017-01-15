@@ -68,7 +68,7 @@ class MQTTRelay(object):
         
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
-        self.pin = pin
+        self.pin = config["relay_pin"]
         GPIO.setup(self.pin, GPIO.OUT)
         self.off()
         
