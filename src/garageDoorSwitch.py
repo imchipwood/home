@@ -61,10 +61,17 @@ def readConfig(f, bDebug):
     return config
 
 
-class MQTTRelay(Relay):
+class MQTTRelay(object):
 
     def __init__(self, config):
         super(MQTTRelay, self).__init__()
+        
+        # set up pin and drive low
+        GPIO.setmode(GPIO.BCM)
+        self.pin = pin
+        GPIO.setup(self.pin, GPIO.OUT)
+        self.off()
+        
         self.mqttClientId = config["mqtt_client"]
         self.mqttHost - config["mqtt_broker"]
         self.mqttPort = config["mqtt_port"]
