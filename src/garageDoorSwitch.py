@@ -9,16 +9,6 @@ from time import sleep
 global sHomePath
 global endThreads
 
-# # stupidity until I figure out how to package my libs properly
-# import sys
-# import os
-# sHomePath = os.path.dirname(os.path.realpath(__file__))
-# sHomePath = "/".join(sHomePath.split("/")[:-1])
-# while "home" not in sHomePath.split("/")[-1]:
-#     sHomePath = "/".join(sHomePath.split("/")[:-1])
-# sys.path.append(sHomePath+"/lib/actuators")
-# from actuator_relay import Relay
-
 
 def parseArgs():
     # argument parsing
@@ -67,7 +57,7 @@ class MQTTRelay(object):
     def __init__(self, config, bDebug):
         super(MQTTRelay, self).__init__()
         self.bDebug = bDebug
-        
+
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
         self.pin = config["relay_pin"]
@@ -75,7 +65,7 @@ class MQTTRelay(object):
             print("MQTTRelay - setting up pin: {}".format(self.pin))
         GPIO.setup(self.pin, GPIO.OUT)
         self.off()
-        
+
         self.mqttClientId = config["mqtt_client"]
         self.mqttHost = config["mqtt_broker"]
         self.mqttPort = config["mqtt_port"]
