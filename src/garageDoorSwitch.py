@@ -69,6 +69,7 @@ class MQTTRelay(object):
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
         self.pin = config["relay_pin"]
+        print("setting up pin: {}".format(self.pin))
         GPIO.setup(self.pin, GPIO.OUT)
         self.off()
         
@@ -78,6 +79,7 @@ class MQTTRelay(object):
         self.mqttTopic = config["mqtt_topic"]
 
     def start(self):
+        print("iniitializing mqtt connection")
         self.client = paho.Client(client_id=self.mqttClientId)
         self.client.on_connect = self.on_connect
         self.client.on_subscribe = self.on_subscribe
@@ -97,7 +99,7 @@ class MQTTRelay(object):
         print("Subscribed: "+str(mid)+" "+str(granted_qos))
 
     def on_message(self, client, userdata, msg):
-        print(msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
+        print("rx: "+msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
         self.toggle()
 
     def cleanup(self):
