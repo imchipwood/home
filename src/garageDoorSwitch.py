@@ -145,7 +145,7 @@ def main():
 
     dConfig = readConfig(sConfigFile, bDebug)
     try:
-        gdr = MQTTRelay(dConfig)
+        gdr = MQTTRelay(dConfig, bDebug)
     except:
         raise
     try:
