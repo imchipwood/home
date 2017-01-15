@@ -8,16 +8,15 @@ import paho.mqtt.client as paho
 global sHomePath
 global endThreads
 
-# stupidity until I figure out how to package my libs properly
-#import sys
-#import os
-#sHomePath = os.path.dirname(os.path.realpath(__file__))
-#sHomePath = "/".join(sHomePath.split("/")[:-1])
-#while "home" not in sHomePath.split("/")[-1]:
-#    sHomePath = "/".join(sHomePath.split("/")[:-1])
-#
-#sys.path.append(sHomePath+"/lib/actuators")
-#from actuator_relay import Relay
+# # stupidity until I figure out how to package my libs properly
+# import sys
+# import os
+# sHomePath = os.path.dirname(os.path.realpath(__file__))
+# sHomePath = "/".join(sHomePath.split("/")[:-1])
+# while "home" not in sHomePath.split("/")[-1]:
+#     sHomePath = "/".join(sHomePath.split("/")[:-1])
+# sys.path.append(sHomePath+"/lib/actuators")
+# from actuator_relay import Relay
 
 
 def parseArgs():
@@ -117,8 +116,6 @@ class MQTTRelay(Relay):
 
 
 def main():
-    global sHomePath
-
     parsedArgs = parseArgs()
     sConfigFile = parsedArgs.configFile
     bDebug = parsedArgs.debug
@@ -129,21 +126,15 @@ def main():
     except:
         raise
     try:
-
+        gdr.start()
     except KeyboardInterrupt:
-        endThreads = True
         print("\n\t-e- gd: KeyboardInterrupt, exiting gracefully\n")
-        raise
     except Exception as e:
-        endThreads = True
         print("\n\t-E- gd: Some exception: %s\n" % (e))
         traceback.print_exc()
         raise e
     finally:
-        endThreads = True
-        # if nPinRelay is not None:
-        #     gdc.cleanup()
-        gdm.cleanup()
+        gdr.cleanup()
     return
 
 
