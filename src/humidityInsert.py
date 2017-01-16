@@ -4,7 +4,8 @@ import os
 import argparse
 import traceback
 import paho.mqtt.client as paho
-from time import sleep
+from time import sleep, time
+import datetime
 
 global sHomePath
 sHomePath = os.path.dirname(os.path.realpath(__file__))
@@ -70,6 +71,7 @@ def printData(i, temperature, humidity):
 #   mqtt_port       - Port to use for MQTT broker
 #   mqtt_topic_t    - topic for temperature readings
 #   mqtt_topic_h    - topic for humidity readings
+#   log             - path to file to log info to
 def readConfig(f, bDebug):
     if bDebug:
         print "-d- Using config file found here:"
@@ -86,6 +88,27 @@ def readConfig(f, bDebug):
             if bDebug:
                 print "-d- config: found key {} with val {}".format(key, val)
     return config
+
+
+def logData(f, data, mqtt_rc, mqtt_mid, bDebug):
+    if bDebug:
+        print "-d- Logging to file: {}".format(f)
+    # construct log line
+    st = datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
+    sLog = "{} - {}: {}, RC: {}, mid: {}\n".format(st,
+                                                   data.keys()[0],
+                                                   data[data.keys()[0]],
+                                                   mqtt_rc,
+                                                   mqtt_mid)
+    if bDebug:
+        print "-d- log data:\n-d- {}".format(sLog)
+    # write to file
+    fileMode = "a"
+    if not os.path.exists(f):
+        fileMode = "w"
+    with open(f, fileMode) as ouf:
+        ouf.write(sLog)
+    return
 
 
 def main():
@@ -154,12 +177,17 @@ def main():
                                            "{0:0.1f}".format(fTemperature),
                                            qos=2,
                                            retain=True)
+                logData(dConfig["log"],
+                        {"temperature": fTemperature}, rc, mid, bDebug)
                 (rc, mid) = client.publish(dConfig["mqtt_topic_h"],
                                            "{0:0.1f}".format(fHumidity),
                                            qos=2,
                                            retain=True)
+                logData(dConfig["log"],
+                        {"humidity": fHumidity}, rc, mid, bDebug)
             except:
                 raise
+        
     except KeyboardInterrupt:
         print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
         pass
