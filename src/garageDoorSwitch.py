@@ -3,13 +3,12 @@ import argparse
 import traceback
 import RPi.GPIO as GPIO
 import paho.mqtt.client as paho
-from time import sleep
-
-# globals
-global sHomePath
-global endThreads
+from time import sleep, time
+from datetime import datetime
 
 
+###############################################################################
+# Appetizers
 def parseArgs():
     # argument parsing
     parser = argparse.ArgumentParser()
@@ -27,50 +26,107 @@ def parseArgs():
     return args
 
 
-# read config file
-# expected keys:
-#   relay_pin       - GPIO pin # for opening/closing door
-#   mqtt_client     - name for the client
-#   mqtt_broker     - IP address of MQTT broker
-#   mqtt_port       - Port to use for MQTT broker
-#   mqtt_topic      - topic to listen to for open/close commands
-def readConfig(f, bDebug):
-    if bDebug:
-        print "-d- Using config file found here:"
-        print "-d- {}".format(f)
-    config = {}
-    with open(f, "r") as inf:
-        for line in inf:
-            line = line.rstrip().split("=")
-            key = line[0]
-            val = line[1]
-            if key in ["relay_pin", "mqtt_port"]:
-                val = int(val)
-            config[key] = val
-            if bDebug:
-                print "-d- config: found key {} with val {}".format(key, val)
-    return config
-
-
 class MQTTRelay(object):
+    '''Relay Object with MQTT Support
 
-    def __init__(self, config, bDebug):
+    This class encapsulates simple functions to set up and drive a relay/switch
+    It drives a relay based on messages detected via an MQTT subscription.
+    The class subscribes to an MQTT topic and whenever a message is detected,
+    it toggles the relay.
+    '''
+    def __init__(self, f, bDebug):
         super(MQTTRelay, self).__init__()
         self.bDebug = bDebug
 
+        self.dConfig = readConfig(f, self.bDebug)
+
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
-        self.pin = config["relay_pin"]
+        self.pin = self.dConfig["relay_pin"]
         if self.bDebug:
             print("MQTTRelay - setting up pin: {}".format(self.pin))
         GPIO.setup(self.pin, GPIO.OUT)
         self.off()
 
-        self.mqttClientId = config["mqtt_client"]
-        self.mqttHost = config["mqtt_broker"]
-        self.mqttPort = config["mqtt_port"]
-        self.mqttTopic = config["mqtt_topic"]
+        # MQTT info
+        self.mqttClientId = self.dConfig["mqtt_client"]
+        self.mqttHost = self.dConfig["mqtt_broker"]
+        self.mqttPort = self.dConfig["mqtt_port"]
+        self.mqttTopic = self.dConfig["mqtt_topic"]
+        return
 
+    '''Read Config - setup
+
+    expected keys:
+      relay_pin       - GPIO pin # for opening/closing door
+      mqtt_client     - name for the client
+      mqtt_broker     - IP address of MQTT broker
+      mqtt_port       - Port to use for MQTT broker
+      mqtt_topic      - topic to listen to for open/close commands
+      log             - path to file to log info to
+    '''
+    def readConfig(self, f):
+        if self.bDebug:
+            print "-d- Using config file found here:"
+            print "-d- {}".format(f)
+        config = {}
+        with open(f, "r") as inf:
+            for line in inf:
+                line = line.rstrip().split("=")
+                key = line[0]
+                val = line[1]
+                if key in ["relay_pin", "mqtt_port"]:
+                    val = int(val)
+                config[key] = val
+                if self.bDebug:
+                    print "-d- config: found key:val '{}:{}'".format(key, val)
+        return config
+
+    # return formatted timestamp
+    def getTimeStamp(self):
+        return datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
+
+    # put stuff in log file with timestamp
+    def printToLog(self, s):
+        fileMode = "a"
+        s = self.getTimeStamp() + " - " + s
+        if not os.path.exists(self.dConfig["log"]):
+            fileMode = "w"
+        with open(self.dConfig["log"], fileMode) as ouf:
+            ouf.write(s)
+        return
+
+    ###########################################################################
+    # Relay functionality
+    def on(self):
+        if self.bDebug:
+            print("MQTTRelay - on")
+        GPIO.output(self.pin, GPIO.HIGH)
+        return
+
+    def off(self):
+        if self.bDebug:
+            print("MQTTRelay - off")
+        GPIO.output(self.pin, GPIO.LOW)
+        return
+
+    def toggle(self):
+        self.on()
+        sleep(0.3)
+        self.off()
+        return
+
+    @property
+    def state(self):
+        return GPIO.input(self.pin)
+
+    ###########################################################################
+    # MQTT functionality
+    '''start MQTT loop
+    Blocking function that sets up MQTT client, attaches
+    connect/subscribe/message functions to the client, subscribes to a topic,
+    and loops until the process is stopped
+    '''
     def start(self):
         if self.bDebug:
             print("MQTTRelay - iniitializing mqtt connection")
@@ -87,16 +143,36 @@ class MQTTRelay(object):
             raise
         return
 
+    '''Print out some info any time a connection is made
+    '''
     def on_connect(self, client, userdata, flags, rc):
-        print("mqtt: CONNACK received with code %d." % (rc))
+        s = "mqtt: (CONNECTION) received with code {}.".format(rc)
+        print(s)
+        self.printToLog(config["log"], s, self.bDebug)
+        return
 
+    '''Print out some info any time a subscription is made
+    '''
     def on_subscribe(self, client, userdata, mid, granted_qos):
-        print("mqtt: Subscribed: "+str(mid)+" "+str(granted_qos))
+        s = "mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid,
+                                                                granted_qos)
+        print(s)
+        self.printToLog(config["log"], s, self.bDebug)
+        return
 
+    '''Print out some info any time a message is received
+    '''
     def on_message(self, client, userdata, msg):
-        print("mqtt: rx: "+msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
+        s = "mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic,
+                                                                msg.qos,
+                                                                msg.payload)
+        print(s)
+        self.printToLog(config["log"], s, self.bDebug)
         self.toggle()
+        return
 
+    ###########################################################################
+    # Clean up GPIO & MQTT connections
     def cleanup(self):
         if self.bDebug:
             print("MQTTRelay - cleaning up...")
@@ -104,39 +180,18 @@ class MQTTRelay(object):
         self.client.loop_stop()
         self.client.unsubscribe(self.mqttTopic)
         self.client.disconnect()
-
-    def on(self):
-        if self.bDebug:
-            print("MQTTRelay - on")
-        GPIO.output(self.pin, GPIO.HIGH)
-
-    def off(self):
-        if self.bDebug:
-            print("MQTTRelay - off")
-        GPIO.output(self.pin, GPIO.LOW)
-
-    def toggle(self):
-        if self.bDebug:
-            print("MQTTRelay - toggle")
-        self.on()
-        if self.bDebug:
-            print("MQTTrelay - sleep")
-        sleep(0.3)
-        self.off()
-
-    @property
-    def state(self):
-        return GPIO.input(self.pin)
+        return
 
 
+###############################################################################
+# Entrees
 def main():
     parsedArgs = parseArgs()
     sConfigFile = parsedArgs.configFile
     bDebug = parsedArgs.debug
 
-    dConfig = readConfig(sConfigFile, bDebug)
     try:
-        gdr = MQTTRelay(dConfig, bDebug)
+        gdr = MQTTRelay(sConfigFile, bDebug)
     except:
         raise
     try:
@@ -146,6 +201,7 @@ def main():
     except Exception as e:
         print("\n\t-E- Some exception: %s\n" % (e))
         traceback.print_exc()
+        gdr.printToLog("-e- EXCEPTION:\n{}".format(e), bDebug)
         raise e
     return
 
