@@ -201,7 +201,7 @@ def main():
     except Exception as e:
         print("\n\t-E- Some exception: %s\n" % (e))
         traceback.print_exc()
-        gdr.printToLog("-e- EXCEPTION:\n{}".format(e), bDebug)
+        gdr.printToLog("-e- EXCEPTION:\n{}".format(e))
         raise e
     return
 
