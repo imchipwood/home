@@ -54,8 +54,9 @@ class MQTTRelay(object):
         self.pin = self.dConfig["relay_pin"]
         if self.bDebug:
             print("MQTTRelay - setting up pin: {}".format(self.pin))
-        GPIO.setup(self.pin, GPIO.OUT)
         self.off()
+        GPIO.setup(self.pin, GPIO.OUT)
+        #self.off()
 
         # MQTT info
         self.mqttClientId = self.dConfig["mqtt_client"]
