@@ -27,6 +27,14 @@ def parseArgs():
     return args
 
 
+class Error(Exception):
+    pass
+
+
+class MQTTError(Error):
+    pass
+
+
 class MQTTRelay(object):
     '''Relay Object with MQTT Support
 
@@ -123,12 +131,12 @@ class MQTTRelay(object):
 
     ###########################################################################
     # MQTT functionality
-    '''start MQTT loop
-    Blocking function that sets up MQTT client, attaches
-    connect/subscribe/message functions to the client, subscribes to a topic,
-    and loops until the process is stopped
+
+    '''setup MQTT connection
+    Sets up MQTT client, attaches connect/subscribe/message functions to the
+    client, subscribes to a topic
     '''
-    def start(self):
+    def connect(self):
         if self.bDebug:
             print("MQTTRelay - iniitializing mqtt connection")
         self.client = paho.Client(client_id=self.mqttClientId)
@@ -137,10 +145,16 @@ class MQTTRelay(object):
         self.client.on_message = self.on_message
         self.client.connect(self.mqttHost, self.mqttPort)
         self.client.subscribe(self.mqttTopic, qos=1)
+        return
+
+    '''start MQTT loop
+    Blocking function that loops until the process is stopped
+    '''
+    def start(self):
         try:
             self.client.loop_forever()
         except:
-            self.cleanup()
+            self.mqtt_cleanup()
             raise
         return
 
@@ -150,7 +164,17 @@ class MQTTRelay(object):
         s = "mqtt: (CONNECTION) received with code {}.".format(rc)
         if self.bDebug:
             print(s)
-        self.printToLog(s)
+        # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
+        # attempt to reconnect on errors
+        if rc != 0:
+            self.printToLog(s)
+            if rc == -4:
+                self.printToLog("mqtt: ERROR: 'too many messages in flight'")
+            elif rc == -5:
+                self.printToLog("mqtt: ERROR: 'invalid UTF-8 string'")
+            elif rc == -9:
+                self.printToLog("mqtt: ERROR: 'bad QoS'")
+            raise MQTTError("on_connect 'rc' failure")
         return
 
     '''Print out some info any time a subscription is made
@@ -175,15 +199,21 @@ class MQTTRelay(object):
         self.toggle()
         return
 
+    def mqtt_cleanup(self):
+        try:
+            self.client.loop_stop()
+            self.client.unsubscribe(self.mqttTopic)
+            self.client.disconnect()
+        except:
+            pass
+
     ###########################################################################
     # Clean up GPIO & MQTT connections
     def cleanup(self):
         if self.bDebug:
             print("MQTTRelay - cleaning up...")
         GPIO.cleanup()
-        self.client.loop_stop()
-        self.client.unsubscribe(self.mqttTopic)
-        self.client.disconnect()
+        self.mqtt_cleanup()
         return
 
 
@@ -199,7 +229,12 @@ def main():
     except:
         raise
     try:
-        gdr.start()
+        while True:
+            try:
+                gdr.connect()
+                gdr.start()
+            except MQTTError:
+                pass
     except KeyboardInterrupt:
         print("\n\t-e- KeyboardInterrupt, exiting gracefully\n")
     except Exception as e:
