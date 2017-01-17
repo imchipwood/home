@@ -149,7 +149,7 @@ class MQTTRelay(object):
     def on_connect(self, client, userdata, flags, rc):
         s = "mqtt: (CONNECTION) received with code {}.".format(rc)
         print(s)
-        self.printToLog(dConfig["log"], s, self.bDebug)
+        self.printToLog(self.dConfig["log"], s, self.bDebug)
         return
 
     '''Print out some info any time a subscription is made
@@ -158,7 +158,7 @@ class MQTTRelay(object):
         s = "mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid,
                                                                 granted_qos)
         print(s)
-        self.printToLog(dConfig["log"], s, self.bDebug)
+        self.printToLog(self.dConfig["log"], s, self.bDebug)
         return
 
     '''Print out some info any time a message is received
@@ -168,7 +168,7 @@ class MQTTRelay(object):
                                                                 msg.qos,
                                                                 msg.payload)
         print(s)
-        self.printToLog(dConfig["log"], s, self.bDebug)
+        self.printToLog(self.dConfig["log"], s, self.bDebug)
         self.toggle()
         return
 
