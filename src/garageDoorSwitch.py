@@ -38,7 +38,7 @@ class MQTTRelay(object):
         super(MQTTRelay, self).__init__()
         self.bDebug = bDebug
 
-        self.dConfig = readConfig(f, self.bDebug)
+        self.dConfig = self.readConfig(f, self.bDebug)
 
         # set up pin and drive low
         GPIO.setmode(GPIO.BCM)
