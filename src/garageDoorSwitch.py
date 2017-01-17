@@ -167,13 +167,13 @@ class MQTTRelay(object):
         # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
         # attempt to reconnect on errors
         if rc != 0:
-            self.printToLog(s)
+            self.printToLog(s+"\n")
             if rc == -4:
-                self.printToLog("mqtt: ERROR: 'too many messages in flight'")
+                self.printToLog("mqtt: ERROR: 'too many messages in flight'\n")
             elif rc == -5:
-                self.printToLog("mqtt: ERROR: 'invalid UTF-8 string'")
+                self.printToLog("mqtt: ERROR: 'invalid UTF-8 string'\n")
             elif rc == -9:
-                self.printToLog("mqtt: ERROR: 'bad QoS'")
+                self.printToLog("mqtt: ERROR: 'bad QoS'\n")
             raise MQTTError("on_connect 'rc' failure")
         return
 
@@ -181,21 +181,21 @@ class MQTTRelay(object):
     '''
     def on_subscribe(self, client, userdata, mid, granted_qos):
         s = "mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid,
-                                                                granted_qos)
+                                                                  granted_qos)
         if self.bDebug:
             print(s)
-        self.printToLog(s)
+        self.printToLog(s+"\n")
         return
 
     '''Print out some info any time a message is received
     '''
     def on_message(self, client, userdata, msg):
         s = "mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic,
-                                                                msg.qos,
-                                                                msg.payload)
+                                                                  msg.qos,
+                                                                  msg.payload)
         if self.bDebug:
             print(s)
-        self.printToLog(s)
+        self.printToLog(s+"\n")
         self.toggle()
         return
 
@@ -240,7 +240,7 @@ def main():
     except Exception as e:
         print("\n\t-E- Some exception: %s\n" % (e))
         traceback.print_exc()
-        gdr.printToLog("-e- EXCEPTION:\n{}".format(e))
+        gdr.printToLog("-e- EXCEPTION:\n{}\n".format(e))
         raise e
     return
 
