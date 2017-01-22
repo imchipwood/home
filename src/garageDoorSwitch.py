@@ -242,6 +242,9 @@ def main():
         traceback.print_exc()
         gdr.printToLog("-e- EXCEPTION:\n{}\n".format(e))
         raise e
+    finally:
+        gdr.cleanup()
+        gdr.printToLog("exiting");
     return
 
 
