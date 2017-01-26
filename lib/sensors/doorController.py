@@ -60,8 +60,6 @@ class DoorController(object):
     config = {}
     clientState = ""
     clientControl = ""
-    monitorThread = Process(target=self.monitor, args=[])
-    controlThread = Process(target=self.control, args=[])
     state = False
 
     def __init__(self, configFile, debug=False):
@@ -79,6 +77,9 @@ class DoorController(object):
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
         self.logger.addHandler(ch)
+        
+        self.monitorThread = Process(target=self.monitor, args=[])
+        self.controlThread = Process(target=self.control, args=[])
 
         if self.readConfig():
             # set up logger
