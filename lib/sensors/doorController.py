@@ -60,8 +60,8 @@ class DoorController(object):
     config = {}
     clientState = ""
     clientControl = ""
-    monitorThread = ""
-    controlThread = ""
+    monitorThread = Process(target=self.monitor, args=[])
+    controlThread = Process(target=self.control, args=[])
     state = False
 
     def __init__(self, configFile, debug=False):
@@ -133,7 +133,6 @@ class DoorController(object):
     def start(self):
         try:
             self.stateConnect()
-            self.monitorThread = Process(target=self.monitor, args=[])
             self.monitorThread.start()
         except:
             self.cleanup()
