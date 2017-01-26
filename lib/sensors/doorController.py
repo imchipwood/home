@@ -267,7 +267,7 @@ class DoorController(object):
         self.clientState.on_publish = self.on_publish
         self.clientState.connect(host=self.mqttBroker,
                                  port=self.mqttPort,
-                                 keepaliave=10)
+                                 keepalive=10)
         self.clientState.loop_start()  # non-blocking
         sleep(3)
         return
