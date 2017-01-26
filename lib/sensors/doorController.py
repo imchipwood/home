@@ -60,6 +60,8 @@ class DoorController(object):
     config = {}
     clientState = ""
     clientControl = ""
+    monitorThread = ""
+    controlThread = ""
     state = False
 
     def __init__(self, configFile, debug=False):
