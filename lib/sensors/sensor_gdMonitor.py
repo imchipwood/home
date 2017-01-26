@@ -107,29 +107,41 @@ class GarageDoorMonitor(Sensor):
     """
     def readConfig(self):
         tmpPins = self.pins
+        config = {}
         with open(self.sConfFile, "r") as inf:
             for line in inf:
                 line = line.rstrip().split("=")
-                # attempt to convert value to int but ignore fails
-                # value might be a string for some other config (DB, etc.)
-                try:
-                    iPinNum = int(line[-1])
-                except:
-                    pass
-                # gpio
-                if line[0] == "plo":
-                    tmpPins["limitOpen"] = iPinNum
-                if line[0] == "plc":
-                    tmpPins["limitClosed"] = iPinNum
-                if line[0] == "pro":
-                    tmpPins["rotary"] = iPinNum
-                # mqtt config
-                if line[0] == "h":
-                    self.mqttHost = str(line[-1])
-                if line[0] == "p":
-                    self.mqttPort = int(line[-1])
-                if line[0] == "t":
-                    self.mqttTopic = str(line[-1])
+                key = line[0]
+                val = line[1]
+                if key in ["sensor_pin", "mqtt_port"]:
+                    val = int(val)
+                config[key] = val
+                if self.bDebug:
+                    print "-d- config: found key:val '{}:{}'".format(key, val)
+        tmpPins["limitClosed"] = config["sensor_pin"]
+        #with open(self.sConfFile, "r") as inf:
+        #    for line in inf:
+        #        line = line.rstrip().split("=")
+        #        # attempt to convert value to int but ignore fails
+        #        # value might be a string for some other config (DB, etc.)
+        #        try:
+        #            iPinNum = int(line[-1])
+        #        except:
+        #            pass
+        #        # gpio
+        #        if line[0] == "plo":
+        #            tmpPins["limitOpen"] = iPinNum
+        #        if line[0] == "plc":
+        #            tmpPins["limitClosed"] = iPinNum
+        #        if line[0] == "pro":
+        #            tmpPins["rotary"] = iPinNum
+        #        # mqtt config
+        #        if line[0] == "h":
+        #            self.mqttHost = str(line[-1])
+        #        if line[0] == "p":
+        #            self.mqttPort = int(line[-1])
+        #        if line[0] == "t":
+        #            self.mqttTopic = str(line[-1])
         validConf = True
         for pin in tmpPins:
             if 2 > pin > 27:  # valid RPi GPIO pins are 2-27
