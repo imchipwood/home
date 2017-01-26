@@ -69,17 +69,21 @@ class DoorController(object):
             self.sConfigFile = configFile
         else:
             raise IOError()
+    
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+        # stdout handler
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        self.logger.addHandler(ch)
 
         if self.readConfig():
             # set up logger
             self.log = self.config["log"]
-            self.logger = logging.getLogger(__name__)
-            self.logger.setLevel(logging.DEBUG)
             # file handler
             fh = logging.FileHandler(self.log)
             fh.setLevel(logging.INFO)
             self.logger.addHandler(fh)
-            # stdout handler
             ch = logging.StreamHandler()
             ch.setLevel(logging.DEBUG)
             self.logger.addHandler(ch)
