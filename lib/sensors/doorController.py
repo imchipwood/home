@@ -109,12 +109,12 @@ class DoorController(object):
                 # sensor
                 self.pinSensor = self.config["pin_sensor"]
                 GPIO.setup(self.pinSensor, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                self.state()  # initialize the state
+                self.getState()  # initialize sensor
 
                 # control
                 self.pinControl = self.config["pin_control"]
                 GPIO.setup(self.pinControl, GPIO.OUT)
-                self.off()
+                self.off()  # ensure control output is LOW
             except:
                 self.logger.exception("Error with Sensor/Relay config")
                 raise Exception()
