@@ -133,17 +133,22 @@ class DoorController(object):
     '''
     def start(self):
         try:
+            self.logger.debug("starting state mqtt connection")
             self.stateConnect()
+            self.logger.debug("starting state thread")
             self.monitorThread.start()
         except:
+            self.logger.exception("failed to start state thread")
             self.cleanup()
             raise
         # launch control thread
         try:
+            self.logger.debug("starting control mqtt connection")
             self.controlConnect()
-            self.controlThread = Process(target=self.control, args=[])
+            self.logger.debug("starting control thread")
             self.controlThread.start()
         except:
+            self.logger.exception("failed to start control thread")
             self.cleanup()
             raise
         return
@@ -285,8 +290,11 @@ class DoorController(object):
         return
 
     def cleanup(self):
-        self.monitorThread.terminate()
-        self.controlThread.terminate()
+        try:
+            self.monitorThread.terminate()
+            self.controlThread.terminate()
+        except:
+            pass
         GPIO.cleanup()
         self.mqttCleanup()
         return
