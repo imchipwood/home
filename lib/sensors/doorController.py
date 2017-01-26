@@ -156,7 +156,7 @@ class DoorController(object):
     '''
     def readConfig(self):
         config = {}
-        with open(self.sConfFile, "r") as inf:
+        with open(self.sConfigFile, "r") as inf:
             for line in inf:
                 line = line.rstrip().split("=")
                 key = line[0]
