@@ -60,6 +60,7 @@ class DoorController(object):
     config = {}
     clientState = ""
     clientControl = ""
+    state = False
 
     def __init__(self, configFile, debug=False):
         super(DoorController, self).__init__()
@@ -202,8 +203,7 @@ class DoorController(object):
         self.off()
         return
 
-    @property
-    def state(self):
+    def getState(self):
         return GPIO.input(self.pinSensor)
 
 ###############################################################################
@@ -224,8 +224,10 @@ class DoorController(object):
             if (now - lastOneHzTime) > oneHz:
                 lastOneHzTime = now
                 try:
-                    if self.state() != lastDoorState:
-                        lastDoorState = self.state
+                    newState = self.getState()
+                    if newState != lastDoorState:
+                        lastDoorState = newState
+                        self.state = newState
                         if self.bDebug:
                             self.logger.debug("monitor state: %s" % (self.state))
                         if self.state:
