@@ -306,7 +306,7 @@ class DoorController(object):
 
     def publish(self, data):
         if self.bDebug:
-            self.logger.debug("mqtt: pub '{}'to topic '{}'".format(data, self.mqttTopicState))
+            self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
         (rc, mid) = self.clientState.publish(self.mqttTopicState,
                                              str(data),
                                              qos=2,
@@ -315,8 +315,8 @@ class DoorController(object):
         return
 
     def on_connect(self, client, userdata, flags, rc):
-        if self.bDebug:
-            self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
+#        if self.bDebug:
+#            self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
         # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
         # attempt to reconnect on errors
         if rc != 0:
