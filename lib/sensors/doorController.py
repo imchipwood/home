@@ -306,7 +306,7 @@ class DoorController(object):
 
     def publish(self, data):
         if self.bDebug:
-            self.logger.debug("mqtt: pub '{}'".format(data))
+            self.logger.debug("mqtt: pub '{}'to topic '{}'".format(data, self.mqttTopicState))
         (rc, mid) = self.clientState.publish(self.mqttTopicState,
                                              str(data),
                                              qos=2,
