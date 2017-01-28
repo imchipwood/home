@@ -102,6 +102,11 @@ class DoorController(object):
                 self.mqttPort = self.__config["mqtt_port"]
                 self.mqttTopicState = self.__config["mqtt_topic_state"]
                 self.mqttTopicControl = self.__config["mqtt_topic_control"]
+                self.logger.debug("mqttClient: {}".format(self.mqttClient))
+                self.logger.debug("mqttBroker: {}".format(self.mqttBroker))
+                self.logger.debug("mqttPort: {}".format(self.mqttPort))
+                self.logger.debug("mqttTopicState: {}".format(self.mqttTopicState))
+                self.logger.debug("mqttTopicControl: {}".format(self.mqttTopicControl))
             except:
                 self.logger.exception("Error with MQTT config")
                 raise Exception()
