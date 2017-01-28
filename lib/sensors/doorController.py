@@ -86,7 +86,7 @@ class DoorController(object):
             self.log = self.config["log"]
             # file handler
             fh = logging.FileHandler(self.log)
-            fh.setLevel(logging.INFO)
+            fh.setLevel(logging.DEBUG)
             self.logger.addHandler(fh)
             ch = logging.StreamHandler()
             ch.setLevel(logging.DEBUG)
