@@ -92,7 +92,7 @@ class DoorController(object):
             self.log = self.__config["log"]
             fh = logging.FileHandler(self.log)
             fh.setLevel(logging.DEBUG)
-            fh.setFormatter(stdoutFormatter)
+            fh.setFormatter(fileFormatter)
             self.logger.addHandler(fh)
 
             # pull MQTT stuff out of config
