@@ -73,36 +73,35 @@ class DoorController(object):
     
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
+        # formatting - add this to han
+        stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
+        fileFormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        stdoutFormatter = logging.Formatter(stdoutFormat)
+        fileFormatter = logging.Formatter(fileFormat)
         # stdout handler
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
+        ch.setFormatter(stdoutFormatter)
         self.logger.addHandler(ch)
-        # formatter
-        floormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        formatter = logging.Formatter(floormat)
-        ch.formatter(floormat)
         
         self.monitorThread = Process(target=self.monitor, args=[])
         self.controlThread = Process(target=self.control, args=[])
 
         if self.readConfig():
-            # set up logger
-            self.log = self.config["log"]
-            # file handler
+            # set up file handler for logger
+            self.log = self.__config["log"]
             fh = logging.FileHandler(self.log)
             fh.setLevel(logging.DEBUG)
+            fh.setFormatter(stdoutFormatter)
             self.logger.addHandler(fh)
-            ch = logging.StreamHandler()
-            ch.setLevel(logging.DEBUG)
-            self.logger.addHandler(ch)
 
             # pull MQTT stuff out of config
             try:
-                self.mqttClient = self.config["mqtt_client"]
-                self.mqttBroker = self.config["mqtt_broker"]
-                self.mqttPort = self.config["mqtt_port"]
-                self.mqttTopicState = self.config["mqtt_topic_state"]
-                self.mqttTopicControl = self.config["mqtt_topic_control"]
+                self.mqttClient = self.__config["mqtt_client"]
+                self.mqttBroker = self.__config["mqtt_broker"]
+                self.mqttPort = self.__config["mqtt_port"]
+                self.mqttTopicState = self.__config["mqtt_topic_state"]
+                self.mqttTopicControl = self.__config["mqtt_topic_control"]
             except:
                 self.logger.exception("Error with MQTT config")
                 raise Exception()
@@ -111,13 +110,13 @@ class DoorController(object):
             try:
                 GPIO.setmode(GPIO.BCM)
                 # sensor
-                self.pinSensor = self.config["pin_sensor"]
+                self.pinSensor = self.__config["pin_sensor"]
                 # TODO: add ability to configure as pull-up or pull-down
                 GPIO.setup(self.pinSensor, GPIO.IN, pull_up_down=GPIO.PUD_UP)
                 self.getState()  # initialize sensor
 
                 # control
-                self.pinControl = self.config["pin_control"]
+                self.pinControl = self.__config["pin_control"]
                 GPIO.setup(self.pinControl, GPIO.OUT)
                 self.off()  # ensure control output is LOW
             except:
@@ -188,7 +187,7 @@ class DoorController(object):
                 if 2 > config[key] > 27:
                     bConfigValid = False
         if bConfigValid:
-            self.config = config
+            self.__config = config
         return bConfigValid
 
 ###############################################################################
