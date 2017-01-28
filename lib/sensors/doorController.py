@@ -77,6 +77,10 @@ class DoorController(object):
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
         self.logger.addHandler(ch)
+        # formatter
+        floormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        formatter = logging.Formatter(floormat)
+        ch.formatter(floormat)
         
         self.monitorThread = Process(target=self.monitor, args=[])
         self.controlThread = Process(target=self.control, args=[])
@@ -91,9 +95,6 @@ class DoorController(object):
             ch = logging.StreamHandler()
             ch.setLevel(logging.DEBUG)
             self.logger.addHandler(ch)
-            # formatter
-            floormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            formatter = logging.Formatter(floormat)
 
             # pull MQTT stuff out of config
             try:
@@ -292,6 +293,7 @@ class DoorController(object):
         return
 
     def cleanup(self):
+        self.logger.info("cleaning up")
         try:
             self.monitorThread.terminate()
             self.controlThread.terminate()
