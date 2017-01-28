@@ -111,6 +111,7 @@ class DoorController(object):
                 GPIO.setmode(GPIO.BCM)
                 # sensor
                 self.pinSensor = self.config["pin_sensor"]
+                # TODO: add ability to configure as pull-up or pull-down
                 GPIO.setup(self.pinSensor, GPIO.IN, pull_up_down=GPIO.PUD_UP)
                 self.getState()  # initialize sensor
 
@@ -237,10 +238,11 @@ class DoorController(object):
                         self.state = newState
                         if self.bDebug:
                             self.logger.debug("monitor state: %s" % (self.state))
+                        # TODO: add ability to configure N.O. vs N.C.
                         if self.state:
-                            self.publish("closed")
-                        else:
                             self.publish("open")
+                        else:
+                            self.publish("closed")
                 except:
                     self.logger.exception("state exception")
                     raise
