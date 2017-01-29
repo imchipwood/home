@@ -17,6 +17,7 @@ import os
 import logging
 import RPi.GPIO as GPIO
 import paho.mqtt.client as paho
+import paho.mqtt.publish as pahopub
 import timeit
 from time import sleep
 from multiprocessing import Process
@@ -312,24 +313,33 @@ class DoorController(object):
 
     def publish(self, data):
         # first create the connection
-        if self.bDebug:
-            self.logger.debug("state connect")
-        self.clientState = paho.Client(client_id=self.mqttClient)
-        self.clientState.on_connect = self.on_connect
-        self.clientState.on_publish = self.on_publish
-        self.clientState.connect(host=self.mqttBroker,
-                                 port=self.mqttPort,
-                                 keepalive=10)
-        self.clientState.loop_start()  # non-blocking
-        sleep(2)
+        #if self.bDebug:
+        #    self.logger.debug("state connect")
+        #self.clientState = paho.Client(client_id=self.mqttClient)
+        #self.clientState.on_connect = self.on_connect
+        #self.clientState.on_publish = self.on_publish
+        #self.clientState.connect(host=self.mqttBroker,
+        #                         port=self.mqttPort,
+        #                         keepalive=10)
+        #self.clientState.loop_start()  # non-blocking
+        #sleep(2)
         #self.stateConnect()
         # then publish the message
         if self.bDebug:
             self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
-        (rc, mid) = self.clientState.publish(self.mqttTopicState,
-                                             str(data),
-                                             qos=2,
-                                             retain=True)
+        
+        (rc, mid) = pahopub.single(self.mqttTopicState,
+                                   payload=str(data),
+                                   qos=2,
+                                   retain=True,
+                                   hostname=self.mqttBroker,
+                                   port=self.mqttPort,
+                                   client_id=self.mqttClient
+                                  )
+        #(rc, mid) = self.clientState.publish(self.mqttTopicState,
+        #                                     str(data),
+        #                                     qos=2,
+        #                                     retain=True)
         self.logger.info("mqtt: pub rc, mid = {}, {}".format(rc, mid))
         if rc != 0:
             if rc == -4:
@@ -340,9 +350,9 @@ class DoorController(object):
                 self.logger.exception("mqtt: ERROR: 'bad QoS'\n")
             #raise MQTTError("mqtt: on_publish 'rc' failure")
         # clean up
-        self.clientState.loop_stop()
-        self.clientState.unsubscribe(self.mqttTopicControl)
-        self.clientState.disconnect()
+        #self.clientState.loop_stop()
+        #self.clientState.unsubscribe(self.mqttTopicControl)
+        #self.clientState.disconnect()
         return
 
     def on_connect(self, client, userdata, flags, rc):
