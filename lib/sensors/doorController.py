@@ -140,7 +140,7 @@ class DoorController(object):
     def start(self):
         try:
             self.logger.debug("starting state mqtt connection")
-            self.stateConnect()
+            #self.stateConnect()
             self.logger.debug("starting state thread")
             self.monitorThread.start()
         except:
