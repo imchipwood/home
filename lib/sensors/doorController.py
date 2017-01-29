@@ -59,7 +59,6 @@ Once instantiated, simply call the start() method to launch the threads
 class DoorController(object):
 
     config = {}
-    clientState = ""
     clientControl = ""
     state = False
 
@@ -140,8 +139,6 @@ class DoorController(object):
     '''
     def start(self):
         try:
-            self.logger.debug("starting state mqtt connection")
-            #self.stateConnect()
             self.logger.debug("starting state thread")
             self.monitorThread.start()
         except:
@@ -267,27 +264,7 @@ class DoorController(object):
         self.clientControl.subscribe(self.mqttTopicControl, qos=2)
         return
 
-    def stateConnect(self):
-        if self.bDebug:
-            self.logger.debug("state connect")
-        self.clientState = paho.Client(client_id=self.mqttClient)
-        self.clientState.on_connect = self.on_connect
-        self.clientState.on_publish = self.on_publish
-        self.clientState.connect(host=self.mqttBroker,
-                                 port=self.mqttPort,
-                                 keepalive=10)
-        self.clientState.loop_start()  # non-blocking
-        sleep(1)
-        return
-
     def mqttCleanup(self):
-        #try:
-        #    self.clientState.loop_stop()
-        #    self.clientState.unsubscribe(self.mqttTopicState)
-        #    self.clientState.disconnect()
-        #except:
-        #    self.logger.exception("mqttCleanup clientState exception")
-        #    pass
         try:
             self.clientControl.loop_stop()
             self.clientControl.unsubscribe(self.mqttTopicControl)
@@ -312,22 +289,8 @@ class DoorController(object):
 # MQTT interaction functions
 
     def publish(self, data):
-        # first create the connection
-        #if self.bDebug:
-        #    self.logger.debug("state connect")
-        #self.clientState = paho.Client(client_id=self.mqttClient)
-        #self.clientState.on_connect = self.on_connect
-        #self.clientState.on_publish = self.on_publish
-        #self.clientState.connect(host=self.mqttBroker,
-        #                         port=self.mqttPort,
-        #                         keepalive=10)
-        #self.clientState.loop_start()  # non-blocking
-        #sleep(2)
-        #self.stateConnect()
-        # then publish the message
         if self.bDebug:
             self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
-        
         pahopub.single(topic=self.mqttTopicState,
                        payload=str(data),
                        qos=2,
@@ -335,23 +298,7 @@ class DoorController(object):
                        hostname=self.mqttBroker,
                        port=self.mqttPort,
                        client_id=self.mqttClient)
-        #(rc, mid) = self.clientState.publish(self.mqttTopicState,
-        #                                     str(data),
-        #                                     qos=2,
-        #                                     retain=True)
-        #self.logger.info("mqtt: pub rc, mid = {}, {}".format(rc, mid))
-        #if rc != 0:
-        #    if rc == -4:
-        #        self.logger.exception("mqtt: ERROR: 'too many messages'\n")
-        #    elif rc == -5:
-        #        self.logger.exception("mqtt: ERROR: 'invalid UTF-8 string'\n")
-        #    elif rc == -9:
-        #        self.logger.exception("mqtt: ERROR: 'bad QoS'\n")
-            #raise MQTTError("mqtt: on_publish 'rc' failure")
-        # clean up
-        #self.clientState.loop_stop()
-        #self.clientState.unsubscribe(self.mqttTopicControl)
-        #self.clientState.disconnect()
+        
         return
 
     def on_connect(self, client, userdata, flags, rc):
