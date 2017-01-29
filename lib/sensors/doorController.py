@@ -331,6 +331,14 @@ class DoorController(object):
                                              qos=2,
                                              retain=True)
         self.logger.info("mqtt: pub rc, mid = {}, {}".format(rc, mid))
+        if rc != 0:
+            if rc == -4:
+                self.logger.exception("mqtt: ERROR: 'too many messages'\n")
+            elif rc == -5:
+                self.logger.exception("mqtt: ERROR: 'invalid UTF-8 string'\n")
+            elif rc == -9:
+                self.logger.exception("mqtt: ERROR: 'bad QoS'\n")
+            #raise MQTTError("mqtt: on_publish 'rc' failure")
         # clean up
         self.clientState.loop_stop()
         self.clientState.unsubscribe(self.mqttTopicControl)
@@ -358,7 +366,7 @@ class DoorController(object):
                                                                                   granted_qos))
         return
 
-    def on_publish(self, client, userdata, mid):
+    def on_publish(self, client, userdata, mid, rc):
         if self.bDebug:
             self.logger.debug("mqtt: (PUBLISH) mid: {}".format(mid))
         return
