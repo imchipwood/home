@@ -256,15 +256,6 @@ class DoorController(object):
 # Connection and cleanup functions
 
     def controlConnect(self):
-        # TESTING
-        try:
-            self.clientControl.loop_stop()
-            self.clientControl.unsubscribe(self.mqttTopicControl)
-            self.clientControl.disconnect()
-        except:
-            self.logger.exception("mqttCleanup clientControl exception")
-            pass
-        
         if self.bDebug:
             self.logger.debug("control connect")
         self.clientControl = paho.Client(client_id=self.mqttClient)
@@ -289,13 +280,13 @@ class DoorController(object):
         return
 
     def mqttCleanup(self):
-        try:
-            self.clientState.loop_stop()
-            self.clientState.unsubscribe(self.mqttTopicState)
-            self.clientState.disconnect()
-        except:
-            self.logger.exception("mqttCleanup clientState exception")
-            pass
+        #try:
+        #    self.clientState.loop_stop()
+        #    self.clientState.unsubscribe(self.mqttTopicState)
+        #    self.clientState.disconnect()
+        #except:
+        #    self.logger.exception("mqttCleanup clientState exception")
+        #    pass
         try:
             self.clientControl.loop_stop()
             self.clientControl.unsubscribe(self.mqttTopicControl)
@@ -340,9 +331,9 @@ class DoorController(object):
                                              retain=True)
         self.logger.info("mqtt: pub rc, mid = {}, {}".format(rc, mid))
         # TESTING
-        self.clientControl.loop_stop()
-        self.clientControl.unsubscribe(self.mqttTopicControl)
-        self.clientControl.disconnect()
+        self.clientState.loop_stop()
+        self.clientState.unsubscribe(self.mqttTopicControl)
+        self.clientState.disconnect()
         
         return
 
