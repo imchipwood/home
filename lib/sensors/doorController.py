@@ -312,17 +312,17 @@ class DoorController(object):
 
     def publish(self, data):
         # first create the connection
-        #if self.bDebug:
-        #    self.logger.debug("state connect")
-        #self.clientState = paho.Client(client_id=self.mqttClient)
-        #self.clientState.on_connect = self.on_connect
-        #self.clientState.on_publish = self.on_publish
-        #self.clientState.connect(host=self.mqttBroker,
-        #                         port=self.mqttPort,
-        #                         keepalive=10)
-        #self.clientState.loop_start()  # non-blocking
-        #sleep(2)
-        self.stateConnect()
+        if self.bDebug:
+            self.logger.debug("state connect")
+        self.clientState = paho.Client(client_id=self.mqttClient)
+        self.clientState.on_connect = self.on_connect
+        self.clientState.on_publish = self.on_publish
+        self.clientState.connect(host=self.mqttBroker,
+                                 port=self.mqttPort,
+                                 keepalive=10)
+        self.clientState.loop_start()  # non-blocking
+        sleep(2)
+        #self.stateConnect()
         # then publish the message
         if self.bDebug:
             self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
