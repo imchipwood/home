@@ -56,6 +56,8 @@ Inputs:
 
 Once instantiated, simply call the start() method to launch the threads
 '''
+
+
 class DoorController(object):
 
     config = {}
@@ -70,7 +72,7 @@ class DoorController(object):
             self.sConfigFile = configFile
         else:
             raise IOError()
-    
+
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
         # formatting - add this to han
@@ -83,7 +85,7 @@ class DoorController(object):
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(stdoutFormatter)
         self.logger.addHandler(ch)
-        
+
         self.monitorThread = Process(target=self.monitor, args=[])
         self.controlThread = Process(target=self.control, args=[])
 
@@ -138,6 +140,7 @@ class DoorController(object):
     and launches separate Processes for each
     '''
     def start(self):
+        # launch monitor thread
         try:
             self.logger.debug("starting state thread")
             self.monitorThread.start()
@@ -147,8 +150,6 @@ class DoorController(object):
             raise
         # launch control thread
         try:
-            self.logger.debug("starting control mqtt connection")
-            self.controlConnect()
             self.logger.debug("starting control thread")
             self.controlThread.start()
         except:
@@ -222,7 +223,27 @@ class DoorController(object):
 #                     in individual threads
 
     def control(self):
-        self.clientControl.loop_forever()  # blocking
+        # set up the connection
+        if self.bDebug:
+            self.logger.debug("control connect")
+        self.clientControl = paho.Client(client_id=self.mqttClient)
+        self.clientControl.on_connect = self.on_connect
+        self.clientControl.on_subscribe = self.on_subscribe
+        self.clientControl.on_message = self.on_message
+        self.clientControl.connect(self.mqttBroker, self.mqttPort)
+        self.clientControl.subscribe(self.mqttTopicControl, qos=2)
+        # begin control loop
+        try:
+            self.clientControl.loop_forever()  # blocking
+        except:
+            # clean up in case of emergency
+            try:
+                self.clientControl.loop_stop()
+                self.clientControl.unsubscribe(self.mqttTopicControl)
+                self.clientControl.disconnect()
+            except:
+                self.logger.exception("clientControl cleanup exception")
+                pass
         return
 
     def monitor(self):
@@ -253,27 +274,6 @@ class DoorController(object):
 ###############################################################################
 # Connection and cleanup functions
 
-    def controlConnect(self):
-        if self.bDebug:
-            self.logger.debug("control connect")
-        self.clientControl = paho.Client(client_id=self.mqttClient)
-        self.clientControl.on_connect = self.on_connect
-        self.clientControl.on_subscribe = self.on_subscribe
-        self.clientControl.on_message = self.on_message
-        self.clientControl.connect(self.mqttBroker, self.mqttPort)
-        self.clientControl.subscribe(self.mqttTopicControl, qos=2)
-        return
-
-    def mqttCleanup(self):
-        try:
-            self.clientControl.loop_stop()
-            self.clientControl.unsubscribe(self.mqttTopicControl)
-            self.clientControl.disconnect()
-        except:
-            self.logger.exception("mqttCleanup clientControl exception")
-            pass
-        return
-
     def cleanup(self):
         self.logger.info("cleaning up")
         try:
@@ -282,7 +282,6 @@ class DoorController(object):
         except:
             pass
         GPIO.cleanup()
-        self.mqttCleanup()
         return
 
 ###############################################################################
@@ -298,12 +297,12 @@ class DoorController(object):
                        hostname=self.mqttBroker,
                        port=self.mqttPort,
                        client_id=self.mqttClient)
-        
+
         return
 
     def on_connect(self, client, userdata, flags, rc):
-#        if self.bDebug:
-#            self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
+        # if self.bDebug:
+        #     self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
         # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
         # attempt to reconnect on errors
         if rc != 0:
