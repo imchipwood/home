@@ -256,6 +256,15 @@ class DoorController(object):
 # Connection and cleanup functions
 
     def controlConnect(self):
+        # TESTING
+        try:
+            self.clientControl.loop_stop()
+            self.clientControl.unsubscribe(self.mqttTopicControl)
+            self.clientControl.disconnect()
+        except:
+            self.logger.exception("mqttCleanup clientControl exception")
+            pass
+        
         if self.bDebug:
             self.logger.debug("control connect")
         self.clientControl = paho.Client(client_id=self.mqttClient)
@@ -292,7 +301,7 @@ class DoorController(object):
             self.clientControl.unsubscribe(self.mqttTopicControl)
             self.clientControl.disconnect()
         except:
-            self.logger.exception("mqttCleanup clientState exception")
+            self.logger.exception("mqttCleanup clientControl exception")
             pass
         return
 
@@ -311,6 +320,18 @@ class DoorController(object):
 # MQTT interaction functions
 
     def publish(self, data):
+        # TESTING
+        if self.bDebug:
+            self.logger.debug("state connect")
+        self.clientState = paho.Client(client_id=self.mqttClient)
+        self.clientState.on_connect = self.on_connect
+        self.clientState.on_publish = self.on_publish
+        self.clientState.connect(host=self.mqttBroker,
+                                 port=self.mqttPort,
+                                 keepalive=10)
+        self.clientState.loop_start()  # non-blocking
+        sleep(3)
+        
         if self.bDebug:
             self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
         (rc, mid) = self.clientState.publish(self.mqttTopicState,
@@ -318,6 +339,11 @@ class DoorController(object):
                                              qos=2,
                                              retain=True)
         self.logger.info("mqtt: pub rc, mid = {}, {}".format(rc, mid))
+        # TESTING
+        self.clientControl.loop_stop()
+        self.clientControl.unsubscribe(self.mqttTopicControl)
+        self.clientControl.disconnect()
+        
         return
 
     def on_connect(self, client, userdata, flags, rc):
