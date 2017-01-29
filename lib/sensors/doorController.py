@@ -276,7 +276,7 @@ class DoorController(object):
                                  port=self.mqttPort,
                                  keepalive=10)
         self.clientState.loop_start()  # non-blocking
-        sleep(3)
+        sleep(1)
         return
 
     def mqttCleanup(self):
