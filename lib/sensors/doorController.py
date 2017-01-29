@@ -140,7 +140,7 @@ class DoorController(object):
     def start(self):
         try:
             self.logger.debug("starting state mqtt connection")
-            #self.stateConnect()
+            self.stateConnect()
             self.logger.debug("starting state thread")
             self.monitorThread.start()
         except:
@@ -280,13 +280,13 @@ class DoorController(object):
         return
 
     def mqttCleanup(self):
-        #try:
-        #    self.clientState.loop_stop()
-        #    self.clientState.unsubscribe(self.mqttTopicState)
-        #    self.clientState.disconnect()
-        #except:
-        #    self.logger.exception("mqttCleanup clientState exception")
-        #    pass
+        try:
+            self.clientState.loop_stop()
+            self.clientState.unsubscribe(self.mqttTopicState)
+            self.clientState.disconnect()
+        except:
+            self.logger.exception("mqttCleanup clientState exception")
+            pass
         try:
             self.clientControl.loop_stop()
             self.clientControl.unsubscribe(self.mqttTopicControl)
@@ -312,16 +312,16 @@ class DoorController(object):
 
     def publish(self, data):
         # TESTING
-        if self.bDebug:
-            self.logger.debug("state connect")
-        self.clientState = paho.Client(client_id=self.mqttClient)
-        self.clientState.on_connect = self.on_connect
-        self.clientState.on_publish = self.on_publish
-        self.clientState.connect(host=self.mqttBroker,
-                                 port=self.mqttPort,
-                                 keepalive=10)
-        self.clientState.loop_start()  # non-blocking
-        sleep(3)
+        #if self.bDebug:
+        #    self.logger.debug("state connect")
+        #self.clientState = paho.Client(client_id=self.mqttClient)
+        #self.clientState.on_connect = self.on_connect
+        #self.clientState.on_publish = self.on_publish
+        #self.clientState.connect(host=self.mqttBroker,
+        #                         port=self.mqttPort,
+        #                         keepalive=10)
+        #self.clientState.loop_start()  # non-blocking
+        #sleep(3)
         
         if self.bDebug:
             self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
@@ -331,9 +331,9 @@ class DoorController(object):
                                              retain=True)
         self.logger.info("mqtt: pub rc, mid = {}, {}".format(rc, mid))
         # TESTING
-        self.clientState.loop_stop()
-        self.clientState.unsubscribe(self.mqttTopicControl)
-        self.clientState.disconnect()
+        #self.clientState.loop_stop()
+        #self.clientState.unsubscribe(self.mqttTopicControl)
+        #self.clientState.disconnect()
         
         return
 
