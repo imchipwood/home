@@ -308,7 +308,6 @@ class DoorController(object):
     def on_connect(self, client, userdata, flags, rc):
         if self.bDebug:
             self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
-        client.subscribe("$SYS/#")
         # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
         # attempt to reconnect on errors
         if rc != 0:
@@ -337,6 +336,7 @@ class DoorController(object):
             self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic,
                                                                                   msg.qos,
                                                                                   msg.payload))
-        if msg.topic == self.mqttTopicControl and msg.payload == "TOGGLE":
+        #if msg.topic == self.mqttTopicControl and msg.payload == "TOGGLE":
+        if msg.topic == self.mqttTopicControl:
             self.toggle()
         return
