@@ -239,6 +239,8 @@ class DoorController(object):
         except:
             # clean up in case of emergency
             try:
+                if self.bDebug:
+                    self.logger.debug("clientControl cleaning up")
                 self.clientControl.loop_stop()
                 self.clientControl.unsubscribe(self.mqttTopicControl)
                 self.clientControl.disconnect()
