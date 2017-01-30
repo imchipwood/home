@@ -294,7 +294,7 @@ class DoorController(object):
             self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
         pahopub.single(topic=self.mqttTopicState,
                        payload=str(data),
-                       qos=2,
+                       qos=1,
                        retain=True,
                        hostname=self.mqttBroker,
                        port=self.mqttPort,
