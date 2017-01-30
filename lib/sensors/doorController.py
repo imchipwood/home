@@ -225,14 +225,14 @@ class DoorController(object):
 
     def control(self):
         # set up the connection
+        # topic subscription happens in on_connect
         if self.bDebug:
             self.logger.debug("control connect")
         self.clientControl = paho.Client(client_id=self.mqttClient)
-        self.clientControl.on_connect = self.on_connect_control
+        self.clientControl.on_connect = self.on_connect
         self.clientControl.on_subscribe = self.on_subscribe
         self.clientControl.on_message = self.on_message
         self.clientControl.connect(self.mqttBroker, self.mqttPort)
-        #self.clientControl.subscribe(self.mqttTopicControl, qos=1)
         # begin control loop
         try:
             if self.bDebug:
@@ -304,21 +304,6 @@ class DoorController(object):
     def on_connect(self, client, userdata, flags, rc):
         if self.bDebug:
             self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
-        # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
-        # attempt to reconnect on errors
-        if rc != 0:
-            if rc == -4:
-                self.logger.exception("mqtt: ERROR: 'too many messages'\n")
-            elif rc == -5:
-                self.logger.exception("mqtt: ERROR: 'invalid UTF-8 string'\n")
-            elif rc == -9:
-                self.logger.exception("mqtt: ERROR: 'bad QoS'\n")
-            raise MQTTError("on_connect 'rc' failure")
-        return
-
-    def on_connect_control(self, client, userdata, flags, rc):
-        if self.bDebug:
-            self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
         client.subscribe(self.mqttTopicControl, qos=1)
         # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
         # attempt to reconnect on errors
@@ -348,7 +333,7 @@ class DoorController(object):
             self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic,
                                                                                   msg.qos,
                                                                                   msg.payload))
-        #if msg.topic == self.mqttTopicControl and msg.payload == "TOGGLE":
-        if msg.topic == self.mqttTopicControl:
+        if msg.topic == self.mqttTopicControl and msg.payload in ["TOGGLE", "CLOSE"]:
+        #if msg.topic == self.mqttTopicControl:
             self.toggle()
         return
