@@ -306,8 +306,9 @@ class DoorController(object):
         return
 
     def on_connect(self, client, userdata, flags, rc):
-        # if self.bDebug:
-        #     self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
+        if self.bDebug:
+            self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
+        client.subscribe("$SYS/#")
         # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
         # attempt to reconnect on errors
         if rc != 0:
