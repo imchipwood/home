@@ -148,7 +148,7 @@ class DoorController(object):
             self.logger.exception("failed to start state thread")
             self.cleanup()
             raise
-        sleep(5)
+        sleep(2)
         # launch control thread
         try:
             self.logger.debug("starting control thread")
@@ -235,6 +235,8 @@ class DoorController(object):
         self.clientControl.subscribe(self.mqttTopicControl, qos=1)
         # begin control loop
         try:
+            if self.bDebug:
+                self.logger.debug("control loop_forever")
             self.clientControl.loop_forever()  # blocking
         except:
             # clean up in case of emergency
