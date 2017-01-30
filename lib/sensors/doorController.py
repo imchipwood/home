@@ -148,6 +148,7 @@ class DoorController(object):
             self.logger.exception("failed to start state thread")
             self.cleanup()
             raise
+        sleep(5)
         # launch control thread
         try:
             self.logger.debug("starting control thread")
