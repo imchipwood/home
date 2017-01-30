@@ -263,10 +263,11 @@ class DoorController(object):
                         if self.bDebug:
                             self.logger.debug("monitor state: %s" % (self.state))
                         # TODO: add ability to configure N.O. vs N.C.
-                        if self.state:
-                            self.publish("open")
-                        else:
-                            self.publish("closed")
+                        self.publish(self.state)
+                        # if self.state:
+                        #     self.publish("open")
+                        # else:
+                        #     self.publish("closed")
                 except:
                     self.logger.exception("state exception")
                     raise
