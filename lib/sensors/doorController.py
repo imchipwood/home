@@ -232,7 +232,7 @@ class DoorController(object):
         self.clientControl.on_subscribe = self.on_subscribe
         self.clientControl.on_message = self.on_message
         self.clientControl.connect(self.mqttBroker, self.mqttPort)
-        self.clientControl.subscribe(self.mqttTopicControl, qos=2)
+        self.clientControl.subscribe(self.mqttTopicControl, qos=1)
         # begin control loop
         try:
             self.clientControl.loop_forever()  # blocking
