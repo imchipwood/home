@@ -298,7 +298,6 @@ class DoorController(object):
                        hostname=self.mqttBroker,
                        port=self.mqttPort,
                        client_id=self.mqttClient)
-
         return
 
     def on_connect(self, client, userdata, flags, rc):
