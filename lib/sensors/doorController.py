@@ -157,6 +157,7 @@ class DoorController(object):
             self.logger.exception("failed to start control thread")
             self.cleanup()
             raise
+        
         return
 
 ###############################################################################
@@ -292,13 +293,17 @@ class DoorController(object):
     def publish(self, data):
         if self.bDebug:
             self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
-        pahopub.single(topic=self.mqttTopicState,
-                       payload=str(data),
-                       qos=1,
-                       retain=True,
-                       hostname=self.mqttBroker,
-                       port=self.mqttPort,
-                       client_id=self.mqttClient)
+        try:
+            pahopub.single(topic=self.mqttTopicState,
+                        payload=str(data),
+                        qos=1,
+                        retain=True,
+                        hostname=self.mqttBroker,
+                        port=self.mqttPort,
+                        client_id=self.mqttClient)
+        except Exception as e:
+            self.logger.exception("mqtt: pub exception:\n{}".format(e))
+            pass
         return
 
     def on_connect(self, client, userdata, flags, rc):
