@@ -1,5 +1,6 @@
 #!/usr/bin/python -B
 import os
+import logging
 import argparse
 import traceback
 import paho.mqtt.client as paho
@@ -8,20 +9,23 @@ import datetime
 
 from lib.sensors.sensor_humidity import SensorHumidity
 
+# TODO: create a logger with configurable verbosity levels so we don't have to use if bDebug: all over the place
+
 
 def on_connect(client, userdata, flags, rc):
-	print("CONNACK received with code %d." % (rc))
+	logging.info("CONNACK received with code %d." % (rc))
+	return
 
 
 def on_publish(client, userdata, mid):
-	print("mid: "+str(mid))
+	logging.info("mid: "+str(mid))
+	return
 
 
 def checkLimits(temperature, humidity):
 	if -20 <= temperature <= 150 and 0 <= humidity <= 100:
 		return True
-	else:
-		return False
+	return False
 
 
 def parseArgs():
@@ -40,7 +44,6 @@ def parseArgs():
 	)
 	parser.add_argument(
 		"-debug",
-
 		"-d",
 		action="store_true",
 		help="Enable debug messages")
@@ -49,8 +52,8 @@ def parseArgs():
 
 
 def printData(i, temperature, humidity):
-	print(
-		"-d- Temperature[{0}]={1:0.1f}, Humidity[{0}]={2:0.1f}".format(
+	logging.info(
+		"Temperature[{0}]={1:0.1f}, Humidity[{0}]={2:0.1f}".format(
 		i,
 		temperature,
 		humidity
@@ -71,8 +74,7 @@ def printData(i, temperature, humidity):
 #   log			 - path to file to log info to
 def readConfig(f, bDebug):
 	if bDebug:
-		print "-d- Using config file found here:"
-		print "-d- {}".format(f)
+		logging.debug("Using config file found here:\n{}".format(f))
 	config = {}
 	with open(f, "r") as inf:
 		for line in inf:
@@ -83,13 +85,13 @@ def readConfig(f, bDebug):
 				val = int(val)
 			config[key] = val
 			if bDebug:
-				print "-d- config: found key {} with val {}".format(key, val)
+				logging.debug("config: found key {} with val {}".format(key, val))
 	return config
 
 
 def logData(f, data, mqtt_rc, mqtt_mid, bDebug):
 	if bDebug:
-		print "-d- Logging to file: {}".format(f)
+		logging.debug("Logging to file: {}".format(f))
 	# construct log line
 	st = datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
 	sLog = "{} - {}: {}, RC: {}, mid: {}\n".format(
@@ -100,7 +102,7 @@ def logData(f, data, mqtt_rc, mqtt_mid, bDebug):
 	   mqtt_mid
 	)
 	if bDebug:
-		print "-d- log data:\n-d- {}".format(sLog)
+		logging.debug("log data:\n-d- {}".format(sLog))
 	# write to file
 	fileMode = "a"
 	if not os.path.exists(f):
@@ -127,21 +129,21 @@ def main():
 	client.loop_start()
 	sleep(3)
 	if bDebug:
-		print "-d- mqtt info:"
-		print "-d- mqtt_client_id: {}".format(dConfig["mqtt_client"])
-		print "-d- mqtt_broker:	   {}".format(dConfig["mqtt_broker"])
-		print "-d- mqtt_port:      {}".format(dConfig["mqtt_port"])
-		print "-d- mqtt_topic_t:   {}".format(dConfig["mqtt_topic_t"])
-		print "-d- mqtt_topic_h:   {}".format(dConfig["mqtt_topic_h"])
-		print "-d- client: {}".format(client)
+		logging.debug("mqtt info:")
+		logging.debug("mqtt_client_id: {}".format(dConfig["mqtt_client"]))
+		logging.debug("mqtt_broker:	   {}".format(dConfig["mqtt_broker"]))
+		logging.debug("mqtt_port:      {}".format(dConfig["mqtt_port"]))
+		logging.debug("mqtt_topic_t:   {}".format(dConfig["mqtt_topic_t"]))
+		logging.debug("mqtt_topic_h:   {}".format(dConfig["mqtt_topic_h"]))
+		logging.debug("client: {}".format(client))
 
 	# set up the sensor
 	if bDebug:
-		print "-d- Setting up humidity sensor"
+		logging.debug("Setting up humidity sensor")
 	h = SensorHumidity(sensor_type=dConfig["dht_type"], pin=dConfig["dht_pin"], units="f")
 	try:
 		if bDebug:
-			print "-d- Beginning 5 warmup readings"
+			logging.debug("Beginning 5 warmup readings")
 		for i in xrange(0, 5):
 			h.read()
 			if bDebug:
@@ -149,7 +151,7 @@ def main():
 
 		# take N readings and average them
 		if bDebug:
-			print "-d- Beginning {} readings for averaging".format(iAvg)
+			logging.debug("Beginning {} readings for averaging".format(iAvg))
 		fTemperature = 0.0
 		fHumidity = 0.0
 		for i in xrange(0, iAvg):
@@ -161,9 +163,9 @@ def main():
 		fTemperature /= float(iAvg)
 		fHumidity /= float(iAvg)
 		if bDebug:
-			print "-d- Final data:"
-			print "-d- Temperature: {0:0.1f}".format(fTemperature)
-			print "-d- Humidity:    {0:0.1f}".format(fHumidity)
+			logging.debug("Final data:")
+			logging.debug("Temperature: {0:0.1f}".format(fTemperature))
+			logging.debug("Humidity:    {0:0.1f}".format(fHumidity))
 
 		# Send data to server
 		if checkLimits(fTemperature, fHumidity):
@@ -189,15 +191,17 @@ def main():
 				raise
 		
 	except KeyboardInterrupt:
-		print "\n\t-e- KeyboardInterrupt, exiting gracefully\n"
+		logging.info("KeyboardInterrupt, exiting gracefully")
 		pass
+
 	except Exception as e:
-		print "\n\t-E- Some exception: %s\n" % (e)
+		logging.exception("Some exception: {}".format(e))
 		traceback.print_exc()
 		raise e
+
 	finally:
 		if bDebug:
-			print "-d- cleaning up"
+			logging.debug("cleaning up")
 		client.loop_stop()
 		client.unsubscribe(dConfig["mqtt_topic_t"])
 		client.unsubscribe(dConfig["mqtt_topic_h"])
