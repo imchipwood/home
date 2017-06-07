@@ -133,14 +133,14 @@ def main():
 	client.connect(host=dConfig["mqtt_broker"], port=dConfig["mqtt_port"], keepalive=10)
 	client.loop_start()
 	sleep(3)
-	if bDebug:
-		logging.debug("mqtt info:")
-		logging.debug("mqtt_client_id: {}".format(dConfig["mqtt_client"]))
-		logging.debug("mqtt_broker:	   {}".format(dConfig["mqtt_broker"]))
-		logging.debug("mqtt_port:      {}".format(dConfig["mqtt_port"]))
-		logging.debug("mqtt_topic_t:   {}".format(dConfig["mqtt_topic_t"]))
-		logging.debug("mqtt_topic_h:   {}".format(dConfig["mqtt_topic_h"]))
-		logging.debug("client: {}".format(client))
+	# if bDebug:
+	logging.debug("mqtt info:")
+	logging.debug("mqtt_client_id: {}".format(dConfig["mqtt_client"]))
+	logging.debug("mqtt_broker:	   {}".format(dConfig["mqtt_broker"]))
+	logging.debug("mqtt_port:      {}".format(dConfig["mqtt_port"]))
+	logging.debug("mqtt_topic_t:   {}".format(dConfig["mqtt_topic_t"]))
+	logging.debug("mqtt_topic_h:   {}".format(dConfig["mqtt_topic_h"]))
+	logging.debug("client: {}".format(client))
 
 	# set up the sensor
 	if bDebug:
