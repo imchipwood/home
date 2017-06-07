@@ -119,6 +119,11 @@ def main():
 	sConfigFile = parsedArgs.configFile
 	bDebug = parsedArgs.debug
 
+	loggingLevel = logging.INFO
+	if bDebug:
+		loggingLevel = logging.DEBUG
+	logging.getLogger().setLevel(loggingLevel)
+
 	dConfig = readConfig(sConfigFile, bDebug)
 
 	# connect to MQTT broker
