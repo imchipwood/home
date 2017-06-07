@@ -1,5 +1,4 @@
 #!/usr/bin/python -B
-import sys
 import os
 import argparse
 import traceback
@@ -7,14 +6,7 @@ import paho.mqtt.client as paho
 from time import sleep, time
 import datetime
 
-global sHomePath
-sHomePath = os.path.dirname(os.path.realpath(__file__))
-sHomePath = "/".join(sHomePath.split("/")[:-1])
-while "home" not in sHomePath.split("/")[-1]:
-    sHomePath = "/".join(sHomePath.split("/")[:-1])
-
-sys.path.append(sHomePath+"/lib/sensors")
-from sensor_humidity import SensorHumidity
+from lib.sensors.sensor_humidity import SensorHumidity
 
 
 def on_connect(client, userdata, flags, rc):
