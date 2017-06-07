@@ -4,3 +4,4 @@ conf/*
 */*/*.pyc
 */*/*/*.pyc
 */cpw*
+.idea
