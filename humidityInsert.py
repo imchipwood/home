@@ -118,7 +118,7 @@ def main():
 		loggingLevel = logging.DEBUG
 	logging.getLogger().setLevel(loggingLevel)
 
-	dConfig = readConfig(sConfigFile, bDebug)
+	dConfig = readConfig(sConfigFile)
 
 	# connect to MQTT broker
 	client = paho.Client(client_id=dConfig["mqtt_client"])
