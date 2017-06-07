@@ -9,8 +9,6 @@ import datetime
 
 from lib.sensors.sensor_humidity import SensorHumidity
 
-# TODO: create a logger with configurable verbosity levels so we don't have to use if bDebug: all over the place
-
 
 def on_connect(client, userdata, flags, rc):
 	logging.info("CONNACK received with code %d." % (rc))
@@ -72,9 +70,8 @@ def printData(i, temperature, humidity):
 #   mqtt_topic_t	- topic for temperature readings
 #   mqtt_topic_h	- topic for humidity readings
 #   log			 - path to file to log info to
-def readConfig(f, bDebug):
-	if bDebug:
-		logging.debug("Using config file found here:\n{}".format(f))
+def readConfig(f):
+	logging.debug("Using config file found here:\n{}".format(f))
 	config = {}
 	with open(f, "r") as inf:
 		for line in inf:
@@ -84,25 +81,22 @@ def readConfig(f, bDebug):
 			if key in ["dht_pin", "mqtt_port"]:
 				val = int(val)
 			config[key] = val
-			if bDebug:
-				logging.debug("config: found key {} with val {}".format(key, val))
+			logging.debug("config: found key {} with val {}".format(key, val))
 	return config
 
 
-def logData(f, data, mqtt_rc, mqtt_mid, bDebug):
-	if bDebug:
-		logging.debug("Logging to file: {}".format(f))
+def logData(f, data, mqtt_rc, mqtt_mid):
+	logging.debug("Logging to file: {}".format(f))
 	# construct log line
 	st = datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
 	sLog = "{} - {}: {}, RC: {}, mid: {}\n".format(
 		st,
-	   data.keys()[0],
-	   data[data.keys()[0]],
-	   mqtt_rc,
-	   mqtt_mid
+		data.keys()[0],
+		data[data.keys()[0]],
+		mqtt_rc,
+		mqtt_mid
 	)
-	if bDebug:
-		logging.debug("log data:\n-d- {}".format(sLog))
+	logging.debug("log data:\n-d- {}".format(sLog))
 	# write to file
 	fileMode = "a"
 	if not os.path.exists(f):
@@ -133,7 +127,7 @@ def main():
 	client.connect(host=dConfig["mqtt_broker"], port=dConfig["mqtt_port"], keepalive=10)
 	client.loop_start()
 	sleep(3)
-	# if bDebug:
+
 	logging.debug("mqtt info:")
 	logging.debug("mqtt_client_id: {}".format(dConfig["mqtt_client"]))
 	logging.debug("mqtt_broker:	   {}".format(dConfig["mqtt_broker"]))
@@ -143,34 +137,28 @@ def main():
 	logging.debug("client: {}".format(client))
 
 	# set up the sensor
-	if bDebug:
-		logging.debug("Setting up humidity sensor")
+	logging.debug("Setting up humidity sensor")
 	h = SensorHumidity(sensor_type=dConfig["dht_type"], pin=dConfig["dht_pin"], units="f")
 	try:
-		if bDebug:
-			logging.debug("Beginning 5 warmup readings")
+		logging.debug("Beginning 5 warmup readings")
 		for i in xrange(0, 5):
 			h.read()
-			if bDebug:
-				printData(i, h.getTemperature(), h.getHumidity())
+			printData(i, h.getTemperature(), h.getHumidity())
 
 		# take N readings and average them
-		if bDebug:
-			logging.debug("Beginning {} readings for averaging".format(iAvg))
+		logging.debug("Beginning {} readings for averaging".format(iAvg))
 		fTemperature = 0.0
 		fHumidity = 0.0
 		for i in xrange(0, iAvg):
 			h.read()
-			if bDebug:
-				printData(i, h.getTemperature(), h.getHumidity())
+			printData(i, h.getTemperature(), h.getHumidity())
 			fTemperature += h.getTemperature()
 			fHumidity += h.getHumidity()
 		fTemperature /= float(iAvg)
 		fHumidity /= float(iAvg)
-		if bDebug:
-			logging.debug("Final data:")
-			logging.debug("Temperature: {0:0.1f}".format(fTemperature))
-			logging.debug("Humidity:    {0:0.1f}".format(fHumidity))
+		logging.debug("Final data:")
+		logging.debug("Temperature: {0:0.1f}".format(fTemperature))
+		logging.debug("Humidity:    {0:0.1f}".format(fHumidity))
 
 		# Send data to server
 		if checkLimits(fTemperature, fHumidity):
@@ -182,7 +170,7 @@ def main():
 					retain=True
 				)
 				dataDict = {"temperature": fTemperature}
-				logData(dConfig["log"], dataDict, rc, mid, bDebug)
+				logData(dConfig["log"], dataDict, rc, mid)
 				
 				(rc, mid) = client.publish(
 					dConfig["mqtt_topic_h"],
@@ -191,7 +179,7 @@ def main():
 					retain=True
 				)
 				dataDict = {"humidity": fHumidity}
-				logData(dConfig["log"], dataDict, rc, mid, bDebug)
+				logData(dConfig["log"], dataDict, rc, mid)
 			except:
 				raise
 		
@@ -205,8 +193,7 @@ def main():
 		raise e
 
 	finally:
-		if bDebug:
-			logging.debug("cleaning up")
+		logging.debug("cleaning up")
 		client.loop_stop()
 		client.unsubscribe(dConfig["mqtt_topic_t"])
 		client.unsubscribe(dConfig["mqtt_topic_h"])
