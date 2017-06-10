@@ -97,6 +97,11 @@ class MqttCamera(object):
 		return cameraSettings, mqttSettings, logFile
 
 	def cleanup(self):
+		print("cleaning up")
+		try:
+			self.controlThread.terminate()
+		except:
+			pass
 		try:
 			self.camera.stop_preview()
 		except:
