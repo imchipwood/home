@@ -27,9 +27,9 @@ class MqttCamera(object):
 		loggingLevel = logging.INFO
 		if debug:
 			loggingLevel = logging.DEBUG
-			logging.info("Logging level: DEBUG")
+			print("Logging level: DEBUG")
 		else:
-			logging.info("Logging level: INFO")
+			print("Logging level: INFO")
 		ch.setLevel(loggingLevel)
 		ch.setFormatter(stdoutFormatter)
 		self.logger.addHandler(ch)
@@ -48,21 +48,22 @@ class MqttCamera(object):
 			self.logger.addHandler(fh)
 
 		self.cameraFile = None
-		self.camera = self.setupCamera(cameraSettings)
+		self.camera = None
+		self.setupCamera(cameraSettings)
 
 		self.clientControl = None
 		self.controlThread = Process(target=self.control, args=[])
 		return
 	
 	def setupCamera(self, cameraSettingsDict):
-		self.logger.debug("setupCamera")
-		camera = PiCamera()
-		camera.rotation = cameraSettingsDict['camera_rotation']
-		camera.brightness = cameraSettingsDict['camera_brightness']
-		camera.contrast = cameraSettingsDict['camera_contrast']
+		print("setupCamera")
+		self.camera = PiCamera()
+		self.camera.rotation = cameraSettingsDict['camera_rotation']
+		self.camera.brightness = cameraSettingsDict['camera_brightness']
+		self.camera.contrast = cameraSettingsDict['camera_contrast']
 		self.cameraFile = cameraSettingsDict['camera_filepath']
-		camera.start_preview()
-		return camera
+		self.camera.start_preview()
+		return
 
 	def parseConfig(self, cfgFile):
 		cameraSettings = {}
