@@ -75,7 +75,7 @@ class DoorController(object):
 
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
-        # formatting - add this to han
+        # formatting - add this to logging handler
         stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
         fileFormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         stdoutFormatter = logging.Formatter(stdoutFormat)

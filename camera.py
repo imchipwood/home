@@ -30,6 +30,7 @@ def main():
 	cfgFile = parsedArgs.configFile
 	bDebug = parsedArgs.debug
 
+	print("creating camera")
 	camera = MqttCamera(configFile=cfgFile, debug=bDebug)
 
 	try:
@@ -38,11 +39,11 @@ def main():
 			sleep(10)
 
 	except KeyboardInterrupt:
-		logging.info("-i- gd: KeyboardInterrupt, exiting gracefully")
+		print("-i- gd: KeyboardInterrupt, exiting gracefully")
 		raise
 
 	except Exception as e:
-		logging.exception("-E- gd: Some exception: {}\n".format(e))
+		print("-E- gd: Some exception: {}\n".format(e))
 		traceback.print_exc()
 		raise e
 

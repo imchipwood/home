@@ -13,7 +13,8 @@ class MQTTError(BaseException):
 
 class MqttCamera(object):
 	def __init__(self, configFile, debug=False):
-		super(MqttCamera, self).__init__()
+		# super(MqttCamera, self).__init__()
+		print("mqttCamera init")
 		# set up logging first
 		loggingLevel = logging.INFO
 		if debug:
