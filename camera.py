@@ -65,7 +65,7 @@ def parseConfig(cfgFile):
 
 def main():
 	parsedArgs = parseArgs()
-	cfgFile = parsedArgs.cfgFile
+	cfgFile = parsedArgs.configFile
 	debug = parsedArgs.debug
 
 	loggingLevel = logging.INFO
