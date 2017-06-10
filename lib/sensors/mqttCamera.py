@@ -181,6 +181,7 @@ class MqttCamera(object):
 
 	def on_message(self, client, userdata, msg):
 		self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
+		print("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
 			self.camera.capture(self.cameraFile)
 
