@@ -1,21 +1,9 @@
 #!/usr/bin/python
 import logging
 import argparse
+from lib.sensors.mqttCamera import MqttCamera
 from time import sleep
-import paho.mqtt.client as paho
-from picamera import PiCamera
-
-
-def on_connect(client, userdata, flags, rc):
-	print("CONNACK received with code %d." % (rc))
-
-
-def on_subscribe(client, userdata, mid, granted_qos):
-	print("Subscribed: "+str(mid)+" "+str(granted_qos))
-
-
-def on_message(client, userdata, msg):
-	print(msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
+import traceback
 
 
 def parseArgs():
@@ -37,49 +25,30 @@ def parseArgs():
 	return args
 
 
-def parseConfig(cfgFile):
-	cameraSettings = {}
-	mqttSettings = {}
-
-	with open(cfgFile, 'r') as inf:
-		lines = inf.readlines()
-
-	for line in lines:
-		line = line.rstrip().split("=")
-		key, val = line[:2]
-		try:
-			val = int(val)
-		except:
-			pass
-		if 'camera' in key:
-			cameraSettings[key] = val
-		elif 'mqtt' in key:
-			mqttSettings[key] = val
-
-	return cameraSettings, mqttSettings
-
-#
-# camera = PiCamera()
-# camera.rotation = 180
-# camera.brightness = 50
-# camera.contrast = 50
-# camera.start_preview()
-# sleep(5)
-# camera.capture('/home/cpw/camera/captures/garage.jpg')
-
 def main():
 	parsedArgs = parseArgs()
 	cfgFile = parsedArgs.configFile
 	bDebug = parsedArgs.debug
 
-	loggingLevel = logging.INFO
-	if bDebug:
-		loggingLevel = logging.DEBUG
-	logging.getLogger().setLevel(loggingLevel)
+	camera = MqttCamera(configFile=cfgFile, debug=bDebug)
 
-	cameraSettings, mqttSettings = parseConfig(cfgFile=cfgFile)
-	logging.debug(cameraSettings)
-	logging.debug(mqttSettings)
+	try:
+		camera.start()
+		while True:
+			sleep(10)
+
+	except KeyboardInterrupt:
+		logging.info("-i- gd: KeyboardInterrupt, exiting gracefully")
+		raise
+
+	except Exception as e:
+		logging.exception("-E- gd: Some exception: {}\n".format(e))
+		traceback.print_exc()
+		raise e
+
+	finally:
+		camera.cleanup()
+
 	return
 
 if __name__ == '__main__':
