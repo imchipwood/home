@@ -1,6 +1,6 @@
 
 import logging
-from time import sleep
+#from time import sleep
 import paho.mqtt.client as paho
 import paho.mqtt.publish as pahopub
 from picamera import PiCamera
@@ -16,7 +16,7 @@ class MqttCamera(object):
 		# super(MqttCamera, self).__init__()
 		print("mqttCamera init")
 		# set up logging first
-		self.logger = logging.getLogger(__name__)
+		self.logger = logging.getLogger()
 
 		# formatting - add this to logging handler
 		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
