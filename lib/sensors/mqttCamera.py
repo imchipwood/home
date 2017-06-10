@@ -16,9 +16,6 @@ class MqttCamera(object):
 		# super(MqttCamera, self).__init__()
 		print("mqttCamera init")
 		# set up logging first
-		loggingLevel = logging.INFO
-		if debug:
-			loggingLevel = logging.DEBUG
 		self.logger = logging.getLogger(__name__)
 
 		# formatting - add this to logging handler
@@ -27,6 +24,12 @@ class MqttCamera(object):
 
 		# stdout handler
 		ch = logging.StreamHandler()
+		loggingLevel = logging.INFO
+		if debug:
+			loggingLevel = logging.DEBUG
+			logging.info("Logging level: DEBUG")
+		else:
+			logging.info("Logging level: INFO")
 		ch.setLevel(loggingLevel)
 		ch.setFormatter(stdoutFormatter)
 		self.logger.addHandler(ch)
@@ -52,6 +55,7 @@ class MqttCamera(object):
 		return
 	
 	def setupCamera(self, cameraSettingsDict):
+		self.logger.debug("setupCamera")
 		camera = PiCamera()
 		camera.rotation = cameraSettingsDict['camera_rotation']
 		camera.brightness = cameraSettingsDict['camera_brightness']
