@@ -72,7 +72,7 @@ class DoorController(object):
 
 		# set up MQTT connections
 		self.clientControl = None
-		self.setupMQTT()
+		# self.setupMQTT()
 
 		# create the camera
 		if cameraEnabled:
@@ -234,6 +234,7 @@ class DoorController(object):
 		"""
 
 		# begin control loop
+		self.setupMQTT()
 		self.logger.debug("MQTT client loop - starting")
 		try:
 			# self.clientControl.loop_forever()  # blocking
