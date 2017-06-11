@@ -6,7 +6,7 @@ import paho.mqtt.client as paho
 from picamera import PiCamera
 from lib.services.pushbulletNotify import PushbulletImageNotify
 
-# hass mqtt publish service data:
+# hass mqtt publish service data for testing:
 # { "topic": "home-assistant/garage/cameraControl", "payload": "CAPTURE", "qos": "1", "retain": "false" }
 
 
@@ -17,22 +17,23 @@ class MQTTError(BaseException):
 class MqttCamera(object):
 	def __init__(self, configFile, debug=False):
 		# super(MqttCamera, self).__init__()
-		print("mqttCamera init")
 		# set up logging first
-		self.logger = logging.getLogger()
+		self.logger = logging.getLogger(__name__)
 
 		# formatting - add this to logging handler
 		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
 		stdoutFormatter = logging.Formatter(stdoutFormat)
 
-		# stdout handler
-		ch = logging.StreamHandler()
+		# handle logging level
 		loggingLevel = logging.INFO
 		if debug:
 			loggingLevel = logging.DEBUG
-			print("Logging level: DEBUG")
+			logging.info("Logging level: DEBUG")
 		else:
-			print("Logging level: INFO")
+			logging.info("Logging level: INFO")
+
+		# stdout stream handler
+		ch = logging.StreamHandler()
 		ch.setLevel(loggingLevel)
 		ch.setFormatter(stdoutFormatter)
 		self.logger.addHandler(ch)
@@ -62,7 +63,8 @@ class MqttCamera(object):
 
 		@return: None
 		"""
-		print("setupCamera")
+		self.logger.debug("setupCamera")
+		# print("setupCamera")
 		self.camera = PiCamera()
 		cameraSettingsKeys = self.cameraSettings.keys()
 
@@ -77,7 +79,7 @@ class MqttCamera(object):
 
 		if 'camera_resolution' in cameraSettingsKeys:
 			width, height = [int(x) for x in self.cameraSettings['camera_resolution'].split(',')]
-			print("setting camera resolution to width, height: {}, {}".format(width, height))
+			self.logger.debug("setting camera resolution to width, height: {}, {}".format(width, height))
 			self.camera.resolution = (width, height)
 
 		if 'camera_filepath' in cameraSettingsKeys:
@@ -112,7 +114,7 @@ class MqttCamera(object):
 		if not daytime:
 			iso = nighttimeISO
 
-		print("setting camera ISO to {}".format(iso))
+		self.logger.debug("setting camera ISO to {}".format(iso))
 		self.camera.iso = iso
 		return
 
@@ -163,21 +165,21 @@ class MqttCamera(object):
 
 		@return: None
 		"""
-		print("cleaning up")
+		self.logger.info("cleaning up")
 
 		try:
-			print("terminating control thread")
+			self.logger.debug("terminating control thread")
 			self.clientControl.loop_stop()
-			print("control thread terminated")
+			self.logger.debug("control thread terminated")
 		except Exception as e:
-			print("exception while trying to terminate thread: {}".format(e))
+			self.logger.exception("exception while trying to terminate thread: {}".format(e))
 			traceback.print_exc()
 			pass
 
 		try:
-			print("disabling camera")
+			self.logger.debug("disabling camera")
 			self.camera.stop_preview()
-			print("camera disabled")
+			self.logger.debug("camera disabled")
 		except:
 			pass
 
@@ -190,7 +192,7 @@ class MqttCamera(object):
 		"""
 		try:
 			self.logger.debug("starting control thread")
-			print("starting control thread")
+			# print("starting control thread")
 			# self.controlThread.start()
 
 			self.clientControl = paho.Client(client_id=self.mqttSettings['mqtt_client'])
@@ -198,12 +200,12 @@ class MqttCamera(object):
 			self.clientControl.on_subscribe = self.on_subscribe
 			self.clientControl.on_message = self.on_message
 			self.clientControl.connect(self.mqttSettings['mqtt_broker'], self.mqttSettings['mqtt_port'])
-			print("starting mqtt loop")
+			self.logger.debug("starting mqtt loop")
 			self.clientControl.loop_start()
 
 		except:
 			self.logger.exception("failed to start control thread")
-			print("failed to start control thread")
+			# print("failed to start control thread")
 			self.cleanup()
 			raise
 		return
@@ -221,7 +223,7 @@ class MqttCamera(object):
 		@return: None
 		"""
 		self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
-		print("mqtt: (CONNECTION) received with code {}".format(rc))
+		# print("mqtt: (CONNECTION) received with code {}".format(rc))
 
 		# check connection results
 		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
@@ -248,7 +250,7 @@ class MqttCamera(object):
 		@return:
 		"""
 		self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
-		print("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
+		# print("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
 		return
 
 	def on_message(self, client, userdata, msg):
@@ -260,7 +262,7 @@ class MqttCamera(object):
 		@return:
 		"""
 		self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
-		print("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
+		# print("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
 
 		# check the topic & payload to see if we should respond something
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
@@ -274,7 +276,9 @@ class MqttCamera(object):
 			self.updateCameraISO()
 
 			# sleep a little bit to let the garage door open enough that there's some light
-			print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
+			self.logger.debug("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
+			# print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
+			# print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
 			sleep(cameraDelay)
 
 			# take the picture
@@ -282,8 +286,10 @@ class MqttCamera(object):
 
 			# send the picture if we have pushbullet settings
 			if 'pushbullet_api' in self.pushbulletSettings.keys():
-				print("sending notification")
+				self.logger..debug("sending notification")
+				# print("sending notification")
 				PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
-				print("notification sent")
+				self.logger.debug("notification sent")
+				# print("notification sent")
 
 		return
