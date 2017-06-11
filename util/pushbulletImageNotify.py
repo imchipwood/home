@@ -54,7 +54,7 @@ def main():
 
 	# create the SSH and SFTP clients
 	ssh_client = paramiko.SSHClient()
-	ssh_client.set_missing_host_key_pollicy(paramiko.AutoAddPolicy())
+	ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 	ssh_client.connect(
 		settings['ssh_client_ip'],
 		username=settings['ssh_client_username'],
@@ -84,7 +84,7 @@ def parseConfig(f):
 		# skip commented out lines, blank lines, and lines without an = sign
 		if line[0] == '#' or line[:2] == '//' or line == '\n' or '=' not in line:
 			continue
-		
+
 		line = line.rstrip().split("=")
 		print(line)
 
