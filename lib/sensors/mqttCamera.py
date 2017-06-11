@@ -112,9 +112,11 @@ class MqttCamera(object):
 		# launch control thread
 		try:
 			self.logger.debug("start control thread")
+			print("start control thread")
 			self.controlThread.start()
 		except:
 			self.logger.exception("failed to start control thread")
+			print("failed to start control thread")
 			self.cleanup()
 			raise
 		return
@@ -128,16 +130,19 @@ class MqttCamera(object):
 		# begin control loop
 		try:
 			self.logger.debug("control loop_forever")
+			print("control loop_forever")
 			self.clientControl.loop_forever()  # blocking
 		except:
 			# clean up in case of emergency
 			try:
 				self.logger.debug("clientControl cleaning up")
+				print("clientControl cleaning up")
 				self.clientControl.loop_stop()
 				self.clientControl.unsubscribe(self.mqttSettings['mqtt_topic_control'])
 				self.clientControl.disconnect()
 			except:
 				self.logger.exception("clientControl cleanup exception")
+				print("clientControl cleanup exception")
 				pass
 		return
 
@@ -146,6 +151,7 @@ class MqttCamera(object):
 
 	def publish(self, data):
 		self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttSettings['mqtt_topic_respond']))
+		print("mqtt: pub '{}' to topic '{}'".format(data, self.mqttSettings['mqtt_topic_respond']))
 		try:
 			pahopub.single(
 				topic=self.mqttSettings['mqtt_topic_respond'],
@@ -158,11 +164,13 @@ class MqttCamera(object):
 			)
 		except Exception as e:
 			self.logger.exception("mqtt: pub exception:\n{}".format(e))
+			print("mqtt: pub exception:\n{}".format(e))
 			pass
 		return
 
 	def on_connect(self, client, userdata, flags, rc):
 		self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
+		print("mqtt: (CONNECTION) received with code {}".format(rc))
 		client.subscribe(self.mqttSettings['mqtt_topic_control'], qos=1)
 		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
 		# attempt to reconnect on errors
@@ -178,6 +186,7 @@ class MqttCamera(object):
 
 	def on_subscribe(self, client, userdata, mid, granted_qos):
 		self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
+		print("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
 		return
 
 	def on_publish(self, client, userdata, mid, rc):
