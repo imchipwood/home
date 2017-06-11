@@ -432,11 +432,16 @@ class DoorController(object):
 		"""
 		# topic subscription happens in on_connect
 		self.logger.debug("control connect")
-		self.clientControl = paho.Client(client_id=self.mqttSettings['client'])
-		self.clientControl.on_connect = self.on_connect
-		self.clientControl.on_subscribe = self.on_subscribe
-		self.clientControl.on_message = self.on_message
-		self.clientControl.connect(self.mqttSettings['broker'], self.mqttSettings['port'])
+		try:
+			self.clientControl = paho.Client(client_id=self.mqttSettings['client'])
+			self.clientControl.on_connect = self.on_connect
+			self.clientControl.on_subscribe = self.on_subscribe
+			self.clientControl.on_message = self.on_message
+			self.clientControl.connect(self.mqttSettings['broker'], self.mqttSettings['port'])
+		except Exception as e:
+			self.logger.exception("Exception while setting up MQTT client: {}".format(e))
+			traceback.print_exc()
+			raise
 		return
 
 	def publish(self, data):
