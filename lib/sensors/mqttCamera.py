@@ -249,10 +249,11 @@ class MqttCamera(object):
 
 		# check the topic & payload to see if we should respond something
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
+			# sleep a little bit to let the garage door open enough that there's some light
 			print("taking picture in 2 seconds: {}".format(self.cameraFile))
 			sleep(2)
-
 			self.camera.capture(self.cameraFile)
-			PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
+			if 'pushbullet_api' in self.pushbulletSettings.keys():
+				PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
 
 		return
