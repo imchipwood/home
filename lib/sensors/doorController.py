@@ -509,7 +509,7 @@ class DoorController(object):
 		@param rc: result of connection
 		@return: None
 		"""
-		self.logger.info("mqtt: (CONNECT) received with code {}".format(rc))
+		self.logger.info("mqtt: (CONNECT) client {} received with code {}".format(client, rc))
 
 		# check connection results
 		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
@@ -524,7 +524,6 @@ class DoorController(object):
 
 		# no errors, subscribe to the MQTT topic
 		self.logger.info("subscribing to topic: {}".format(self.mqttSettings['topic_control']))
-		self.logger.debug("client: {}".format(str(client)))
 		client.subscribe(self.mqttSettings['topic_control'], qos=1)
 		return
 
