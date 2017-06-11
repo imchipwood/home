@@ -199,6 +199,9 @@ class MqttCamera(object):
 		self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
 		print("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
 		print("expected topic: {}".format(self.mqttSettings['mqtt_topic_control']))
+		topicMatch = msg.topic == self.mqttSettings['mqtt_topic_control']
+		payloadMatch = msg.payload == 'CAPTURE'
+		print("topic match: {}, payload match: {}".format(topicMatch, payloadMatch))
 
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
 			print("taking picture now: {}".format(self.cameraFile))
