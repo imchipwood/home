@@ -197,23 +197,27 @@ class DoorController(object):
 
 		@return: None
 		"""
+		self.logger.debug("\n----------------------------------------")
+
 		# MQTT settings
 		s = ''
 		for key, val in self.mqttSettings.items():
 			s += '{}: {}\n'.format(key, val)
-		self.logger.debug("MQTT Settings:\n{}".format(s))
+		self.logger.debug("\nMQTT Settings:\n{}".format(s))
 
 		# GPIO settings
 		s = ''
 		for key, val in self.gpioSettings.items():
 			s += '{}: {}\n'.format(key, val)
-		self.logger.debug("GPIO Settings:\n{}".format(s))
+		self.logger.debug("\nGPIO Settings:\n{}".format(s))
 
 		# camera
-		self.logger.debug("Camera enabled: {}".format(self.camera))
+		self.logger.debug("Camera enabled: {}\n".format(self.camera))
 
 		# notifications
-		self.logger.debug("Notifications enabled: {}".format(True if self.pushbullet else False))
+		self.logger.debug("Notifications enabled: {}\n".format(True if self.pushbullet else False))
+
+		self.logger.debug("----------------------------------------\n")
 
 		return
 
