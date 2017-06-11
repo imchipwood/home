@@ -87,7 +87,7 @@ class DoorController(object):
 		# self.controlThread = Process(target=self.control, args=[])
 		self.monitor = True
 		self.monitorThread = Thread(target=self.monitorLoop, args=[])
-		self.controlThread = Process(target=self.controlLoop, args=[])
+		self.controlThread = Process(target=self.controlLoop, args=[self])
 
 		self.logCurrentSetup()
 		return
