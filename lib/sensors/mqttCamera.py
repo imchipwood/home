@@ -53,7 +53,7 @@ class MqttCamera(object):
 
 		self.clientControl = None
 		#self.controlThread = Process(target=self.control, args=[])
-		self.controlThread = Thread(target=self.control, args=[])
+		# self.controlThread = Thread(target=self.control, args=[])
 		return
 	
 	def setupCamera(self, cameraSettingsDict):
