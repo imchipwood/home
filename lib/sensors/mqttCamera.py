@@ -20,16 +20,14 @@ class MqttCamera(object):
 		# set up logging first
 		self.logger = logging.getLogger(__name__)
 
-		# formatting - add this to logging handler
-		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
-		stdoutFormatter = logging.Formatter(stdoutFormat)
-
 		# handle logging level
 		loggingLevel = logging.INFO
 		if debug:
 			loggingLevel = logging.DEBUG
 
+		# logging level has to be set globally for some reason
 		logging.getLogger().setLevel(loggingLevel)
+
 		if loggingLevel == logging.DEBUG:
 			val = 'DEBUG'
 		else:
@@ -38,8 +36,11 @@ class MqttCamera(object):
 
 		# stdout stream handler
 		ch = logging.StreamHandler()
-		# ch.setLevel(loggingLevel)
 		ch.setLevel(loggingLevel)
+
+		# stdout logging formatting
+		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
+		stdoutFormatter = logging.Formatter(stdoutFormat)
 		ch.setFormatter(stdoutFormatter)
 		self.logger.addHandler(ch)
 
@@ -51,6 +52,7 @@ class MqttCamera(object):
 			fh = logging.FileHandler(self.logFile)
 			fh.setLevel(logging.DEBUG)
 
+			# file logging formatting
 			fileFormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 			fileFormatter = logging.Formatter(fileFormat)
 			fh.setFormatter(fileFormatter)
