@@ -19,7 +19,7 @@ import paho.mqtt.client as paho
 import paho.mqtt.publish as pahopub
 import timeit
 from time import sleep
-from multiprocessing import Process
+# from multiprocessing import Process
 from threading import Thread
 from cameraController import PiCameraController
 from lib.services.pushbulletNotify import PushbulletImageNotify
@@ -83,11 +83,9 @@ class DoorController(object):
 		# setup sensing/controlling GPIO
 		self.setupGPIO()
 
-		# self.monitorThread = Process(target=self.monitor, args=[])
-		# self.controlThread = Process(target=self.control, args=[])
 		self.monitor = True
 		self.monitorThread = Thread(target=self.monitorLoop, args=[])
-		self.controlThread = Process(target=self.controlLoop, args=[self])
+		# self.controlThread = Process(target=self.controlLoop, args=[self])
 
 		self.logCurrentSetup()
 		return
@@ -233,26 +231,26 @@ class DoorController(object):
 		@return: None
 		"""
 
-		# # begin control loop
-		# self.setupMQTT()
-		# self.logger.debug("MQTT client loop - starting")
-		# try:
-		# 	# self.clientControl.loop_forever()  # blocking
-		# 	self.clientControl.loop()  # non-blocking
-		# 	self.logger.debug("MQTT client loop - started")
-		# except Exception as e:
-		# 	self.logger.exception("Exception while starting MQTT client loop: {}".format(e))
-		# 	traceback.print_exc()
-		# 	# clean up in case of emergency
-		# 	try:
-		# 		self.logger.debug("clientControl cleaning up")
-		# 		self.clientControl.loop_stop()
-		# 		self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
-		# 		self.clientControl.disconnect()
-		# 	except:
-		# 		self.logger.exception("clientControl cleanup exception")
-		# 		raise
-		# 	raise
+		# begin control loop
+		self.setupMQTT()
+		self.logger.debug("MQTT client loop - starting")
+		try:
+			# self.clientControl.loop_forever()  # blocking
+			self.clientControl.loop()  # non-blocking
+			self.logger.debug("MQTT client loop - started")
+		except Exception as e:
+			self.logger.exception("Exception while starting MQTT client loop: {}".format(e))
+			traceback.print_exc()
+			# clean up in case of emergency
+			try:
+				self.logger.debug("clientControl cleaning up")
+				self.clientControl.loop_stop()
+				self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
+				self.clientControl.disconnect()
+			except:
+				self.logger.exception("clientControl cleanup exception")
+				raise
+			raise
 
 		sleep(2)
 
@@ -267,14 +265,14 @@ class DoorController(object):
 
 		# sleep(2)
 
-		# launch control thread
-		try:
-			self.logger.debug("starting control thread")
-			self.controlThread.start()
-		except:
-			self.logger.exception("failed to start control thread")
-			self.cleanup()
-			raise
+		# # launch control thread
+		# try:
+		# 	self.logger.debug("starting control thread")
+		# 	self.controlThread.start()
+		# except:
+		# 	self.logger.exception("failed to start control thread")
+		# 	self.cleanup()
+		# 	raise
 		
 		return
 
@@ -299,10 +297,10 @@ class DoorController(object):
 
 		try:
 			self.logger.debug("shutting down control thread")
-			self.controlThread.terminate()
-			# self.clientControl.loop_stop()
-			# self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
-			# self.clientControl.disconnect()
+			# self.controlThread.terminate()
+			self.clientControl.loop_stop()
+			self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
+			self.clientControl.disconnect()
 		except Exception as e:
 			self.logger.exception("Exception while shutting down control loop: {}".format(e))
 			traceback.print_exc()
