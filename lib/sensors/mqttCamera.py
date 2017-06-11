@@ -121,7 +121,6 @@ class MqttCamera(object):
 				pushbulletSettings[key] = val
 			elif key == 'log':
 				logFile = val
-		print(s)
 
 		return cameraSettings, mqttSettings, pushbulletSettings, logFile
 
