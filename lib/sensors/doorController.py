@@ -22,6 +22,7 @@ from time import sleep
 # from multiprocessing import Process
 from threading import Thread
 from cameraController import PiCameraController
+from lib.services.pushbulletNotify import PushbulletImageNotify
 import traceback
 
 # logging junk
@@ -64,7 +65,7 @@ class DoorController(object):
 		logging.getLogger().setLevel(loggingLevel)
 
 		# read the config file - we need the log file path to finish setting up logging
-		self.mqttSettings, self.gpioSettings, logFile, cameraEnabled = self.readConfig(configFile)
+		self.mqttSettings, self.gpioSettings, logFile, cameraEnabled, self.pushbullet = self.readConfig(configFile)
 
 		# finish setting up logging
 		self.setupLogging(loggingLevel=loggingLevel, logFile=logFile)
@@ -110,6 +111,7 @@ class DoorController(object):
 		gpioConfig = {}
 		logFile = None
 		cameraEnabled = False
+		pushbullet = False
 
 		with open(configFile, "r") as inf:
 			lines = inf.readlines()
@@ -123,12 +125,18 @@ class DoorController(object):
 			line = line.rstrip().split("=")
 			key, val = line[:2]
 
-			# try to convert the value to an int. some values will be strings so this won't work, but
+			# try to convert the value to an int or float. some values will be strings so this won't work, but
 			# it means we don't have to do the conversions elsewhere
-			try:
-				val = int(val)
-			except:
-				pass
+			if '.' in val:
+				try:
+					val = float(val)
+				except:
+					pass
+			else:
+				try:
+					val = int(val)
+				except:
+					pass
 
 			# store values as appropriate
 			if 'mqtt' in key:
@@ -141,8 +149,10 @@ class DoorController(object):
 				logFile = val
 			elif 'camera' in key:
 				cameraEnabled = True
+			elif 'pushbullet' in key:
+				pushbullet = val
 
-		return mqttConfig, gpioConfig, logFile, cameraEnabled
+		return mqttConfig, gpioConfig, logFile, cameraEnabled, pushbullet
 
 	def setupLogging(self, loggingLevel, logFile=None):
 		"""Set up logging stream and file handlers
@@ -349,6 +359,9 @@ class DoorController(object):
 
 						if self.camera and self.state:
 							self.camera.capture()
+
+							if self.pushbullet:
+								PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
 
 				except:
 					self.logger.exception("state exception")
