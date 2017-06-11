@@ -86,7 +86,7 @@ class DoorController(object):
 		# self.monitorThread = Process(target=self.monitor, args=[])
 		# self.controlThread = Process(target=self.control, args=[])
 		self.monitor = True
-		self.monitorThread = Thread(target=self.monitor, args=[])
+		self.monitorThread = Thread(target=self.monitorLoop, args=[])
 		# self.controlThread = Thread(target=self.control, args=[])
 
 		return
@@ -328,7 +328,7 @@ class DoorController(object):
 	# 			raise
 	# 	return
 
-	def monitor(self):
+	def monitorLoop(self):
 		"""Monitor the door open/closed sensor @1Hz
 
 		@remark: set DoorController.monitor=False to stop the thread
