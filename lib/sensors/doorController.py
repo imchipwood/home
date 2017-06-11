@@ -34,6 +34,8 @@ import traceback
 # DEBUG		10
 # NOTSET		0
 
+# { "topic": "home-assistant/garage/switch", "payload": "TOGGLE", "qos": "1", "retain": "false" }
+
 
 class Error(Exception):
 	pass
@@ -72,7 +74,6 @@ class DoorController(object):
 
 		# set up MQTT connections
 		self.clientControl = None
-		# self.setupMQTT()
 
 		# create the camera
 		if cameraEnabled:
@@ -233,24 +234,6 @@ class DoorController(object):
 
 		# begin control loop
 		self.setupMQTT()
-		# self.logger.debug("MQTT client loop - starting")
-		# try:
-		# 	# self.clientControl.loop_forever()  # blocking
-		# 	self.clientControl.loop()  # non-blocking
-		# 	self.logger.debug("MQTT client loop - started")
-		# except Exception as e:
-		# 	self.logger.exception("Exception while starting MQTT client loop: {}".format(e))
-		# 	traceback.print_exc()
-		# 	# clean up in case of emergency
-		# 	try:
-		# 		self.logger.debug("clientControl cleaning up")
-		# 		self.clientControl.loop_stop()
-		# 		self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
-		# 		self.clientControl.disconnect()
-		# 	except:
-		# 		self.logger.exception("clientControl cleanup exception")
-		# 		raise
-		# 	raise
 
 		sleep(2)
 
@@ -392,7 +375,6 @@ class DoorController(object):
 
 		@return:
 		"""
-		self.setupMQTT()
 		# begin control loop
 		try:
 			self.logger.debug("control loop")
