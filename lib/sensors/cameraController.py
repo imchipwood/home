@@ -54,7 +54,7 @@ class PiCameraController(PiCamera):
 				pass
 
 			if 'camera' in key:
-				key = key.split('_')[1:]
+				key = "_".join(key.split('_')[1:])
 				cameraSettings[key] = val
 
 		return cameraSettings

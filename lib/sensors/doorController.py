@@ -140,10 +140,10 @@ class DoorController(object):
 
 			# store values as appropriate
 			if 'mqtt' in key:
-				key = key.split('_')[1:]
+				key = "_".join(key.split('_')[1:])
 				mqttConfig[key] = val
 			elif 'gpio' in key:
-				key = key.split('_')[1:]
+				key = "_".join(key.split('_')[1:])
 				gpioConfig[key] = val
 			elif key == 'log':
 				logFile = val
