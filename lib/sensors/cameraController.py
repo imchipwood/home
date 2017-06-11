@@ -186,7 +186,7 @@ class PiCameraController(PiCamera):
 
 		return
 
-	def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None **options):
+	def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
 		"""slight modification on built-in capture function to allow not specifying an output and updating camera ISO
 		on the fly based on time of day
 
