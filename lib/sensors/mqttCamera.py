@@ -157,9 +157,18 @@ class MqttCamera(object):
 		@return: None
 		"""
 		try:
-			self.logger.debug("start control thread")
-			print("start control thread")
-			self.controlThread.start()
+			self.logger.debug("starting control thread")
+			print("starting control thread")
+			# self.controlThread.start()
+
+			self.clientControl = paho.Client(client_id=self.mqttSettings['mqtt_client'])
+			self.clientControl.on_connect = self.on_connect
+			self.clientControl.on_subscribe = self.on_subscribe
+			self.clientControl.on_message = self.on_message
+			self.clientControl.connect(self.mqttSettings['mqtt_broker'], self.mqttSettings['mqtt_port'])
+			print("starting mqtt loop")
+			self.clientControl.loop_start()
+
 		except:
 			self.logger.exception("failed to start control thread")
 			print("failed to start control thread")
@@ -181,7 +190,7 @@ class MqttCamera(object):
 		try:
 			self.logger.debug("control loop_forever")
 			print("control loop_forever")
-			self.clientControl.loop_forever()  # blocking
+			self.clientControl.loop_start()  # blocking
 		except:
 			# clean up in case of emergency
 			try:
