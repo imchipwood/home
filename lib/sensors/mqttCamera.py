@@ -72,6 +72,9 @@ class MqttCamera(object):
 		if 'camera_contrast' in cameraSettingsKeys:
 			self.camera.contrast = self.cameraSettings['camera_contrast']
 
+		if 'camera_iso' in cameraSettingsKeys:
+			self.camera.iso= self.cameraSettings['camera_iso']
+
 		if 'camera_resolution' in cameraSettingsKeys:
 			width, height = [int(x) for x in self.cameraSettings['camera_resolution'].split(',')]
 			print("setting camera resolution to width, height: {}, {}".format(width, height))
