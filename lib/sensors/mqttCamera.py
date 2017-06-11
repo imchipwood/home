@@ -134,7 +134,8 @@ class MqttCamera(object):
 
 		try:
 			print("terminating control thread")
-			self.controlThread.terminate()
+			#self.controlThread.terminate()
+			self.clientControl.loop_stop()
 			print("control thread terminated")
 		except Exception as e:
 			print("exception while trying to terminate thread: {}".format(e))
