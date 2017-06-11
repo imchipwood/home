@@ -286,7 +286,7 @@ class MqttCamera(object):
 
 			# send the picture if we have pushbullet settings
 			if 'pushbullet_api' in self.pushbulletSettings.keys():
-				self.logger..debug("sending notification")
+				self.logger.debug("sending notification")
 				# print("sending notification")
 				PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
 				self.logger.debug("notification sent")
