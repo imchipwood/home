@@ -1,11 +1,10 @@
-
 import logging
 import traceback
 from time import sleep
 import paho.mqtt.client as paho
 from picamera import PiCamera
-from threading import Thread
 from lib.services.pushbulletNotify import PushbulletImageNotify
+
 
 class MQTTError(BaseException):
 	pass
@@ -52,8 +51,6 @@ class MqttCamera(object):
 		self.setupCamera(cameraSettings)
 
 		self.clientControl = None
-		#self.controlThread = Process(target=self.control, args=[])
-		# self.controlThread = Thread(target=self.control, args=[])
 		return
 	
 	def setupCamera(self, cameraSettingsDict):
@@ -174,35 +171,6 @@ class MqttCamera(object):
 			print("failed to start control thread")
 			self.cleanup()
 			raise
-		return
-
-	def control(self):
-		"""Create an MQTT client, connect to the broker and subscribe to a thread. Loop forever waiting for messages
-
-		@return: None
-		"""
-		self.clientControl = paho.Client(client_id=self.mqttSettings['mqtt_client'])
-		self.clientControl.on_connect = self.on_connect
-		self.clientControl.on_subscribe = self.on_subscribe
-		self.clientControl.on_message = self.on_message
-		self.clientControl.connect(self.mqttSettings['mqtt_broker'], self.mqttSettings['mqtt_port'])
-		# begin control loop
-		try:
-			self.logger.debug("control loop_forever")
-			print("control loop_forever")
-			self.clientControl.loop_start()  # blocking
-		except:
-			# clean up in case of emergency
-			try:
-				self.logger.debug("clientControl cleaning up")
-				print("clientControl cleaning up")
-				self.clientControl.loop_stop()
-				self.clientControl.unsubscribe(self.mqttSettings['mqtt_topic_control'])
-				self.clientControl.disconnect()
-			except:
-				self.logger.exception("clientControl cleanup exception")
-				print("clientControl cleanup exception")
-				pass
 		return
 
 	###############################################################################
