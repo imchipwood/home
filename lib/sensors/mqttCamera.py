@@ -4,7 +4,7 @@ from time import sleep
 import paho.mqtt.client as paho
 from picamera import PiCamera
 from threading import Thread
-from pushbulletNotify import PushbulletImageNotify
+from lib.services.pushbulletNotify import PushbulletImageNotify
 
 class MQTTError(BaseException):
 	pass
