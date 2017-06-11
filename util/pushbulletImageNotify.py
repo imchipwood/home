@@ -81,6 +81,10 @@ def parseConfig(f):
 
 	settings = {}
 	for line in lines:
+		# skip commented out lines, blank lines, and lines without an = sign
+		if line[0] == '#' or line[:2] == '//' or line == '\n' or '=' not in line:
+			continue
+		
 		line = line.rstrip().split("=")
 		print(line)
 
