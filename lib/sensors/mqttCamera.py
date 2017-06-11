@@ -59,9 +59,8 @@ class MqttCamera(object):
 	
 	def setupCamera(self):
 		"""Set up the PiCamera based on settings found in config file
-		
-		@param self.cameraSettings: 
-		@return: 
+
+		@return: None
 		"""
 		print("setupCamera")
 		self.camera = PiCamera()
@@ -75,9 +74,6 @@ class MqttCamera(object):
 
 		if 'camera_contrast' in cameraSettingsKeys:
 			self.camera.contrast = self.cameraSettings['camera_contrast']
-
-		# if 'camera_iso' in cameraSettingsKeys:
-		# 	self.camera.iso = self.cameraSettings['camera_iso']
 
 		if 'camera_resolution' in cameraSettingsKeys:
 			width, height = [int(x) for x in self.cameraSettings['camera_resolution'].split(',')]
@@ -273,11 +269,13 @@ class MqttCamera(object):
 			else:
 				cameraDelay = 10
 
+			# update the camera ISO based on the time of day in case the thread has been running for long enough
+			# for the sun to have gone down or come up again
+			self.updateCameraISO()
+
 			# sleep a little bit to let the garage door open enough that there's some light
 			print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
-			self.updateCameraISO()
 			sleep(cameraDelay)
-
 
 			# take the picture
 			self.camera.capture(self.cameraFile)
