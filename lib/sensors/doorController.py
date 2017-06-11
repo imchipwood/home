@@ -228,7 +228,9 @@ class DoorController(object):
 			self.logger.debug("control loop")
 			# self.clientControl.loop_forever()  # blocking
 			self.clientControl.loop()  # non-blocking
-		except:
+		except Exception as e:
+			self.logger.exception("Exception while starting MQTT client loop: {}".format(e))
+			traceback.print_exc()
 			# clean up in case of emergency
 			try:
 				self.logger.debug("clientControl cleaning up")
@@ -238,6 +240,7 @@ class DoorController(object):
 			except:
 				self.logger.exception("clientControl cleanup exception")
 				raise
+			raise
 		
 		return
 
