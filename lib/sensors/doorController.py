@@ -254,10 +254,11 @@ class DoorController(object):
 		# 	raise
 
 		# begin control loop
-		self.logger.debug("beginning MQTT client loop")
+		self.logger.debug("MQTT client loop - starting")
 		try:
 			# self.clientControl.loop_forever()  # blocking
 			self.clientControl.loop()  # non-blocking
+			self.logger.debug("MQTT client loop - started")
 		except Exception as e:
 			self.logger.exception("Exception while starting MQTT client loop: {}".format(e))
 			traceback.print_exc()
@@ -273,9 +274,6 @@ class DoorController(object):
 			raise
 		
 		return
-
-###############################################################################
-
 
 ###############################################################################
 # GPIO interactions
@@ -471,6 +469,7 @@ class DoorController(object):
 			self.clientControl.on_subscribe = self.on_subscribe
 			self.clientControl.on_message = self.on_message
 			self.clientControl.connect(self.mqttSettings['broker'], self.mqttSettings['port'])
+			self.logger.debug("mqtt client connected")
 		except Exception as e:
 			self.logger.exception("Exception while setting up MQTT client: {}".format(e))
 			traceback.print_exc()
@@ -508,7 +507,7 @@ class DoorController(object):
 		@param rc: result of connection
 		@return: None
 		"""
-		self.logger.info("mqtt: (CONNECTION) received with code {}".format(rc))
+		self.logger.info("mqtt: (CONNECT) received with code {}".format(rc))
 
 		# check connection results
 		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
@@ -523,7 +522,8 @@ class DoorController(object):
 
 		# no errors, subscribe to the MQTT topic
 		self.logger.info("subscribing to topic: {}".format(self.mqttSettings['topic_control']))
-		self.clientControl.subscribe(self.mqttSettings['topic_control'], qos=1)
+		self.logger.debug("client: {}".format(str(client)))
+		client.subscribe(self.mqttSettings['topic_control'], qos=1)
 		return
 
 	def on_subscribe(self, client, userdata, mid, granted_qos):
@@ -558,7 +558,7 @@ class DoorController(object):
 		@param msg: the received message
 		@return:
 		"""
-		self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
+		self.logger.debug("mqtt: (MESSAGE) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
 		if msg.topic == self.mqttSettings['topic_control'] and msg.payload in ["TOGGLE", "CLOSE"]:
 			self.toggle()
 		return
