@@ -34,7 +34,7 @@ class MqttCamera(object):
 		self.logger.addHandler(ch)
 
 		# attempt to parse the config file
-		cameraSettings, self.mqttSettings, self.pushbulletSettings, self.logFile = self.parseConfig(configFile)
+		self.cameraSettings, self.mqttSettings, self.pushbulletSettings, self.logFile = self.parseConfig(configFile)
 
 		# set up file handler logger
 		if self.logFile:
@@ -48,32 +48,32 @@ class MqttCamera(object):
 
 		self.cameraFile = None
 		self.camera = None
-		self.setupCamera(cameraSettings)
+		self.setupCamera()
 
 		self.clientControl = None
 		return
 	
-	def setupCamera(self, cameraSettingsDict):
+	def setupCamera(self):
 		"""Set up the PiCamera based on settings found in config file
 		
-		@param cameraSettingsDict: 
+		@param self.cameraSettings: 
 		@return: 
 		"""
 		print("setupCamera")
 		self.camera = PiCamera()
-		cameraSettingsKeys = cameraSettingsDict.keys()
+		cameraSettingsKeys = self.cameraSettings.keys()
 
 		if 'camera_rotation' in cameraSettingsKeys:
-			self.camera.rotation = cameraSettingsDict['camera_rotation']
+			self.camera.rotation = self.cameraSettings['camera_rotation']
 
 		if 'camera_brightness' in cameraSettingsKeys:
-			self.camera.brightness = cameraSettingsDict['camera_brightness']
+			self.camera.brightness = self.cameraSettings['camera_brightness']
 
 		if 'camera_contrast' in cameraSettingsKeys:
-			self.camera.contrast = cameraSettingsDict['camera_contrast']
+			self.camera.contrast = self.cameraSettings['camera_contrast']
 
 		if 'camera_filepath' in cameraSettingsKeys:
-			self.cameraFile = cameraSettingsDict['camera_filepath']
+			self.cameraFile = self.cameraSettings['camera_filepath']
 		else:
 			raise IOError("No specified filepath for camera found in config file")
 		
@@ -229,10 +229,19 @@ class MqttCamera(object):
 
 		# check the topic & payload to see if we should respond something
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
+			if 'camera_delay' in self.cameraSettings.keys():
+				cameraDelay = self.cameraSettings['camera_delay']
+			else:
+				cameraDelay = 10
+
 			# sleep a little bit to let the garage door open enough that there's some light
-			print("taking picture in 5 seconds: {}".format(self.cameraFile))
-			sleep(5)
+			print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
+			sleep(cameraDelay)
+
+			# take the picture
 			self.camera.capture(self.cameraFile)
+
+			# send the picture if we have pushbullet settings
 			if 'pushbullet_api' in self.pushbulletSettings.keys():
 				print("sending notification")
 				PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
