@@ -89,6 +89,7 @@ class DoorController(object):
 		self.monitorThread = Thread(target=self.monitorLoop, args=[])
 		# self.controlThread = Thread(target=self.control, args=[])
 
+		self.logCurrentSetup()
 		return
 
 	def readConfig(self, configFile):
@@ -189,6 +190,31 @@ class DoorController(object):
 			fileFormatter = logging.Formatter(fileFormat)
 			fh.setFormatter(fileFormatter)
 			self.logger.addHandler(fh)
+		return
+
+	def logCurrentSetup(self):
+		"""Write the current setup to the debug stream
+
+		@return: None
+		"""
+		# MQTT settings
+		s = ''
+		for key, val in self.mqttSettings.items():
+			s += '{}: {}\n'.format(key, val)
+		self.logger.debug("MQTT Settings:\n{}".format(s))
+
+		# GPIO settings
+		s = ''
+		for key, val in self.gpioSettings.items():
+			s += '{}: {}\n'.format(key, val)
+		self.logger.debug("GPIO Settings:\n{}".format(s))
+
+		# camera
+		self.logger.debug("Camera enabled: {}".format(self.camera))
+
+		# notifications
+		self.logger.debug("Notifications enabled: {}".format(True if self.pushbullet else False))
+
 		return
 
 ###############################################################################
