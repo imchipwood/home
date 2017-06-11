@@ -1,9 +1,13 @@
 import logging
 import traceback
+import ephem
 from time import sleep
 import paho.mqtt.client as paho
 from picamera import PiCamera
 from lib.services.pushbulletNotify import PushbulletImageNotify
+
+# hass mqtt publish service data:
+# { "topic": "home-assistant/garage/cameraControl", "payload": "CAPTURE", "qos": "1", "retain": "false" }
 
 
 class MQTTError(BaseException):
@@ -72,8 +76,8 @@ class MqttCamera(object):
 		if 'camera_contrast' in cameraSettingsKeys:
 			self.camera.contrast = self.cameraSettings['camera_contrast']
 
-		if 'camera_iso' in cameraSettingsKeys:
-			self.camera.iso= self.cameraSettings['camera_iso']
+		# if 'camera_iso' in cameraSettingsKeys:
+		# 	self.camera.iso = self.cameraSettings['camera_iso']
 
 		if 'camera_resolution' in cameraSettingsKeys:
 			width, height = [int(x) for x in self.cameraSettings['camera_resolution'].split(',')]
@@ -84,8 +88,36 @@ class MqttCamera(object):
 			self.cameraFile = self.cameraSettings['camera_filepath']
 		else:
 			raise IOError("No specified filepath for camera found in config file")
+
+		# set the ISO based on whether or not the sun is up
+		self.updateCameraISO()
 		
 		self.camera.start_preview()
+		return
+
+	def updateCameraISO(self):
+		sun = ephem.Sun()
+		sea = ephem.city("Seattle")
+		sun.compute(sea)
+		twilight = -12 * ephem.degree
+		daytime = sun.alt < twilight
+
+		if 'camera_iso_daytime' in self.cameraSettings.keys():
+			daytimeISO = self.cameraSettings['camera_iso_daytime']
+		else:
+			daytimeISO = 200
+
+		if 'camera_iso_nighttime' in self.cameraSettings.keys():
+			nighttimeISO = self.cameraSettings['camera_iso_nighttime']
+		else:
+			nighttimeISO = 800
+
+		iso = daytimeISO
+		if not daytime:
+			iso = nighttimeISO
+
+		print("setting camera ISO to {}".format(iso))
+		self.camera.iso = iso
 		return
 
 	def parseConfig(self, cfgFile):
@@ -243,7 +275,9 @@ class MqttCamera(object):
 
 			# sleep a little bit to let the garage door open enough that there's some light
 			print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
+			self.updateCameraISO()
 			sleep(cameraDelay)
+
 
 			# take the picture
 			self.camera.capture(self.cameraFile)
