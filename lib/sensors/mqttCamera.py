@@ -34,7 +34,8 @@ class MqttCamera(object):
 
 		# stdout stream handler
 		ch = logging.StreamHandler()
-		ch.setLevel(loggingLevel)
+		# ch.setLevel(loggingLevel)
+		ch.setLevel(logging.DEBUG)
 		ch.setFormatter(stdoutFormatter)
 		self.logger.addHandler(ch)
 
