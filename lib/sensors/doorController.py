@@ -233,24 +233,24 @@ class DoorController(object):
 
 		# begin control loop
 		self.setupMQTT()
-		self.logger.debug("MQTT client loop - starting")
-		try:
-			# self.clientControl.loop_forever()  # blocking
-			self.clientControl.loop()  # non-blocking
-			self.logger.debug("MQTT client loop - started")
-		except Exception as e:
-			self.logger.exception("Exception while starting MQTT client loop: {}".format(e))
-			traceback.print_exc()
-			# clean up in case of emergency
-			try:
-				self.logger.debug("clientControl cleaning up")
-				self.clientControl.loop_stop()
-				self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
-				self.clientControl.disconnect()
-			except:
-				self.logger.exception("clientControl cleanup exception")
-				raise
-			raise
+		# self.logger.debug("MQTT client loop - starting")
+		# try:
+		# 	# self.clientControl.loop_forever()  # blocking
+		# 	self.clientControl.loop()  # non-blocking
+		# 	self.logger.debug("MQTT client loop - started")
+		# except Exception as e:
+		# 	self.logger.exception("Exception while starting MQTT client loop: {}".format(e))
+		# 	traceback.print_exc()
+		# 	# clean up in case of emergency
+		# 	try:
+		# 		self.logger.debug("clientControl cleaning up")
+		# 		self.clientControl.loop_stop()
+		# 		self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
+		# 		self.clientControl.disconnect()
+		# 	except:
+		# 		self.logger.exception("clientControl cleanup exception")
+		# 		raise
+		# 	raise
 
 		sleep(2)
 
@@ -396,8 +396,8 @@ class DoorController(object):
 		# begin control loop
 		try:
 			self.logger.debug("control loop")
-			self.clientControl.loop_forever()  # blocking
-			# self.clientControl.loop()  # non-blocking
+			# self.clientControl.loop_forever()  # blocking
+			self.clientControl.loop()  # non-blocking
 		except:
 			# clean up in case of emergency
 			try:
@@ -472,7 +472,9 @@ class DoorController(object):
 			self.clientControl.on_message = self.on_message
 			self.clientControl.on_publish = self.on_publish
 			self.clientControl.connect(self.mqttSettings['broker'], self.mqttSettings['port'])
-			self.logger.debug("mqtt client connected. client: {}".format(str(self.clientControl)))
+			self.logger.debug("mqtt client connected. client: {}. starting loop".format(str(self.clientControl)))
+			self.clientControl.loop_start()
+			self.logger.debug("mqtt client loop started")
 		except Exception as e:
 			self.logger.exception("Exception while setting up MQTT client: {}".format(e))
 			traceback.print_exc()
@@ -537,7 +539,7 @@ class DoorController(object):
 		@param granted_qos: quality of service granted to the connection
 		@return:
 		"""
-		self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
+		self.logger.debug("mqtt: (SUBSCRIBE) client: {}, mid: {}, granted_qos: {}".format(client, mid, granted_qos))
 		return
 
 	def on_publish(self, client, userdata, mid, rc):
@@ -549,7 +551,7 @@ class DoorController(object):
 		@param rc: result of connection
 		@return: None
 		"""
-		self.logger.debug("mqtt: (PUBLISH) mid: {}".format(mid))
+		self.logger.debug("mqtt: (PUBLISH) client: {}, mid: {}".format(client, mid))
 		return
 
 	def on_message(self, client, userdata, msg):
@@ -560,7 +562,7 @@ class DoorController(object):
 		@param msg: the received message
 		@return:
 		"""
-		self.logger.debug("mqtt: (MESSAGE) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
+		self.logger.debug("mqtt: (MESSAGE) client: {}, topic: {}, QOS: {}, payload: {}".format(client, msg.topic, msg.qos, msg.payload))
 		if msg.topic == self.mqttSettings['topic_control'] and msg.payload in ["TOGGLE", "CLOSE"]:
 			self.toggle()
 		return
