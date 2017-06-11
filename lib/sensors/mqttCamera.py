@@ -69,7 +69,7 @@ class MqttCamera(object):
 		@return: None
 		"""
 		self.logger.debug("setupCamera")
-		# print("setupCamera")
+		self.logger.debug(self.cameraSettings)
 		self.camera = PiCamera()
 		cameraSettingsKeys = self.cameraSettings.keys()
 
@@ -196,10 +196,7 @@ class MqttCamera(object):
 		@return: None
 		"""
 		try:
-			self.logger.debug("starting control thread")
-			# print("starting control thread")
-			# self.controlThread.start()
-
+			self.logger.info("starting MQTT client")
 			self.clientControl = paho.Client(client_id=self.mqttSettings['mqtt_client'])
 			self.clientControl.on_connect = self.on_connect
 			self.clientControl.on_subscribe = self.on_subscribe
@@ -210,7 +207,6 @@ class MqttCamera(object):
 
 		except:
 			self.logger.exception("failed to start control thread")
-			# print("failed to start control thread")
 			self.cleanup()
 			raise
 		return
@@ -227,8 +223,7 @@ class MqttCamera(object):
 		@param rc: result of connection
 		@return: None
 		"""
-		self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
-		# print("mqtt: (CONNECTION) received with code {}".format(rc))
+		self.logger.info("mqtt: (CONNECTION) received with code {}".format(rc))
 
 		# check connection results
 		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
@@ -255,7 +250,6 @@ class MqttCamera(object):
 		@return:
 		"""
 		self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
-		# print("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
 		return
 
 	def on_message(self, client, userdata, msg):
@@ -266,8 +260,7 @@ class MqttCamera(object):
 		@param msg: the received message
 		@return:
 		"""
-		self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
-		# print("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
+		self.logger.info("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
 
 		# check the topic & payload to see if we should respond something
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
@@ -281,9 +274,7 @@ class MqttCamera(object):
 			self.updateCameraISO()
 
 			# sleep a little bit to let the garage door open enough that there's some light
-			self.logger.debug("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
-			# print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
-			# print("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
+			self.logger.info("taking picture in {} seconds: {}".format(cameraDelay, self.cameraFile))
 			sleep(cameraDelay)
 
 			# take the picture
@@ -291,10 +282,8 @@ class MqttCamera(object):
 
 			# send the picture if we have pushbullet settings
 			if 'pushbullet_api' in self.pushbulletSettings.keys():
-				self.logger.debug("sending notification")
-				# print("sending notification")
+				self.logger.info("sending notification")
 				PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
-				self.logger.debug("notification sent")
-				# print("notification sent")
+				self.logger.info("notification sent")
 
 		return
