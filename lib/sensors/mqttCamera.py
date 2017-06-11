@@ -90,10 +90,12 @@ class MqttCamera(object):
 		for key, val in cameraSettings.items():
 			s += "{}: {}\n".format(key, val)
 		logging.debug(s)
+		print(s)
 		s = 'MQTT settings:\n'
 		for key, val in mqttSettings.items():
 			s += "{}: {}\n".format(key, val)
 		logging.debug(s)
+		print(s)
 		return cameraSettings, mqttSettings, logFile
 
 	def cleanup(self):
@@ -196,7 +198,10 @@ class MqttCamera(object):
 	def on_message(self, client, userdata, msg):
 		self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
 		print("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
+		print("expected topic: {}".format(self.mqttSettings['mqtt_topic_control']))
+
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
+			print("taking picture now: {}".format(self.cameraFile))
 			self.camera.capture(self.cameraFile)
 
 		# tell the server where the file is for now... we'll figure out something else later
