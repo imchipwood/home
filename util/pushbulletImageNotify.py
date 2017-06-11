@@ -53,6 +53,7 @@ def main():
 			raise IOError("{} found but with bad value: {} ".format(setting, settings[setting]))
 
 	# create the SSH and SFTP clients
+	print("creating SSH & SFTP clients")
 	ssh_client = paramiko.SSHClient()
 	ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 	ssh_client.connect(
@@ -63,13 +64,16 @@ def main():
 	sftp_client = ssh_client.open_sftp()
 
 	# create the pushbullet client
+	print("creating pushbullet client")
 	pb = Pushbullet(pushbullet_api)
 
 	# get the file from the remote machine
+	print("opening remote file via sftp_client")
 	with sftp_client.open(imagePath) as pic:
 		file_data = pb.upload_file(pic, imageName)
 
 	# push the file as a notification
+	print("pushing remote file as a notification")
 	push = pb.push_file(**file_data)
 
 	return
