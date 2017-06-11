@@ -32,6 +32,9 @@ class MqttCamera(object):
 		else:
 			logging.info("Logging level: INFO")
 
+		logging.getLogger().setLevel(logging.DEBUG)
+		logging.debug("THIS IS A TEST MESSAGE")
+
 		# stdout stream handler
 		ch = logging.StreamHandler()
 		# ch.setLevel(loggingLevel)
