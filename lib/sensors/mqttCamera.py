@@ -4,8 +4,8 @@ import logging
 import paho.mqtt.client as paho
 import paho.mqtt.publish as pahopub
 from picamera import PiCamera
-from multiprocessing import Process
-
+# from multiprocessing import Process
+from threading import Thread
 
 class MQTTError(BaseException):
 	pass
@@ -52,7 +52,8 @@ class MqttCamera(object):
 		self.setupCamera(cameraSettings)
 
 		self.clientControl = None
-		self.controlThread = Process(target=self.control, args=[])
+		#self.controlThread = Process(target=self.control, args=[])
+		self.controlThread = Thread(target=self.control, args=[])
 		return
 	
 	def setupCamera(self, cameraSettingsDict):
