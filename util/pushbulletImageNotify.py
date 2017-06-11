@@ -81,6 +81,7 @@ def parseConfig(f):
 
 	settings = {}
 	for line in lines:
+		print(line)
 		line = line.rstrip().split("=")
 		key, val = line[:2]
 		settings[key] = val
