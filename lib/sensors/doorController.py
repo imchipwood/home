@@ -254,8 +254,8 @@ class DoorController(object):
 		# 	raise
 
 		# begin control loop
+		self.logger.debug("beginning MQTT client loop")
 		try:
-			self.logger.debug("control loop")
 			# self.clientControl.loop_forever()  # blocking
 			self.clientControl.loop()  # non-blocking
 		except Exception as e:
@@ -464,7 +464,7 @@ class DoorController(object):
 		@return: None
 		"""
 		# topic subscription happens in on_connect
-		self.logger.debug("control connect")
+		self.logger.debug("setting up mqtt client connection")
 		try:
 			self.clientControl = paho.Client(client_id=self.mqttSettings['client'])
 			self.clientControl.on_connect = self.on_connect
