@@ -51,8 +51,8 @@ class DoorController(object):
 	Once instantiated, simply call the start() method to launch the threads
 	"""
 	def __init__(self, configFile, debug=False):
-		DoorController.__init__(self)
-
+		# DoorController.__init__(self)
+		super(DoorController, self).__init__()
 		self.state = None
 
 		# handle logging level
