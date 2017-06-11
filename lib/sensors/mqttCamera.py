@@ -1,11 +1,10 @@
 
 import logging
-#from time import sleep
+from time import sleep
 import paho.mqtt.client as paho
-import paho.mqtt.publish as pahopub
 from picamera import PiCamera
-# from multiprocessing import Process
 from threading import Thread
+from pushbulletNotify import PushbulletImageNotify
 
 class MQTTError(BaseException):
 	pass
@@ -35,7 +34,7 @@ class MqttCamera(object):
 		self.logger.addHandler(ch)
 
 		# attempt to parse the config file
-		cameraSettings, self.mqttSettings, self.logFile = self.parseConfig(configFile)
+		cameraSettings, self.mqttSettings, self.pushbulletSettings, self.logFile = self.parseConfig(configFile)
 
 		# set up file handler logger
 		if self.logFile:
@@ -87,10 +86,11 @@ class MqttCamera(object):
 		"""Parse a config file for relevant camera, MQTT, and logging info
 
 		@param cfgFile: The file to parse
-		@return: tuple of camera settings dict, mqtt settings dict, and str log file path
+		@return: tuple of camera settings dict, mqtt settings dict, pushbullet settings dict, and str log file path
 		"""
 		cameraSettings = {}
 		mqttSettings = {}
+		pushbulletSettings = {}
 		logFile = None
 
 		with open(cfgFile, 'r') as inf:
@@ -117,22 +117,13 @@ class MqttCamera(object):
 				cameraSettings[key] = val
 			elif 'mqtt' in key:
 				mqttSettings[key] = val
+			elif 'pushbullet' in key:
+				pushbulletSettings[key] = val
 			elif key == 'log':
 				logFile = val
-
-		# debug stuff
-		s = 'Camera settings:\n'
-		for key, val in cameraSettings.items():
-			s += "{}: {}\n".format(key, val)
-		logging.debug(s)
-		print(s)
-		s = 'MQTT settings:\n'
-		for key, val in mqttSettings.items():
-			s += "{}: {}\n".format(key, val)
-		logging.debug(s)
 		print(s)
 
-		return cameraSettings, mqttSettings, logFile
+		return cameraSettings, mqttSettings, pushbulletSettings, logFile
 
 	def cleanup(self):
 		"""Attempt to gracefully exit the program
@@ -205,30 +196,6 @@ class MqttCamera(object):
 	###############################################################################
 	# MQTT interaction functions
 
-	def publish(self, data):
-		"""Publish data to an MQTT topic
-
-		@param data: The data to publish
-		@return: None
-		"""
-		self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttSettings['mqtt_topic_respond']))
-		print("mqtt: pub '{}' to topic '{}'".format(data, self.mqttSettings['mqtt_topic_respond']))
-		try:
-			pahopub.single(
-				topic=self.mqttSettings['mqtt_topic_respond'],
-				payload=str(data),
-				qos=1,
-				retain=True,
-				hostname=self.mqttSettings['mqtt_broker'],
-				port=self.mqttSettings['mqtt_port'],
-				client_id=self.mqttSettings['mqtt_client']
-			)
-		except Exception as e:
-			self.logger.exception("mqtt: pub exception:\n{}".format(e))
-			print("mqtt: pub exception:\n{}".format(e))
-			pass
-		return
-
 	def on_connect(self, client, userdata, flags, rc):
 		"""Catch MQTT connection events and subscribe to an MQTT topic for listening
 
@@ -269,18 +236,6 @@ class MqttCamera(object):
 		print("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
 		return
 
-	def on_publish(self, client, userdata, mid, rc):
-		"""Event handler for when the client attempts to publish to a topic
-
-		@param client: the MQTT client that is publishing
-		@param userdata: any special user data needed (currently unused but comes with automatically)
-		@param mid: ??
-		@param rc: results of publication
-		@return:
-		"""
-		self.logger.debug("mqtt: (PUBLISH) mid: {}, rc: {}".format(mid, rc))
-		return
-
 	def on_message(self, client, userdata, msg):
 		"""Event handler for when client receives a message on the subscribed topic
 
@@ -294,9 +249,10 @@ class MqttCamera(object):
 
 		# check the topic & payload to see if we should respond something
 		if msg.topic == self.mqttSettings['mqtt_topic_control'] and msg.payload == 'CAPTURE':
-			print("taking picture now: {}".format(self.cameraFile))
-			self.camera.capture(self.cameraFile)
+			print("taking picture in 2 seconds: {}".format(self.cameraFile))
+			sleep(2)
 
-			# tell the server where the file is for now... we'll figure out something else later
-			self.publish(data=self.cameraFile)
+			self.camera.capture(self.cameraFile)
+			PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
+
 		return
