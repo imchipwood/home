@@ -522,6 +522,7 @@ class DoorController(object):
 			raise MQTTError("on_connect 'rc' failure")
 
 		# no errors, subscribe to the MQTT topic
+		self.logger.info("subscribing to topic: {}".format(self.mqttSettings['topic_control']))
 		client.subscribe(self.mqttSettings['topic_control'], qos=1)
 		return
 
