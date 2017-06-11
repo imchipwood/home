@@ -389,7 +389,7 @@ class DoorController(object):
 ###############################################################################
 # looping functions - these two functions are intended to be launched in individual threads
 
-	def control(self):
+	def controlLoop(self):
 		"""Start the MQTT client
 
 		@return:
