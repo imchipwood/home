@@ -230,28 +230,8 @@ class DoorController(object):
 	def start(self):
 		"""Start the state monitoring thread and launch the MQTT connections
 
-		@return:
+		@return: None
 		"""
-
-		# launch monitor thread
-		try:
-			self.logger.debug("starting state thread")
-			self.monitorThread.start()
-		except:
-			self.logger.exception("failed to start state thread")
-			self.cleanup()
-			raise
-
-		sleep(2)
-
-		# # launch control thread
-		# try:
-		# 	self.logger.debug("starting control thread")
-		# 	self.controlThread.start()
-		# except:
-		# 	self.logger.exception("failed to start control thread")
-		# 	self.cleanup()
-		# 	raise
 
 		# begin control loop
 		self.logger.debug("MQTT client loop - starting")
@@ -272,6 +252,28 @@ class DoorController(object):
 				self.logger.exception("clientControl cleanup exception")
 				raise
 			raise
+
+		sleep(2)
+
+		# launch monitor thread
+		try:
+			self.logger.debug("starting state thread")
+			self.monitorThread.start()
+		except:
+			self.logger.exception("failed to start state thread")
+			self.cleanup()
+			raise
+
+		# sleep(2)
+
+		# # launch control thread
+		# try:
+		# 	self.logger.debug("starting control thread")
+		# 	self.controlThread.start()
+		# except:
+		# 	self.logger.exception("failed to start control thread")
+		# 	self.cleanup()
+		# 	raise
 		
 		return
 
