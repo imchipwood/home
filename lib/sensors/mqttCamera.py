@@ -72,6 +72,10 @@ class MqttCamera(object):
 		if 'camera_contrast' in cameraSettingsKeys:
 			self.camera.contrast = self.cameraSettings['camera_contrast']
 
+		if 'camera_resolution' in cameraSettingsKeys:
+			width, height = [int(x) for x in self.cameraSettings['camera_resolution'].split(',')]
+			self.camera.resolution = (width, height)
+
 		if 'camera_filepath' in cameraSettingsKeys:
 			self.cameraFile = self.cameraSettings['camera_filepath']
 		else:
@@ -131,7 +135,6 @@ class MqttCamera(object):
 
 		try:
 			print("terminating control thread")
-			#self.controlThread.terminate()
 			self.clientControl.loop_stop()
 			print("control thread terminated")
 		except Exception as e:
