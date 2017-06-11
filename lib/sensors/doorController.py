@@ -469,7 +469,7 @@ class DoorController(object):
 			self.clientControl.on_subscribe = self.on_subscribe
 			self.clientControl.on_message = self.on_message
 			self.clientControl.connect(self.mqttSettings['broker'], self.mqttSettings['port'])
-			self.logger.debug("mqtt client connected")
+			self.logger.debug("mqtt client connected. client: {}".format(str(self.clientControl)))
 		except Exception as e:
 			self.logger.exception("Exception while setting up MQTT client: {}".format(e))
 			traceback.print_exc()
