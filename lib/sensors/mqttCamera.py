@@ -1,5 +1,6 @@
 
 import logging
+import traceback
 from time import sleep
 import paho.mqtt.client as paho
 from picamera import PiCamera
@@ -135,7 +136,9 @@ class MqttCamera(object):
 			print("terminating control thread")
 			self.controlThread.terminate()
 			print("control thread terminated")
-		except:
+		except Exception as e:
+			print("exception while trying to terminate thread: {}".format(e))
+			traceback.print_exc()
 			pass
 
 		try:
@@ -253,6 +256,8 @@ class MqttCamera(object):
 			sleep(2)
 			self.camera.capture(self.cameraFile)
 			if 'pushbullet_api' in self.pushbulletSettings.keys():
+				print("sending notification")
 				PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
+				print("notification sent")
 
 		return
