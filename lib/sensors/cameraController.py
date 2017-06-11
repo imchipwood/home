@@ -205,6 +205,7 @@ class PiCameraController(PiCamera):
 			output = self.cameraFile
 		self.updateCameraISO()
 		if delay:
+			self.logger.debug("delaying {} seconds before taking photo".format(delay))
 			sleep(delay)
 		super(PiCameraController, self).capture(
 			output=output,
