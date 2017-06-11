@@ -13,332 +13,500 @@ A separate control MQTT client thread subscribes to the control topic and
 toggles the GPIO when a message is published with the payload of "TOGGLE".
 It does not respond to any other messages.
 '''
-import os
 import logging
 import RPi.GPIO as GPIO
 import paho.mqtt.client as paho
 import paho.mqtt.publish as pahopub
 import timeit
 from time import sleep
-from multiprocessing import Process
+# from multiprocessing import Process
+from threading import Thread
+from cameraController import PiCameraController
+import traceback
 
 # logging junk
-# Level	    Numeric value
+# Level		Numeric value
 # CRITICAL	 50
-# ERROR	    40
+# ERROR		40
 # WARNING	  30
-# INFO	     20
-# DEBUG	    10
-# NOTSET	    0
-
-# TODO: MQTT - need to set up a periodic conversation
-# client sends message to "keepalive" topic, expects specific response
-#   if response is received, continue
-#   if response is not received, attempt to reconnect and try "keepalive" again
-# do this... every 15 minutes? need to screw around with it
+# INFO		 20
+# DEBUG		10
+# NOTSET		0
 
 
 class Error(Exception):
-    pass
+	pass
 
 
 class MQTTError(Error):
-    pass
-
-
-'''Threaded Door Controller object
-
-This class is intended to handle all aspects of door monitoring and control.
-
-Inputs:
-    - configFile        the full system path to a configuration file
-    - debug             Boolean to enable more verbose logging. Default: false
-
-Once instantiated, simply call the start() method to launch the threads
-'''
+	pass
 
 
 class DoorController(object):
+	"""Threaded Door Controller object
 
-    config = {}
-    clientControl = ""
-    state = False
+	This class is intended to handle all aspects of door monitoring and control, as well as camera control
 
-    def __init__(self, configFile, debug=False):
-        super(DoorController, self).__init__()
-        self.bDebug = debug
+	Once instantiated, simply call the start() method to launch the threads
+	"""
+	def __init__(self, configFile, debug=False):
+		DoorController.__init__(self)
 
-        if os.path.exists(configFile):
-            self.sConfigFile = configFile
-        else:
-            raise IOError()
+		self.state = None
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        # formatting - add this to logging handler
-        stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
-        fileFormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        stdoutFormatter = logging.Formatter(stdoutFormat)
-        fileFormatter = logging.Formatter(fileFormat)
-        # stdout handler
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        ch.setFormatter(stdoutFormatter)
-        self.logger.addHandler(ch)
+		# handle logging level
+		self.logger = logging.getLogger(__name__)
+		loggingLevel = logging.INFO
+		if debug:
+			loggingLevel = logging.DEBUG
 
-        self.monitorThread = Process(target=self.monitor, args=[])
-        self.controlThread = Process(target=self.control, args=[])
+		# logging level has to be set globally for some reason
+		logging.getLogger().setLevel(loggingLevel)
 
-        if self.readConfig():
-            # set up file handler for logger
-            self.log = self.__config["log"]
-            fh = logging.FileHandler(self.log)
-            fh.setLevel(logging.DEBUG)
-            fh.setFormatter(fileFormatter)
-            self.logger.addHandler(fh)
+		# read the config file - we need the log file path to finish setting up logging
+		self.mqttSettings, self.gpioSettings, logFile, cameraEnabled = self.readConfig(configFile)
 
-            # pull MQTT stuff out of config
-            try:
-                self.mqttClient = self.__config["mqtt_client"]
-                self.mqttBroker = self.__config["mqtt_broker"]
-                self.mqttPort = self.__config["mqtt_port"]
-                self.mqttTopicState = self.__config["mqtt_topic_state"]
-                self.mqttTopicControl = self.__config["mqtt_topic_control"]
-                self.logger.debug("mqttClient: {}".format(self.mqttClient))
-                self.logger.debug("mqttBroker: {}".format(self.mqttBroker))
-                self.logger.debug("mqttPort: {}".format(self.mqttPort))
-                self.logger.debug("mqttTopicState: {}".format(self.mqttTopicState))
-                self.logger.debug("mqttTopicControl: {}".format(self.mqttTopicControl))
-            except:
-                self.logger.exception("Error with MQTT config")
-                raise Exception()
+		# finish setting up logging
+		self.setupLogging(loggingLevel=loggingLevel, logFile=logFile)
 
-            # pull GPIO stuff out of config and set up GPIO
-            try:
-                GPIO.setmode(GPIO.BCM)
-                # sensor
-                self.pinSensor = self.__config["pin_sensor"]
-                # TODO: add ability to configure as pull-up or pull-down
-                GPIO.setup(self.pinSensor, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                self.getState()  # initialize sensor
+		# set up MQTT connections
+		self.clientControl = None
+		self.setupMQTT()
 
-                # control
-                self.pinControl = self.__config["pin_control"]
-                GPIO.setup(self.pinControl, GPIO.OUT)
-                self.off()  # ensure control output is LOW
-            except:
-                self.logger.exception("Error with Sensor/Relay config")
-                raise Exception()
-        else:
-            raise IOError("Failed to read config")
-        return
+		# create the camera
+		if cameraEnabled:
+			self.camera = PiCameraController(configFile=configFile, debug=debug)
+		else:
+			self.camera = None
+
+		# setup sensing/controlling GPIO
+		self.setupGPIO()
+
+		# self.monitorThread = Process(target=self.monitor, args=[])
+		# self.controlThread = Process(target=self.control, args=[])
+		self.monitor = True
+		self.monitorThread = Thread(target=self.monitor, args=[])
+		# self.controlThread = Thread(target=self.control, args=[])
+
+		return
+
+	def readConfig(self, configFile):
+		"""Read the config file for MQTT, GPIO, and logging setup
+
+		Expected tokens:
+			log - full path of file to log to
+			mqtt_client - name to send MQTT messages as
+			mqtt_broker - IP address of MQTT broker
+			mqtt_port - port to talk to MQTT broker on
+			mqtt_topic_state - MQTT topic to send state updates on
+			mqtt_topic_control - MQTT topic to listen for commands on
+			gpio_pin_sensor - GPIO # that door is connected to
+			gpio_pin_control - GPIO # that relay is connected to
+
+		@param configFile: path to config file to parse
+		@return: tuple (dict of mqtt settings, dict of gpio settings, str logfile path, bool cameraEnabled)
+		"""
+		mqttConfig = {}
+		gpioConfig = {}
+		logFile = None
+		cameraEnabled = False
+
+		with open(configFile, "r") as inf:
+			lines = inf.readlines()
+
+		for line in lines:
+			# skip commented out lines, blank lines, and lines without an = sign
+			if line[0] == '#' or line[:2] == '//' or line == '\n' or '=' not in line:
+				continue
+
+			# line is good, split it by '=' to get token and value
+			line = line.rstrip().split("=")
+			key, val = line[:2]
+
+			# try to convert the value to an int. some values will be strings so this won't work, but
+			# it means we don't have to do the conversions elsewhere
+			try:
+				val = int(val)
+			except:
+				pass
+
+			# store values as appropriate
+			if 'mqtt' in key:
+				key = key.split('_')[1:]
+				mqttConfig[key] = val
+			elif 'gpio' in key:
+				key = key.split('_')[1:]
+				gpioConfig[key] = val
+			elif key == 'log':
+				logFile = val
+			elif 'camera' in key:
+				cameraEnabled = True
+
+		return mqttConfig, gpioConfig, logFile, cameraEnabled
+
+	def setupLogging(self, loggingLevel, logFile=None):
+		"""Set up logging stream and file handlers
+
+		@param loggingLevel: logging level as defined by logging package
+		@param logFile: (optional) path for file logging
+		@return: None
+		"""
+		if loggingLevel == logging.DEBUG:
+			val = 'DEBUG'
+		elif loggingLevel == logging.INFO:
+			val = 'INFO'
+		else:
+			raise AttributeError("DoorController only supports logging.INFO and logging.DEBUG levels")
+		logging.info("Logging level: {}".format(val))
+
+		# stdout stream handler
+		ch = logging.StreamHandler()
+		ch.setLevel(loggingLevel)
+
+		# stdout logging formatting
+		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
+		stdoutFormatter = logging.Formatter(stdoutFormat)
+		ch.setFormatter(stdoutFormatter)
+		self.logger.addHandler(ch)
+
+		# set up file handler logger
+		if logFile:
+			fh = logging.FileHandler(logFile)
+			fh.setLevel(logging.DEBUG)
+
+			# file logging formatting
+			fileFormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+			fileFormatter = logging.Formatter(fileFormat)
+			fh.setFormatter(fileFormatter)
+			self.logger.addHandler(fh)
+		return
 
 ###############################################################################
 
-    '''Start the state monitoring and control threads
-    This function initializes all MQTT connections and subscriptions
-    and launches separate Processes for each
-    '''
-    def start(self):
-        # launch monitor thread
-        try:
-            self.logger.debug("starting state thread")
-            self.monitorThread.start()
-        except:
-            self.logger.exception("failed to start state thread")
-            self.cleanup()
-            raise
-        sleep(2)
-        # launch control thread
-        try:
-            self.logger.debug("starting control thread")
-            self.controlThread.start()
-        except:
-            self.logger.exception("failed to start control thread")
-            self.cleanup()
-            raise
-        
-        return
+	'''Start the state monitoring and control threads
+	This function initializes all MQTT connections and subscriptions
+	and launches separate Processes for each
+	'''
+	def start(self):
+		"""Start the state monitoring thread and launch the MQTT connections
+
+		@return:
+		"""
+
+		# launch monitor thread
+		try:
+			self.logger.debug("starting state thread")
+			self.monitorThread.start()
+		except:
+			self.logger.exception("failed to start state thread")
+			self.cleanup()
+			raise
+
+		sleep(2)
+
+		# # launch control thread
+		# try:
+		# 	self.logger.debug("starting control thread")
+		# 	self.controlThread.start()
+		# except:
+		# 	self.logger.exception("failed to start control thread")
+		# 	self.cleanup()
+		# 	raise
+
+		# begin control loop
+		try:
+			self.logger.debug("control loop")
+			# self.clientControl.loop_forever()  # blocking
+			self.clientControl.loop()  # non-blocking
+		except:
+			# clean up in case of emergency
+			try:
+				self.logger.debug("clientControl cleaning up")
+				self.clientControl.loop_stop()
+				self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
+				self.clientControl.disconnect()
+			except:
+				self.logger.exception("clientControl cleanup exception")
+				raise
+		
+		return
 
 ###############################################################################
-    '''Read configuration from a file
 
-    Expected tokens:
-        log - full path of file to log to
-        mqtt_client - name to send MQTT messages as
-        mqtt_broker - IP address of MQTT broker
-        mqtt_port - port to talk to MQTT broker on
-        mqtt_topic_state - MQTT topic to send state updates on
-        mqtt_topic_control - MQTT topic to listen for commands on
-        pin_sensor - GPIO # that door is connected to
-        pin_control - GPIO # that relay is connected to
-    '''
-    def readConfig(self):
-        config = {}
-        with open(self.sConfigFile, "r") as inf:
-            for line in inf:
-                line = line.rstrip().split("=")
-                key = line[0]
-                val = line[1]
-                if key in ["pin_sensor", "pin_control", "mqtt_port"]:
-                    val = int(val)
-                config[key] = val
-                if self.bDebug:
-                    self.logger.debug("-d- config: key:val '{}:{}'".format(key,
-                                                                           val)
-                                      )
-        bConfigValid = True
-        for key in config.keys():
-            if "pin" in key:
-                if 2 > config[key] > 27:
-                    bConfigValid = False
-        if bConfigValid:
-            self.__config = config
-        return bConfigValid
 
 ###############################################################################
 # GPIO interactions
 
-    def on(self):
-        if self.bDebug:
-            self.logger.debug("control - on")
-        GPIO.output(self.pinControl, GPIO.HIGH)
-        return
+	def setupGPIO(self):
+		"""Set up GPIO for controlling & sensing door states
 
-    def off(self):
-        if self.bDebug:
-            self.logger.debug("control - off")
-        GPIO.output(self.pinControl, GPIO.LOW)
-        return
+		@return: None
+		"""
+		GPIO.setmode(GPIO.BCM)
 
-    def toggle(self):
-        self.on()
-        sleep(0.3)
-        self.off()
-        return
+		# initialize sesnsor
+		# TODO: add ability to configure as pull-up or pull-down
+		GPIO.setup(self.gpioSettings['pin_sensor'], GPIO.IN, pull_up_down=GPIO.PUD_UP)
+		self.getState()
 
-    def getState(self):
-        return GPIO.input(self.pinSensor)
+		# initialize control (relay
+		GPIO.setup(self.gpioSettings['pin_control'], GPIO.OUT)
+		# ensure control output is LOW
+		self.off()
+		return
+
+	def on(self):
+		"""set GPIO output HIGH for control pin
+
+		@return: None
+		"""
+		self.logger.debug("control - on")
+		GPIO.output(self.gpioSettings['pin_control'], GPIO.HIGH)
+		return
+
+	def off(self):
+		"""set GPIO output LOW for control pin
+
+		@return: None
+		"""
+		self.logger.debug("control - off")
+		GPIO.output(self.gpioSettings['pin_control'], GPIO.LOW)
+		return
+
+	def toggle(self):
+		"""toggle GPIO relay
+
+		@return: None
+		"""
+		self.on()
+		if 'relay_toggle_delay' in self.gpioSettings.keys():
+			sleep(self.gpioSettings['relay_toggle_delay'])
+		else:
+			sleep(0.3)
+		self.off()
+		return
+
+	def getState(self):
+		"""Get current state of GPIO input pin
+
+		@return: int
+		"""
+		return GPIO.input(self.gpioSettings['pin_sensor'])
 
 ###############################################################################
-# looping functions - these two functions are intended to be launched
-#                     in individual threads
+# looping functions - these two functions are intended to be launched in individual threads
 
-    def control(self):
-        # set up the connection
-        # topic subscription happens in on_connect
-        if self.bDebug:
-            self.logger.debug("control connect")
-        self.clientControl = paho.Client(client_id=self.mqttClient)
-        self.clientControl.on_connect = self.on_connect
-        self.clientControl.on_subscribe = self.on_subscribe
-        self.clientControl.on_message = self.on_message
-        self.clientControl.connect(self.mqttBroker, self.mqttPort)
-        # begin control loop
-        try:
-            if self.bDebug:
-                self.logger.debug("control loop_forever")
-            self.clientControl.loop_forever()  # blocking
-        except:
-            # clean up in case of emergency
-            try:
-                if self.bDebug:
-                    self.logger.debug("clientControl cleaning up")
-                self.clientControl.loop_stop()
-                self.clientControl.unsubscribe(self.mqttTopicControl)
-                self.clientControl.disconnect()
-            except:
-                self.logger.exception("clientControl cleanup exception")
-                pass
-        return
+	# def control(self):
+	# 	"""Start the MQTT client
+	#
+	# 	@return:
+	# 	"""
+	# 	# begin control loop
+	# 	try:
+	# 		self.logger.debug("control loop")
+	# 		# self.clientControl.loop_forever()  # blocking
+	# 		self.clientControl.loop()  # non-blocking
+	# 	except:
+	# 		# clean up in case of emergency
+	# 		try:
+	# 			self.logger.debug("clientControl cleaning up")
+	# 			self.clientControl.loop_stop()
+	# 			self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
+	# 			self.clientControl.disconnect()
+	# 		except:
+	# 			self.logger.exception("clientControl cleanup exception")
+	# 			raise
+	# 	return
 
-    def monitor(self):
-        oneHz = 1.0
-        lastOneHzTime = 0
-        lastDoorState = -99
+	def monitor(self):
+		"""Monitor the door open/closed sensor @1Hz
 
-        while True:
-            now = float(timeit.default_timer())
-            if (now - lastOneHzTime) > oneHz:
-                lastOneHzTime = now
-                try:
-                    newState = self.getState()
-                    if newState != lastDoorState:
-                        lastDoorState = newState
-                        self.state = newState
-                        if self.bDebug:
-                            self.logger.debug("monitor state: %s" % (self.state))
-                        # TODO: add ability to configure N.O. vs N.C.
-                        self.publish(self.state)
-                except:
-                    self.logger.exception("state exception")
-                    raise
+		@remark: set DoorController.monitor=False to stop the thread
+
+		@return: None
+		"""
+		oneHz = 1.0
+		lastOneHzTime = 0
+		lastDoorState = -99
+
+		while self.monitor:
+			now = float(timeit.default_timer())
+
+			if (now - lastOneHzTime) > oneHz:
+				lastOneHzTime = now
+
+				try:
+					newState = self.getState()
+
+					if newState != lastDoorState:
+						lastDoorState = newState
+						self.state = newState
+						self.logger.debug("monitor state: %s" % (self.state))
+
+						# TODO: add ability to configure N.O. vs N.C.
+
+						self.publish(self.state)
+
+						if self.camera and self.state:
+							self.camera.capture()
+
+				except:
+					self.logger.exception("state exception")
+					raise
+
+		self.logger.info("Monitor loop exiting")
+		return
 
 ###############################################################################
 # Connection and cleanup functions
 
-    def cleanup(self):
-        self.logger.info("cleaning up")
-        try:
-            self.monitorThread.terminate()
-            self.controlThread.terminate()
-        except:
-            pass
-        GPIO.cleanup()
-        return
+	def cleanup(self):
+		"""Clean up all threads and GPIO
+		
+		@return: 
+		"""
+		self.logger.info("cleaning up")
+
+		try:
+			self.logger.debug("shutting down monitor loop")
+			# self.monitorThread.terminate()
+			# self.monitorThread.loop_stop()
+			# self.monitorThread.unsubscribe(self.mqttSettings['topic_state'])()
+			# self.monitorThread.disconnect()
+			self.monitor = False
+		except Exception as e:
+			self.logger.exception("Exception while shutting down monitor loop: {}".format(e))
+			traceback.print_exc()
+			pass
+
+		try:
+			self.logger.debug("shutting down control thread")
+			# self.controlThread.terminate()
+			self.clientControl.loop_stop()
+			self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
+			self.clientControl.disconnect()
+		except Exception as e:
+			self.logger.exception("Exception while shutting down control loop: {}".format(e))
+			traceback.print_exc()
+			pass
+
+		try:
+			self.logger.debug("Cleaning up GPIO")
+			GPIO.cleanup()
+		except Exception as e:
+			self.logger.exception("Exception while cleaning up GPIO: {}".format(e))
+			traceback.print_exc()
+			pass
+
+		if self.camera:
+			try:
+				self.logger.debug("Cleaning up camera")
+				self.camera.cleanup()
+			except Exception as e:
+				self.logger.exception("Exception while cleaning up camera: {}".format(e))
+				traceback.print_exc()
+				pass
+
+		return
 
 ###############################################################################
 # MQTT interaction functions
 
-    def publish(self, data):
-        if self.bDebug:
-            self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttTopicState))
-        try:
-            pahopub.single(topic=self.mqttTopicState,
-                        payload=str(data),
-                        qos=1,
-                        retain=True,
-                        hostname=self.mqttBroker,
-                        port=self.mqttPort,
-                        client_id=self.mqttClient)
-        except Exception as e:
-            self.logger.exception("mqtt: pub exception:\n{}".format(e))
-            pass
-        return
+	def setupMQTT(self):
+		"""Set up MQTT connection
 
-    def on_connect(self, client, userdata, flags, rc):
-        if self.bDebug:
-            self.logger.debug("mqtt: (CONNECTION) received with code {}".format(rc))
-        client.subscribe(self.mqttTopicControl, qos=1)
-        # MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
-        # attempt to reconnect on errors
-        if rc != 0:
-            if rc == -4:
-                self.logger.exception("mqtt: ERROR: 'too many messages'\n")
-            elif rc == -5:
-                self.logger.exception("mqtt: ERROR: 'invalid UTF-8 string'\n")
-            elif rc == -9:
-                self.logger.exception("mqtt: ERROR: 'bad QoS'\n")
-            raise MQTTError("on_connect 'rc' failure")
-        return
+		@return: None
+		"""
+		# topic subscription happens in on_connect
+		self.logger.debug("control connect")
+		self.clientControl = paho.Client(client_id=self.mqttSettings['client'])
+		self.clientControl.on_connect = self.on_connect
+		self.clientControl.on_subscribe = self.on_subscribe
+		self.clientControl.on_message = self.on_message
+		self.clientControl.connect(self.mqttSettings['broker'], self.mqttSettings['port'])
+		return
 
-    def on_subscribe(self, client, userdata, mid, granted_qos):
-        if self.bDebug:
-            self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid,
-                                                                                  granted_qos))
-        return
+	def publish(self, data):
+		"""Publish data to MQTT state topic
 
-    def on_publish(self, client, userdata, mid, rc):
-        if self.bDebug:
-            self.logger.debug("mqtt: (PUBLISH) mid: {}".format(mid))
-        return
+		@param data: data to be published
+		@return: None
+		"""
+		self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttSettings['topic_state']))
+		try:
+			pahopub.single(
+				topic=self.mqttSettings['topic_state'],
+				payload=str(data),
+				qos=1,
+				retain=True,
+				hostname=self.mqttSettings['broker'],
+				port=self.mqttSettings['port'],
+				client_id=self.mqttSettings['client']
+			)
+		except Exception as e:
+			self.logger.exception("mqtt: pub exception:\n{}".format(e))
+			pass
+		return
 
-    def on_message(self, client, userdata, msg):
-        if self.bDebug:
-            self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic,
-                                                                                  msg.qos,
-                                                                                  msg.payload))
-        if msg.topic == self.mqttTopicControl and msg.payload in ["TOGGLE", "CLOSE"]:
-        #if msg.topic == self.mqttTopicControl:
-            self.toggle()
-        return
+	def on_connect(self, client, userdata, flags, rc):
+		"""Catch MQTT connection events and subscribe to an MQTT topic for listening
+
+		@param client: the MQTT client to use for subscribing to topics
+		@param userdata: any special user data needed (currently unused but comes with connection call)
+		@param flags: any flags for the connection (unused but comes with automatically)
+		@param rc: result of connection
+		@return: None
+		"""
+		self.logger.info("mqtt: (CONNECTION) received with code {}".format(rc))
+
+		# check connection results
+		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
+		if rc != 0:
+			if rc == -4:
+				self.logger.exception("mqtt: ERROR: 'too many messages'\n")
+			elif rc == -5:
+				self.logger.exception("mqtt: ERROR: 'invalid UTF-8 string'\n")
+			elif rc == -9:
+				self.logger.exception("mqtt: ERROR: 'bad QoS'\n")
+			raise MQTTError("on_connect 'rc' failure")
+
+		# no errors, subscribe to the MQTT topic
+		client.subscribe(self.mqttSettings['mqtt_topic_control'], qos=1)
+		return
+
+	def on_subscribe(self, client, userdata, mid, granted_qos):
+		"""Event handler for when the client attempts to subscribe to a topic
+
+		@param client: the MQTT client that subscribed to a topic
+		@param userdata: any special user data needed (currently unused but comes with automatically)
+		@param mid: results of subscription
+		@param granted_qos: quality of service granted to the connection
+		@return:
+		"""
+		self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
+		return
+
+	def on_publish(self, client, userdata, mid, rc):
+		"""Event handler for when the client attempts to publish to a topic
+
+		@param client: the MQTT client that published
+		@param userdata: any special user data needed (currently unused but comes with automatically)
+		@param mid: result of connection
+		@param rc: result of connection
+		@return: None
+		"""
+		self.logger.debug("mqtt: (PUBLISH) mid: {}".format(mid))
+		return
+
+	def on_message(self, client, userdata, msg):
+		"""Event handler for when client receives a message on the subscribed topic
+
+		@param client: the client that received a message
+		@param userdata: any special user data needed (currently unused but comes with automatically)
+		@param msg: the received message
+		@return:
+		"""
+		self.logger.debug("mqtt: (RX) topic: {}, QOS: {}, payload: {}".format(msg.topic, msg.qos, msg.payload))
+		if msg.topic == self.mqttSettings['topic_control'] and msg.payload in ["TOGGLE", "CLOSE"]:
+			self.toggle()
+		return

@@ -249,7 +249,7 @@ class MqttCamera(object):
 		@param userdata: any special user data needed (currently unused but comes with automatically)
 		@param mid: results of subscription
 		@param granted_qos: quality of service granted to the connection
-		@return:
+		@return: None
 		"""
 		self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
 		return
