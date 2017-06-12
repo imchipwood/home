@@ -171,12 +171,14 @@ class DoorController(object):
 
 		# stdout stream handler
 		ch = logging.StreamHandler()
-		ch.setLevel(loggingLevel)
+		ch.setLevel(logging.DEBUG)
 
 		# stdout logging formatting
 		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
 		stdoutFormatter = logging.Formatter(stdoutFormat)
 		ch.setFormatter(stdoutFormatter)
+		# remove existing handlers then add the new one
+		self.logger.handlers = []
 		self.logger.addHandler(ch)
 
 		# set up file handler logger
