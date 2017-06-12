@@ -31,6 +31,11 @@ class PiCameraController(PiCamera):
 		return
 
 	def parseConfig(self, cfgFile):
+		"""Parse the config file for camera settings
+
+		@param cfgFile:
+		@return: dict of settings
+		"""
 		cameraSettings = {}
 		logFile = None
 
@@ -60,7 +65,12 @@ class PiCameraController(PiCamera):
 		return cameraSettings
 
 	def setupLogging(self, loggingLevel, logFile=None):
+		"""Set up logging stream and file handlers
 
+		@param loggingLevel: logging level as defined by logging package
+		@param logFile: (optional) path for file logging
+		@return: None
+		"""
 		if loggingLevel == logging.DEBUG:
 			val = 'DEBUG'
 		else:
@@ -123,8 +133,6 @@ class PiCameraController(PiCamera):
 
 		# set the ISO based on whether or not the sun is up
 		self.updateCameraISO()
-
-		# self.start_preview()
 		return
 
 	def updateCameraISO(self, iso=None):
