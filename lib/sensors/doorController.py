@@ -384,12 +384,9 @@ class DoorController(object):
 							PushbulletTextNotify(self.pushbullet, text, text)
 
 						if self.camera and self.state and lastDoorState is not None:
+							# create a separate thread for the camera so this loop can continue running while camera operates
 							t = Thread(target=self.cameraLoop, args=[])
 							t.start()
-							# self.camera.capture()
-							#
-							# if self.pushbullet:
-							# 	PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
 
 						lastDoorState = newState
 
@@ -401,6 +398,10 @@ class DoorController(object):
 		return
 
 	def cameraLoop(self):
+		"""loop for camera picture taking - camera may have a delay built in which could cause monitorLoop to stall
+
+		@return: None
+		"""
 		self.camera.capture()
 
 		if self.pushbullet:
