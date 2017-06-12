@@ -401,7 +401,7 @@ class DoorController(object):
 		"""
 		oneHz = 1.0
 		lastOneHzTime = 0
-		lastDoorState = -99
+		lastDoorState = None
 
 		while self.monitor:
 			now = float(timeit.default_timer())
@@ -413,7 +413,6 @@ class DoorController(object):
 					newState = self.getState()
 
 					if newState != lastDoorState:
-						lastDoorState = newState
 						self.state = newState
 						self.logger.debug("monitor state: %s" % (self.state))
 
@@ -421,15 +420,17 @@ class DoorController(object):
 
 						self.publish(self.state)
 
-						if self.pushbullet:
+						if self.pushbullet and lastDoorState is not None:
 							text = "Garage Door {}".format('open' if self.state else 'closed')
 							PushbulletTextNotify(self.pushbullet, text, text)
 
-						if self.camera and self.state:
+						if self.camera and self.state and lastDoorState is not None:
 							self.camera.capture()
 
 							if self.pushbullet:
 								PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
+
+						lastDoorState = newState
 
 				except:
 					self.logger.exception("state exception")
