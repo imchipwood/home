@@ -70,7 +70,7 @@ class DoorController(object):
 		self.mqttSettings, self.gpioSettings, logFile, cameraEnabled, self.pushbullet = self.readConfig(configFile)
 
 		# finish setting up logging
-		self.setupLogging(loggingLevel=loggingLevel, logFile=logFile)
+		self.setupLogging(loggingLevel=debug, logFile=logFile)
 
 		# set up MQTT connections
 		self.clientControl = None
