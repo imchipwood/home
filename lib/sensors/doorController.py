@@ -86,7 +86,6 @@ class DoorController(object):
 
 		self.monitor = True
 		self.monitorThread = Thread(target=self.monitorLoop, args=[])
-		# self.controlThread = Process(target=self.controlLoop, args=[self])
 
 		self.logCurrentSetup()
 		return
@@ -171,17 +170,19 @@ class DoorController(object):
 
 		# stdout stream handler
 		ch = logging.StreamHandler()
-		ch.setLevel(logging.DEBUG)
+		ch.setLevel(loggingLevel)
 
 		# stdout logging formatting
 		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
 		stdoutFormatter = logging.Formatter(stdoutFormat)
 		ch.setFormatter(stdoutFormatter)
+
 		# remove existing handlers then add the new one
 		self.logger.handlers = []
+		print("loggers: {}".format(len(self.logger.handlers)))
 		self.logger.addHandler(ch)
 
-		# set up file handler logger
+		# set up file handler logger - always debug level
 		if logFile:
 			fh = logging.FileHandler(logFile)
 			fh.setLevel(logging.DEBUG)
@@ -247,17 +248,6 @@ class DoorController(object):
 			self.logger.exception("failed to start state thread")
 			self.cleanup()
 			raise
-
-		# sleep(2)
-
-		# # launch control thread
-		# try:
-		# 	self.logger.debug("starting control thread")
-		# 	self.controlThread.start()
-		# except:
-		# 	self.logger.exception("failed to start control thread")
-		# 	self.cleanup()
-		# 	raise
 		
 		return
 
@@ -270,10 +260,6 @@ class DoorController(object):
 
 		try:
 			self.logger.debug("shutting down monitor loop")
-			# self.monitorThread.terminate()
-			# self.monitorThread.loop_stop()
-			# self.monitorThread.unsubscribe(self.mqttSettings['topic_state'])()
-			# self.monitorThread.disconnect()
 			self.monitor = False
 		except Exception as e:
 			self.logger.exception("Exception while shutting down monitor loop: {}".format(e))
@@ -372,28 +358,6 @@ class DoorController(object):
 ###############################################################################
 # looping functions - these two functions are intended to be launched in individual threads
 
-	def controlLoop(self):
-		"""Start the MQTT client
-
-		@return:
-		"""
-		# begin control loop
-		try:
-			self.logger.debug("control loop")
-			# self.clientControl.loop_forever()  # blocking
-			self.clientControl.loop()  # non-blocking
-		except:
-			# clean up in case of emergency
-			try:
-				self.logger.debug("clientControl cleaning up")
-				self.clientControl.loop_stop()
-				self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
-				self.clientControl.disconnect()
-			except:
-				self.logger.exception("clientControl cleanup exception")
-				raise
-		return
-
 	def monitorLoop(self):
 		"""Monitor the door open/closed sensor @1Hz
 
@@ -440,9 +404,6 @@ class DoorController(object):
 
 		self.logger.info("Monitor loop exiting")
 		return
-
-###############################################################################
-# Connection and cleanup functions
 
 ###############################################################################
 # MQTT interaction functions
