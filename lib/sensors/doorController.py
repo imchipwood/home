@@ -22,7 +22,7 @@ from time import sleep
 # from multiprocessing import Process
 from threading import Thread
 from cameraController import PiCameraController
-from lib.services.pushbulletNotify import PushbulletImageNotify
+from lib.services.pushbulletNotify import PushbulletImageNotify, PushbulletTextNotify
 import traceback
 
 # logging junk
@@ -420,6 +420,10 @@ class DoorController(object):
 						# TODO: add ability to configure N.O. vs N.C.
 
 						self.publish(self.state)
+
+						if self.pushbullet:
+							text = "Garage Door {}".format('open' if self.state else 'closed')
+							PushbulletTextNotify(self.pushbullet, text, text)
 
 						if self.camera and self.state:
 							self.camera.capture()
