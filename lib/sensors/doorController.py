@@ -59,6 +59,7 @@ class DoorController(object):
 
 		# handle logging level
 		self.logger = logging.getLogger(__name__)
+		print(str(self.logger))
 		loggingLevel = logging.INFO
 		if debug:
 			loggingLevel = logging.DEBUG
