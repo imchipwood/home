@@ -59,13 +59,12 @@ class DoorController(object):
 
 		# handle logging level
 		self.logger = logging.getLogger(__name__)
-		print(str(self.logger))
-		loggingLevel = logging.INFO
-		if debug:
-			loggingLevel = logging.DEBUG
-
-		# logging level has to be set globally for some reason
-		logging.getLogger().setLevel(loggingLevel)
+		# loggingLevel = logging.INFO
+		# if debug:
+		# 	loggingLevel = logging.DEBUG
+		#
+		# # logging level has to be set globally for some reason
+		# logging.getLogger().setLevel(loggingLevel)
 
 		# read the config file - we need the log file path to finish setting up logging
 		self.mqttSettings, self.gpioSettings, logFile, cameraEnabled, self.pushbullet = self.readConfig(configFile)

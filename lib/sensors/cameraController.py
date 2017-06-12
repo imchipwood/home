@@ -11,13 +11,12 @@ class PiCameraController(PiCamera):
 
 		# handle logging level
 		self.logger = logging.getLogger(__name__)
-		print(str(self.logger))
-		loggingLevel = logging.INFO
-		if debug:
-			loggingLevel = logging.DEBUG
+		# loggingLevel = logging.INFO
+		# if debug:
+		# 	loggingLevel = logging.DEBUG
 
 		# logging level has to be set globally for some reason
-		logging.getLogger().setLevel(loggingLevel)
+		# logging.getLogger().setLevel(loggingLevel)
 
 		# read the config file
 		self.cameraSettings = self.parseConfig(cfgFile=configFile)
@@ -214,10 +213,10 @@ class PiCameraController(PiCamera):
 			output = self.cameraFile
 		self.updateCameraISO()
 		if delay:
-			self.logger.debug("delaying {} seconds before taking photo".format(delay))
+			self.logger.debug("delaying {} seconds before taking picture".format(delay))
 			sleep(delay)
 		elif self.cameraDelay:
-			self.logger.debug("delaying {} seconds before taking photo".format(self.cameraDelay))
+			self.logger.debug("delaying {} seconds before taking picture".format(self.cameraDelay))
 			sleep(self.cameraDelay)
 			
 		super(PiCameraController, self).capture(
@@ -228,4 +227,5 @@ class PiCameraController(PiCamera):
 			splitter_port=splitter_port,
 			**options
 		)
+		self.logger.debug("picture taken")
 		return
