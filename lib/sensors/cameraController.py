@@ -64,14 +64,14 @@ class PiCameraController(PiCamera):
 
 		return cameraSettings
 
-	def setupLogging(self, loggingLevel, logFile=None):
+	def setupLogging(self, loggingLevel=False, logFile=None):
 		"""Set up logging stream and file handlers
 
 		@param loggingLevel: logging level as defined by logging package
 		@param logFile: (optional) path for file logging
 		@return: None
 		"""
-		if loggingLevel == logging.DEBUG:
+		if loggingLevel:
 			val = 'DEBUG'
 		else:
 			val = 'INFO'

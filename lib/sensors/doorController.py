@@ -153,19 +153,17 @@ class DoorController(object):
 
 		return mqttConfig, gpioConfig, logFile, cameraEnabled, pushbullet
 
-	def setupLogging(self, loggingLevel, logFile=None):
+	def setupLogging(self, loggingLevel=False, logFile=None):
 		"""Set up logging stream and file handlers
 
 		@param loggingLevel: logging level as defined by logging package
 		@param logFile: (optional) path for file logging
 		@return: None
 		"""
-		if loggingLevel == logging.DEBUG:
+		if loggingLevel:
 			val = 'DEBUG'
-		elif loggingLevel == logging.INFO:
-			val = 'INFO'
 		else:
-			raise AttributeError("DoorController only supports logging.INFO and logging.DEBUG levels")
+			val = 'INFO'
 		self.logger.info("Logging level: {}".format(val))
 
 		# stdout stream handler
