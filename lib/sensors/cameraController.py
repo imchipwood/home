@@ -9,11 +9,8 @@ class PiCameraController(PiCamera):
 	def __init__(self, configFile, debug=False):
 		PiCamera.__init__(self)
 
-		# handle logging level
+		# initalize logger
 		self.logger = logging.getLogger(__name__)
-		# loggingLevel = logging.INFO
-		# if debug:
-		# 	loggingLevel = logging.DEBUG
 
 		# logging level has to be set globally for some reason
 		logging.getLogger().setLevel(logging.DEBUG)
