@@ -262,7 +262,6 @@ class DoorController(object):
 
 		try:
 			self.logger.debug("shutting down control thread")
-			# self.controlThread.terminate()
 			self.clientControl.loop_stop()
 			self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
 			self.clientControl.disconnect()
@@ -385,10 +384,12 @@ class DoorController(object):
 							PushbulletTextNotify(self.pushbullet, text, text)
 
 						if self.camera and self.state and lastDoorState is not None:
-							self.camera.capture()
-
-							if self.pushbullet:
-								PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
+							t = Thread(target=self.cameraLoop, args=[])
+							t.start()
+							# self.camera.capture()
+							#
+							# if self.pushbullet:
+							# 	PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
 
 						lastDoorState = newState
 
@@ -397,6 +398,13 @@ class DoorController(object):
 					raise
 
 		self.logger.info("Monitor loop exiting")
+		return
+
+	def cameraLoop(self):
+		self.camera.capture()
+
+		if self.pushbullet:
+			PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
 		return
 
 ###############################################################################
