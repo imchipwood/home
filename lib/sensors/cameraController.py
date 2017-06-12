@@ -16,7 +16,7 @@ class PiCameraController(PiCamera):
 		# 	loggingLevel = logging.DEBUG
 
 		# logging level has to be set globally for some reason
-		# logging.getLogger().setLevel(loggingLevel)
+		logging.getLogger().setLevel(logging.DEBUG)
 
 		# read the config file
 		self.cameraSettings = self.parseConfig(cfgFile=configFile)

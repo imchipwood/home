@@ -63,8 +63,8 @@ class DoorController(object):
 		# if debug:
 		# 	loggingLevel = logging.DEBUG
 		#
-		# # logging level has to be set globally for some reason
-		# logging.getLogger().setLevel(loggingLevel)
+		# logging level has to be set globally for some reason
+		logging.getLogger().setLevel(logging.DEBUG)
 
 		# read the config file - we need the log file path to finish setting up logging
 		self.mqttSettings, self.gpioSettings, logFile, cameraEnabled, self.pushbullet = self.readConfig(configFile)
@@ -177,7 +177,6 @@ class DoorController(object):
 
 		# remove existing handlers then add the new one
 		self.logger.handlers = []
-		print("loggers: {}".format(len(self.logger.handlers)))
 		self.logger.addHandler(ch)
 
 		# set up file handler logger - always debug level
