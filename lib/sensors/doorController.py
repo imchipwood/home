@@ -167,7 +167,7 @@ class DoorController(object):
 			val = 'INFO'
 		else:
 			raise AttributeError("DoorController only supports logging.INFO and logging.DEBUG levels")
-		logging.info("Logging level: {}".format(val))
+		self.logger.info("Logging level: {}".format(val))
 
 		# stdout stream handler
 		ch = logging.StreamHandler()

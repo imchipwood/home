@@ -76,7 +76,7 @@ class PiCameraController(PiCamera):
 			val = 'DEBUG'
 		else:
 			val = 'INFO'
-		logging.info("Logging level: {}".format(val))
+		self.logger.info("Logging level: {}".format(val))
 
 		# stdout stream handler
 		ch = logging.StreamHandler()
