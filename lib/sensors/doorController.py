@@ -422,9 +422,9 @@ class DoorController(object):
 						del result[key]
 					except:
 						pass
-				logging.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(result)))
+				logging.info("PushbulletImageNotify Error:\n{}".format(pprint.pformat(result)))
 			else:
-				logging.info("PushbulletTextNotify Success")
+				logging.info("PushbulletImageNotify Success")
 		return
 
 ###############################################################################
