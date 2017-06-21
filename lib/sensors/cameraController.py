@@ -149,7 +149,8 @@ class PiCameraController(PiCamera):
 			sea = ephem.city(self.cameraSettings['city'])
 			sun.compute(sea)
 			twilight = -12 * ephem.degree
-			isDaytime = sun.alt < twilight
+			# isDaytime = sun.alt < twilight
+			isDaytime = sun.alt > twilight
 
 			if 'iso_daytime' in self.cameraSettings.keys():
 				daytimeISO = self.cameraSettings['iso_daytime']
