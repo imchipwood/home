@@ -381,7 +381,10 @@ class DoorController(object):
 
 						if self.pushbullet and lastDoorState is not None:
 							text = "Garage Door {}".format('open' if self.state else 'closed')
-							PushbulletTextNotify(self.pushbullet, text, text)
+							notify = PushbulletTextNotify(self.pushbullet, text, text)
+							result = notify.result
+							logging.info("PushbulletTextNotify result: {}".format(result))
+
 
 						if self.camera and self.state and lastDoorState is not None:
 							# create a separate thread for the camera so this loop can continue running while camera operates
@@ -405,7 +408,9 @@ class DoorController(object):
 		self.camera.capture()
 
 		if self.pushbullet:
-			PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
+			notify = PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
+			result = notify.result
+			logging.info("PushbulletImageNotify result: {}".format(result))
 		return
 
 ###############################################################################
