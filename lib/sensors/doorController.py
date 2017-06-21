@@ -18,6 +18,7 @@ import RPi.GPIO as GPIO
 import paho.mqtt.client as paho
 import paho.mqtt.publish as pahopub
 import timeit
+import pprint
 from time import sleep
 # from multiprocessing import Process
 from threading import Thread
@@ -383,7 +384,12 @@ class DoorController(object):
 							text = "Garage Door {}".format('open' if self.state else 'closed')
 							notify = PushbulletTextNotify(self.pushbullet, text, text)
 							result = notify.result
-							logging.info("PushbulletTextNotify result: {}".format(result))
+							if 'error' in result.keys():
+								for key in ['iden', 'sender_iden', 'receiver_iden']:
+									del result[key]
+								logging.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(result)))
+							else:
+								logging.info("PushbulletTextNotify Success")
 
 
 						if self.camera and self.state and lastDoorState is not None:
@@ -410,7 +416,15 @@ class DoorController(object):
 		if self.pushbullet:
 			notify = PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
 			result = notify.result
-			logging.info("PushbulletImageNotify result: {}".format(result))
+			if 'error' in result.keys():
+				for key in ['iden', 'sender_iden', 'receiver_iden']:
+					try:
+						del result[key]
+					except:
+						pass
+				logging.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(result)))
+			else:
+				logging.info("PushbulletTextNotify Success")
 		return
 
 ###############################################################################
