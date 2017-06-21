@@ -166,7 +166,8 @@ class PiCameraController(PiCamera):
 			if not isDaytime:
 				iso = nighttimeISO
 
-			self.logger.debug("setting camera ISO to {}".format(iso))
+			timeOfDay = "daytime" if isDaytime else "nighttime"
+			self.logger.debug("currently {} - setting camera ISO to {}".format(timeOfDay, iso))
 			self.iso = iso
 		elif 'iso' in self.cameraSettings.keys():
 			self.iso = self.cameraSettings['iso']
