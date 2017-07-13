@@ -218,8 +218,7 @@ class PiCameraController(PiCamera):
 			self.logger.debug("delaying {} seconds before taking picture".format(self.cameraDelay))
 			sleep(self.cameraDelay)
 
-		self.capture(
-		# super(PiCameraController, self).capture(
+		super(PiCameraController, self).capture(
 			output=output,
 			format=format,
 			use_video_port=use_video_port,
