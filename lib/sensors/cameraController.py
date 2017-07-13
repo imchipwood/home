@@ -25,7 +25,7 @@ class PiCameraController(PiCamera):
 		self.cameraFile = None
 		self.cameraDelay = None
 		self.cameraSetup(self.cameraSettings)
-		self.logger.debug("It is currently {}".format("daytime" if self.isDaytime() else "nighttime"))
+		self.logCurrentSetup()
 		return
 
 	def parseConfig(self, cfgFile):
@@ -95,6 +95,16 @@ class PiCameraController(PiCamera):
 			fileFormatter = logging.Formatter(fileFormat)
 			fh.setFormatter(fileFormatter)
 			self.logger.addHandler(fh)
+		return
+
+	def logCurrentSetup(self):
+		self.logger.debug("\n----------------------------------------")
+		s = ''
+		for key, val in self.cameraSettings.items():
+			s += '{}: {}\n'.format(key, val)
+		self.logger.debug("\nCamera Settings:\n{}".format(s))
+		self.logger.debug("It is currently {}".format("daytime" if self.isDaytime() else "nighttime"))
+		self.logger.debug("----------------------------------------\n")
 		return
 
 	def cameraSetup(self, settings):
