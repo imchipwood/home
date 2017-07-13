@@ -382,8 +382,10 @@ class DoorController(object):
 						self.logger.debug("monitor state: %s" % (self.state))
 
 						# TODO: add ability to configure N.O. vs N.C.
-
-						self.publish(self.state)
+						try:
+							self.publish(self.state)
+						except:
+							pass
 
 						if self.pushbullet and lastDoorState is not None:
 							text = "Garage Door {}".format('open' if self.state else 'closed')
