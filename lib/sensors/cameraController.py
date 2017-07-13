@@ -25,6 +25,7 @@ class PiCameraController(PiCamera):
 		self.cameraFile = None
 		self.cameraDelay = None
 		self.cameraSetup(self.cameraSettings)
+		self.logger.debug("It is currently {}".format("daytime" if self.isDaytime() else "nighttime"))
 		return
 
 	def parseConfig(self, cfgFile):
