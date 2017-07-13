@@ -379,13 +379,13 @@ class DoorController(object):
 
 					if newState != lastDoorState:
 						self.state = newState
-						self.logger.debug("monitor state: %s" % (self.state))
+						self.logger.debug("monitor state: {}".format(self.state))
 
 						# TODO: add ability to configure N.O. vs N.C.
 						try:
 							self.publish(self.state)
 						except:
-							logging.exception("door state publish failed")
+							self.logger.exception("door state publish failed")
 							pass
 
 						if self.pushbullet and lastDoorState is not None:
