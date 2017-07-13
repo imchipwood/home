@@ -35,7 +35,6 @@ class PiCameraController(PiCamera):
 		@return: dict of settings
 		"""
 		cameraSettings = {}
-		logFile = None
 
 		with open(cfgFile, 'r') as inf:
 			lines = inf.readlines()
@@ -103,7 +102,8 @@ class PiCameraController(PiCamera):
 		for key, val in self.cameraSettings.items():
 			s += '{}: {}\n'.format(key, val)
 		self.logger.debug("\nCamera Settings:\n{}".format(s))
-		self.logger.debug("It is currently {}".format("daytime" if self.isDaytime() else "nighttime"))
+		isDaytime = self.isDaytime(self.cameraSettings['city'])
+		self.logger.debug("It is currently {}".format("daytime" if isDaytime else "nighttime"))
 		self.logger.debug("----------------------------------------\n")
 		return
 
