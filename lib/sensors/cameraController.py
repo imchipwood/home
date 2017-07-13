@@ -1,7 +1,7 @@
 import logging
 import traceback
 import ephem
-from time import sleep
+import time
 from picamera import PiCamera
 
 
@@ -132,6 +132,26 @@ class PiCameraController(PiCamera):
 		self.updateCameraISO()
 		return
 
+	def isDaytime(self, city=None):
+		isDaytime = True
+
+		if city:
+			self.logger.debug("using ephem package for daytime calculation")
+			sun = ephem.Sun()
+			city = ephem.city(city)
+			sun.compute(city)
+			twilight = -12 * ephem.degree
+			isDaytime = sun.alt < twilight
+
+		else:
+			self.logger.debug("using time.asctime() for daytime calculation")
+			currentTime = time.asctime().split(' ')[-2]
+			hour, minute, second = currentTime.split(':')
+			hour = int(hour)
+			if 6 > hour > 19:
+				isDaytime = False
+		return isDaytime
+
 	def updateCameraISO(self, iso=None):
 		"""Update the camera ISO. Supports daytime/nighttime ISO values set up in the cameraSettings dict,
 		directly specifying the ISO as a function argument, or an ISO key in the cameraSettingsDict.
@@ -144,14 +164,11 @@ class PiCameraController(PiCamera):
 		"""
 		if iso:
 			self.iso = iso
-		elif 'city' in self.cameraSettings.keys():
-			sun = ephem.Sun()
-			sea = ephem.city(self.cameraSettings['city'])
-			sun.compute(sea)
-			twilight = -12 * ephem.degree
-			# isDaytime = sun.alt < twilight
-			isDaytime = sun.alt > twilight
 
+		elif 'iso' in self.cameraSettings.keys():
+			self.iso = self.cameraSettings['iso']
+
+		else:
 			if 'iso_daytime' in self.cameraSettings.keys():
 				daytimeISO = self.cameraSettings['iso_daytime']
 			else:
@@ -163,16 +180,14 @@ class PiCameraController(PiCamera):
 				nighttimeISO = 800
 
 			iso = daytimeISO
+			isDaytime = self.isDaytime(self.cameraSettings['city'])
 			if not isDaytime:
 				iso = nighttimeISO
 
 			timeOfDay = "daytime" if isDaytime else "nighttime"
 			self.logger.debug("currently {} - setting camera ISO to {}".format(timeOfDay, iso))
 			self.iso = iso
-		elif 'iso' in self.cameraSettings.keys():
-			self.iso = self.cameraSettings['iso']
-		else:
-			self.logger.info("no 'city' or 'iso' found in config file, leaving ISO as default")
+
 		return
 
 	def cleanup(self):
@@ -213,10 +228,10 @@ class PiCameraController(PiCamera):
 		self.updateCameraISO()
 		if delay:
 			self.logger.debug("delaying {} seconds before taking picture".format(delay))
-			sleep(delay)
+			time.sleep(delay)
 		elif self.cameraDelay:
 			self.logger.debug("delaying {} seconds before taking picture".format(self.cameraDelay))
-			sleep(self.cameraDelay)
+			time.sleep(self.cameraDelay)
 
 		super(PiCameraController, self).capture(
 			output=output,
