@@ -57,6 +57,7 @@ class DoorController(object):
 		# DoorController.__init__(self)
 		super(DoorController, self).__init__()
 		self.state = None
+		self.mqttEnabled = True
 
 		# initalize logger
 		self.logger = logging.getLogger(__name__)
@@ -236,6 +237,7 @@ class DoorController(object):
 		except:
 			# if mqtt fails to set up, that's OK, we can at least monitor the door
 			logging.exception("door control loop failed to initialize - will not be able to control door")
+			self.mqttEnabled = False
 			pass
 
 		sleep(2)
@@ -383,7 +385,8 @@ class DoorController(object):
 
 						# TODO: add ability to configure N.O. vs N.C.
 						try:
-							self.publish(self.state)
+							if self.mqttEnabled:
+								self.publish(self.state)
 						except:
 							self.logger.exception("door state publish failed")
 							pass
