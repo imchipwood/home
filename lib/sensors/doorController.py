@@ -385,6 +385,7 @@ class DoorController(object):
 						try:
 							self.publish(self.state)
 						except:
+							logging.exception("door state publish failed")
 							pass
 
 						if self.pushbullet and lastDoorState is not None:
