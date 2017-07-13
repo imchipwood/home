@@ -234,7 +234,8 @@ class DoorController(object):
 		try:
 			self.setupMQTT()
 		except:
-			# if mqtt fails to set up, that's OK, we can keep monitoring the door anyway
+			# if mqtt fails to set up, that's OK, we can at least monitor the door
+			logging.exception("door control loop failed to initialize - will not be able to control door")
 			pass
 
 		sleep(2)
@@ -394,7 +395,6 @@ class DoorController(object):
 								logging.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(result)))
 							else:
 								logging.info("PushbulletTextNotify Success")
-
 
 						if self.camera and self.state and lastDoorState is not None:
 							# create a separate thread for the camera so this loop can continue running while camera operates
