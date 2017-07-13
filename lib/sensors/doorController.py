@@ -231,7 +231,11 @@ class DoorController(object):
 		"""
 
 		# begin control loop
-		self.setupMQTT()
+		try:
+			self.setupMQTT()
+		except:
+			# if mqtt fails to set up, that's OK, we can keep monitoring the door anyway
+			pass
 
 		sleep(2)
 
