@@ -2,6 +2,8 @@ import logging
 import traceback
 import ephem
 import time
+import os
+
 from picamera import PiCamera
 
 
@@ -236,6 +238,10 @@ class PiCameraController(PiCamera):
 		"""
 		if not output:
 			output = self.cameraFile
+
+		if os.path.exists(self.cameraFile):
+			os.remove(self.cameraFile)
+
 		self.updateCameraISO()
 		if delay:
 			self.logger.debug("delaying {} seconds before taking picture".format(delay))
