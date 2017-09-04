@@ -171,6 +171,8 @@ def main():
 		logging.debug("Final data:")
 		logging.debug("Temperature: {0:0.1f}".format(fTemperature))
 		logging.debug("Humidity:    {0:0.1f}".format(fHumidity))
+		dataDict = {"temperature": fTemperature, "humidity": fHumidity}
+		logData(dConfig["log"], dataDict, None, None)
 
 		# Send data to server
 		if checkLimits(fTemperature, fHumidity):
