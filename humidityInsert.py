@@ -12,12 +12,10 @@ from lib.sensors.sensor_humidity import SensorHumidity
 
 def on_connect(client, userdata, flags, rc):
 	logging.info("CONNACK received with code %d." % (rc))
-	return
 
 
 def on_publish(client, userdata, mid):
 	logging.info("mid: "+str(mid))
-	return
 
 
 def checkLimits(temperature, humidity):
@@ -79,7 +77,6 @@ def printData(i, temperature, humidity):
 		humidity
 		)
 	)
-	return
 
 
 # read config file
@@ -125,7 +122,6 @@ def logData(f, data, mqtt_rc, mqtt_mid):
 		fileMode = "w"
 	with open(f, fileMode) as ouf:
 		ouf.write(sLog)
-	return
 
 
 def main():
@@ -205,7 +201,8 @@ def main():
 				dataDict = {"humidity": fHumidity}
 				logData(dConfig["log"], dataDict, rc, mid)
 			except:
-				raise
+				logging.debug("some MQTT failure. Ignoring")
+				pass
 		else:
 			logging.warning("Temperature failed limit check")
 		
@@ -220,11 +217,13 @@ def main():
 
 	finally:
 		logging.debug("cleaning up")
-		client.loop_stop()
-		client.unsubscribe(dConfig["mqtt_topic_t"])
-		client.unsubscribe(dConfig["mqtt_topic_h"])
-		client.disconnect()
-	return True
+		try:
+			client.loop_stop()
+			client.unsubscribe(dConfig["mqtt_topic_t"])
+			client.unsubscribe(dConfig["mqtt_topic_h"])
+			client.disconnect()
+		except:
+			pass
 
 
 if __name__ == "__main__":
