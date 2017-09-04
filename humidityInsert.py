@@ -142,6 +142,8 @@ def main():
 
 	dConfig = readConfig(sConfigFile)
 
+	client = paho.Client(client_id=dConfig["mqtt_client"])
+
 	logging.debug("mqtt info:")
 	logging.debug("mqtt_client_id: {}".format(dConfig["mqtt_client"]))
 	logging.debug("mqtt_broker:	   {}".format(dConfig["mqtt_broker"]))
@@ -179,7 +181,6 @@ def main():
 			try:
 				# connect to MQTT broker
 				logging.debug("Connecting to MQTT broker")
-				client = paho.Client(client_id=dConfig["mqtt_client"])
 				client.on_connect = on_connect
 				client.on_publish = on_publish
 				client.connect(host=dConfig["mqtt_broker"], port=dConfig["mqtt_port"], keepalive=10)
