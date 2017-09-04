@@ -106,15 +106,28 @@ def readConfig(f):
 
 def logData(f, data, mqtt_rc, mqtt_mid):
 	logging.debug("Logging to file: {}".format(f))
+
 	# construct log line
 	st = datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
-	sLog = "{} - {}: {}, RC: {}, mid: {}\n".format(
-		st,
-		data.keys()[0],
-		data[data.keys()[0]],
-		mqtt_rc,
-		mqtt_mid
-	)
+
+	# dict
+	dataStr = ""
+	for key, value in data.items():
+		dataStr += "{}: {},".format(key, value)
+	dataStr = dataStr[:-1]
+
+	if mqtt_rc or mqtt_mid:
+		sLog = "{} - RC: {}, mid: {}, {}\n".format(
+			st,
+			mqtt_rc,
+			mqtt_mid,
+			dataStr
+		)
+	else:
+		sLog = "{} - {}\n".format(
+			st,
+			dataStr
+		)
 	logging.debug("log data:\n-d- {}".format(sLog))
 	# write to file
 	fileMode = "a"
