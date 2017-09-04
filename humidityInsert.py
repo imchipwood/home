@@ -113,8 +113,8 @@ def logData(f, data, mqtt_rc, mqtt_mid):
 	# dict
 	dataStr = ""
 	for key, value in data.items():
-		dataStr += "{}: {},".format(key, value)
-	dataStr = dataStr[:-1]
+		dataStr += "{}: {:06.2f}, ".format(key, value)
+	dataStr = dataStr[:-2]
 
 	if mqtt_rc or mqtt_mid:
 		sLog = "{} - RC: {}, mid: {}, {}\n".format(
