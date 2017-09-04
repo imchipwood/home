@@ -21,9 +21,31 @@ def on_publish(client, userdata, mid):
 
 
 def checkLimits(temperature, humidity):
-	if -20 <= temperature <= 150 and 0 <= humidity <= 100:
-		return True
-	return False
+	tempLowLimit = -2
+	tempHighLimit = 150
+	tempGood = False
+	if tempLowLimit <= temperature <= tempHighLimit:
+		tempGood = True
+	else:
+		logging.info(
+			"Temperature outside of limits (low:{}, high:{})".format(
+				tempLowLimit, tempHighLimit
+			)
+		)
+
+	humidLowLimit = 0
+	humidHighLimit = 100
+	humidGood = False
+	if humidLowLimit <= humidity <= humidHighLimit:
+		humidGood = True
+	else:
+		logging.info(
+			"Humidity outside of limits (low:{}, high:{})".format(
+				humidLowLimit, humidHighLimit
+			)
+		)
+
+	return tempGood & humidGood
 
 
 def parseArgs():
@@ -120,14 +142,6 @@ def main():
 
 	dConfig = readConfig(sConfigFile)
 
-	# connect to MQTT broker
-	client = paho.Client(client_id=dConfig["mqtt_client"])
-	client.on_connect = on_connect
-	client.on_publish = on_publish
-	client.connect(host=dConfig["mqtt_broker"], port=dConfig["mqtt_port"], keepalive=10)
-	client.loop_start()
-	sleep(3)
-
 	logging.debug("mqtt info:")
 	logging.debug("mqtt_client_id: {}".format(dConfig["mqtt_client"]))
 	logging.debug("mqtt_broker:	   {}".format(dConfig["mqtt_broker"]))
@@ -163,6 +177,15 @@ def main():
 		# Send data to server
 		if checkLimits(fTemperature, fHumidity):
 			try:
+				# connect to MQTT broker
+				logging.debug("Connecting to MQTT broker")
+				client = paho.Client(client_id=dConfig["mqtt_client"])
+				client.on_connect = on_connect
+				client.on_publish = on_publish
+				client.connect(host=dConfig["mqtt_broker"], port=dConfig["mqtt_port"], keepalive=10)
+				client.loop_start()
+				sleep(3)
+
 				(rc, mid) = client.publish(
 					dConfig["mqtt_topic_t"],
 					"{0:0.1f}".format(fTemperature),
@@ -182,6 +205,8 @@ def main():
 				logData(dConfig["log"], dataDict, rc, mid)
 			except:
 				raise
+		else:
+			logging.warning("Temperature failed limit check")
 		
 	except KeyboardInterrupt:
 		logging.info("KeyboardInterrupt, exiting gracefully")
