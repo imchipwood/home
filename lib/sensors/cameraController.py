@@ -154,7 +154,7 @@ class PiCameraController(PiCamera):
 			city = ephem.city(city)
 			sun.compute(city)
 			twilight = -12 * ephem.degree
-			isDaytime = sun.alt < twilight
+			isDaytime = sun.alt > twilight
 
 		else:
 			self.logger.debug("using time.asctime() for daytime calculation")
