@@ -28,8 +28,7 @@ class PiCameraController(PiCamera):
 		self.cameraDelay = None
 		self.cameraSetup(self.cameraSettings)
 		self.logCurrentSetup()
-		return
-
+		
 	def parseConfig(self, cfgFile):
 		"""Parse the config file for camera settings
 
@@ -96,7 +95,6 @@ class PiCameraController(PiCamera):
 			fileFormatter = logging.Formatter(fileFormat)
 			fh.setFormatter(fileFormatter)
 			self.logger.addHandler(fh)
-		return
 
 	def logCurrentSetup(self):
 		self.logger.debug("\n----------------------------------------")
@@ -107,7 +105,6 @@ class PiCameraController(PiCamera):
 		isDaytime = self.isDaytime(self.cameraSettings['city'])
 		self.logger.debug("It is currently {}".format("daytime" if isDaytime else "nighttime"))
 		self.logger.debug("----------------------------------------\n")
-		return
 
 	def cameraSetup(self, settings):
 		"""Set up the PiCamera based on settings found in config file
@@ -143,8 +140,7 @@ class PiCameraController(PiCamera):
 
 		# set the ISO based on whether or not the sun is up
 		self.updateCameraISO()
-		return
-
+		
 	def isDaytime(self, city=None):
 		isDaytime = True
 
@@ -201,8 +197,7 @@ class PiCameraController(PiCamera):
 			self.logger.debug("currently {} - setting camera ISO to {}".format(timeOfDay, iso))
 			self.iso = iso
 
-		return
-
+		
 	def cleanup(self):
 		"""Attempt to gracefully exit the program
 
@@ -219,8 +214,7 @@ class PiCameraController(PiCamera):
 			traceback.print_exc()
 			pass
 
-		return
-
+		
 	def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
 		"""slight modification on built-in capture function to allow not specifying an output and updating camera ISO
 		on the fly based on time of day
@@ -259,4 +253,4 @@ class PiCameraController(PiCamera):
 			**options
 		)
 		self.logger.debug("picture taken")
-		return
+		

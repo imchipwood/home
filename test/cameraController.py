@@ -15,7 +15,6 @@ def test():
 	print("Capturing image: {}".format(camera.cameraFile))
 	camera.capture()
 
-	return
-
+	
 if __name__ == '__main__':
 	test()

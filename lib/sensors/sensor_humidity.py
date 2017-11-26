@@ -40,8 +40,7 @@ class SensorHumidity(Sensor):
 		self.pin = pin
 		# units
 		self.setUnits(units)
-		return
-
+		
 ###############################################################################
 
 	"""Take readings
@@ -62,8 +61,7 @@ class SensorHumidity(Sensor):
 				self.temperature = -999
 			if hum is not None:
 				self.humidity = hum
-		return
-
+		
 ###############################################################################
 
 	"""Get last Humidity reading
@@ -119,8 +117,7 @@ class SensorHumidity(Sensor):
 		else:
 			sException = "Valid units: [{}]".format("|".join(self.validUnits))
 			raise SensorException(sException)
-		return
-
+		
 ###############################################################################
 
 	"""Get sensor type

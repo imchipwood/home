@@ -63,7 +63,6 @@ class MqttCamera(object):
 		self.setupCamera()
 
 		self.clientControl = None
-		return
 	
 	def setupCamera(self):
 		"""Set up the PiCamera based on settings found in config file
@@ -98,7 +97,6 @@ class MqttCamera(object):
 		self.updateCameraISO()
 		
 		self.camera.start_preview()
-		return
 
 	def updateCameraISO(self):
 		sun = ephem.Sun()
@@ -123,7 +121,6 @@ class MqttCamera(object):
 
 		self.logger.debug("setting camera ISO to {}".format(iso))
 		self.camera.iso = iso
-		return
 
 	def parseConfig(self, cfgFile):
 		"""Parse a config file for relevant camera, MQTT, and logging info
@@ -190,8 +187,6 @@ class MqttCamera(object):
 		except:
 			pass
 
-		return
-
 	def start(self):
 		"""Start threads
 
@@ -211,7 +206,6 @@ class MqttCamera(object):
 			self.logger.exception("failed to start control thread")
 			self.cleanup()
 			raise
-		return
 
 	###############################################################################
 	# MQTT interaction functions
@@ -240,7 +234,6 @@ class MqttCamera(object):
 
 		# no errors, subscribe to the MQTT topic
 		client.subscribe(self.mqttSettings['mqtt_topic_control'], qos=1)
-		return
 
 	def on_subscribe(self, client, userdata, mid, granted_qos):
 		"""Event handler for when the client attempts to subscribe to a topic
@@ -252,7 +245,6 @@ class MqttCamera(object):
 		@return: None
 		"""
 		self.logger.debug("mqtt: (SUBSCRIBE) mid: {}, granted_qos: {}".format(mid, granted_qos))
-		return
 
 	def on_message(self, client, userdata, msg):
 		"""Event handler for when client receives a message on the subscribed topic
@@ -287,5 +279,3 @@ class MqttCamera(object):
 				self.logger.info("sending notification")
 				PushbulletImageNotify(self.pushbulletSettings['pushbullet_api'], self.cameraFile)
 				self.logger.info("notification sent")
-
-		return

@@ -17,8 +17,7 @@ def main():
                                                               "msg": "Notification"})
     else:
         print "code not right. {}".format(code)
-    return
-
+    
 
 def getConfig(f):
     with open(f, "r") as inf:

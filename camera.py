@@ -50,7 +50,5 @@ def main():
 	finally:
 		camera.cleanup()
 
-	return
-
 if __name__ == '__main__':
 	main()

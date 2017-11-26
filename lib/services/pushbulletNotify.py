@@ -10,11 +10,10 @@ class PushbulletImageNotify(Pushbullet):
 		with open(filepath, 'rb') as pic:
 			filedata = self.upload_file(pic, filename)
 		self.result = self.push_file(**filedata)
-		return
-
+		
 
 class PushbulletTextNotify(Pushbullet):
 	def __init__(self, apikey, titletext, messagetext):
 		Pushbullet.__init__(self, apikey)
 		self.result = self.push_note(titletext, messagetext)
-		return
+		

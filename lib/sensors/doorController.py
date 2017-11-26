@@ -87,8 +87,7 @@ class DoorController(object):
 		self.monitorThread = Thread(target=self.monitorLoop, args=[])
 
 		self.logCurrentSetup()
-		return
-
+		
 	def readConfig(self, configFile):
 		"""Read the config file for MQTT, GPIO, and logging setup
 
@@ -188,8 +187,7 @@ class DoorController(object):
 			fileFormatter = logging.Formatter(fileFormat)
 			fh.setFormatter(fileFormatter)
 			self.logger.addHandler(fh)
-		return
-
+		
 	def logCurrentSetup(self):
 		"""Write the current setup to the debug stream
 
@@ -217,8 +215,7 @@ class DoorController(object):
 
 		self.logger.debug("----------------------------------------\n")
 
-		return
-
+		
 ###############################################################################
 
 	'''Start the state monitoring and control threads
@@ -251,8 +248,7 @@ class DoorController(object):
 			self.cleanup()
 			raise
 		
-		return
-
+		
 	def cleanup(self):
 		"""Clean up all threads and GPIO
 
@@ -295,8 +291,7 @@ class DoorController(object):
 				traceback.print_exc()
 				pass
 
-		return
-
+		
 ###############################################################################
 # GPIO interactions
 
@@ -316,8 +311,7 @@ class DoorController(object):
 		GPIO.setup(self.gpioSettings['pin_control'], GPIO.OUT)
 		# ensure control output is LOW
 		self.off()
-		return
-
+		
 	def on(self):
 		"""set GPIO output HIGH for control pin
 
@@ -325,8 +319,7 @@ class DoorController(object):
 		"""
 		self.logger.debug("control - on")
 		GPIO.output(self.gpioSettings['pin_control'], GPIO.HIGH)
-		return
-
+		
 	def off(self):
 		"""set GPIO output LOW for control pin
 
@@ -334,8 +327,7 @@ class DoorController(object):
 		"""
 		self.logger.debug("control - off")
 		GPIO.output(self.gpioSettings['pin_control'], GPIO.LOW)
-		return
-
+		
 	def toggle(self):
 		"""toggle GPIO relay
 
@@ -347,8 +339,7 @@ class DoorController(object):
 		else:
 			sleep(0.3)
 		self.off()
-		return
-
+		
 	def getState(self):
 		"""Get current state of GPIO input pin
 
@@ -414,8 +405,7 @@ class DoorController(object):
 					raise
 
 		self.logger.info("Monitor loop exiting")
-		return
-
+		
 	def cameraLoop(self):
 		"""loop for camera picture taking - camera may have a delay built in which could cause monitorLoop to stall
 
@@ -435,8 +425,7 @@ class DoorController(object):
 				logging.info("PushbulletImageNotify Error:\n{}".format(pprint.pformat(result)))
 			else:
 				logging.info("PushbulletImageNotify Success")
-		return
-
+		
 ###############################################################################
 # MQTT interaction functions
 
@@ -461,8 +450,7 @@ class DoorController(object):
 			self.logger.exception("Exception while setting up MQTT client: {}".format(e))
 			traceback.print_exc()
 			raise
-		return
-
+		
 	def publish(self, data):
 		"""Publish data to MQTT state topic
 
@@ -483,8 +471,7 @@ class DoorController(object):
 		except Exception as e:
 			self.logger.exception("mqtt: pub exception:\n{}".format(e))
 			pass
-		return
-
+		
 	def on_connect(self, client, userdata, flags, rc):
 		"""Catch MQTT connection events and subscribe to an MQTT topic for listening
 
@@ -510,8 +497,7 @@ class DoorController(object):
 		# no errors, subscribe to the MQTT topic
 		self.logger.info("subscribing to topic: {}".format(self.mqttSettings['topic_control']))
 		client.subscribe(self.mqttSettings['topic_control'], qos=1)
-		return
-
+		
 	def on_subscribe(self, client, userdata, mid, granted_qos):
 		"""Event handler for when the client attempts to subscribe to a topic
 
@@ -522,8 +508,7 @@ class DoorController(object):
 		@return:
 		"""
 		self.logger.debug("mqtt: (SUBSCRIBE) client: {}, mid: {}, granted_qos: {}".format(client, mid, granted_qos))
-		return
-
+		
 	def on_publish(self, client, userdata, mid, rc):
 		"""Event handler for when the client attempts to publish to a topic
 
@@ -534,8 +519,7 @@ class DoorController(object):
 		@return: None
 		"""
 		self.logger.debug("mqtt: (PUBLISH) client: {}, mid: {}".format(client, mid))
-		return
-
+		
 	def on_message(self, client, userdata, msg):
 		"""Event handler for when client receives a message on the subscribed topic
 
@@ -547,4 +531,4 @@ class DoorController(object):
 		self.logger.debug("mqtt: (MESSAGE) client: {}, topic: {}, QOS: {}, payload: {}".format(client, msg.topic, msg.qos, msg.payload))
 		if msg.topic == self.mqttSettings['topic_control'] and msg.payload in ["TOGGLE", "CLOSE"]:
 			self.toggle()
-		return
+		
