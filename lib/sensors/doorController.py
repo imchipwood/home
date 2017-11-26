@@ -1,4 +1,4 @@
-'''Threaded MQTT Door Control and State Monitoring
+"""Threaded MQTT Door Control and State Monitoring
 
 Chip Wood, Jan. 2017
 
@@ -12,7 +12,7 @@ The published states are "open" and "closed".
 A separate control MQTT client thread subscribes to the control topic and
 toggles the GPIO when a message is published with the payload of "TOGGLE".
 It does not respond to any other messages.
-'''
+"""
 import logging
 import RPi.GPIO as GPIO
 import paho.mqtt.client as paho
