@@ -1,6 +1,5 @@
 paho-mqtt==1.2
 RPi.GPIO==0.6.3
 picamera==1.13
-MySQL-python==1.2.3
 pushbullet==0.10.0
 pyephem==3.7.6.0
