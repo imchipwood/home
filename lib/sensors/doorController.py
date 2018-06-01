@@ -384,14 +384,19 @@ class DoorController(object):
 
 						if self.pushbullet and lastDoorState is not None:
 							text = "Garage Door {}".format('open' if self.state else 'closed')
-							notify = PushbulletTextNotify(self.pushbullet, text, text)
-							result = notify.result
-							if 'error' in result.keys():
-								for key in ['iden', 'sender_iden', 'receiver_iden']:
-									del result[key]
-								logging.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(result)))
+							if not self.state:
+								# Don't send notification on opening, let the camera thread handle that.
+								# Only get 500 free notifications per month with pushbullet!
+								notify = PushbulletTextNotify(self.pushbullet, text, text)
+								result = notify.result
+								if 'error' in result.keys():
+									for key in ['iden', 'sender_iden', 'receiver_iden']:
+										del result[key]
+									logging.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(result)))
+								else:
+									logging.info("PushbulletTextNotify Success")
 							else:
-								logging.info("PushbulletTextNotify Success")
+								logging.info("Door Opened, skipping text notify")
 
 						if self.camera and self.state and lastDoorState is not None:
 							# create a separate thread for the camera so this loop can continue running while camera operates
