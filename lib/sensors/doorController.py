@@ -87,6 +87,10 @@ class DoorController(object):
 		self.monitorThread = Thread(target=self.monitorLoop, args=[])
 
 		self.logCurrentSetup()
+
+	@property
+	def open(self):
+		return self.state
 		
 	def readConfig(self, configFile):
 		"""Read the config file for MQTT, GPIO, and logging setup
@@ -380,12 +384,11 @@ class DoorController(object):
 								self.publish(self.state)
 						except:
 							self.logger.exception("door state publish failed")
-							pass
 
 						if self.pushbullet and lastDoorState is not None:
 
 							# Only send text notification on closing - only have 500 notifications per month!g
-							if self.state:
+							if not self.open:
 								text = "Garage Door {}".format('open' if self.state else 'closed')
 								notify = PushbulletTextNotify(self.pushbullet, text, text)
 								result = notify.result
@@ -398,7 +401,7 @@ class DoorController(object):
 							else:
 								logging.info("Door opened, not sending notification")
 
-						if self.camera and self.state and lastDoorState is not None:
+						if self.camera and self.open and lastDoorState is not None:
 							# create a separate thread for the camera so this loop can continue running while camera operates
 							t = Thread(target=self.cameraLoop, args=[])
 							t.start()
