@@ -52,13 +52,49 @@ class CameraConfig(object):
 		return self.config.get(self.ConfigKeys.SETTINGS, {})
 
 	@property
+	def brightness(self):
+		"""
+		@rtype: int
+		"""
+		return self.settings.get(self.ConfigKeys.SETTINGS_BRIGHTNESS, 50)
+
+	@property
+	def contrast(self):
+		"""
+		@rtype: int
+		"""
+		return self.settings.get(self.ConfigKeys.SETTINGS_CONTRAST, 0)
+
+	@property
+	def rotation(self):
+		"""
+		@rtype: int
+		"""
+		return self.settings.get(self.ConfigKeys.SETTINGS_ROTATION, 180)
+
+	@property
+	def resolution(self):
+		"""
+		@rtype: list(int)
+		"""
+		return self.settings.get(self.ConfigKeys.SETTINGS_RESOLUTION, [3280, 2464])
+
+	@property
+	def captureDelay(self):
+		"""
+		@rtype: float
+		"""
+		return self.settings.get(self.ConfigKeys.SETTINGS_DELAY, 10.0)
+
+	@property
 	def iso(self):
 		"""
 		Calculate the ISO based on whether or not it's nighttime
 		@rtype: int
 		"""
 		sun = ephem.Sun()
-		sea = ephem.city(self.settings.get(self.ConfigKeys.LOCATION, {}).get(self.ConfigKeys.LOCATION_CITY, "Seattle"))
+		city = self.config.get(self.ConfigKeys.LOCATION, {}).get(self.ConfigKeys.LOCATION_CITY, "Seattle")
+		sea = ephem.city(city)
 		sun.compute(sea)
 		# twilight = -12 * ephem.degree
 		# daytime = sun.alt < twilight
@@ -78,7 +114,7 @@ class CameraConfig(object):
 		"""
 		@rtype: str
 		"""
-		return self.settings.get(self.ConfigKeys.CAPTURE_PATH, "")
+		return self.config.get(self.ConfigKeys.CAPTURE_PATH, "")
 
 	@property
 	def log(self):
@@ -114,6 +150,10 @@ if __name__ == "__main__":
 	config = CameraConfig(confFile)
 	print(config)
 	print(config.iso)
+	print(config.brightness)
+	print(config.contrast)
+	print(config.captureDelay)
+	print(config.capturePath)
 	# print(json.dumps(config.mqtt, indent=2))
 	# print(json.dumps(config.gpio, indent=2))
 	print(config.log)
