@@ -386,7 +386,6 @@ class DoorController(object):
 							self.logger.exception("door state publish failed")
 
 						if self.pushbullet and lastDoorState is not None:
-
 							# Only send text notification on closing - only have 500 notifications per month!g
 							if not self.open:
 								text = "Garage Door {}".format('open' if self.state else 'closed')
@@ -399,7 +398,7 @@ class DoorController(object):
 								else:
 									logging.info("PushbulletTextNotify Success")
 							else:
-								logging.info("Door opened, not sending notification")
+								logging.info("Door Opened, skipping text notify")
 
 						if self.camera and self.open and lastDoorState is not None:
 							# create a separate thread for the camera so this loop can continue running while camera operates
