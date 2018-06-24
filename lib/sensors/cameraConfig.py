@@ -1,4 +1,5 @@
 import json
+import ephem
 
 
 class CameraConfig(object):
@@ -15,7 +16,7 @@ class CameraConfig(object):
 		LOCATION = "location"
 		LOCATION_CITY = "city"
 		CAPTURE_PATH = "capture_path"
-		LOG = "log"
+		LOG_PATH = "log"
 
 	def __init__(self, configPath, debug=False):
 		"""
@@ -51,6 +52,35 @@ class CameraConfig(object):
 		return self.config.get(self.ConfigKeys.SETTINGS, {})
 
 	@property
+	def iso(self):
+		"""
+		Calculate the ISO based on whether or not it's nighttime
+		@rtype: int
+		"""
+		sun = ephem.Sun()
+		sea = ephem.city(self.settings.get(self.ConfigKeys.LOCATION, {}).get(self.ConfigKeys.LOCATION_CITY, "Seattle"))
+		sun.compute(sea)
+		# twilight = -12 * ephem.degree
+		# daytime = sun.alt < twilight
+		daytime = sun.alt > 0
+
+		daytimeISO = self.settings.get(self.ConfigKeys.SETTINGS_ISO, {}).get(self.ConfigKeys.SETTINGS_ISO_DAY, 200)
+		nighttimeISO = self.settings.get(self.ConfigKeys.SETTINGS_ISO, {}).get(self.ConfigKeys.SETTINGS_ISO_NIGHT, 800)
+
+		iso = daytimeISO
+		if not daytime:
+			iso = nighttimeISO
+
+		return iso
+
+	@property
+	def capturePath(self):
+		"""
+		@rtype: str
+		"""
+		return self.settings.get(self.ConfigKeys.CAPTURE_PATH, "")
+
+	@property
 	def log(self):
 		"""
 		@rtype: str
@@ -83,6 +113,7 @@ if __name__ == "__main__":
 
 	config = CameraConfig(confFile)
 	print(config)
-	print(json.dumps(config.mqtt, indent=2))
-	print(json.dumps(config.gpio, indent=2))
+	print(config.iso)
+	# print(json.dumps(config.mqtt, indent=2))
+	# print(json.dumps(config.gpio, indent=2))
 	print(config.log)
