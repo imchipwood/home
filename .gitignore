@@ -6,4 +6,4 @@ conf/*
 */cpw*
 .idea
 doc
-venv
+*venv*
