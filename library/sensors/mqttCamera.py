@@ -4,7 +4,7 @@ import ephem
 from time import sleep
 import paho.mqtt.client as paho
 from picamera import PiCamera
-from lib.services.pushbulletNotify import PushbulletImageNotify
+from library.services.pushbulletNotify import PushbulletImageNotify
 
 # hass mqtt publish service data for testing:
 # { "topic": "home-assistant/garage/cameraControl", "payload": "CAPTURE", "qos": "1", "retain": "false" }

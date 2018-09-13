@@ -22,9 +22,9 @@ import pprint
 from time import sleep
 # from multiprocessing import Process
 from threading import Thread
-from lib.config.doorConfig import DoorConfig
+from library.config.doorConfig import DoorConfig
 from cameraController import PiCameraController
-from lib.services.pushbulletNotify import PushbulletImageNotify, PushbulletTextNotify
+from library.services.pushbulletNotify import PushbulletImageNotify, PushbulletTextNotify
 import traceback
 
 # logging junk

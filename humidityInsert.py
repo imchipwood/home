@@ -7,7 +7,7 @@ import paho.mqtt.client as paho
 from time import sleep, time
 import datetime
 
-from lib.sensors.sensor_humidity import SensorHumidity
+from library.sensors.sensor_humidity import SensorHumidity
 
 
 def on_connect(client, userdata, flags, rc):

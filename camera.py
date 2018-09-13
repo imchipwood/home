@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import logging
 import argparse
-from lib.sensors.mqttCamera import MqttCamera
+from library.sensors.mqttCamera import MqttCamera
 from time import sleep
 import traceback
 

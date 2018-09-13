@@ -14,11 +14,11 @@ def main():
 		lines.reverse()
 
 	# example lines we're looking for:
-	# 2017-10-02 08:50:10,581 - lib.sensors.doorController - DEBUG - monitor state: 0
-	# 2017-10-02 08:54:18,600 - lib.sensors.doorController - DEBUG - monitor state: 1
-	# 2017-10-02 08:56:00,410 - lib.sensors.doorController - DEBUG - monitor state: 0
+	# 2017-10-02 08:50:10,581 - library.sensors.doorController - DEBUG - monitor state: 0
+	# 2017-10-02 08:54:18,600 - library.sensors.doorController - DEBUG - monitor state: 1
+	# 2017-10-02 08:56:00,410 - library.sensors.doorController - DEBUG - monitor state: 0
 	# regex for that:
-	reg = re.compile(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+\s*-\s*lib\.sensors\.doorController\s*-\s*\w+\s*-\s*monitor state:\s*(\d+)')
+	reg = re.compile(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+\s*-\s*library\.sensors\.doorController\s*-\s*\w+\s*-\s*monitor state:\s*(\d+)')
 
 	for line in lines:
 		matcher = reg.match(line)

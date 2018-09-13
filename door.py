@@ -3,7 +3,7 @@ import logging
 import argparse
 import traceback
 from time import sleep
-from lib.sensors.doorController import DoorController
+from library.sensors.doorController import DoorController
 
 
 def parseArgs():

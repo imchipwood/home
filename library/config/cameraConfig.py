@@ -142,8 +142,8 @@ class CameraConfig(object):
 
 if __name__ == "__main__":
 	import os
-	thisDir = os.path.dirname(__file__).replace("/lib/sensors", "")
-	confDir = os.path.join(thisDir, "conf")
+	thisDir = os.path.dirname(__file__).replace("/library/sensors", "")
+	confDir = os.path.join(thisDir, "config")
 
 	confFile = os.path.join(confDir, "garageDoorCamera.json")
 
