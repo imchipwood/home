@@ -26,4 +26,5 @@ def test_startStop():
 
 	with dc as door:
 		door.start()
+		assert not door.open
 		door.monitor = False
