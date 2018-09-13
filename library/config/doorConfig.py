@@ -39,6 +39,22 @@ class MQTTSettings(object):
 	def topicState(self):
 		return self._settings[ConfigKeys.MQTT_TOPIC_STATE]
 
+	def __iter__(self):
+		for setting in self._settings.values():
+			yield setting
+
+	def __getitem__(self, item):
+		return self._settings.get(item, None)
+
+	def __repr__(self):
+		return json.dumps(self._settings, indent=2)
+
+	def items(self):
+		return iter([(x, y) for x, y in self._settings.items()])
+
+	def iteritems(self):
+		return iter([(x, y) for x, y in self._settings.iteritems()])
+
 
 class DoorConfig(object):
 
