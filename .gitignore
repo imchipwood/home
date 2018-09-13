@@ -1,4 +1,3 @@
-conf/*
 *.pyc
 */*.pyc
 */*/*.pyc
