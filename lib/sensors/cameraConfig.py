@@ -75,7 +75,7 @@ class CameraConfig(object):
 	@property
 	def resolution(self):
 		"""
-		@rtype: list(int)
+		@rtype: list[int]
 		"""
 		return self.settings.get(self.ConfigKeys.SETTINGS_RESOLUTION, [3280, 2464])
 

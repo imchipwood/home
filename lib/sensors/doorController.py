@@ -22,6 +22,7 @@ import pprint
 from time import sleep
 # from multiprocessing import Process
 from threading import Thread
+from doorConfig import DoorConfig
 from cameraController import PiCameraController
 from lib.services.pushbulletNotify import PushbulletImageNotify, PushbulletTextNotify
 import traceback
@@ -53,8 +54,7 @@ class DoorController(object):
 
 	Once instantiated, simply call the start() method to launch the threads
 	"""
-	def __init__(self, configFile, debug=False):
-		# DoorController.__init__(self)
+	def __init__(self, doorConfigFile, cameraConfigFile=None, debug=False):
 		super(DoorController, self).__init__()
 		self.state = None
 		self.mqttEnabled = True
@@ -66,17 +66,18 @@ class DoorController(object):
 		logging.getLogger().setLevel(logging.DEBUG)
 
 		# read the config file - we need the log file path to finish setting up logging
-		self.mqttSettings, self.gpioSettings, logFile, cameraEnabled, self.pushbullet = self.readConfig(configFile)
+		self.settings = DoorConfig(doorConfigFile)
+		self.mqttSettings = self.settings.mqtt
 
 		# finish setting up logging
-		self.setupLogging(loggingLevel=debug, logFile=logFile)
+		self.setupLogging(loggingLevel=debug, logFile=self.settings.log)
 
 		# set up MQTT connections
 		self.clientControl = None
 
 		# create the camera
-		if cameraEnabled:
-			self.camera = PiCameraController(configFile=configFile, debug=debug)
+		if cameraConfigFile is not None:
+			self.camera = PiCameraController(configFile=cameraConfigFile, debug=debug)
 		else:
 			self.camera = None
 
@@ -91,69 +92,6 @@ class DoorController(object):
 	@property
 	def open(self):
 		return self.state
-		
-	def readConfig(self, configFile):
-		"""Read the config file for MQTT, GPIO, and logging setup
-
-		Expected tokens:
-			log - full path of file to log to
-			mqtt_client - name to send MQTT messages as
-			mqtt_broker - IP address of MQTT broker
-			mqtt_port - port to talk to MQTT broker on
-			mqtt_topic_state - MQTT topic to send state updates on
-			mqtt_topic_control - MQTT topic to listen for commands on
-			gpio_pin_sensor - GPIO # that door is connected to
-			gpio_pin_control - GPIO # that relay is connected to
-
-		@param configFile: path to config file to parse
-		@return: tuple (dict of mqtt settings, dict of gpio settings, str logfile path, bool cameraEnabled)
-		"""
-		mqttConfig = {}
-		gpioConfig = {}
-		logFile = None
-		cameraEnabled = False
-		pushbullet = False
-
-		with open(configFile, "r") as inf:
-			lines = inf.readlines()
-
-		for line in lines:
-			# skip commented out lines, blank lines, and lines without an = sign
-			if line[0] == '#' or line[:2] == '//' or line == '\n' or '=' not in line:
-				continue
-
-			# line is good, split it by '=' to get token and value
-			line = line.rstrip().split("=")
-			key, val = line[:2]
-
-			# try to convert the value to an int or float. some values will be strings so this won't work, but
-			# it means we don't have to do the conversions elsewhere
-			if '.' in val:
-				try:
-					val = float(val)
-				except:
-					pass
-			else:
-				try:
-					val = int(val)
-				except:
-					pass
-
-			# store values as appropriate
-			if 'mqtt' in key:
-				key = "_".join(key.split('_')[1:])
-				mqttConfig[key] = val
-			elif 'gpio' in key:
-				key = "_".join(key.split('_')[1:])
-				gpioConfig[key] = val
-			elif key == 'log':
-				logFile = val
-			elif 'camera' in key:
-				cameraEnabled = True
-			elif 'pushbullet' in key:
-				pushbullet = val
-
-		return mqttConfig, gpioConfig, logFile, cameraEnabled, pushbullet
 
 	def setupLogging(self, loggingLevel=False, logFile=None):
 		"""Set up logging stream and file handlers

@@ -1,19 +1,46 @@
 import json
 
 
+class ConfigKeys:
+	GPIO = "gpio"
+	GPIO_PIN_CONTROL = "pin_control"
+	GPIO_PIN_SENSOR = "pin_sensor"
+	GPIO_RELAY_TOGGLE_DELAY = "relay_toggle_delay"
+	MQTT = "mqtt"
+	MQTT_CLIENT = "client"
+	MQTT_BROKER = "broker"
+	MQTT_PORT = "port"
+	MQTT_TOPIC_CONTROL = "topic_control"
+	MQTT_TOPIC_STATE = "topic_state"
+	LOG_PATH = "log"
+
+
+class MQTTSettings(object):
+	def __init__(self, settingsDict):
+		self._settings = settingsDict
+
+	@property
+	def client(self):
+		return self._settings[ConfigKeys.MQTT_CLIENT]
+
+	@property
+	def broker(self):
+		return self._settings[ConfigKeys.MQTT_BROKER]
+
+	@property
+	def port(self):
+		return self._settings[ConfigKeys.MQTT_PORT]
+
+	@property
+	def topicControl(self):
+		return self._settings[ConfigKeys.MQTT_TOPIC_CONTROL]
+
+	@property
+	def topicState(self):
+		return self._settings[ConfigKeys.MQTT_TOPIC_STATE]
+
+
 class DoorConfig(object):
-	class ConfigKeys:
-		GPIO = "gpio"
-		GPIO_PIN_CONTROL = "pin_control"
-		GPIO_PIN_SENSOR = "pin_sensor"
-		GPIO_RELAY_TOGGLE_DELAY = "relay_toggle_delay"
-		MQTT = "mqtt"
-		MQTT_CLIENT = "client"
-		MQTT_BROKER = "broker"
-		MQTT_PORT = "port"
-		MQTT_TOPIC_CONTROL = "topic_control"
-		MQTT_TOPIC_STATE = "topic_state"
-		LOG_PATH = "log"
 
 	def __init__(self, configPath, debug=False):
 		"""
@@ -44,23 +71,23 @@ class DoorConfig(object):
 	@property
 	def mqtt(self):
 		"""
-		@rtype: dict[str, str]
+		@rtype: MQTTSettings
 		"""
-		return self.config.get(self.ConfigKeys.MQTT, {})
+		return MQTTSettings(self.config.get(ConfigKeys.MQTT, {}))
 
 	@property
 	def gpio(self):
 		"""
 		@rtype: dict[str, str]
 		"""
-		return self.config.get(self.ConfigKeys.GPIO, {})
+		return self.config.get(ConfigKeys.GPIO, {})
 
 	@property
 	def log(self):
 		"""
 		@rtype: str
 		"""
-		return self.config.get(self.ConfigKeys.LOG_PATH)
+		return self.config.get(ConfigKeys.LOG_PATH)
 
 	def _loadConfig(self, configPath):
 		"""
@@ -88,6 +115,6 @@ if __name__ == "__main__":
 
 	config = DoorConfig(confFile)
 	print(config)
-	print(json.dumps(config.mqtt, indent=2))
+	print(config.mqtt.broker)
 	print(json.dumps(config.gpio, indent=2))
 	print(config.log)

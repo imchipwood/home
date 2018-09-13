@@ -1,15 +1,30 @@
 import logging
 import traceback
-import ephem
 import time
 import os
 
-from picamera import PiCamera
+try:
+	from picamera import PiCamera
+except:
+	logging.warning("Failed to import picamera - using dummy")
+	from lib.dummy.picamera import PiCamera
+
+from cameraConfig import CameraConfig
 
 
 class PiCameraController(PiCamera):
 	def __init__(self, configFile, debug=False):
-		PiCamera.__init__(self)
+		"""
+		Constructor for the modified PiCamera used in this project
+		Additions:
+		- ISO is calculated based on the time of day
+		- Logging
+		@param configFile: path to configuration file
+		@type configFile: str
+		@param debug: debug logging flag
+		@type debug: bool
+		"""
+		super(PiCameraController, self).__init__()
 
 		# initalize logger
 		self.logger = logging.getLogger(__name__)
@@ -18,56 +33,24 @@ class PiCameraController(PiCamera):
 		logging.getLogger().setLevel(logging.DEBUG)
 
 		# read the config file
-		self.cameraSettings = self.parseConfig(cfgFile=configFile)
+		self.settings = CameraConfig(configFile)
 
 		# finish setting up logging
-		self.setupLogging(loggingLevel=debug, logFile=self.cameraSettings['log'])
+		self.setupLogging(loggingLevel=debug, logFile=self.settings.log)
 
 		# configure the camera
 		self.cameraFile = None
 		self.cameraDelay = None
-		self.cameraSetup(self.cameraSettings)
+		self.cameraSetup()
 		self.logCurrentSetup()
-		
-	def parseConfig(self, cfgFile):
-		"""Parse the config file for camera settings
-
-		@param cfgFile:
-		@return: dict of settings
-		"""
-		cameraSettings = {}
-
-		with open(cfgFile, 'r') as inf:
-			lines = inf.readlines()
-
-		for line in lines:
-			# skip commented out lines, blank lines, and lines without an = sign
-			if line[0] == '#' or line[:2] == '//' or line == '\n' or '=' not in line:
-				continue
-
-			# line is good, split it by '=' to get token and value
-			line = line.rstrip().split("=")
-			key, val = line[:2]
-
-			# try to convert the value to an int. some values will be strings so this won't work, but
-			# it means we don't have to do the conversions elsewhere
-			try:
-				val = int(val)
-			except:
-				pass
-
-			if 'camera' in key:
-				key = "_".join(key.split('_')[1:])
-				cameraSettings[key] = val
-
-		return cameraSettings
 
 	def setupLogging(self, loggingLevel=False, logFile=None):
-		"""Set up logging stream and file handlers
-
+		"""
+		Set up logging stream and file handlers
 		@param loggingLevel: logging level as defined by logging package
+		@type loggingLevel: int
 		@param logFile: (optional) path for file logging
-		@return: None
+		@type logFile: str
 		"""
 		if loggingLevel:
 			val = 'DEBUG'
@@ -97,126 +80,44 @@ class PiCameraController(PiCamera):
 			self.logger.addHandler(fh)
 
 	def logCurrentSetup(self):
+		"""
+		Log the current setup to file
+		"""
 		self.logger.debug("\n----------------------------------------")
-		s = ''
-		for key, val in self.cameraSettings.items():
-			s += '{}: {}\n'.format(key, val)
-		self.logger.debug("\nCamera Settings:\n{}".format(s))
-		isDaytime = self.isDaytime(self.cameraSettings['city'])
-		self.logger.debug("It is currently {}".format("daytime" if isDaytime else "nighttime"))
-		self.logger.debug("----------------------------------------\n")
+		self.logger.debug("\nCamera Settings:\n{}".format(self.settings))
 
-	def cameraSetup(self, settings):
-		"""Set up the PiCamera based on settings found in config file
-
-		@return: None
+	def cameraSetup(self):
+		"""
+		Set up the PiCamera based on settings found in config file
 		"""
 		self.logger.debug("cameraSetup")
-		self.logger.debug(settings)
-		# self.camera = PiCamera()
-		cameraSettingsKeys = settings.keys()
+		self.rotation = self.settings.rotation
+		self.brightness = self.settings.brightness
+		self.contrast = self.settings.contrast
+		self.resolution = self.settings.resolution
+		self.cameraFile = self.settings.capturePath
+		self.cameraDelay = self.settings.captureDelay
+		self.iso = self.settings.iso
 
-		if 'rotation' in cameraSettingsKeys:
-			self.rotation = settings['rotation']
-
-		if 'brightness' in cameraSettingsKeys:
-			self.brightness = settings['brightness']
-
-		if 'contrast' in cameraSettingsKeys:
-			self.contrast = settings['contrast']
-
-		if 'resolution' in cameraSettingsKeys:
-			width, height = [int(x) for x in settings['resolution'].split(',')]
-			self.logger.debug("setting camera resolution to width, height: {}, {}".format(width, height))
-			self.resolution = (width, height)
-
-		if 'filepath' in cameraSettingsKeys:
-			self.cameraFile = settings['filepath']
-		else:
-			raise IOError("No specified filepath for camera found in config file")
-
-		if 'delay' in cameraSettingsKeys:
-			self.cameraDelay = settings['delay']
-
-		# set the ISO based on whether or not the sun is up
-		self.updateCameraISO()
-		
-	def isDaytime(self, city=None):
-		isDaytime = True
-
-		if city:
-			self.logger.debug("using ephem package for daytime calculation")
-			sun = ephem.Sun()
-			city = ephem.city(city)
-			sun.compute(city)
-			twilight = -12 * ephem.degree
-			isDaytime = sun.alt > twilight
-
-		else:
-			self.logger.debug("using time.asctime() for daytime calculation")
-			currentTime = time.asctime().split(' ')[-2]
-			hour, minute, second = currentTime.split(':')
-			hour = int(hour)
-			if 6 > hour > 19:
-				isDaytime = False
-		return isDaytime
-
-	def updateCameraISO(self, iso=None):
-		"""Update the camera ISO. Supports daytime/nighttime ISO values set up in the cameraSettings dict,
-		directly specifying the ISO as a function argument, or an ISO key in the cameraSettingsDict.
-
-		@remark: function arg takes preference, then city/daytime/nighttime values in cameraSettings dict, then 'iso' key
-		 in cameraSettings dict
-
-		@param iso: Optional, integer, ISO to set the camera to
-		@return:
-		"""
-		if iso:
-			self.iso = iso
-
-		elif 'iso' in self.cameraSettings.keys():
-			self.iso = self.cameraSettings['iso']
-
-		else:
-			if 'iso_daytime' in self.cameraSettings.keys():
-				daytimeISO = self.cameraSettings['iso_daytime']
-			else:
-				daytimeISO = 200
-
-			if 'iso_nighttime' in self.cameraSettings.keys():
-				nighttimeISO = self.cameraSettings['iso_nighttime']
-			else:
-				nighttimeISO = 800
-
-			iso = daytimeISO
-			isDaytime = self.isDaytime(self.cameraSettings['city'])
-			if not isDaytime:
-				iso = nighttimeISO
-
-			timeOfDay = "daytime" if isDaytime else "nighttime"
-			self.logger.debug("currently {} - setting camera ISO to {}".format(timeOfDay, iso))
-			self.iso = iso
-
-		
 	def cleanup(self):
-		"""Attempt to gracefully exit the program
-
-		@return: None
+		"""
+		Attempt to gracefully exit the program
 		"""
 		self.logger.info("cleaning up")
 
 		try:
 			self.logger.debug("disabling camera")
 			self.stop_preview()
+			self.close()
 			self.logger.debug("camera disabled")
 		except Exception as e:
 			self.logger.exception("Exception while shutting down camera: {}".format(e))
 			traceback.print_exc()
 			pass
 
-		
 	def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
-		"""slight modification on built-in capture function to allow not specifying an output and updating camera ISO
+		"""
+		slight modification on built-in capture function to allow not specifying an output and updating camera ISO
 		on the fly based on time of day
 
 		@remark: More info here: http://picamera.readthedocs.io/en/release-1.10/api_camera.html
@@ -228,15 +129,17 @@ class PiCameraController(PiCamera):
 		@param splitter_port: Optional, boolean, default 0, ignored when use_video_port=False. Defines port of video splitter that image encoder will be attached to
 		@param delay: Optional, integer, default None, use to delay the camera picture taking by 'delay' seconds
 		@param options: no documentation provided by picamera docs
-		@return: None
 		"""
 		if not output:
-			output = self.cameraFile
+			output = self.settings.capturePath
 
-		if os.path.exists(self.cameraFile):
-			os.remove(self.cameraFile)
+		if os.path.exists(output):
+			os.remove(output)
 
-		self.updateCameraISO()
+		# update iso
+		self.iso = self.settings.iso
+
+		# Do any delay
 		if delay:
 			self.logger.debug("delaying {} seconds before taking picture".format(delay))
 			time.sleep(delay)
@@ -253,4 +156,3 @@ class PiCameraController(PiCamera):
 			**options
 		)
 		self.logger.debug("picture taken")
-		
