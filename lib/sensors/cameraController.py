@@ -9,7 +9,7 @@ except:
 	logging.warning("Failed to import picamera - using dummy")
 	from lib.dummy.picamera import PiCamera
 
-from cameraConfig import CameraConfig
+from lib.config.cameraConfig import CameraConfig
 
 
 class PiCameraController(PiCamera):

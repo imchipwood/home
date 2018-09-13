@@ -1,6 +1,6 @@
 import os
 
-from lib.sensors.cameraConfig import CameraConfig
+from lib.config.cameraConfig import CameraConfig
 from definitions import CONFIG_DIR
 
 
