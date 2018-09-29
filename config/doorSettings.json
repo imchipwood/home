@@ -6,7 +6,7 @@
   },
   "mqtt": {
     "client": "garageDoor",
-    "broker": "192.168.1.130",
+    "broker": "192.168.1.18",
     "port": 1883,
     "topic_control": "home-assistant/garage/switch",
     "topic_state": "home-assistant/garage/state"

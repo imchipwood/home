@@ -1,0 +1,8 @@
+dht_type=22
+dht_pin=4
+mqtt_client=pi_media
+mqtt_broker=192.168.1.18
+mqtt_port=1883
+mqtt_topic_t=home-assistant/media/temperature
+mqtt_topic_h=home-assistant/media/humidity
+log=/home/cpw/dev/home/log/dht.log
