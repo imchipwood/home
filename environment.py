@@ -140,32 +140,32 @@ def main():
 
 	# set up the sensor
 	logging.debug("Setting up humidity sensor")
-	h = SensorHumidity(sensor_type=config.dhtType, pin=config.dhtPin, units="f")
+	environmentSensor = SensorHumidity(sensorType=config.dhtType, pin=config.dhtPin, units="fahrenheit")
 	try:
 		logging.debug("Beginning 5 warmup readings")
 		for i in xrange(0, 5):
-			h.read()
-			printData(i, h.getTemperature(), h.getHumidity())
+			environmentSensor.read()
+			printData(i, environmentSensor.temperature, environmentSensor.humidity)
 
 		# take N readings and average them
 		logging.debug("Beginning {} readings for averaging".format(readingsToAverage))
-		fTemperature = 0.0
-		fHumidity = 0.0
+		cumulativeTemperature = 0.0
+		cumulativeHumidity = 0.0
 		for i in xrange(0, readingsToAverage):
-			h.read()
-			printData(i, h.getTemperature(), h.getHumidity())
-			fTemperature += h.getTemperature()
-			fHumidity += h.getHumidity()
-		fTemperature /= float(readingsToAverage)
-		fHumidity /= float(readingsToAverage)
+			environmentSensor.read()
+			printData(i, environmentSensor.temperature, environmentSensor.humidity)
+			cumulativeTemperature += environmentSensor.temperature
+			cumulativeHumidity += environmentSensor.humidity
+		averageTemperature = cumulativeTemperature / float(readingsToAverage)
+		averageHumidity = cumulativeHumidity / float(readingsToAverage)
 		logging.debug("Final data:")
-		logging.debug("Temperature: {0:0.1f}".format(fTemperature))
-		logging.debug("Humidity:    {0:0.1f}".format(fHumidity))
-		dataDict = {"temperature": fTemperature, "humidity": fHumidity}
+		logging.debug("Temperature: {0:0.1f}".format(averageTemperature))
+		logging.debug("Humidity:    {0:0.1f}".format(averageHumidity))
+		dataDict = {"temperature": averageTemperature, "humidity": averageHumidity}
 		logData(config.log, dataDict, None, None)
 
 		# Send data to server
-		if checkLimits(fTemperature, fHumidity):
+		if checkLimits(averageTemperature, averageHumidity):
 			try:
 				# connect to MQTT broker
 				logging.debug("Connecting to MQTT broker")
@@ -177,20 +177,20 @@ def main():
 
 				(rc, mid) = client.publish(
 					mqttSettings.topicTemperature,
-					"{0:0.1f}".format(fTemperature),
+					"{0:0.1f}".format(averageTemperature),
 					qos=2,
 					retain=True
 				)
-				dataDict = {"temperature": fTemperature}
+				dataDict = {"temperature": averageTemperature}
 				logData(config.log, dataDict, rc, mid)
 				
 				(rc, mid) = client.publish(
 					mqttSettings.topicHumidity,
-					"{0:0.1f}".format(fHumidity),
+					"{0:0.1f}".format(averageHumidity),
 					qos=2,
 					retain=True
 				)
-				dataDict = {"humidity": fHumidity}
+				dataDict = {"humidity": averageHumidity}
 				logData(config.log, dataDict, rc, mid)
 			except:
 				logging.debug("some MQTT failure. Ignoring")

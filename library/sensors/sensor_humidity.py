@@ -4,150 +4,130 @@ from sensor import Sensor, SensorException
 
 
 class SensorHumidity(Sensor):
-	"""Humidity Sensor Class
-
-	This class houses all functions required to set up
-	and take readings from a DHT humidity sensor
-	"""
-	humidity = 0.0
-	temperature = 0.0
-	validUnits = ["c", "f"]
-	validSensorTypes = {
+	VALID_TEMPERATURE_UNITS = ["celsius", "fahrenheit"]
+	VALID_DHT_TYPES = {
 		"11": Adafruit_DHT.DHT11,
 		"22": Adafruit_DHT.DHT22,
 		"2302": Adafruit_DHT.AM2302
 	}
-	sensorType = validSensorTypes.values()[0]
-	units = validUnits[0]
-	bDebug = False
 
-	"""Initialize a Humidity sensor
-
-	Inputs:
-		sensor_type (Integer or String - which kind of DHT sensor.)
-		pin number (Integer - GPIO pin)
-		units (String - Celcius or Fahrenheit)
-		debug (Boolean)
-	Returns:
-		Nothing
-	"""
-	def __init__(self, sensor_type, pin, units, debug=False):
+	def __init__(self, sensorType, pin, units="fahrenheit", debug=False):
+		"""
+		Constructor for SensorHumidity object
+		@param sensorType: Desired Adafruit DHT sensor type
+		@type sensorType: int or str
+		@param pin: GPIO pin for reading sensor
+		@type pin: int or str
+		@param units: Desired temperature units. Fahrenheit or Celsius
+		@type units: str
+		@param debug: Flag to enable/disable debug prints
+		@type debug: bool
+		"""
 		super(SensorHumidity, self).__init__()
-		self.bDebug = debug
-		# sensor type
-		self.setSensorType(str(sensor_type))
-		# pin
+
+		self.debug = debug
+
+		# Initialize values for readings
+		self._temperature = -999.0
+		self._humidity = -999.0
+
+		# Set the sensor type & pin #
+		self._sensorType = Adafruit_DHT.DHT11
+		self.sensorType = sensorType
 		self.pin = pin
-		# units
-		self.setUnits(units)
-		
-###############################################################################
 
-	"""Take readings
+		self._units = "fahrenheit"
+		self.units = units
 
-	Inputs:
-		None
-	Returns:
-		Nothing
-	"""
+	def resetReadings(self):
+		self._humidity = -999.0
+		self._temperature = -999.0
+
 	def read(self):
-		self.humidity = -999
-		self.temperature = -999
+		"""
+		Read sensor and store results
+		"""
+		self.resetReadings()
 		if self.state:
-			hum, temp = Adafruit_DHT.read_retry(self.getSensorType(), self.pin)
+			hum, temp = Adafruit_DHT.read_retry(self.sensorType, self.pin)
 			if temp is not None:
-				self.temperature = temp
-			else:
-				self.temperature = -999
+				self._temperature = temp
 			if hum is not None:
-				self.humidity = hum
-		
-###############################################################################
+				self._humidity = hum
 
-	"""Get last Humidity reading
+	@property
+	def temperature(self):
+		"""
+		@return: The most recent temperature reading
+		@rtype: float
+		"""
+		return self._temperature
 
-	Inputs:
-		None
-	Returns:
-		Humidity in %
-	"""
-	def getHumidity(self):
-		return self.humidity
+	@property
+	def humidity(self):
+		"""
+		@return: The most recent humidity reading
+		@rtype: float
+		"""
+		return self._humidity
 
-###############################################################################
+	@property
+	def units(self):
+		"""
+		Get the current units
+		@return: current units
+		@rtype: str
+		"""
+		return self._units
 
-	"""Get last temperature reading
+	@units.setter
+	def units(self, units):
+		"""
+		Change the current temperature units to Fahrenheit or Celsius
+		@param units: new units as a single char string - 'f' or 'c' are valid
+		@type units: str
+		"""
+		SensorHumidity.ValidateUnits(units)
+		self._units = units.lower()
+		if self.debug:
+			logging.debug("-d- SensorHumidity: units set to {}".format(self.units))
 
-	Inputs:
-		None
-	Returns:
-		Temperature in self.units
-	"""
-	def getTemperature(self):
-		if self.getUnits().lower() == "f":
-			return self.temperature * 9.0/5.0 + 32.0
-		return self.temperature
+	@property
+	def sensorType(self):
+		return self._sensorType
 
-###############################################################################
+	@sensorType.setter
+	def sensorType(self, newSensorType):
+		"""
+		Change the current sensor type
+		@param newSensorType:
+		@type newSensorType: str or int
+		"""
+		SensorHumidity.ValidateSensorType(newSensorType)
+		self._sensorType = self.VALID_DHT_TYPES[str(newSensorType)]
+		if self.debug:
+			logging.debug("-d- SensorHumidity type: {}".format(newSensorType))
 
-	"""Get current units
+	@staticmethod
+	def ValidateUnits(units):
+		"""
+		Check that the given units are valid - raises AssertionError if invalid
+		@param units: desired new units
+		@type units: str
+		"""
+		assert units.lower() in SensorHumidity.VALID_TEMPERATURE_UNITS, \
+			"Invalid units! Valid units: {}".format(
+				", ".join(SensorHumidity.VALID_TEMPERATURE_UNITS)
+			)
 
-	Inputs:
-		None
-	Returns:
-		Units as a single-char string
-	"""
-	def getUnits(self):
-		return self.units
-
-###############################################################################
-
-	"""Update temperature units
-
-	Inputs:
-		units as a single char string, 'f' or 'c' (case-insensitive)
-	Returns:
-		Nothing, but does throw exception if it fails
-	"""
-	def setUnits(self, units):
-		if units.lower() in self.validUnits:
-			self.units = units.lower()
-			if self.bDebug:
-				logging.debug("-d- SensorHumidity: units set to {}".format(self.getUnits()))
-		else:
-			sException = "Valid units: [{}]".format("|".join(self.validUnits))
-			raise SensorException(sException)
-		
-###############################################################################
-
-	"""Get sensor type
-
-	Inputs:
-		None
-	Returns:
-		self.sensorType as defined in Adafruit_DHT class
-	"""
-	def getSensorType(self):
-		return self.sensorType
-
-###############################################################################
-
-	"""Set sensor type
-
-	Inputs:
-		type as defined in self.sensorType
-	Returns:
-		Nothing, but does throw exception if it fails
-	"""
-	def setSensorType(self, sensor_type):
-		if sensor_type in self.validSensorTypes:
-			self.sensorType = self.validSensorTypes[sensor_type]
-			if self.bDebug:
-				sType = "sensorType: %s=%s" % (sensor_type, self.sensorType)
-				logging.debug("-d- SensorHumidity: %s" % (sType))
-		else:
-			sException = "Valid sensor types: ["
-			sException += "|".join(self.sensorType.keys()) + "]"
-			raise SensorException(sException)
-
-###############################################################################
+	@staticmethod
+	def ValidateSensorType(sensorType):
+		"""
+		Check that the given sensor type is valid - raises AssertionError if invalid
+		@param sensorType: desired new sensor type
+		@type sensorType: str or int
+		"""
+		assert str(sensorType) in SensorHumidity.VALID_DHT_TYPES.keys(), \
+			"Invalid sensor type! Valid types: {}".format(
+				", ".join(SensorHumidity.VALID_DHT_TYPES.keys())
+			)
