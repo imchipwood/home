@@ -34,6 +34,7 @@ class EnvironmentConfig(object):
 		self.debug = debug
 
 		self._config = {}
+		self.config = configPath
 
 	@property
 	def config(self):
