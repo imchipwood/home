@@ -8,6 +8,7 @@ from time import sleep, time
 import datetime
 
 from library.sensors.sensor_humidity import SensorHumidity
+from library.config.environmentConfig import EnvironmentConfig
 
 
 def on_connect(client, userdata, flags, rc):
@@ -79,31 +80,6 @@ def printData(i, temperature, humidity):
 	)
 
 
-# read config file
-# expected keys:
-#   dht_type		- DHT type (11, 22, 2302). See Adafruit library for info
-#   dht_pin		 - GPIO pin # for DHT sensor
-#   mqtt_client	 - name for the client
-#   mqtt_broker	 - IP address of MQTT broker
-#   mqtt_port	   - Port to use for MQTT broker
-#   mqtt_topic_t	- topic for temperature readings
-#   mqtt_topic_h	- topic for humidity readings
-#   log			 - path to file to log info to
-def readConfig(f):
-	logging.debug("Using config file found here:\n{}".format(f))
-	config = {}
-	with open(f, "r") as inf:
-		for line in inf:
-			line = line.rstrip().split("=")
-			key = line[0]
-			val = line[1]
-			if key in ["dht_pin", "mqtt_port"]:
-				val = int(val)
-			config[key] = val
-			logging.debug("config: found key {} with val {}".format(key, val))
-	return config
-
-
 def logData(f, data, mqtt_rc, mqtt_mid):
 	logging.debug("Logging to file: {}".format(f))
 
@@ -140,30 +116,31 @@ def logData(f, data, mqtt_rc, mqtt_mid):
 def main():
 
 	parsedArgs = parseArgs()
-	iAvg = parsedArgs.nAvg
-	sConfigFile = parsedArgs.configFile
-	bDebug = parsedArgs.debug
+	readingsToAverage = parsedArgs.nAvg
+	configFilePath = parsedArgs.configFile
+	debugEnable = parsedArgs.debug
 
 	loggingLevel = logging.INFO
-	if bDebug:
+	if debugEnable:
 		loggingLevel = logging.DEBUG
 	logging.getLogger().setLevel(loggingLevel)
 
-	dConfig = readConfig(sConfigFile)
+	config = EnvironmentConfig(configFilePath)
+	mqttSettings = config.mqtt
 
-	client = paho.Client(client_id=dConfig["mqtt_client"])
+	client = paho.Client(client_id=mqttSettings.client)
 
 	logging.debug("mqtt info:")
-	logging.debug("mqtt_client_id: {}".format(dConfig["mqtt_client"]))
-	logging.debug("mqtt_broker:	   {}".format(dConfig["mqtt_broker"]))
-	logging.debug("mqtt_port:      {}".format(dConfig["mqtt_port"]))
-	logging.debug("mqtt_topic_t:   {}".format(dConfig["mqtt_topic_t"]))
-	logging.debug("mqtt_topic_h:   {}".format(dConfig["mqtt_topic_h"]))
+	logging.debug("mqtt_client_id: {}".format(mqttSettings.client))
+	logging.debug("mqtt_broker:	   {}".format(mqttSettings.broker))
+	logging.debug("mqtt_port:      {}".format(mqttSettings.port))
+	logging.debug("mqtt_topic_t:   {}".format(mqttSettings.topicTemperature))
+	logging.debug("mqtt_topic_h:   {}".format(mqttSettings.topicHumidity))
 	logging.debug("client: {}".format(client))
 
 	# set up the sensor
 	logging.debug("Setting up humidity sensor")
-	h = SensorHumidity(sensor_type=dConfig["dht_type"], pin=dConfig["dht_pin"], units="f")
+	h = SensorHumidity(sensor_type=config.dhtType, pin=config.dhtPin, units="f")
 	try:
 		logging.debug("Beginning 5 warmup readings")
 		for i in xrange(0, 5):
@@ -171,21 +148,21 @@ def main():
 			printData(i, h.getTemperature(), h.getHumidity())
 
 		# take N readings and average them
-		logging.debug("Beginning {} readings for averaging".format(iAvg))
+		logging.debug("Beginning {} readings for averaging".format(readingsToAverage))
 		fTemperature = 0.0
 		fHumidity = 0.0
-		for i in xrange(0, iAvg):
+		for i in xrange(0, readingsToAverage):
 			h.read()
 			printData(i, h.getTemperature(), h.getHumidity())
 			fTemperature += h.getTemperature()
 			fHumidity += h.getHumidity()
-		fTemperature /= float(iAvg)
-		fHumidity /= float(iAvg)
+		fTemperature /= float(readingsToAverage)
+		fHumidity /= float(readingsToAverage)
 		logging.debug("Final data:")
 		logging.debug("Temperature: {0:0.1f}".format(fTemperature))
 		logging.debug("Humidity:    {0:0.1f}".format(fHumidity))
 		dataDict = {"temperature": fTemperature, "humidity": fHumidity}
-		logData(dConfig["log"], dataDict, None, None)
+		logData(config.log, dataDict, None, None)
 
 		# Send data to server
 		if checkLimits(fTemperature, fHumidity):
@@ -194,27 +171,27 @@ def main():
 				logging.debug("Connecting to MQTT broker")
 				client.on_connect = on_connect
 				client.on_publish = on_publish
-				client.connect(host=dConfig["mqtt_broker"], port=dConfig["mqtt_port"], keepalive=10)
+				client.connect(host=mqttSettings.broker, port=mqttSettings.port, keepalive=10)
 				client.loop_start()
 				sleep(3)
 
 				(rc, mid) = client.publish(
-					dConfig["mqtt_topic_t"],
+					mqttSettings.topicTemperature,
 					"{0:0.1f}".format(fTemperature),
 					qos=2,
 					retain=True
 				)
 				dataDict = {"temperature": fTemperature}
-				logData(dConfig["log"], dataDict, rc, mid)
+				logData(config.log, dataDict, rc, mid)
 				
 				(rc, mid) = client.publish(
-					dConfig["mqtt_topic_h"],
+					mqttSettings.topicHumidity,
 					"{0:0.1f}".format(fHumidity),
 					qos=2,
 					retain=True
 				)
 				dataDict = {"humidity": fHumidity}
-				logData(dConfig["log"], dataDict, rc, mid)
+				logData(config.log, dataDict, rc, mid)
 			except:
 				logging.debug("some MQTT failure. Ignoring")
 				pass
@@ -234,8 +211,8 @@ def main():
 		logging.debug("cleaning up")
 		try:
 			client.loop_stop()
-			client.unsubscribe(dConfig["mqtt_topic_t"])
-			client.unsubscribe(dConfig["mqtt_topic_h"])
+			client.unsubscribe(mqttSettings.topicTemperature)
+			client.unsubscribe(mqttSettings.topicHumidity)
 			client.disconnect()
 		except:
 			pass

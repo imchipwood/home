@@ -1,0 +1,14 @@
+{
+  "sensor": {
+    "type": 22,
+    "pin": 4
+  },
+  "mqtt": {
+    "client": "pi_media",
+    "broker": "192.168.1.18",
+    "port": 1883,
+    "topic_temperature": "home-assistant/media/temperature",
+    "topic_humidity": "home-assistant/media/humidity"
+  },
+  "log": "/home/cpw/dev/home/log/dht.log"
+}
