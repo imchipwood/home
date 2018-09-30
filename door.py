@@ -10,9 +10,21 @@ def parseArgs():
 	# argument parsing
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
-		"configFile",
+		"doorConfigFile",
 		type=str,
-		help="Config file for DoorController - required"
+		help="Config file for door monitoring/control - required"
+	)
+	parser.add_argument(
+		"cameraConfigFile",
+		"-c",
+		type=str,
+		help="Config file for camera control - optional"
+	)
+	parser.add_argument(
+		"pushbulletConfigFile",
+		"-p",
+		type=str,
+		help="Config file for PushBullet notifications - optional"
 	)
 	parser.add_argument(
 		'-debug',
@@ -27,11 +39,18 @@ def parseArgs():
 
 def main():
 	parsedArgs = parseArgs()
-	sGarageDoorFilePath = parsedArgs.configFile
-	bDebug = parsedArgs.debug
+	doorConfigFile = parsedArgs.doorConfigFile
+	cameraConfigFile = parsedArgs.cameraConfigFile
+	pushbulletConfigFile = parsedArgs.pushbulletConfigFile
+	debug = parsedArgs.debug
 
 	try:
-		door = DoorController(sGarageDoorFilePath, bDebug)
+		door = DoorController(
+			doorConfigFile,
+			cameraConfigFile,
+			pushbulletConfigFile,
+			debug=debug
+		)
 	except:
 		raise
 
@@ -41,11 +60,11 @@ def main():
 			sleep(10)
 
 	except KeyboardInterrupt:
-		logging.info("-i- gd: KeyboardInterrupt, exiting gracefully")
+		logging.info("gd: KeyboardInterrupt, exiting gracefully")
 		raise
 
 	except Exception as e:
-		logging.exception("-E- gd: Some exception: {}\n".format(e))
+		logging.exception("gd: Some exception: {}\n".format(e))
 		traceback.print_exc()
 		raise e
 
