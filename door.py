@@ -5,30 +5,36 @@ import traceback
 from time import sleep
 from library.sensors.doorController import DoorController
 
+_description = "door.py - A Raspberry Pi-based door monitor with PiCamera & PushBullet notification support."
+
 
 def parseArgs():
-	# argument parsing
-	parser = argparse.ArgumentParser()
+	"""
+
+	@return:
+	@rtype:
+	"""
+	parser = argparse.ArgumentParser(description=_description)
 	parser.add_argument(
 		"doorConfigFile",
 		type=str,
 		help="Config file for door monitoring/control - required"
 	)
 	parser.add_argument(
-		"-cameraConfigFile",
 		"-c",
+		"--cameraConfigFile",
 		type=str,
 		help="Config file for camera control - optional"
 	)
 	parser.add_argument(
-		"-pushbulletConfigFile",
 		"-p",
+		"--pushbulletConfigFile",
 		type=str,
 		help="Config file for PushBullet notifications - optional"
 	)
 	parser.add_argument(
-		'-debug',
 		'-d',
+		'--debug',
 		action="store_true",
 		help="Enable debug messages - optional"
 	)
@@ -38,22 +44,17 @@ def parseArgs():
 
 
 def main():
+	# Parse the arguments and create the door controller
 	parsedArgs = parseArgs()
-	doorConfigFile = parsedArgs.doorConfigFile
-	cameraConfigFile = parsedArgs.cameraConfigFile
-	pushbulletConfigFile = parsedArgs.pushbulletConfigFile
-	debug = parsedArgs.debug
 
-	try:
-		door = DoorController(
-			doorConfigFile,
-			cameraConfigFile,
-			pushbulletConfigFile,
-			debug=debug
-		)
-	except:
-		raise
+	door = DoorController(
+		doorConfigFile=parsedArgs.doorConfigFile,
+		cameraConfigFile=parsedArgs.cameraConfigFile,
+		pushbulletConfigFile=parsedArgs.pushbulletConfigFile,
+		debug=parsedArgs.debug
+	)
 
+	# Launch the door control thread & wait for something bad to happen
 	try:
 		door.start()
 		while True:
@@ -61,14 +62,14 @@ def main():
 
 	except KeyboardInterrupt:
 		logging.info("gd: KeyboardInterrupt, exiting gracefully")
-		raise
 
 	except Exception as e:
-		logging.exception("gd: Some exception: {}\n".format(e))
-		traceback.print_exc()
+		logging.exception("gd: Some exception:\n{}\n".format(e))
+		# traceback.print_exc()
 		raise e
 
 	finally:
+		# Gracefully shut everything down
 		door.cleanup()
 
 
