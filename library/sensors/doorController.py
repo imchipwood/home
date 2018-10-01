@@ -214,29 +214,29 @@ class DoorController(object):
 			self.logger.debug("shutting down monitor loop")
 			self.monitor = False
 		except Exception as e:
-			self.logger.exception("Exception while shutting down monitor loop: {}".format(e))
+			self.logger.exception("Exception while shutting down monitor loop")
 
 		if self.mqttEnabled:
 			try:
 				self.logger.debug("shutting down control thread")
 				self.clientControl.loop_stop()
-				self.clientControl.unsubscribe(self.mqtt.topicControl)
+				# self.clientControl.unsubscribe(self.mqtt.topicControl)
 				self.clientControl.disconnect()
 			except Exception as e:
-				self.logger.exception("Exception while shutting down control loop: {}".format(e))
+				self.logger.exception("Exception while shutting down control loop")
 
 		try:
 			self.logger.debug("Cleaning up GPIO")
 			GPIO.cleanup()
 		except Exception as e:
-			self.logger.exception("Exception while cleaning up GPIO: {}".format(e))
+			self.logger.exception("Exception while cleaning up GPIO")
 
 		if self.camera:
 			try:
 				self.logger.debug("Cleaning up camera")
 				self.camera.cleanup()
 			except Exception as e:
-				self.logger.exception("Exception while cleaning up camera: {}".format(e))
+				self.logger.exception("Exception while cleaning up camera")
 
 		# region ThreadLoops
 
