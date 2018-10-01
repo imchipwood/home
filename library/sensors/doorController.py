@@ -60,10 +60,12 @@ class DoorController(object):
 		@type debug: bool
 		"""
 		super(DoorController, self).__init__()
+		self.debug = debug
 		self.state = None
 
 		# initalize logger
 		self.logger = logging.getLogger(__name__)
+		self.logger.info("Logger initialized")
 
 		# logging level has to be set globally for some reason
 		logging.getLogger().setLevel(logging.DEBUG)
@@ -74,21 +76,12 @@ class DoorController(object):
 		self.settings = DoorConfig(doorConfigFile)
 
 		# finish setting up logging
-		if not skipLogging:
-			self.setupLogging(loggingLevel=debug, logFile=self.settings.log)
+		self.setupLogging(skipLogging=skipLogging, loggingLevel=self.debug, logFile=self.settings.log)
 
 		# create the camera
-		if cameraConfigFile is not None:
-			self.camera = PiCameraController(configFile=cameraConfigFile, debug=debug)
-		else:
-			self.camera = None
+		self.camera = self.setupCamera(cameraConfigFile)
 
-		if pushbulletConfigFile is not None:
-			self.pushbulletConfig = PushbulletConfig(pushbulletConfigFile)
-			self.pushbullet = self.pushbulletConfig.apiKey
-		else:
-			self.pushbulletConfig = None
-			self.pushbullet = None
+		self.pushbulletConfig, self.pushbullet = self.setupNotifications(pushbulletConfigFile)
 
 		# set up MQTT connections
 		self.clientControl = None
@@ -119,41 +112,45 @@ class DoorController(object):
 
 	# region Logging
 
-	def setupLogging(self, loggingLevel=False, logFile=None):
+	def setupLogging(self, skipLogging=False, loggingLevel=False, logFile=None):
 		"""
 		Set up logging stream and file handlers
+		@param skipLogging: Flag to disable logging enhancements
+		@type skipLogging: bool
 		@param loggingLevel: logging level as defined by logging package
+		@type loggingLevel: int
 		@param logFile: (optional) path for file logging
+		@type logFile: str
 		"""
-		if loggingLevel:
-			val = 'DEBUG'
-		else:
-			val = 'INFO'
-		self.logger.info("Logging level: {}".format(val))
+		if skipLogging:
+			# Do nothing
+			return
+
+		self.logger.info("Logging level: {}".format('DEBUG' if loggingLevel else 'INFO'))
 
 		# stdout stream handler
-		ch = logging.StreamHandler()
-		ch.setLevel(loggingLevel)
+		streamHandler = logging.StreamHandler()
+		streamHandler.setLevel(logging.DEBUG if loggingLevel else logging.INFO)
 
 		# stdout logging formatting
 		stdoutFormat = "%(name)s - %(levelname)s - %(message)s"
 		stdoutFormatter = logging.Formatter(stdoutFormat)
-		ch.setFormatter(stdoutFormatter)
+		streamHandler.setFormatter(stdoutFormatter)
 
 		# remove existing handlers then add the new one
 		self.logger.handlers = []
-		self.logger.addHandler(ch)
+		self.logger.addHandler(streamHandler)
 
 		# set up file handler logger - always debug level
 		if logFile:
-			fh = logging.FileHandler(logFile)
-			fh.setLevel(logging.DEBUG)
+			fileHandler = logging.FileHandler(logFile)
+			fileHandler.setLevel(logging.DEBUG)
 
 			# file logging formatting
 			fileFormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 			fileFormatter = logging.Formatter(fileFormat)
-			fh.setFormatter(fileFormatter)
-			self.logger.addHandler(fh)
+			fileHandler.setFormatter(fileFormatter)
+			self.logger.addHandler(fileHandler)
 		
 	def logCurrentSetup(self):
 		"""
@@ -167,6 +164,34 @@ class DoorController(object):
 		self.logger.debug("----------------------------------------")
 
 	# endregion Logging
+	# region Setup
+
+	def setupCamera(self, configFile):
+		"""
+		Set up the camera if we have a config file
+		@param configFile: path to camera config file
+		@type configFile: str
+		@return: camera controller
+		@rtype: PiCameraController or None
+		"""
+		if configFile is not None:
+			return PiCameraController(configFile=configFile, debug=self.debug)
+		return None
+
+	def setupNotifications(self, configFile):
+		"""
+		Set up notifications
+		@param configFile: path to config file
+		@type configFile: str
+		@return: tuple of config & API key
+		@rtype: tuple(PushbulletConfig, str) or tuple(None, None)
+		"""
+		if configFile is not None:
+			config = PushbulletConfig(configFile)
+			return config, config.apiKey
+		return None, None
+
+	# endregion Setup
 	# region Threading
 
 	def start(self):
