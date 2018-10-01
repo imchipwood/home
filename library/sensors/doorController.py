@@ -73,7 +73,6 @@ class DoorController(object):
 		"""
 		super(DoorController, self).__init__()
 		self.state = None
-		self.mqttEnabled = False
 
 		# initalize logger
 		self.logger = logging.getLogger(__name__)
@@ -190,7 +189,7 @@ class DoorController(object):
 			self.setupMQTT()
 		except:
 			# if mqtt fails to set up, that's OK, we can at least monitor the door
-			logging.exception("door control loop failed to initialize - will not be able to control door")
+			self.logger.exception("door control loop failed to initialize - will not be able to control door")
 
 		sleep(2)
 
@@ -200,7 +199,7 @@ class DoorController(object):
 			self.monitor = True
 			self.monitorThread.start()
 		except:
-			self.logger.exception("failed to start state thread")
+			self.logger.exception("Failed to start door state monitoring thread!")
 			self.cleanup()
 			raise
 		
@@ -213,29 +212,29 @@ class DoorController(object):
 		try:
 			self.logger.debug("shutting down monitor loop")
 			self.monitor = False
-		except Exception as e:
-			self.logger.exception("Exception while shutting down monitor loop")
+		except:
+			self.logger.exception("Exception while shutting down door state monitoring loop")
 
-		if self.mqttEnabled:
+		if self.canControlDoor():
 			try:
 				self.logger.debug("shutting down control thread")
 				self.clientControl.loop_stop()
 				# self.clientControl.unsubscribe(self.mqtt.topicControl)
 				self.clientControl.disconnect()
-			except Exception as e:
-				self.logger.exception("Exception while shutting down control loop")
+			except:
+				self.logger.exception("Exception while shutting down MQTT door control loop")
 
 		try:
 			self.logger.debug("Cleaning up GPIO")
 			GPIO.cleanup()
-		except Exception as e:
+		except:
 			self.logger.exception("Exception while cleaning up GPIO")
 
 		if self.camera:
 			try:
 				self.logger.debug("Cleaning up camera")
 				self.camera.cleanup()
-			except Exception as e:
+			except:
 				self.logger.exception("Exception while cleaning up camera")
 
 		# region ThreadLoops
@@ -263,7 +262,7 @@ class DoorController(object):
 						lastDoorState = self.doorStateChange(lastDoorState, newState)
 
 				except:
-					self.logger.exception("state exception")
+					self.logger.exception("Door state monitor loop exception")
 					raise
 
 		self.logger.info("Monitor loop exiting")
@@ -311,15 +310,49 @@ class DoorController(object):
 		else:
 			logging.info("PushbulletTextNotify Success")
 
+	def canPublishState(self):
+		"""
+		Check if it's possible to publish the door state to an MQTT topic
+		@return:
+		@rtype: bool
+		"""
+		requirements = {
+			'client': self.mqtt.client,
+			'broker': self.mqtt.broker,
+			'topicState': self.mqtt.topicState,
+			'port': self.mqtt.port
+		}
+		return all([val not in [None, ''] for val in requirements.itervalues()])
+
+	def getMissingPublishRequirements(self):
+		"""
+		Get a list of the MQTT attributes preventing publishing state information
+		@return: list of MQTT attributes
+		@rtype: list[str]
+		"""
+		requirements = {
+			'client': self.mqtt.client,
+			'broker': self.mqtt.broker,
+			'topicState': self.mqtt.topicState,
+			'port': self.mqtt.port
+		}
+		return [key for key, val in requirements.iteritems() if val in [None, '']]
+
 	def publishDoorState(self):
 		"""
-		Publish the state of the door to MQTT, if enabled
+		Publish the state of the door to MQTT
 		"""
-		if self.mqttEnabled:
+		if self.canPublishState():
 			try:
 				self.publish(self.state)
 			except:
-				self.logger.exception("door state publish failed")
+				self.logger.exception("MQTT: Failed to publish door state!")
+		else:
+			self.logger.info(
+				"Cannot publish state to MQTT - missing MQTT attributes: {}".format(
+					", ".join(self.getMissingPublishRequirements())
+				)
+			)
 
 	def cameraLoop(self):
 		"""
@@ -393,26 +426,45 @@ class DoorController(object):
 	# endregion GPIO
 	# region MQTT
 
+	def canControlDoor(self):
+		"""
+		Check if it's possible to publish the door state to an MQTT topic
+		@return:
+		@rtype: bool
+		"""
+		requirements = {
+			'client': self.mqtt.client,
+			'broker': self.mqtt.broker,
+			'topicControl': self.mqtt.topicControl,
+			'port': self.mqtt.port
+		}
+		return all([val not in [None, ''] for val in requirements.itervalues()])
+
 	def setupMQTT(self):
 		"""
 		Set up MQTT connection
 		"""
-		# topic subscription happens in on_connect
-		self.logger.debug("setting up mqtt client connection")
-		self.mqttEnabled = False
-		try:
-			self.clientControl = paho.Client(client_id=self.mqtt.client)
-			self.clientControl.on_connect = self.on_connect
-			self.clientControl.on_subscribe = self.on_subscribe
-			self.clientControl.on_message = self.on_message
-			self.clientControl.on_publish = self.on_publish
-			self.clientControl.connect(self.mqtt.broker, self.mqtt.port)
-			self.logger.debug("mqtt client connected. client: {}. starting loop".format(str(self.clientControl)))
-			self.clientControl.loop_start()
-			self.mqttEnabled = True
-			self.logger.debug("mqtt client loop started")
-		except Exception as e:
-			self.logger.exception("Exception while setting up MQTT client: {}".format(e))
+		if self.canControlDoor:
+			# topic subscription happens in on_connect - no need to call it here
+			self.logger.debug("setting up mqtt client connection")
+			try:
+				# Initialize the client
+				self.clientControl = paho.Client(client_id=self.mqtt.client)
+
+				# Setup callbacks
+				self.clientControl.on_connect = self.on_connect
+				self.clientControl.on_subscribe = self.on_subscribe
+				self.clientControl.on_message = self.on_message
+				self.clientControl.on_publish = self.on_publish
+
+				# Attempt connection and begin the loop
+				self.clientControl.connect(self.mqtt.broker, self.mqtt.port)
+				self.logger.debug("mqtt client connected. client: {}. starting loop".format(str(self.clientControl)))
+				self.clientControl.loop_start()
+
+				self.logger.debug("mqtt client loop started")
+			except:
+				self.logger.exception("MQTT: Exception while initializing control loop!")
 		
 	def publish(self, data):
 		"""
@@ -431,8 +483,8 @@ class DoorController(object):
 				port=self.mqtt.port,
 				client_id=self.mqtt.client
 			)
-		except Exception as e:
-			self.logger.exception("mqtt: pub exception:\n{}".format(e))
+		except:
+			self.logger.exception("MQTT: pub exception!")
 		
 	def on_connect(self, client, userdata, flags, rc):
 		"""
@@ -447,12 +499,12 @@ class DoorController(object):
 		# check connection results
 		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
 		if rc != 0:
-			if rc == -4:
-				self.logger.exception("mqtt: ERROR: 'too many messages'\n")
-			elif rc == -5:
-				self.logger.exception("mqtt: ERROR: 'invalid UTF-8 string'\n")
-			elif rc == -9:
-				self.logger.exception("mqtt: ERROR: 'bad QoS'\n")
+			exceptionMap = {
+				-4: 'too many messages',
+				-5: 'invalid UTF-8 string',
+				-9: 'bad QoS'
+			}
+			self.logger.exception("mqtt: ERROR: rc={}, {}\n".format(rc, exceptionMap.get(rc)))
 			raise MQTTError("on_connect 'rc' failure")
 
 		# no errors, subscribe to the MQTT topic
