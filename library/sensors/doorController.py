@@ -443,7 +443,7 @@ class DoorController(object):
 		"""
 		Set up MQTT connection
 		"""
-		if self.canControlDoor:
+		if self.canControlDoor():
 			# topic subscription happens in on_connect - no need to call it here
 			self.logger.debug("setting up mqtt client connection")
 			try:
