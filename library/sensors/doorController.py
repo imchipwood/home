@@ -215,7 +215,7 @@ class DoorController(object):
 		except:
 			self.logger.exception("Exception while shutting down door state monitoring loop")
 
-		if self.canControlDoor():
+		if self.clientControl:
 			try:
 				self.logger.debug("shutting down control thread")
 				self.clientControl.loop_stop()
@@ -458,12 +458,16 @@ class DoorController(object):
 
 				# Attempt connection and begin the loop
 				self.clientControl.connect(self.mqtt.broker, self.mqtt.port)
-				self.logger.debug("mqtt client connected. client: {}. starting loop".format(str(self.clientControl._client_id)))
+				self.logger.debug(
+					"mqtt client connected. client: {}. starting loop".format(self.clientControl._client_id)
+				)
 				self.clientControl.loop_start()
 
 				self.logger.debug("mqtt client loop started")
 			except:
 				self.logger.exception("MQTT: Exception while initializing control loop!")
+		else:
+			self.logger.info("Missing information for door control MQTT setup - skipping")
 		
 	def publish(self, data):
 		"""
