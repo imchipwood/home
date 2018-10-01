@@ -15,13 +15,13 @@ def parseArgs():
 		help="Config file for door monitoring/control - required"
 	)
 	parser.add_argument(
-		"cameraConfigFile",
+		"-cameraConfigFile",
 		"-c",
 		type=str,
 		help="Config file for camera control - optional"
 	)
 	parser.add_argument(
-		"pushbulletConfigFile",
+		"-pushbulletConfigFile",
 		"-p",
 		type=str,
 		help="Config file for PushBullet notifications - optional"
