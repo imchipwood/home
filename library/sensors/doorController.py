@@ -290,9 +290,9 @@ class DoorController(object):
 				# Only send text notification on closing -
 				text = "Garage Door {}".format('open' if self.state else 'closed')
 				notify = PushbulletTextNotify(self.pushbullet, text, text)
-				self.LogPushbulletErrors(notify)
+				self.logPushbulletErrors(notify)
 			else:
-				logging.info("Door Opened, skipping text notify")
+				self.logger.info("Door Opened, skipping text notify")
 
 		if self.camera and self.open and lastDoorState is not None:
 			# create a separate thread for the camera so this loop can continue running while camera operates
@@ -301,14 +301,13 @@ class DoorController(object):
 
 		return newState
 
-	@staticmethod
-	def LogPushbulletErrors(response):
+	def logPushbulletErrors(self, response):
 		if 'error' in response.result:
 			for key in ['iden', 'sender_iden', 'receiver_iden']:
 				del response.result[key]
-			logging.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(response.result)))
+			self.logger.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(response.result)))
 		else:
-			logging.info("PushbulletTextNotify Success")
+			self.logger.info("PushbulletTextNotify Success")
 
 	def canPublishState(self):
 		"""
@@ -369,9 +368,9 @@ class DoorController(object):
 						del result[key]
 					except KeyError:
 						pass
-				logging.info("PushbulletImageNotify Error:\n{}".format(pprint.pformat(result)))
+				self.logger.info("PushbulletImageNotify Error:\n{}".format(pprint.pformat(result)))
 			else:
-				logging.info("PushbulletImageNotify Success")
+				self.logger.info("PushbulletImageNotify Success")
 
 		# endregion ThreadLoops
 	# endregion Threading
@@ -459,7 +458,7 @@ class DoorController(object):
 
 				# Attempt connection and begin the loop
 				self.clientControl.connect(self.mqtt.broker, self.mqtt.port)
-				self.logger.debug("mqtt client connected. client: {}. starting loop".format(str(self.clientControl)))
+				self.logger.debug("mqtt client connected. client: {}. starting loop".format(str(self.clientControl._client_id)))
 				self.clientControl.loop_start()
 
 				self.logger.debug("mqtt client loop started")
@@ -494,7 +493,7 @@ class DoorController(object):
 		@param flags: any flags for the connection (unused but comes with automatically)
 		@param rc: result of connection
 		"""
-		self.logger.info("mqtt: (CONNECT) client {} received with code {}".format(client, rc))
+		self.logger.info("mqtt: (CONNECT) client {} received with code {}".format(client._client_id, rc))
 
 		# check connection results
 		# MQTTCLIENT_SUCCESS = 0, all others are some kind of error.
@@ -519,7 +518,7 @@ class DoorController(object):
 		@param mid: results of subscription
 		@param granted_qos: quality of service granted to the connection
 		"""
-		self.logger.debug("mqtt: (SUBSCRIBE) client: {}, mid: {}, granted_qos: {}".format(client, mid, granted_qos))
+		self.logger.debug("mqtt: (SUBSCRIBE) client: {}, mid: {}, granted_qos: {}".format(client._client_id, mid, granted_qos))
 		
 	def on_publish(self, client, userdata, mid, rc):
 		"""
