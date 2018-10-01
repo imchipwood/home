@@ -10,5 +10,6 @@
     "port": 1883,
     "topic_control": "home-assistant/garage/switch",
     "topic_state": "home-assistant/garage/state"
-  }
+  },
+  "log": "/home/cpw/dev/logs/garageDoor.txt"
 }

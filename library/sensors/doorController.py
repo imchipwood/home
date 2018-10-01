@@ -143,6 +143,7 @@ class DoorController(object):
 
 		# set up file handler logger - always debug level
 		if logFile:
+			self.logger.info("Logging to file: {}".format(logFile))
 			fileHandler = logging.FileHandler(logFile)
 			fileHandler.setLevel(logging.DEBUG)
 
@@ -151,6 +152,8 @@ class DoorController(object):
 			fileFormatter = logging.Formatter(fileFormat)
 			fileHandler.setFormatter(fileFormatter)
 			self.logger.addHandler(fileHandler)
+		else:
+			self.logger.warning("No log file path specified - file logging disabled")
 		
 	def logCurrentSetup(self):
 		"""

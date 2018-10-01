@@ -13,5 +13,6 @@
   "location": {
     "city": "Seattle"
   },
-  "capture_path": "/home/cpw/camera/captures/garage.jpg"
+  "capture_path": "/home/cpw/camera/captures/garage.jpg",
+  "log": "/home/cpw/dev/logs/garageCameragi.txt"
 }

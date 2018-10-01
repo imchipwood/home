@@ -70,6 +70,7 @@ class PiCameraController(PiCamera):
 
 		# set up file handler logger
 		if logFile:
+			self.logger.info("Logging to file: {}".format(logFile))
 			fh = logging.FileHandler(logFile)
 			fh.setLevel(logging.DEBUG)
 
