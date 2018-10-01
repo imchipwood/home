@@ -84,7 +84,6 @@ class DoorController(object):
 		# read the config files
 		self.gpioSettings = {}
 		self.settings = DoorConfig(doorConfigFile)
-		self.mqttSettings = self.settings.mqtt
 
 		# finish setting up logging
 		if not skipLogging:
@@ -122,6 +121,13 @@ class DoorController(object):
 		@rtype: bool
 		"""
 		return self.state
+	
+	@property
+	def mqtt(self):
+		"""
+		@rtype: library.config.doorConfig.DoorMQTTConfiguration
+		"""
+		return self.settings.mqtt
 
 	# region Logging
 
@@ -166,7 +172,7 @@ class DoorController(object):
 		Write the current setup to the debug stream
 		"""
 		self.logger.debug("\n----------------------------------------")
-		self.logger.debug("\nMQTT Settings:\n{}".format(str(self.mqttSettings)))
+		self.logger.debug("\nMQTT Settings:\n{}".format(str(self.mqtt)))
 		self.logger.debug("\nGPIO Settings:\n{}".format(json.dumps(self.gpioSettings, indent=2)))
 		self.logger.debug("Camera enabled: {}\n".format(bool(self.camera)))
 		self.logger.debug("Notifications enabled: {}\n".format(bool(self.pushbullet)))
@@ -214,7 +220,7 @@ class DoorController(object):
 			try:
 				self.logger.debug("shutting down control thread")
 				self.clientControl.loop_stop()
-				self.clientControl.unsubscribe(self.mqttSettings['topic_control'])
+				self.clientControl.unsubscribe(self.mqtt.topicControl)
 				self.clientControl.disconnect()
 			except Exception as e:
 				self.logger.exception("Exception while shutting down control loop: {}".format(e))
@@ -324,7 +330,7 @@ class DoorController(object):
 		if self.pushbullet:
 			notify = PushbulletImageNotify(self.pushbullet, self.camera.cameraFile)
 			result = notify.result
-			if 'error' in result.keys():
+			if 'error' in result:
 				for key in ['iden', 'sender_iden', 'receiver_iden']:
 					try:
 						del result[key]
@@ -395,12 +401,12 @@ class DoorController(object):
 		self.logger.debug("setting up mqtt client connection")
 		self.mqttEnabled = False
 		try:
-			self.clientControl = paho.Client(client_id=self.mqttSettings['client'])
+			self.clientControl = paho.Client(client_id=self.mqtt.client)
 			self.clientControl.on_connect = self.on_connect
 			self.clientControl.on_subscribe = self.on_subscribe
 			self.clientControl.on_message = self.on_message
 			self.clientControl.on_publish = self.on_publish
-			self.clientControl.connect(self.mqttSettings['broker'], self.mqttSettings['port'])
+			self.clientControl.connect(self.mqtt.broker, self.mqtt.port)
 			self.logger.debug("mqtt client connected. client: {}. starting loop".format(str(self.clientControl)))
 			self.clientControl.loop_start()
 			self.mqttEnabled = True
@@ -414,20 +420,19 @@ class DoorController(object):
 		@param data: data to be published
 		@type data: str
 		"""
-		self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqttSettings['topic_state']))
+		self.logger.debug("mqtt: pub '{}' to topic '{}'".format(data, self.mqtt.topicState))
 		try:
 			pahopub.single(
-				topic=self.mqttSettings['topic_state'],
+				topic=self.mqtt.topicState,
 				payload=str(data),
 				qos=1,
 				retain=True,
-				hostname=self.mqttSettings['broker'],
-				port=self.mqttSettings['port'],
-				client_id=self.mqttSettings['client']
+				hostname=self.mqtt.broker,
+				port=self.mqtt.port,
+				client_id=self.mqtt.client
 			)
 		except Exception as e:
 			self.logger.exception("mqtt: pub exception:\n{}".format(e))
-			pass
 		
 	def on_connect(self, client, userdata, flags, rc):
 		"""
@@ -451,8 +456,8 @@ class DoorController(object):
 			raise MQTTError("on_connect 'rc' failure")
 
 		# no errors, subscribe to the MQTT topic
-		self.logger.info("subscribing to topic: {}".format(self.mqttSettings['topic_control']))
-		client.subscribe(self.mqttSettings['topic_control'], qos=1)
+		self.logger.info("subscribing to topic: {}".format(self.mqtt.topicControl))
+		client.subscribe(self.mqtt.topicControl, qos=1)
 		
 	def on_subscribe(self, client, userdata, mid, granted_qos):
 		"""
@@ -483,7 +488,7 @@ class DoorController(object):
 		@param msg: the received message
 		"""
 		self.logger.debug("mqtt: (MESSAGE) client: {}, topic: {}, QOS: {}, payload: {}".format(client, msg.topic, msg.qos, msg.payload))
-		if msg.topic == self.mqttSettings.get('topic_control') and msg.payload in ["TOGGLE", "CLOSE"]:
+		if msg.topic == self.mqtt.get('topic_control') and msg.payload in ["TOGGLE", "CLOSE"]:
 			self.toggle()
 
 	# endregion MQTT

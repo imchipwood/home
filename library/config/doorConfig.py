@@ -1,6 +1,6 @@
 import json
 
-from library.config import MQTTSettings
+from library.config import MQTTConfiguration
 
 
 class ConfigKeys:
@@ -17,17 +17,25 @@ class ConfigKeys:
 	LOG_PATH = "log"
 
 
-class DoorMQTTSettings(MQTTSettings):
+class DoorMQTTConfiguration(MQTTConfiguration):
 	def __init__(self, mqttDict):
-		super(DoorMQTTSettings, self).__init__(mqttDict)
+		super(DoorMQTTConfiguration, self).__init__(mqttDict)
 
 	@property
 	def topicControl(self):
-		return self._config[ConfigKeys.MQTT_TOPIC_CONTROL]
+		"""
+		Get the control topic name
+		@rtype: str
+		"""
+		return self._config.get(ConfigKeys.MQTT_TOPIC_CONTROL, "")
 
 	@property
 	def topicState(self):
-		return self._config[ConfigKeys.MQTT_TOPIC_STATE]
+		"""
+		Get the state topic name
+		@rtype: str
+		"""
+		return self._config.get(ConfigKeys.MQTT_TOPIC_STATE, "")
 
 
 class DoorConfig(object):
@@ -61,9 +69,9 @@ class DoorConfig(object):
 	@property
 	def mqtt(self):
 		"""
-		@rtype: DoorMQTTSettings
+		@rtype: DoorMQTTConfiguration
 		"""
-		return DoorMQTTSettings(self.config.get(ConfigKeys.MQTT, {}))
+		return DoorMQTTConfiguration(self.config.get(ConfigKeys.MQTT, {}))
 
 	@property
 	def gpio(self):

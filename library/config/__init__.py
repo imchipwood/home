@@ -1,23 +1,63 @@
 import json
 
 
-class MQTTSettings(object):
+class MQTTConfiguration(object):
 	def __init__(self, mqttDict):
-		super(MQTTSettings, self).__init__()
+		super(MQTTConfiguration, self).__init__()
 
-		self._config = mqttDict
+		self._config = {}
+		self.config = mqttDict
+
+	@property
+	def config(self):
+		"""
+		Get the current config
+		@return: configuration dict
+		@rtype: dict[str, str]
+		"""
+		return self._config
+
+	@config.setter
+	def config(self, newConfig):
+		"""
+		Set a new config
+		@param newConfig:
+		@type newConfig:
+		@return:
+		@rtype:
+		"""
+		assert isinstance(newConfig, dict), "Configuration must be of type dict!"
+		self._config = newConfig
+
+		# Ensure there is a port - 1883 is the default used by MQTT servers
+		self.config.setdefault('port', 1883)
 
 	@property
 	def client(self):
-		return self._config.get('client')
+		"""
+		Get the MQTT client name
+		@rtype: str
+		"""
+		return self._config.get('client', "")
 
 	@property
 	def broker(self):
-		return self._config.get('broker')
+		"""
+		Get the MQTT broker URL
+		@rtype: str
+		"""
+		return self._config.get('broker', "")
 
 	@property
 	def port(self):
-		return self._config.get('port')
+		"""
+		Get the MQTT port
+		@rtype: int or None
+		"""
+		if 'port' in self.config:
+			return int(self._config.get('port'))
+		else:
+			return self.config.setdefault('port', 1883)
 
 	def __iter__(self):
 		for setting in self._config.values():

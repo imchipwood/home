@@ -1,6 +1,6 @@
 import json
 
-from library.config import MQTTSettings
+from library.config import MQTTConfiguration
 
 
 class ConfigKeys:
@@ -13,9 +13,9 @@ class ConfigKeys:
 	LOG_PATH = "log"
 
 
-class EnvironmentMQTTSettings(MQTTSettings):
+class EnvironmentMQTTConfiguration(MQTTConfiguration):
 	def __init__(self, mqttDict):
-		super(EnvironmentMQTTSettings, self).__init__(mqttDict)
+		super(EnvironmentMQTTConfiguration, self).__init__(mqttDict)
 
 	@property
 	def topicTemperature(self):
@@ -75,7 +75,7 @@ class EnvironmentConfig(object):
 		"""
 		@rtype: DoorMQTTSettings
 		"""
-		return EnvironmentMQTTSettings(self.config.get(ConfigKeys.MQTT, {}))
+		return EnvironmentMQTTConfiguration(self.config.get(ConfigKeys.MQTT, {}))
 
 	@property
 	def dhtType(self):

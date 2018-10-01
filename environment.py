@@ -73,9 +73,9 @@ def parseArgs():
 def printData(i, temperature, humidity):
 	logging.info(
 		"Temperature[{0}]={1:0.1f}, Humidity[{0}]={2:0.1f}".format(
-		i,
-		temperature,
-		humidity
+			i,
+			temperature,
+			humidity
 		)
 	)
 
@@ -209,13 +209,10 @@ def main():
 
 	finally:
 		logging.debug("cleaning up")
-		try:
-			client.loop_stop()
-			client.unsubscribe(mqttSettings.topicTemperature)
-			client.unsubscribe(mqttSettings.topicHumidity)
-			client.disconnect()
-		except:
-			pass
+		client.loop_stop()
+		client.unsubscribe(mqttSettings.topicTemperature)
+		client.unsubscribe(mqttSettings.topicHumidity)
+		client.disconnect()
 
 
 if __name__ == "__main__":
