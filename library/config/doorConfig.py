@@ -38,6 +38,63 @@ class DoorMQTTConfiguration(MQTTConfiguration):
 		return self._config.get(ConfigKeys.MQTT_TOPIC_STATE, "")
 
 
+class DoorGPIOConfiguration(object):
+	def __init__(self, gpioDict):
+		super(DoorGPIOConfiguration, self).__init__()
+
+		self._config = {}
+		self.config = gpioDict
+
+	def __repr__(self):
+		return json.dumps(self.config, indent=2)
+
+	@property
+	def config(self):
+		return self._config
+
+	@config.setter
+	def config(self, gpioDict):
+		assert isinstance(gpioDict, dict), "Configuration must be of type dict"
+		self._config = gpioDict
+		self.config.setdefault('relay_toggle_delay', 0.3)
+
+	@property
+	def pinControl(self):
+		"""
+		Get the control pin GPIO #
+		@return: control pin GPIO #
+		@rtype: int or None
+		"""
+		if 'pin_control' in self.config:
+			return int(self.config.get('pin_control'))
+		else:
+			return None
+
+	@property
+	def pinSensor(self):
+		"""
+		Get the sense pin GPIO #
+		@return: sense pin GPIO #
+		@rtype: int or None
+		"""
+		if 'pin_sensor' in self.config:
+			return int(self.config.get('pin_sensor'))
+		else:
+			return None
+
+	@property
+	def relayToggleDelay(self):
+		"""
+		Get the relay toggle delay duration
+		@return: relay toggle delay duration
+		@rtype: float or None
+		"""
+		if 'relay_toggle_delay' in self.config:
+			return float(self.config.get('relay_toggle_delay'))
+		else:
+			return None
+
+
 class DoorConfig(object):
 
 	def __init__(self, configPath, debug=False):
@@ -76,14 +133,14 @@ class DoorConfig(object):
 	@property
 	def gpio(self):
 		"""
-		@rtype: dict[str, str]
+		@rtype: DoorGPIOConfiguration
 		"""
-		return self.config.get(ConfigKeys.GPIO, {})
+		return DoorGPIOConfiguration(self.config.get(ConfigKeys.GPIO, {}))
 
 	@property
 	def log(self):
 		"""
-		@rtype: str
+		@rtype: str or None
 		"""
 		return self.config.get(ConfigKeys.LOG_PATH)
 

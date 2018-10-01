@@ -25,24 +25,12 @@ import paho.mqtt.publish as pahopub
 import timeit
 import pprint
 from time import sleep
-# from multiprocessing import Process
 from threading import Thread
 
 from library.config.doorConfig import DoorConfig
 from library.config.pushbulletConfig import PushbulletConfig
 from cameraController import PiCameraController
 from library.services.pushbulletNotify import PushbulletImageNotify, PushbulletTextNotify
-
-# logging junk
-# Level		Numeric value
-# CRITICAL	 50
-# ERROR		40
-# WARNING	  30
-# INFO		 20
-# DEBUG		10
-# NOTSET		0
-
-# { "topic": "home-assistant/garage/switch", "payload": "TOGGLE", "qos": "1", "retain": "false" }
 
 
 class Error(Exception):
@@ -81,7 +69,8 @@ class DoorController(object):
 		logging.getLogger().setLevel(logging.DEBUG)
 
 		# read the config files
-		self.gpioSettings = {}
+		self.gpio = None
+		""" @type: library.config.doorConfig.DoorGPIOConfiguration """
 		self.settings = DoorConfig(doorConfigFile)
 
 		# finish setting up logging
@@ -170,12 +159,12 @@ class DoorController(object):
 		"""
 		Write the current setup to the debug stream
 		"""
-		self.logger.debug("\n----------------------------------------")
+		self.logger.debug("----------------------------------------")
 		self.logger.debug("\nMQTT Settings:\n{}".format(str(self.mqtt)))
-		self.logger.debug("\nGPIO Settings:\n{}".format(json.dumps(self.gpioSettings, indent=2)))
-		self.logger.debug("Camera enabled: {}\n".format(bool(self.camera)))
-		self.logger.debug("Notifications enabled: {}\n".format(bool(self.pushbullet)))
-		self.logger.debug("----------------------------------------\n")
+		self.logger.debug("\nGPIO Settings:\n{}".format(self.gpio))
+		self.logger.debug("Camera enabled: {}".format(bool(self.camera)))
+		self.logger.debug("Notifications enabled: {}".format(bool(self.pushbullet)))
+		self.logger.debug("----------------------------------------")
 
 	# endregion Logging
 	# region Threading
@@ -194,14 +183,17 @@ class DoorController(object):
 		sleep(2)
 
 		# launch monitor thread
-		try:
-			self.logger.debug("starting state thread")
-			self.monitor = True
-			self.monitorThread.start()
-		except:
-			self.logger.exception("Failed to start door state monitoring thread!")
-			self.cleanup()
-			raise
+		if self.canSenseDoor():
+			try:
+				self.logger.debug("starting state thread")
+				self.monitor = True
+				self.monitorThread.start()
+			except:
+				self.logger.exception("Failed to start door state monitoring thread!")
+				self.cleanup()
+				raise
+		else:
+			self.logger.warning("Cannot start door monitoring thread - GPIO pin # missing!")
 		
 	def cleanup(self):
 		"""
@@ -305,7 +297,7 @@ class DoorController(object):
 		if 'error' in response.result:
 			for key in ['iden', 'sender_iden', 'receiver_iden']:
 				del response.result[key]
-			self.logger.info("PushbulletTextNotify Error:\n{}".format(pprint.pformat(response.result)))
+			self.logger.error("PushbulletTextNotify Error:\n{}".format(pprint.pformat(response.result)))
 		else:
 			self.logger.info("PushbulletTextNotify Success")
 
@@ -368,7 +360,7 @@ class DoorController(object):
 						del result[key]
 					except KeyError:
 						pass
-				self.logger.info("PushbulletImageNotify Error:\n{}".format(pprint.pformat(result)))
+				self.logger.error("PushbulletImageNotify Error:\n{}".format(pprint.pformat(result)))
 			else:
 				self.logger.info("PushbulletImageNotify Success")
 
@@ -380,47 +372,60 @@ class DoorController(object):
 		"""
 		Set up GPIO for controlling & sensing door states
 		"""
-		self.gpioSettings = self.settings.gpio
+		self.gpio = self.settings.gpio
 		GPIO.setmode(GPIO.BCM)
 
-		# initialize sesnsor
 		# TODO: add ability to configure as pull-up or pull-down
-		GPIO.setup(self.gpioSettings['pin_sensor'], GPIO.IN, pull_up_down=GPIO.PUD_UP)
-		self.getState()
+		if self.canSenseDoor():
+			GPIO.setup(self.gpio.pinSensor, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+			self.getState()
+		else:
+			self.logger.warning("GPIO door state monitoring disabled - missing GPIO pin #")
 
-		# initialize control (relay
-		GPIO.setup(self.gpioSettings['pin_control'], GPIO.OUT)
-		# ensure control output is LOW
-		self.off()
+		if self.canControlDoor():
+			GPIO.setup(self.gpio.pinControl, GPIO.OUT)
+			# ensure control output is LOW
+			self.off()
+		else:
+			self.logger.warning("GPIO door control disabled - missing GPIO pin # or MQTT info")
 		
 	def on(self):
 		"""
 		Set GPIO output HIGH for control pin
 		"""
 		self.logger.debug("control - on")
-		GPIO.output(self.gpioSettings['pin_control'], GPIO.HIGH)
+		GPIO.output(self.gpio.pinControl, GPIO.HIGH)
 		
 	def off(self):
 		"""
 		Set GPIO output LOW for control pin
 		"""
 		self.logger.debug("control - off")
-		GPIO.output(self.gpioSettings['pin_control'], GPIO.LOW)
+		GPIO.output(self.gpio.pinControl, GPIO.LOW)
 		
 	def toggle(self):
 		"""
 		Toggle GPIO relay
 		"""
 		self.on()
-		sleep(self.gpioSettings.get('relay_toggle_delay', 0.3))
+		sleep(self.gpio.relayToggleDelay)
 		self.off()
 		
 	def getState(self):
 		"""
 		Get current state of GPIO input pin
+		@rtype: bool or None
+		"""
+		if not self.canSenseDoor():
+			return None
+		return bool(GPIO.input(self.gpio.pinSensor))
+
+	def canSenseDoor(self):
+		"""
+		Check if we can sense the door
 		@rtype: bool
 		"""
-		return bool(GPIO.input(self.gpioSettings['pin_sensor']))
+		return self.gpio.pinSensor is not None
 
 	# endregion GPIO
 	# region MQTT
@@ -437,7 +442,7 @@ class DoorController(object):
 			'topicControl': self.mqtt.topicControl,
 			'port': self.mqtt.port
 		}
-		return all([val not in [None, ''] for val in requirements.itervalues()])
+		return all([val not in [None, ''] for val in requirements.itervalues()]) and self.gpio.pinControl is not None
 
 	def setupMQTT(self):
 		"""

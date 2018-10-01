@@ -1,8 +1,6 @@
 {
   "gpio": {
-    "pin_control": 17,
-    "pin_sensor": 4,
-    "relay_toggle_delay": 0.3
+    "pin_sensor": 4
   },
   "mqtt": {
     "client": "garageDoor",
