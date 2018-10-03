@@ -136,11 +136,11 @@ def main():
 	logging.debug("mqtt_port:      {}".format(mqttSettings.port))
 	logging.debug("mqtt_topic_t:   {}".format(mqttSettings.topicTemperature))
 	logging.debug("mqtt_topic_h:   {}".format(mqttSettings.topicHumidity))
-	logging.debug("client: {}".format(client))
+	logging.debug("client: {}".format(client._client_id))
 
 	# set up the sensor
 	logging.debug("Setting up humidity sensor")
-	environmentSensor = SensorHumidity(sensorType=config.dhtType, pin=config.dhtPin, units="fahrenheit")
+	environmentSensor = SensorHumidity(sensorType=config.dhtType, pin=config.dhtPin, units="fahrenheit", debug=debugEnable)
 	try:
 		logging.debug("Beginning 5 warmup readings")
 		for i in xrange(0, 5):
