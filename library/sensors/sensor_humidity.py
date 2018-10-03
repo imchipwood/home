@@ -58,10 +58,10 @@ class SensorHumidity(Sensor):
 	@property
 	def temperature(self):
 		"""
-		@return: The most recent temperature reading
+		@return: The most recent temperature reading in the desired units
 		@rtype: float
 		"""
-		return self._temperature
+		return self.celsius if self.isCelsius() else self.fahrenheit
 
 	@property
 	def humidity(self):
@@ -70,6 +70,32 @@ class SensorHumidity(Sensor):
 		@rtype: float
 		"""
 		return self._humidity
+
+	def isCelsius(self):
+		"""
+		Check if we're set to Celsius
+		@return: whether or not current units are set to celsius
+		@rtype: bool
+		"""
+		return self.units == 'celsius'
+
+	@property
+	def fahrenheit(self):
+		"""
+		Get the most recent temperature reading in Fahrenheit
+		@return: temperature in Fahrenheit
+		@rtype: float
+		"""
+		return self._temperature * 9.0 / 5.0 + 32.0
+
+	@property
+	def celsius(self):
+		"""
+		Get the most recent temperature reading in Celsius
+		@return: temperature in Celsius
+		@rtype: float
+		"""
+		return self._temperature
 
 	@property
 	def units(self):
