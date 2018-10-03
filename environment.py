@@ -210,8 +210,8 @@ def main():
 	finally:
 		logging.debug("cleaning up")
 		client.loop_stop()
-		client.unsubscribe(mqttSettings.topicTemperature)
-		client.unsubscribe(mqttSettings.topicHumidity)
+		# client.unsubscribe(mqttSettings.topicTemperature)
+		# client.unsubscribe(mqttSettings.topicHumidity)
 		client.disconnect()
 
 
