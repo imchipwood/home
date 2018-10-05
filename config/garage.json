@@ -1,0 +1,7 @@
+{
+  "sensors": {
+    "door": "garage_door.json",
+    "camera": "garage_camera.json"
+  },
+  "mqtt": "mqtt.json"
+}

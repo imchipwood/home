@@ -2,8 +2,5 @@
   "sensors": {
     "environment": "media_environment.json"
   },
-  "mqtt": {
-    "broker": "192.168.1.18",
-    "port": 1883
-  }
+  "mqtt": "mqtt.json"
 }

@@ -1,0 +1,18 @@
+{
+  "log": "/home/cpw/dev/logs/garageCamera.txt",
+  "settings": {
+    "iso": {
+      "day": 200,
+      "night": 800
+    },
+    "delay": 10,
+    "resolution": [3280, 2464],
+    "rotation": 180,
+    "brightness": 50,
+    "contrast": 0
+  },
+  "location": {
+    "city": "Seattle"
+  },
+  "capture_path": "/home/cpw/camera/captures/garage.jpg"
+}
