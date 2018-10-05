@@ -94,6 +94,12 @@ class DoorController(object):
 
 		self.logCurrentSetup()
 
+	def __repr__(self):
+		"""
+		@rtype: str
+		"""
+		return "Open" if self.open else "Closed"
+
 	@property
 	def open(self):
 		"""
@@ -363,7 +369,7 @@ class DoorController(object):
 		"""
 		if self.canPublishState():
 			try:
-				self.publish(self.state)
+				self.publish(str(self))
 			except:
 				self.logger.exception("MQTT: Failed to publish door state!")
 		else:
