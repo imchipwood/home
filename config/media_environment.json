@@ -1,0 +1,14 @@
+{
+  "log": "/home/cpw/dev/logs/environment.log",
+  "type": 22,
+  "pin": 4,
+  "mqtt": {
+    "client_id": "pi_media",
+    "topics": {
+      "publish": {
+        "temperature": "home-assistant/media/temperature",
+        "humidity": "home-assistant/media/humidity"
+      }
+    }
+  }
+}
