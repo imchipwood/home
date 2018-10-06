@@ -1,0 +1,56 @@
+
+Goal:
+Refactor everything to have a single entry point script, with enabled components controlled completely by
+the configuration file. I.E. define sensors in the JSON configuration files and that will enable/disable
+components as necessary.
+
+TODO:
+1. Create JSON configuration files in a modular manner
+
+2. Create configuration handler
+    single configuration should have different sections for different sensors
+        sensors
+            (environment)
+            (door)
+                Include configuration for type of door - open/closed vs unlocked/locked
+        mqtt
+        pushbullet
+    Each sensor should have an mqtt section with these keys (if MQTT is to be used by that sensor)
+        client_id
+        topics - should have internal sections with these keys
+            publish
+            subscribe
+    Each sensor should also have a "log" key with the path to the log
+
+    The configuration handler should parse out the sensors & MQTT settings
+        a. Instantiate an MQTT object for passing to sensor objects
+        b. Instantiate the sensor objects
+        c. Return all instantiated sensor objects in a dictionary keyed by the sensor names (door, environment, etc.)
+
+3. Create MQTT object that encapsulates all necessary methods for publishing
+   This object should:
+    a. Extend the paho.Client object
+    b. Take the base MQTT configuration path as an arg
+    c. Set up all callbacks
+
+4. Create new environment "sensor" object that periodically reads the sensor and publishes to MQTT via threading
+   The new object should:
+    a. Take the environment sensor & MQTT config paths as arguments
+    b. Instantiate the environment sensor object with the environment sensor & MQTT config paths
+    c. Create a thread that periodically reads the sensor and publishes the results as a JSON object with both readings
+
+5. Create new DoorMonitor object that launches a thread to monitor the door and publish changes in state to MQTT
+   The new object should:
+    a. Take the door monitor & MQTT config paths as arguments
+    d. Instantiate the door monitor object with the config paths
+    c. Create a thread that periodically reads the sensor and publishes the door state as a simple string
+
+6. Create new DoorControl object that simply subscribes to the appropriate MQTT topic and waits for commands
+   The new object should:
+    a. Take the door control & MQTT config paths as arguments
+    b. Instantiate the door control object with the config paths
+    c. Subscribe to the topic and perform the necessary actions when a message is received
+
+8. Create single entry point script (home.py) that takes a single configuration file argument (and debug flag)
+    Imports configuration handler which then instantiates the appropriate sensor objects and kicks them off
+

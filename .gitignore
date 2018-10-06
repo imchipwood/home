@@ -4,7 +4,9 @@
 */*/*/*.pyc
 */cpw*
 .idea
-doc
+#doc
+smb.conf
+test.json
 *venv*
 *pytest_cache*
 *pushbulletSettings*
