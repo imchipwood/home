@@ -39,23 +39,30 @@ TODO:
     b. Instantiate the environment sensor object with the environment sensor & MQTT config paths
     c. Create a thread that periodically reads the sensor and publishes the results as a JSON object with both readings
 
-5. Create new DoorMonitor object that launches a thread to monitor the door and publish changes in state to MQTT
+5. Create new Camera object that can subscribe to an MQTT topic and wait for a command to take a picture
    The new object should:
-    a. Take the door monitor & MQTT config paths as arguments
-    d. Instantiate the door monitor object with the config paths
+    a. Extend the existing PiCamera object
+    b. Take the camera & MQTT config paths as arguments
+    c. Subscribe to the MQTT topic if MQTT info is provided
+    d. Handle situation where picture is being taken and a new request to take a picture is issued
+
+6. Create new DoorMonitor object that launches a thread to monitor the door and publish changes in state to MQTT
+   The new object should:
+    a. Take the door monitor, camera, and MQTT config paths as arguments
+    d. Instantiate the config objects and create the GPIO sensor & camera objects using the config objects
     c. Create a thread that periodically reads the sensor and publishes the door state as a simple string
 
-6. Create new DoorControl object that simply subscribes to the appropriate MQTT topic and waits for commands
+7. Create new DoorControl object that simply subscribes to the appropriate MQTT topic and waits for commands
    The new object should:
     a. Take the door control & MQTT config paths as arguments
     b. Instantiate the door control object with the config paths
     c. Subscribe to the topic and perform the necessary actions when a message is received
 
-7. Create new Door object that encapsulates both the DoorMonitor & DoorControl objects
+8. Create new Door object that encapsulates both the DoorMonitor & DoorControl objects
    The new object should:
-    a. Take the door monitor, door control, and MQTT config paths as arguments
+    a. Take the door monitor, door control, camera, and MQTT config paths as arguments
     b. Instantiate the door monitor & control objects with the config paths. Skip sensors without config files
 
-8. Create single entry point script (home.py) that takes a single configuration file argument (and debug flag)
+9. Create single entry point script (home.py) that takes a single configuration file argument (and debug flag)
     Imports configuration handler which then instantiates the appropriate sensor objects and kicks them off
 

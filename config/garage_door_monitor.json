@@ -1,8 +1,9 @@
 {
-  "log": "/home/cpw/dev/logs/doorMonitor.log",
+  "log": "/home/cpw/dev/logs/garageDoorMonitor.log",
   "gpio": {
     "pin": 4
   },
+  "camera": "garage_door_camera.json",
   "mqtt": {
     "client_id": "pi_garage",
     "topics": {

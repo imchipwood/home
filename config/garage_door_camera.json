@@ -1,4 +1,5 @@
 {
+  "log": "/home/cpw/dev/logs/garageDoorCamera.txt",
   "settings": {
     "iso": {
       "day": 200,
@@ -13,6 +14,5 @@
   "location": {
     "city": "Seattle"
   },
-  "capture_path": "/home/cpw/camera/captures/garage.jpg",
-  "log": "/home/cpw/dev/logs/garageCamera.txt"
+  "capture_path": "/home/cpw/camera/captures/garage.jpg"
 }
