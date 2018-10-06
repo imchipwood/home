@@ -9,7 +9,7 @@
     "topics": {
       "publish": {
         "state": "home-assistant/garage/state"
-      },
+      }
     }
   }
 }
