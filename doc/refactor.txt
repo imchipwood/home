@@ -51,6 +51,11 @@ TODO:
     b. Instantiate the door control object with the config paths
     c. Subscribe to the topic and perform the necessary actions when a message is received
 
+7. Create new Door object that encapsulates both the DoorMonitor & DoorControl objects
+   The new object should:
+    a. Take the door monitor, door control, and MQTT config paths as arguments
+    b. Instantiate the door monitor & control objects with the config paths. Skip sensors without config files
+
 8. Create single entry point script (home.py) that takes a single configuration file argument (and debug flag)
     Imports configuration handler which then instantiates the appropriate sensor objects and kicks them off
 

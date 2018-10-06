@@ -1,0 +1,15 @@
+{
+  "log": "/home/cpw/dev/logs/doorControl.log",
+  "gpio": {
+    "pin": 17,
+    "toggle_delay": 0.3
+  },
+  "mqtt": {
+    "client_id": "pi_garage",
+    "topics": {
+      "subscribe": {
+        "control": "home-assistant/garage/control"
+      }
+    }
+  }
+}

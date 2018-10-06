@@ -1,0 +1,14 @@
+{
+  "log": "/home/cpw/dev/logs/doorMonitor.log",
+  "gpio": {
+    "pin": 4
+  },
+  "mqtt": {
+    "client_id": "pi_garage",
+    "topics": {
+      "publish": {
+        "state": "home-assistant/garage/state"
+      },
+    }
+  }
+}
