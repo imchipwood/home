@@ -1,32 +1,92 @@
+import os
 import json
+
+from definitions import CONFIG_DIR
 
 
 class BaseConfiguration(object):
 	def __init__(self, configpath):
 		super(BaseConfiguration, self).__init__()
 
+		self._configpath = ""
 		self._config = {}
 		self.config = configpath
 
 	def loadconfig(self, configpath):
+		"""
+		Load a JSON config file and return its contents
+		@param configpath: path to config file
+		@type configpath: str
+		@return: JSON data
+		@rtype: dict
+		"""
 		with open(configpath, 'r') as inf:
 			return json.load(inf)
 
 	@property
 	def config(self):
+		"""
+		Get the current config dict
+		@return: current config dict
+		@rtype: dict
+		"""
 		return self._config
 
 	@config.setter
 	def config(self, configpath):
-		self._config = self.loadconfig(configpath)
+		"""
+		Set a new config using a path to a JSON file
+		@param configpath: path to config file
+		@type configpath: str
+		"""
+		configpath = self.normalizeconfigpath(configpath)
+		self._configpath = configpath
+		self._config = self.loadconfig(self._configpath)
+
+	@staticmethod
+	def normalizeconfigpath(configpath):
+		"""
+		Normalize a config file path to the config dir of the repo
+		@param configpath: relative config path
+		@type configpath: str
+		@return: normalized, absolute config path
+		@rtype: str or None
+		"""
+		if not configpath:
+			return None
+		elif os.path.exists(configpath):
+			return configpath
+		else:
+			# Assume it's in the config directory
+			return os.path.join(CONFIG_DIR, configpath)
 
 	@property
 	def sensorpaths(self):
+		"""
+		Get the sensor config path dict
+		@return: dict of sensor config paths
+		@rtype: dict[str, str]
+		"""
 		return self.config.get('sensors')
+
+	def getsensorpath(self, sensor):
+		"""
+		Get the config path for the target sensor
+		@param sensor: target sensor
+		@type sensor: str
+		@return: Path to sensor config
+		@rtype: str
+		"""
+		return self.normalizeconfigpath(self.sensorpaths.get(sensor))
 
 	@property
 	def mqttpath(self):
-		return self.config.get('mqtt')
+		"""
+		Get the path to the base MQTT configuration file
+		@return: path to base MQTT configuration file if it exists
+		@rtype: str or None
+		"""
+		return self.normalizeconfigpath(self.config.get('mqtt'))
 
 
 class MQTTConfiguration(object):
