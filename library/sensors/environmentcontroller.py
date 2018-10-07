@@ -1,8 +1,7 @@
 
 
 class EnvironmentController(object):
-	def __init__(self, configpath, mqttconfig=None):
+	def __init__(self, config):
 		super(EnvironmentController, self).__init__()
 
-		self._configpath = configpath
-		self._mqttconfig = mqttconfig
+		self.config = config

@@ -66,6 +66,19 @@ class ConfigurationHandler(BaseConfiguration):
 		else:
 			return None
 
+	def getsensorcontroller(self, sensor):
+		"""
+		Get the sensor object for the given sensor
+		@param sensor: target sensor
+		@type sensor: str
+		@return: sensor object
+		@rtype: object
+		"""
+		if sensor in self.SENSOR_CLASS_MAP:
+			return self.SENSOR_CLASS_MAP[sensor](self.getsensorconfig(sensor))
+		else:
+			return None
+
 
 if __name__ == "__main__":
 	configpath = "media.json"
@@ -75,5 +88,7 @@ if __name__ == "__main__":
 	# print(mqttconfig.client_id)
 
 	env = config.getsensorconfig('environment')
-	print(env)
+	# print(env)
 	print(env.mqttconfig)
+	print(env.pin)
+	print(env.type)
