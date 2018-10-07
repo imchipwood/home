@@ -12,6 +12,9 @@ class BaseConfiguration(object):
 		self._config = {}
 		self.config = configpath
 
+	def __repr__(self):
+		return json.dumps(self.config, indent=2)
+
 	def loadconfig(self, configpath):
 		"""
 		Load a JSON config file and return its contents
@@ -87,6 +90,10 @@ class BaseConfiguration(object):
 		@rtype: str or None
 		"""
 		return self.normalizeconfigpath(self.config.get('mqtt'))
+
+	@property
+	def log(self):
+		return self.config.get('log')
 
 
 class MQTTConfiguration(object):
