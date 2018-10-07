@@ -1,6 +1,34 @@
 import json
 
 
+class BaseConfiguration(object):
+	def __init__(self, configpath):
+		super(BaseConfiguration, self).__init__()
+
+		self._config = {}
+		self.config = configpath
+
+	def loadconfig(self, configpath):
+		with open(configpath, 'r') as inf:
+			return json.load(inf)
+
+	@property
+	def config(self):
+		return self._config
+
+	@config.setter
+	def config(self, configpath):
+		self._config = self.loadconfig(configpath)
+
+	@property
+	def sensorpaths(self):
+		return self.config.get('sensors')
+
+	@property
+	def mqttpath(self):
+		return self.config.get('mqtt')
+
+
 class MQTTConfiguration(object):
 	def __init__(self, mqttDict):
 		super(MQTTConfiguration, self).__init__()

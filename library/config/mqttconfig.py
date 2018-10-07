@@ -70,6 +70,15 @@ class MQTTConfig(MQTTBaseConfig):
 		"""
 		return self.config.get('client_id', "")
 
+	@client_id.setter
+	def client_id(self, client_id):
+		"""
+		Change the client ID
+		@param client_id: new client ID
+		@type client_id: str
+		"""
+		self.config['client_id'] = client_id
+
 	@property
 	def topics_publish(self):
 		"""
@@ -88,9 +97,6 @@ class MQTTConfig(MQTTBaseConfig):
 		"""
 		return self.config.get('topics', {}).get('subscribe', {})
 
-	def __repr__(self):
-		return self.client_id or ""
-
 
 if __name__ == "__main__":
 	import os
@@ -100,4 +106,5 @@ if __name__ == "__main__":
 	config = MQTTConfig(configpath, sensorconfigpath)
 	print(config)
 	print(config.topics_publish.get('state'))
+	print(config.client_id)
 
