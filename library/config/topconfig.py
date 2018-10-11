@@ -5,7 +5,7 @@ from library.config import BaseConfiguration
 from library.config.mqttconfig import MQTTConfig
 from library.config.environmentconfig import EnvironmentConfig
 
-from library.sensors.environmentcontroller import EnvironmentController
+from library.controllers.environmentcontroller import EnvironmentController
 
 
 class ConfigurationHandler(BaseConfiguration):

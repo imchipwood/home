@@ -9,9 +9,10 @@ class MQTTClient(Client):
 		"""
 		@type mqttconfig: MQTTConfig
 		"""
+		self.config = mqttconfig
 		if mqttconfig:
 			super(MQTTClient, self).__init__(
-				client_id=mqttconfig.client_id,
+				client_id=self.config.client_id,
 				clean_session=clean_session,
 				userdata=userdata,
 				protocol=protocol,
@@ -25,8 +26,6 @@ class MQTTClient(Client):
 				protocol=protocol,
 				transport=transport
 			)
-
-		self.config = mqttconfig
 
 	def connect(self, host="", port=1883, keepalive=60, bind_address=""):
 		"""

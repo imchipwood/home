@@ -33,3 +33,30 @@ class EnvironmentConfig(BaseConfiguration):
 		@rtype: int
 		"""
 		return self.config.get('pin')
+
+	@property
+	def units(self):
+		"""
+		Get the desired temperature units
+		@return: temperature units
+		@rtype: str
+		"""
+		return self.config.get('units')
+
+	@property
+	def mqtttopic(self):
+		"""
+		Get the MQTT topic to publish environment info to
+		@return: topic to publish environment info to
+		@rtype: str
+		"""
+		return self.mqttconfig.topics_publish['environment']
+
+	@property
+	def period(self):
+		"""
+		Get the period for reading the sensor
+		@return: period in seconds. Default: 300
+		@rtype: int
+		"""
+		return int(self.config.get('period', 5 * 60))

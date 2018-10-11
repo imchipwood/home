@@ -7,7 +7,7 @@ import paho.mqtt.client as paho
 from time import sleep, time
 import datetime
 
-from library.sensors.sensor_humidity import SensorHumidity
+from library.sensors.sensor_environment import EnvironmentSensor
 from library.config.environmentConfig import EnvironmentConfig
 
 
@@ -140,7 +140,7 @@ def main():
 
 	# set up the sensor
 	logging.debug("Setting up humidity sensor")
-	environmentSensor = SensorHumidity(sensorType=config.dhtType, pin=config.dhtPin, units="fahrenheit", debug=debugEnable)
+	environmentSensor = EnvironmentSensor(sensorType=config.dhtType, pin=config.dhtPin, units="fahrenheit", debug=debugEnable)
 	try:
 		logging.debug("Beginning 5 warmup readings")
 		for i in xrange(0, 5):
