@@ -1,0 +1,6 @@
+{
+  "sensors": {
+    "environment": "media_environment_ubuntu.json"
+  },
+  "mqtt": "mqtt.json"
+}

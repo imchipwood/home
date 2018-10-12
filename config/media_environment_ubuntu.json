@@ -1,0 +1,15 @@
+{
+  "log": "/mnt/plex/dev/personal/home/log/environment.log",
+  "type": 22,
+  "pin": 4,
+  "units": "fahrenheit",
+  "period": 10,
+  "mqtt": {
+    "client_id": "pi_media",
+    "topics": {
+      "publish": {
+        "environment": "home-assistant/test/sub"
+      }
+    }
+  }
+}
