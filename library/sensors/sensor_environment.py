@@ -2,7 +2,7 @@ import logging
 
 try:
 	import Adafruit_DHT
-except ModuleNotFoundError:
+except:
 	logging.warn("Couldn't import Adafruit_DHT - assuming this machine is not a Raspberry Pi and importing the mock module.")
 	import library.sensors.Adafruit_DHT_mock as Adafruit_DHT
 
