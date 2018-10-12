@@ -92,6 +92,7 @@ class EnvironmentSensor(Sensor):
 		self.resetReadings()
 		for i in range(n):
 			temperature[i], humidity[i] = self.read()
+			logging.debug("{} - temp: {:0.1f}, hum: {:0.1f}".format(i, temperature[i], humidity[i]))
 
 		self.temperature = avg(temperature)
 		self.humidity = avg(humidity)
