@@ -79,7 +79,7 @@ class EnvironmentController(object):
 
 				# Do the readings
 				try:
-					temperature, humidity = self.sensor.readntimes(5)
+					humidity, temperature = self.sensor.readntimes(5)
 				except:
 					self.logger.exception('Failed to read environment sensor!')
 					continue

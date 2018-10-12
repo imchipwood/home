@@ -56,7 +56,7 @@ class EnvironmentSensor(Sensor):
 	def read(self):
 		"""
 		Read sensor and store results
-		@return: tuple of latest readings, temperature then humidity
+		@return: tuple of latest readings, humidity then temperature
 		@rtype: tuple[float, float]
 		"""
 		if not self.state:
@@ -64,15 +64,17 @@ class EnvironmentSensor(Sensor):
 			logging.warn("Sensor is disabled - will not read as requested!")
 			return None, None
 
-		self.humidity, self.temperature = Adafruit_DHT.read_retry(self.sensorType, self.pin)
-		return self.celcius, self.humidity
+		humidity, temperature = Adafruit_DHT.read_retry(self.sensorType, self.pin)
+		self.humidity = humidity
+		self.temperature = temperature
+		return humidity, temperature
 
 	def readntimes(self, n=5):
 		"""
 		Read the environment sensor n times and return the average
 		@param n: number of times to read the sensor. Default: 5
 		@type n: int or float or str
-		@return: tuple of averaged readings
+		@return: tuple of averaged readings, humidity then temperature
 		@rtype: tuple(float, float)
 		"""
 		# Convert n to an int and ensure it's valid
@@ -94,10 +96,10 @@ class EnvironmentSensor(Sensor):
 			temperature[i], humidity[i] = self.read()
 			logging.debug("{} - temp: {:0.1f}, hum: {:0.1f}".format(i, temperature[i], humidity[i]))
 
-		self.temperature = avg(temperature)
 		self.humidity = avg(humidity)
+		self.temperature = avg(temperature)
 
-		return self.temperature, self.humidity
+		return self.humidity, self.temperature
 
 	@property
 	def temperature(self):
@@ -111,7 +113,7 @@ class EnvironmentSensor(Sensor):
 	def temperature(self, temperature):
 		"""
 		Set a new temperature
-		@param temperature: new temperature
+		@param temperature: new temperature in Celsius
 		@type temperature: float or int or str
 		"""
 		self._temperature = float(temperature) if temperature is not None else -999.0
