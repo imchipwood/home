@@ -1,7 +1,6 @@
 import logging
 from threading import Thread
 import timeit
-import time
 import json
 
 from library import setup_logging
@@ -46,7 +45,10 @@ class EnvironmentController(object):
 
 		# Set up the thread
 		self.running = False
-		self.thread = Thread(target=self.loop, args=[])
+		self.thread = Thread(target=self.loop)
+		self.thread.daemon = True
+
+	# region Threading
 
 	def start(self):
 		"""
@@ -65,13 +67,13 @@ class EnvironmentController(object):
 
 	def loop(self):
 		"""
-		Looping method for threading
+		Looping method for threading - reads sensor @ desired intervals and publishes results
 		"""
 		lasttime = 0
 		while self.running:
-			now = float(timeit.default_timer())
 
-			# Adhere to the reading frequency
+			# Read at the desired frequency
+			now = float(timeit.default_timer())
 			if now - lasttime > self.config.period:
 				lasttime = now
 
@@ -83,26 +85,42 @@ class EnvironmentController(object):
 					continue
 
 				# Publish
-				if self.mqtt:
-					payload = {
-						'temperature': "{:0.1f}".format(temperature),
-						'humidity': "{:0.1f}".format(humidity)
-					}
-					self.logger.info("Publishing to {}: {}".format(
-						self.config.mqtttopic,
-						json.dumps(payload, indent=2))
-					)
-					try:
-						self.mqtt.single(
-							topic=self.config.mqtttopic,
-							payload=payload
-						)
-					except:
-						self.logger.exception("Failed to publish MQTT data!")
+				self.publish(humidity, temperature, self.sensor.units)
 
-			else:
-				# Haven't waited long enough - sleep for a bit
-				time.sleep(10)
+	# endregion Threading
+	# region Communication
+
+	def publish(self, humidity, temperature, units):
+		"""
+		Broadcast environment readings
+		@param humidity: humidity %
+		@type humidity: float
+		@param temperature: temperature
+		@type temperature: float
+		@param units: temperature units
+		@type units: str
+		"""
+		if not self.mqtt:
+			return
+
+		payload = {
+			"temperature": "{:0.1f}".format(temperature),
+			"humidity": "{:0.1f}".format(humidity),
+			"units": units
+		}
+		self.logger.info("Publishing to {}: {}".format(
+			self.config.mqtttopic,
+			json.dumps(payload, indent=2))
+		)
+		try:
+			self.mqtt.single(
+				topic=self.config.mqtttopic,
+				payload=payload
+			)
+		except:
+			self.logger.exception("Failed to publish MQTT data!")
+
+	# endregion Communication
 
 	def cleanup(self):
 		"""
@@ -111,3 +129,9 @@ class EnvironmentController(object):
 		self.logger.info("Stopping environment thread...")
 		self.running = False
 		self.logger.info("Cleanup complete")
+
+	def __repr__(self):
+		"""
+		@rtype: str
+		"""
+		return "{}|{}|{}".format(self.__class__, self.config.type, self.config.pin)

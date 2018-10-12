@@ -1,3 +1,4 @@
+import json
 from paho.mqtt.client import Client, MQTTv311
 from paho.mqtt import publish
 
@@ -58,6 +59,8 @@ class MQTTClient(Client):
 		"""
 		paho.mqtt.publish.single method
 		"""
+		if isinstance(payload, dict):
+			payload = json.dumps(payload)
 		publish.single(
 			topic=topic,
 			payload=payload,

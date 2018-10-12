@@ -24,6 +24,10 @@ class ConfigurationHandler(BaseConfiguration):
 
 	def __init__(self, configpath):
 		super(ConfigurationHandler, self).__init__(configpath)
+		self._currentsensor = 0
+		self.sensors = list(self.config.get('sensors', {}))
+
+	# region Sensors
 
 	@property
 	def mqttconfigpath(self):
@@ -78,6 +82,38 @@ class ConfigurationHandler(BaseConfiguration):
 			return self.SENSOR_CLASS_MAP[sensor](self.getsensorconfig(sensor))
 		else:
 			return None
+
+	# endregion Sensors
+	# region BuiltIns
+
+	def __repr__(self):
+		"""
+		@rtype: str
+		"""
+		return "({})".format(", ".join(self.sensors))
+
+	def __iter__(self):
+		"""
+		Yield a sensor one at a time
+		@return: sensor controllers iteratively
+		"""
+		self._currentsensor = 0
+		for sensor in self.config.get('sensors', {}):
+			yield self.getsensorcontroller(sensor)
+
+	def __next__(self):
+		"""
+		Get the next sensor
+		@return: sensor controller
+		"""
+		if self._currentsensor < len(self.sensors):
+			sensor = self.sensors[self._currentsensor]
+			self._currentsensor += 1
+			return self.getsensorcontroller(sensor)
+		else:
+			raise StopIteration
+
+		# endregion BuiltIns
 
 
 if __name__ == "__main__":
