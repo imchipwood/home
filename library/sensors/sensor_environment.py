@@ -65,7 +65,7 @@ class EnvironmentSensor(Sensor):
 			return None, None
 
 		self.humidity, self.temperature = Adafruit_DHT.read_retry(self.sensorType, self.pin)
-		return self.temperature, self.humidity
+		return self.celcius, self.humidity
 
 	def readntimes(self, n=5):
 		"""
