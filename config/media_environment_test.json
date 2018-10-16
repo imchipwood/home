@@ -1,5 +1,5 @@
 {
-  "log": "/mnt/plex/dev/personal/home/log/environment.log",
+  "log": "/tmp/environment.log",
   "type": 22,
   "pin": 4,
   "units": "fahrenheit",
