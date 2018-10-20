@@ -1,3 +1,9 @@
+"""
+home.py
+Author: Charles "Chip" Wood, imchipwood@gmail.com, github.com/imchipwood
+Entry point for all Raspberry Pi-based home automation sensors
+"""
+
 import argparse
 import logging
 
@@ -52,9 +58,7 @@ def execute():
             try:
                 sensor.cleanup()
             except:
-                logging.exception(
-                    "Exception cleaning up sensor {}".format(sensor)
-                )
+                logging.exception("Exception cleaning up sensor %s", sensor)
 
 
 if __name__ == "__main__":
