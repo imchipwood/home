@@ -17,5 +17,5 @@ class TestEnvironmentController:
 		while CONTROLLER.thread.isAlive():
 			time.sleep(0.01)
 			i += 1
-			if i > 100:
+			if i > 1000:
 				assert False, "Thread didn't stop!"
