@@ -18,8 +18,8 @@ class ConfigKeys:
 
 
 class DoorMQTTConfiguration(MQTTConfiguration):
-	def __init__(self, mqttDict):
-		super(DoorMQTTConfiguration, self).__init__(mqttDict)
+	def __init__(self, mqtt_dict):
+		super(DoorMQTTConfiguration, self).__init__(mqtt_dict)
 
 	@property
 	def topicControl(self):

@@ -4,13 +4,12 @@ try:
 	import Adafruit_DHT
 except:
 	logging.warning("Couldn't import Adafruit_DHT - assuming this machine is not a Raspberry Pi and importing the mock module.")
-	import library.sensors.Adafruit_DHT_mock as Adafruit_DHT
+	import library.mock.mock_Adafruit_DHT as Adafruit_DHT
 
-from library.sensors.sensor import Sensor
 from library.sensors import avg
 
 
-class EnvironmentSensor(Sensor):
+class EnvironmentSensor(object):
 	VALID_TEMPERATURE_UNITS = ["celsius", "fahrenheit"]
 	VALID_DHT_TYPES = {
 		"11": Adafruit_DHT.DHT11,
@@ -18,11 +17,11 @@ class EnvironmentSensor(Sensor):
 		"2302": Adafruit_DHT.AM2302
 	}
 
-	def __init__(self, sensorType, pin, units="fahrenheit", debug=False):
+	def __init__(self, sensor_type, pin, units="fahrenheit", debug=False):
 		"""
 		Constructor for SensorHumidity object
-		@param sensorType: Desired Adafruit DHT sensor type
-		@type sensorType: int or str
+		@param sensor_type: Desired Adafruit DHT sensor type
+		@type sensor_type: int or str
 		@param pin: GPIO pin for reading sensor
 		@type pin: int or str
 		@param units: Desired temperature units. Fahrenheit or Celsius
@@ -36,22 +35,24 @@ class EnvironmentSensor(Sensor):
 
 		# Initialize values for readings
 		self._temperature = -999.0
+		self.temperature = -999.0
 		self._humidity = -999.0
+		self.humidity = -999.0
 
 		# Set the sensor type & pin #
-		self._sensorType = Adafruit_DHT.DHT11
-		self.sensorType = sensorType
+		self._sensor_type = Adafruit_DHT.DHT11
+		self.sensor_type = sensor_type
 		self.pin = pin
 
 		self._units = "fahrenheit"
 		self.units = units
 
-	def resetReadings(self):
+	def reset_readings(self):
 		"""
 		Reset the stored temperature/humidity values
 		"""
-		self._humidity = -999.0
-		self._temperature = -999.0
+		self.humidity = -999.0
+		self.temperature = -999.0
 
 	def read(self):
 		"""
@@ -59,19 +60,16 @@ class EnvironmentSensor(Sensor):
 		@return: tuple of latest readings, humidity then temperature
 		@rtype: tuple[float, float]
 		"""
-		if not self.state:
-			self.resetReadings()
-			logging.warning("Sensor is disabled - will not read as requested!")
-			return None, None
-
-		humidity, temperature = Adafruit_DHT.read_retry(self.sensorType, self.pin)
+		humidity, temperature = Adafruit_DHT.read_retry(self.sensor_type, self.pin)
 		self.humidity = humidity
 		self.temperature = temperature
 		return humidity, temperature
 
-	def readntimes(self, n=5):
+	def read_n_times(self, n=5):
 		"""
 		Read the environment sensor n times and return the average
+		Also sets the humidity/temperature class properties to the calculated
+		average
 		@param n: number of times to read the sensor. Default: 5
 		@type n: int or float or str
 		@return: tuple of averaged readings, humidity then temperature
@@ -85,13 +83,8 @@ class EnvironmentSensor(Sensor):
 		temperature = [0.0] * n
 		humidity = [0.0] * n
 
-		# Check that we're enabled
-		if not self.state:
-			logging.warning("Sensor is disabled - will not read it {} times as requested!".format(n))
-			return None, None
-
 		# Everything is good - do the readings
-		self.resetReadings()
+		self.reset_readings()
 		for i in range(n):
 			humidity[i], temperature[i] = self.read()
 			logging.debug("{} - hum: {:0.1f}, temp: {:0.1f}".format(i, humidity[i], temperature[i]))
@@ -108,7 +101,7 @@ class EnvironmentSensor(Sensor):
 		@return: The most recent temperature reading in the desired units
 		@rtype: float
 		"""
-		return self.celsius if self.isCelsius() else self.fahrenheit
+		return self.celsius if self.is_celsius() else self.fahrenheit
 
 	@temperature.setter
 	def temperature(self, temperature):
@@ -136,7 +129,7 @@ class EnvironmentSensor(Sensor):
 		"""
 		self._humidity = float(humidity) if humidity is not None else -999.0
 
-	def isCelsius(self):
+	def is_celsius(self):
 		"""
 		Check if we're set to Celsius
 		@return: whether or not current units are set to celsius
@@ -178,34 +171,34 @@ class EnvironmentSensor(Sensor):
 		@param units: new units as a single char string - 'f' or 'c' are valid
 		@type units: str
 		"""
-		EnvironmentSensor.ValidateUnits(units)
+		EnvironmentSensor.validate_units(units)
 		self._units = units.lower()
 		if self.debug:
 			logging.debug("-d- SensorHumidity: units set to {}".format(self.units))
 
 	@property
-	def sensorType(self):
+	def sensor_type(self):
 		"""
 		Get the current sensor type
 		@return: current sensor type
 		@rtype: int
 		"""
-		return self._sensorType
+		return self._sensor_type
 
-	@sensorType.setter
-	def sensorType(self, newSensorType):
+	@sensor_type.setter
+	def sensor_type(self, sensor_type):
 		"""
 		Change the current sensor type
-		@param newSensorType:
-		@type newSensorType: str or int
+		@param sensor_type:
+		@type sensor_type: str or int
 		"""
-		EnvironmentSensor.ValidateSensorType(newSensorType)
-		self._sensorType = self.VALID_DHT_TYPES[str(newSensorType)]
+		EnvironmentSensor.validate_sensor_type(sensor_type)
+		self._sensor_type = self.VALID_DHT_TYPES[str(sensor_type)]
 		if self.debug:
-			logging.debug("-d- SensorHumidity type: {}".format(newSensorType))
+			logging.debug("-d- SensorHumidity type: {}".format(sensor_type))
 
 	@staticmethod
-	def ValidateUnits(units):
+	def validate_units(units):
 		"""
 		Check that the given units are valid - raises AssertionError if invalid
 		@param units: desired new units
@@ -217,13 +210,13 @@ class EnvironmentSensor(Sensor):
 			)
 
 	@staticmethod
-	def ValidateSensorType(sensorType):
+	def validate_sensor_type(sensor_type):
 		"""
 		Check that the given sensor type is valid - raises AssertionError if invalid
-		@param sensorType: desired new sensor type
-		@type sensorType: str or int
+		@param sensor_type: desired new sensor type
+		@type sensor_type: str or int
 		"""
-		assert str(sensorType) in EnvironmentSensor.VALID_DHT_TYPES.keys(), \
+		assert str(sensor_type) in EnvironmentSensor.VALID_DHT_TYPES.keys(), \
 			"Invalid sensor type! Valid types: {}".format(
 				", ".join(EnvironmentSensor.VALID_DHT_TYPES.keys())
 			)

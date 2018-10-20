@@ -4,7 +4,7 @@ import logging
 from library.config.topconfig import ConfigurationHandler
 
 
-def parseargs():
+def parse_args():
 	"""
 	Set up an argument parser and return the parsed arguments
 	@return: Result of calling parse_args() on the argparse.ArgumentParser object
@@ -29,8 +29,8 @@ def execute():
 	"""
 	Full flow - get arguments, parse configuration files, launch sensor threads
 	"""
-	args = parseargs()
-	handler = ConfigurationHandler(configpath=args.configpath)
+	args = parse_args()
+	handler = ConfigurationHandler(config_path=args.configpath)
 
 	try:
 		logging.info("Launching sensor threads")

@@ -5,25 +5,25 @@ from library import CONFIG_DIR
 
 
 class BaseConfiguration(object):
-	def __init__(self, configpath):
+	def __init__(self, config_path):
 		super(BaseConfiguration, self).__init__()
 
-		self._configpath = ""
+		self._config_path = ""
 		self._config = {}
-		self.config = configpath
+		self.config = config_path
 
 	def __repr__(self):
 		return json.dumps(self.config, indent=2)
 
-	def loadconfig(self, configpath):
+	def load_config(self, config_path):
 		"""
 		Load a JSON config file and return its contents
-		@param configpath: path to config file
-		@type configpath: str
+		@param config_path: path to config file
+		@type config_path: str
 		@return: JSON data
 		@rtype: dict
 		"""
-		with open(configpath, 'r') as inf:
+		with open(config_path, 'r') as inf:
 			return json.load(inf)
 
 	@property
@@ -36,35 +36,35 @@ class BaseConfiguration(object):
 		return self._config
 
 	@config.setter
-	def config(self, configpath):
+	def config(self, config_path):
 		"""
 		Set a new config using a path to a JSON file
-		@param configpath: path to config file
-		@type configpath: str
+		@param config_path: path to config file
+		@type config_path: str
 		"""
-		configpath = self.normalizeconfigpath(configpath)
-		self._configpath = configpath
-		self._config = self.loadconfig(self._configpath)
+		config_path = self.normalize_config_path(config_path)
+		self._config_path = config_path
+		self._config = self.load_config(self._config_path)
 
 	@staticmethod
-	def normalizeconfigpath(configpath):
+	def normalize_config_path(config_path):
 		"""
 		Normalize a config file path to the config dir of the repo
-		@param configpath: relative config path
-		@type configpath: str
+		@param config_path: relative config path
+		@type config_path: str
 		@return: normalized, absolute config path
 		@rtype: str or None
 		"""
-		if not configpath:
+		if not config_path:
 			return None
-		elif os.path.exists(configpath):
-			return configpath
+		elif os.path.exists(config_path):
+			return config_path
 		else:
 			# Assume it's in the config directory
-			return os.path.join(CONFIG_DIR, configpath)
+			return os.path.join(CONFIG_DIR, config_path)
 
 	@property
-	def sensorpaths(self):
+	def sensor_paths(self):
 		"""
 		Get the sensor config path dict
 		@return: dict of sensor config paths
@@ -72,7 +72,7 @@ class BaseConfiguration(object):
 		"""
 		return self.config.get('sensors')
 
-	def getsensorpath(self, sensor):
+	def get_sensor_path(self, sensor):
 		"""
 		Get the config path for the target sensor
 		@param sensor: target sensor
@@ -80,16 +80,16 @@ class BaseConfiguration(object):
 		@return: Path to sensor config
 		@rtype: str
 		"""
-		return self.normalizeconfigpath(self.sensorpaths.get(sensor))
+		return self.normalize_config_path(self.sensor_paths.get(sensor))
 
 	@property
-	def mqttpath(self):
+	def mqtt_path(self):
 		"""
 		Get the path to the base MQTT configuration file
 		@return: path to base MQTT configuration file if it exists
 		@rtype: str or None
 		"""
-		return self.normalizeconfigpath(self.config.get('mqtt'))
+		return self.normalize_config_path(self.config.get('mqtt'))
 
 	@property
 	def log(self):
@@ -97,11 +97,11 @@ class BaseConfiguration(object):
 
 
 class MQTTConfiguration(object):
-	def __init__(self, mqttDict):
+	def __init__(self, mqtt_dict):
 		super(MQTTConfiguration, self).__init__()
 
 		self._config = {}
-		self.config = mqttDict
+		self.config = mqtt_dict
 
 	@property
 	def config(self):
@@ -113,16 +113,16 @@ class MQTTConfiguration(object):
 		return self._config
 
 	@config.setter
-	def config(self, newConfig):
+	def config(self, config):
 		"""
 		Set a new config
-		@param newConfig:
-		@type newConfig:
+		@param config:
+		@type config:
 		@return:
 		@rtype:
 		"""
-		assert isinstance(newConfig, dict), "Configuration must be of type dict!"
-		self._config = newConfig
+		assert isinstance(config, dict), "Configuration must be of type dict!"
+		self._config = config
 
 		# Ensure there is a port - 1883 is the default used by MQTT servers
 		self.config.setdefault('port', 1883)

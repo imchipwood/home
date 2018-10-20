@@ -3,9 +3,10 @@ import os
 from library.config import BaseConfiguration
 
 from library.config.mqttconfig import MQTTConfig
-from library.config.environmentconfig import EnvironmentConfig
+from library.config.environment import EnvironmentConfig
+from library.config.door_monitor import DoorMonitorConfig
 
-from library.controllers.environmentcontroller import EnvironmentController
+from library.controllers.environment import EnvironmentController
 
 
 class ConfigurationHandler(BaseConfiguration):
@@ -18,19 +19,19 @@ class ConfigurationHandler(BaseConfiguration):
 	}
 	SENSOR_CONFIG_CLASS_MAP = {
 		'environment': EnvironmentConfig,
-		'door_monitor': None,
+		'door_monitor': DoorMonitorConfig,
 		'door_control': None
 	}
 
-	def __init__(self, configpath):
-		super(ConfigurationHandler, self).__init__(configpath)
-		self._currentsensor = 0
+	def __init__(self, config_path):
+		super(ConfigurationHandler, self).__init__(config_path)
+		self._current_sensor = 0
 		self.sensors = list(self.config.get('sensors', {}))
 
 	# region Sensors
 
 	@property
-	def mqttconfigpath(self):
+	def mqtt_config_path(self):
 		"""
 		Get the full path to the base MQTT configuration file
 		@return: path to the base MQTT configuration file
@@ -39,9 +40,9 @@ class ConfigurationHandler(BaseConfiguration):
 		if os.path.exists(self.config.get('mqtt', '')):
 			return self.config['mqtt']
 		else:
-			return self.normalizeconfigpath(self.config.get('mqtt'))
+			return self.normalize_config_path(self.config.get('mqtt'))
 
-	def getsensormqttconfig(self, sensor):
+	def get_sensor_mqtt_config(self, sensor):
 		"""
 		Get the MQTT config class for the given sensor
 		@param sensor: target sensor
@@ -49,12 +50,12 @@ class ConfigurationHandler(BaseConfiguration):
 		@return: MQTT configuration object with sensor settings
 		@rtype: MQTTConfig
 		"""
-		if sensor in self.sensorpaths:
-			return MQTTConfig(self.mqttconfigpath, self.getsensorpath(sensor))
+		if sensor in self.sensor_paths:
+			return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor))
 		else:
 			return None
 
-	def getsensorconfig(self, sensor):
+	def get_sensor_config(self, sensor):
 		"""
 		Get the config class for the particular
 		@param sensor: target sensor
@@ -62,24 +63,24 @@ class ConfigurationHandler(BaseConfiguration):
 		@return: the sensor config object for the given sensor if supported
 		@rtype: library.config.BaseConfiguration
 		"""
-		if sensor in self.SENSOR_CLASS_MAP and sensor in self.sensorpaths:
+		if sensor in self.SENSOR_CLASS_MAP and sensor in self.sensor_paths:
 			return self.SENSOR_CONFIG_CLASS_MAP[sensor](
-				self.sensorpaths[sensor],
-				self.getsensormqttconfig(sensor)
+				self.sensor_paths[sensor],
+				self.get_sensor_mqtt_config(sensor)
 			)
 		else:
 			return None
 
-	def getsensorcontroller(self, sensor):
+	def get_sensor_controller(self, sensor):
 		"""
 		Get the sensor object for the given sensor
 		@param sensor: target sensor
 		@type sensor: str
 		@return: sensor object
-		@rtype: library.controllers.Controller
+		@rtype: library.controllers.BaseController
 		"""
 		if sensor in self.SENSOR_CLASS_MAP:
-			return self.SENSOR_CLASS_MAP[sensor](self.getsensorconfig(sensor))
+			return self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
 		else:
 			return None
 
@@ -97,19 +98,19 @@ class ConfigurationHandler(BaseConfiguration):
 		Yield a sensor one at a time
 		@return: sensor controllers iteratively
 		"""
-		self._currentsensor = 0
+		self._current_sensor = 0
 		for sensor in self.config.get('sensors', {}):
-			yield self.getsensorcontroller(sensor)
+			yield self.get_sensor_controller(sensor)
 
 	def __next__(self):
 		"""
 		Get the next sensor
 		@return: sensor controller
 		"""
-		if self._currentsensor < len(self.sensors):
-			sensor = self.sensors[self._currentsensor]
-			self._currentsensor += 1
-			return self.getsensorcontroller(sensor)
+		if self._current_sensor < len(self.sensors):
+			sensor = self.sensors[self._current_sensor]
+			self._current_sensor += 1
+			return self.get_sensor_controller(sensor)
 		else:
 			raise StopIteration
 
@@ -120,11 +121,11 @@ if __name__ == "__main__":
 	configpath = "media.json"
 	config = ConfigurationHandler(configpath)
 
-	# mqttconfig = config.getsensormqttconfig('environment')
+	# mqttconfig = config.get_sensor_mqtt_config('environment')
 	# print(mqttconfig.client_id)
 
-	env = config.getsensorconfig('environment')
+	env = config.get_sensor_config('environment')
 	# print(env)
-	print(env.mqttconfig)
+	print(env.mqtt_config)
 	print(env.pin)
 	print(env.type)

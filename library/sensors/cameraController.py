@@ -6,8 +6,8 @@ import os
 try:
 	from picamera import PiCamera
 except:
-	logging.warning("Failed to import picamera - using dummy")
-	from library.dummy.picamera import PiCamera
+	logging.warning("Failed to import picamera - using mock")
+	from library.mock.mock_picamera import PiCamera
 
 from library.config.cameraConfig import CameraConfig
 

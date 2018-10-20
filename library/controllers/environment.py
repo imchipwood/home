@@ -2,16 +2,16 @@ from threading import Thread
 import timeit
 import json
 
-from library.controllers import Controller
+from library.controllers import BaseController
 from library.communication.mqtt import MQTTClient
 from library.sensors.sensor_environment import EnvironmentSensor
 
 
-class EnvironmentController(Controller):
+class EnvironmentController(BaseController):
 	def __init__(self, config, debug=False):
 		"""
 		@param config: configuration object for environment sensing
-		@type config: library.config.environmentconfig.EnvironmentConfig
+		@type config: library.config.environment.EnvironmentConfig
 		@param debug: debug flag
 		@type debug: bool
 		"""
@@ -19,7 +19,7 @@ class EnvironmentController(Controller):
 
 		# Set up the sensor
 		self.sensor = EnvironmentSensor(
-			sensorType=self.config.type,
+			sensor_type=self.config.type,
 			pin=self.config.pin,
 			units=self.config.units,
 			debug=self.debug
@@ -28,12 +28,11 @@ class EnvironmentController(Controller):
 		# Set up MQTT
 		self.mqtt = None
 		"""@type: MQTTClient"""
-		if self.config.mqttconfig:
-			self.mqtt = MQTTClient(mqttconfig=self.config.mqttconfig)
+		if self.config.mqtt_config:
+			self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
 
 		# Set up the thread
-		self.thread = Thread(target=self.loop)
-		self.thread.daemon = True
+		self.thread = None
 
 	# region Threading
 
@@ -42,6 +41,8 @@ class EnvironmentController(Controller):
 		Start the thread
 		"""
 		self.logger.info("Starting environment thread")
+		self.thread = Thread(target=self.loop)
+		self.thread.daemon = True
 		self.running = True
 		self.thread.start()
 
@@ -66,7 +67,7 @@ class EnvironmentController(Controller):
 
 				# Do the readings
 				try:
-					humidity, temperature = self.sensor.readntimes(5)
+					humidity, temperature = self.sensor.read_n_times(5)
 				except:
 					self.logger.exception('Failed to read environment sensor!')
 					continue
@@ -91,17 +92,17 @@ class EnvironmentController(Controller):
 			return
 
 		payload = {
-			"temperature": "{:0.1f}".format(temperature),
-			"humidity": "{:0.1f}".format(humidity),
+			"temperature": "{:0.2f}".format(temperature),
+			"humidity": "{:0.2f}".format(humidity),
 			"units": units
 		}
 		self.logger.info("Publishing to {}: {}".format(
-			self.config.mqtttopic,
+			self.config.mqtt_topic,
 			json.dumps(payload, indent=2))
 		)
 		try:
 			self.mqtt.single(
-				topic=self.config.mqtttopic,
+				topic=self.config.mqtt_topic,
 				payload=payload
 			)
 		except:
@@ -111,10 +112,9 @@ class EnvironmentController(Controller):
 
 	def cleanup(self):
 		"""
-		Do nothing - just a standard method placeholder
+		Shut down the thread
 		"""
-		self.logger.info("Stopping environment thread...")
-		self.running = False
+		super(EnvironmentController, self).cleanup()
 		self.logger.info("Cleanup complete")
 
 	def __repr__(self):

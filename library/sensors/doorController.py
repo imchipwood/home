@@ -14,12 +14,12 @@ toggles the GPIO when a message is published with the payload of "TOGGLE".
 It does not respond to any other messages.
 """
 import logging
-import json
+
 try:
 	import RPi.GPIO as GPIO
 except:
 	logging.warning("Failed to import RPi.GPIO - using mock library")
-	import library.sensors.mock_gpio as GPIO
+	import library.mock.mock_gpio as GPIO
 import paho.mqtt.client as paho
 import paho.mqtt.publish as pahopub
 import timeit

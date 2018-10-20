@@ -6,12 +6,12 @@ from library.config.mqttconfig import MQTTConfig
 
 
 class MQTTClient(Client):
-	def __init__(self, client_id="", clean_session=True, userdata=None, protocol=MQTTv311, transport="tcp", mqttconfig=None):
+	def __init__(self, client_id="", clean_session=True, userdata=None, protocol=MQTTv311, transport="tcp", mqtt_config=None):
 		"""
-		@type mqttconfig: MQTTConfig
+		@type mqtt_config: MQTTConfig
 		"""
-		self.config = mqttconfig
-		if mqttconfig:
+		self.config = mqtt_config
+		if mqtt_config:
 			super(MQTTClient, self).__init__(
 				client_id=self.config.client_id,
 				clean_session=clean_session,
