@@ -1,3 +1,9 @@
+"""
+Simple door monitoring controller with PiCamera and MQTT support
+Author: Charles "Chip" Wood
+        imchipwood@gmail.com
+        github.com/imchipwood
+"""
 from threading import Thread
 import timeit
 
@@ -6,6 +12,12 @@ from library.communication.mqtt import MQTTClient
 
 
 class DoorMonitorController(BaseController):
+    """
+    Basic controller with threads for monitoring door state
+    and publishing changes via MQTT.
+    Also supports PiCamera for snapping photos when the door opens
+    Door state changes & photos can be published via Pushbullet, too
+    """
     def __init__(self, config, debug=False):
         """
         @param config: configuration object for environment sensing
@@ -44,7 +56,8 @@ class DoorMonitorController(BaseController):
         """
         Looping method for threading - reads sensor @ desired intervals and publishes results
         """
-        lasttime = 0
+        pass
+        # lasttime = 0
         # while self.running:
         #
         #     # Read at the desired frequency
@@ -74,9 +87,10 @@ class DoorMonitorController(BaseController):
         if not self.mqtt:
             return
 
-        self.logger.info("Publishing to {}: {}".format(
+        self.logger.info(
+            "Publishing to %s: %s",
             self.config.mqtt_topic,
-            state)
+            state
         )
         try:
             self.mqtt.single(

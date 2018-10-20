@@ -1,7 +1,16 @@
+"""
+Basic single-GPIO monitoring configuration handler
+Author: Charles "Chip" Wood
+        imchipwood@gmail.com
+        github.com/imchipwood
+"""
 from library.config import BaseConfiguration
 
 
 class DoorMonitorConfig(BaseConfiguration):
+    """
+    MQTT-enabled door monitoring configuration
+    """
     def __init__(self, config_path, mqtt_config=None):
         """
         @param config_path: path to JSON configuration file
@@ -10,11 +19,13 @@ class DoorMonitorConfig(BaseConfiguration):
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
         super(DoorMonitorConfig, self).__init__(config_path)
+        from library.config import ConfigKeys
+        self.config_keys = ConfigKeys
 
         self.mqtt_config = mqtt_config
 
         # Update the base configuration for easy dumping later
-        self.config.get('mqtt', {}).update(self.mqtt_config.config)
+        self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
     def pin(self):

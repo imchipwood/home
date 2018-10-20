@@ -1,15 +1,26 @@
+"""
+Simple wrapper around Adafruit's DHT module
+Author: Charles "Chip" Wood
+        imchipwood@gmail.com
+        github.com/imchipwood
+"""
 import logging
 
 try:
     import Adafruit_DHT
 except:
-    logging.warning("Couldn't import Adafruit_DHT - assuming this machine is not a Raspberry Pi and importing the mock module.")
+    logging.warning("Couldn't import Adafruit_DHT - importing the mock module.")
     import library.mock.mock_Adafruit_DHT as Adafruit_DHT
 
 from library.sensors import avg
 
 
 class EnvironmentSensor(object):
+    """
+    Basic wrapper around Adafruit's DHT module with support for
+    setting temperature units (Celsius, Fahrenheit) and averaging
+    multiple sensor reads.
+    """
     VALID_TEMPERATURE_UNITS = ["celsius", "fahrenheit"]
     VALID_DHT_TYPES = {
         "11": Adafruit_DHT.DHT11,
@@ -35,9 +46,9 @@ class EnvironmentSensor(object):
 
         # Initialize values for readings
         self._temperature = -999.0
-        self.temperature = -999.0
+        # self.temperature = -999.0
         self._humidity = -999.0
-        self.humidity = -999.0
+        # self.humidity = -999.0
 
         # Set the sensor type & pin #
         self._sensor_type = Adafruit_DHT.DHT11
@@ -65,27 +76,27 @@ class EnvironmentSensor(object):
         self.temperature = temperature
         return humidity, temperature
 
-    def read_n_times(self, n=5):
+    def read_n_times(self, num_reads=5):
         """
         Read the environment sensor n times and return the average
         Also sets the humidity/temperature class properties to the calculated
         average
-        @param n: number of times to read the sensor. Default: 5
-        @type n: int or float or str
+        @param num_reads: number of times to read the sensor. Default: 5
+        @type num_reads: int or float or str
         @return: tuple of averaged readings, humidity then temperature
         @rtype: tuple(float, float)
         """
         # Convert n to an int and ensure it's valid
-        n = int(n)
-        assert n > 0, "n < 1! n needs to be larger than 0! Please try again!"
+        num_reads = int(num_reads)
+        assert num_reads > 0, "n < 1! n needs to be larger than 0! Please try again!"
 
         # Set up lists for the number of desired readings
-        temperature = [0.0] * n
-        humidity = [0.0] * n
+        temperature = [0.0] * num_reads
+        humidity = [0.0] * num_reads
 
         # Everything is good - do the readings
         self.reset_readings()
-        for i in range(n):
+        for i in range(num_reads):
             humidity[i], temperature[i] = self.read()
             logging.debug("{} - hum: {:0.1f}, temp: {:0.1f}".format(i, humidity[i], temperature[i]))
 
@@ -173,8 +184,7 @@ class EnvironmentSensor(object):
         """
         EnvironmentSensor.validate_units(units)
         self._units = units.lower()
-        if self.debug:
-            logging.debug("-d- SensorHumidity: units set to {}".format(self.units))
+        logging.debug("SensorHumidity: units set to %s", self.units)
 
     @property
     def sensor_type(self):
@@ -194,8 +204,7 @@ class EnvironmentSensor(object):
         """
         EnvironmentSensor.validate_sensor_type(sensor_type)
         self._sensor_type = self.VALID_DHT_TYPES[str(sensor_type)]
-        if self.debug:
-            logging.debug("-d- SensorHumidity type: {}".format(sensor_type))
+        logging.debug("SensorHumidity type: %d", sensor_type)
 
     @staticmethod
     def validate_units(units):

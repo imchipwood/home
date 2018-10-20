@@ -1,3 +1,9 @@
+"""
+Controller for environment sensors
+Author: Charles "Chip" Wood
+        imchipwood@gmail.com
+        github.com/imchipwood
+"""
 from threading import Thread
 import timeit
 import json
@@ -8,6 +14,10 @@ from library.sensors.sensor_environment import EnvironmentSensor
 
 
 class EnvironmentController(BaseController):
+    """
+    Simple controller with threads for reading environment sensors
+    and publishing data via MQTT
+    """
     def __init__(self, config, debug=False):
         """
         @param config: configuration object for environment sensing
@@ -93,9 +103,10 @@ class EnvironmentController(BaseController):
             "humidity": "{:0.2f}".format(humidity),
             "units": units
         }
-        self.logger.info("Publishing to {}: {}".format(
+        self.logger.info(
+            "Publishing to %s: %s",
             self.config.mqtt_topic,
-            json.dumps(payload, indent=2))
+            json.dumps(payload, indent=2)
         )
         try:
             self.mqtt.single(

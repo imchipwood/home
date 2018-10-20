@@ -1,7 +1,19 @@
-from library.config import BaseConfiguration, ConfigKeys
+"""
+Environment sensor configuration
+Author: Charles "Chip" Wood
+        imchipwood@gmail.com
+        github.com/imchipwood
+"""
+
+from library.config import BaseConfiguration
 
 
 class EnvironmentConfig(BaseConfiguration):
+    """
+    Basic configuration for environment sensor
+    Supports MQTT communication & the DHT11, DHT22, AM2302
+    humidity/temperature sensors
+    """
     def __init__(self, config_path, mqtt_config=None):
         """
         @param config_path: path to JSON configuration file

@@ -1,14 +1,30 @@
+"""
+Basic MQTT Client with MQTTConfig constructor support
+Author: Charles "Chip" Wood
+        imchipwood@gmail.com
+        github.com/imchipwood
+"""
 import json
 from paho.mqtt.client import Client, MQTTv311
 from paho.mqtt import publish
 
-from library.config.mqtt import MQTTConfig
-
 
 class MQTTClient(Client):
-    def __init__(self, client_id="", clean_session=True, userdata=None, protocol=MQTTv311, transport="tcp", mqtt_config=None):
+    """
+    paho.mqtt.client with support for passing in MQTTConfig object
+    for initialization instead of manually defining client_id, etc.
+    """
+    def __init__(
+            self,
+            client_id="",
+            clean_session=True,
+            userdata=None,
+            protocol=MQTTv311,
+            transport="tcp",
+            mqtt_config=None
+    ):
         """
-        @type mqtt_config: MQTTConfig
+        @type mqtt_config: library.config.mqtt.MQTTConfig
         """
         self.config = mqtt_config
         if mqtt_config:
@@ -53,9 +69,11 @@ class MQTTClient(Client):
             bind_address=bind_address
         )
 
-    def single(self, topic, payload=None, qos=1, retain=True, hostname=None,
+    def single(
+            self, topic, payload=None, qos=1, retain=True, hostname=None,
             port=None, client_id="", keepalive=60, will=None, auth=None,
-            tls=None, protocol=MQTTv311, transport="tcp"):
+            tls=None, protocol=MQTTv311, transport="tcp"
+    ):
         """
         paho.mqtt.publish.single method
         """

@@ -1,7 +1,8 @@
 """
-home.py
-Author: Charles "Chip" Wood, imchipwood@gmail.com, github.com/imchipwood
 Entry point for all Raspberry Pi-based home automation sensors
+Author: Charles "Chip" Wood
+        imchipwood@gmail.com
+        github.com/imchipwood
 """
 
 import argparse
@@ -13,7 +14,7 @@ from library.config import ConfigurationHandler
 def parse_args():
     """
     Set up an argument parser and return the parsed arguments
-    @return: Result of calling parse_args() on the argparse.ArgumentParser object
+    @return: Parsed commandline args
     @rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
@@ -35,7 +36,7 @@ def parse_args():
 
 def execute():
     """
-    Full flow - get arguments, parse configuration files, launch sensor threads
+    Full flow - get arguments, parse configuration files, launch threads
     """
     args = parse_args()
     handler = ConfigurationHandler(config_path=args.configpath)
