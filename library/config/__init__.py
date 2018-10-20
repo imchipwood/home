@@ -1,7 +1,7 @@
 import os
 import json
 
-from definitions import CONFIG_DIR
+from library import CONFIG_DIR
 
 
 class BaseConfiguration(object):

@@ -1,9 +1,7 @@
-import logging
 from threading import Thread
 import timeit
 import json
 
-from library import setup_logging
 from library.controllers import Controller
 from library.communication.mqtt import MQTTClient
 from library.sensors.sensor_environment import EnvironmentSensor

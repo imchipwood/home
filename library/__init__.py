@@ -1,4 +1,9 @@
 import logging
+import os
+
+HOME_DIR = os.path.join(os.path.dirname(__file__), '..')
+CONFIG_DIR = os.path.join(HOME_DIR, 'config')
+LOG_DIR = os.path.join(HOME_DIR, 'log')
 
 
 def setup_logging(logger, loggingLevel=False, logFile=None):
