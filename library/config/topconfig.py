@@ -60,7 +60,7 @@ class ConfigurationHandler(BaseConfiguration):
 		@param sensor: target sensor
 		@type sensor: str
 		@return: the sensor config object for the given sensor if supported
-		@rtype: object or None
+		@rtype: library.config.BaseConfiguration
 		"""
 		if sensor in self.SENSOR_CLASS_MAP and sensor in self.sensorpaths:
 			return self.SENSOR_CONFIG_CLASS_MAP[sensor](
@@ -76,7 +76,7 @@ class ConfigurationHandler(BaseConfiguration):
 		@param sensor: target sensor
 		@type sensor: str
 		@return: sensor object
-		@rtype: object
+		@rtype: library.controllers.Controller
 		"""
 		if sensor in self.SENSOR_CLASS_MAP:
 			return self.SENSOR_CLASS_MAP[sensor](self.getsensorconfig(sensor))

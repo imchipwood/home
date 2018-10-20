@@ -4,11 +4,12 @@ import timeit
 import json
 
 from library import setup_logging
+from library.controllers import Controller
 from library.communication.mqtt import MQTTClient
 from library.sensors.sensor_environment import EnvironmentSensor
 
 
-class EnvironmentController(object):
+class EnvironmentController(Controller):
 	def __init__(self, config, debug=False):
 		"""
 		@param config: configuration object for environment sensing
@@ -16,18 +17,7 @@ class EnvironmentController(object):
 		@param debug: debug flag
 		@type debug: bool
 		"""
-		super(EnvironmentController, self).__init__()
-		self.debug = debug
-		self.config = config
-
-		# Set up logging
-		logging.getLogger().setLevel(logging.DEBUG)
-		self.logger = setup_logging(
-			logging.getLogger(__name__),
-			loggingLevel=self.debug,
-			logFile=self.config.log
-		)
-		self.logger.info("Logger initialized")
+		super(EnvironmentController, self).__init__(config, debug)
 
 		# Set up the sensor
 		self.sensor = EnvironmentSensor(
@@ -44,7 +34,6 @@ class EnvironmentController(object):
 			self.mqtt = MQTTClient(mqttconfig=self.config.mqttconfig)
 
 		# Set up the thread
-		self.running = False
 		self.thread = Thread(target=self.loop)
 		self.thread.daemon = True
 
