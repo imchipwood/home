@@ -204,7 +204,7 @@ class EnvironmentSensor(object):
         """
         EnvironmentSensor.validate_sensor_type(sensor_type)
         self._sensor_type = self.VALID_DHT_TYPES[str(sensor_type)]
-        logging.debug("SensorHumidity type: %d", sensor_type)
+        logging.debug("SensorHumidity type: %s", sensor_type)
 
     @staticmethod
     def validate_units(units):
