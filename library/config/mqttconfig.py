@@ -2,20 +2,20 @@ import json
 
 
 class MQTTBaseConfig(object):
-	def __init__(self, mqttconfigpath):
+	def __init__(self, mqtt_config_path):
 		super(MQTTBaseConfig, self).__init__()
 		self._config = {}
-		self.config = mqttconfigpath
+		self.config = mqtt_config_path
 
-	def loadconfig(self, configpath):
+	def load_config(self, config_path):
 		"""
 		Parse a config file
-		@param configpath: path to config file
-		@type configpath: str
+		@param config_path: path to config file
+		@type config_path: str
 		@return: data from config file
 		@rtype: dict
 		"""
-		with open(configpath, 'r') as inf:
+		with open(config_path, 'r') as inf:
 			return json.load(inf)
 
 	@property
@@ -26,13 +26,13 @@ class MQTTBaseConfig(object):
 		return self._config
 
 	@config.setter
-	def config(self, configpath):
+	def config(self, config_path):
 		"""
 		Set a new config
-		@param configpath: path to config file
-		@type configpath: str
+		@param config_path: path to config file
+		@type config_path: str
 		"""
-		self._config = self.loadconfig(configpath)
+		self._config = self.load_config(config_path)
 
 	@property
 	def broker(self):
@@ -57,9 +57,9 @@ class MQTTBaseConfig(object):
 
 
 class MQTTConfig(MQTTBaseConfig):
-	def __init__(self, mqttconfigpath, sensorconfigpath):
-		super(MQTTConfig, self).__init__(mqttconfigpath)
-		self.config.update(self.loadconfig(sensorconfigpath).get('mqtt'))
+	def __init__(self, mqtt_config_path, sensor_config_path):
+		super(MQTTConfig, self).__init__(mqtt_config_path)
+		self.config.update(self.load_config(sensor_config_path).get('mqtt'))
 
 	@property
 	def client_id(self):
