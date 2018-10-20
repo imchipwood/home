@@ -20,7 +20,7 @@ class DoorMonitorConfig(BaseConfiguration):
 	def pin(self):
 		"""
 		Get the GPIO pin #
-		@return: GPIO pin # for environment sensor
+		@return: GPIO pin # for sensor
 		@rtype: int
 		"""
 		return self.config.get('pin')

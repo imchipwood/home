@@ -19,7 +19,7 @@ class EnvironmentConfig(BaseConfiguration):
 	@property
 	def type(self):
 		"""
-		Get the environment sensor type
+		Get the sensor type
 		@return: Adafruit_DHT type
 		@rtype: int
 		"""

@@ -31,9 +31,6 @@ class EnvironmentController(BaseController):
 		if self.config.mqtt_config:
 			self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
 
-		# Set up the thread
-		self.thread = None
-
 	# region Threading
 
 	def start(self):
