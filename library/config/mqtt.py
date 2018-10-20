@@ -2,21 +2,18 @@ import json
 
 
 class MQTTBaseConfig(object):
+
 	def __init__(self, mqtt_config_path):
+		"""
+		Base MQTT configuration handler with
+		@param mqtt_config_path:
+		@type mqtt_config_path:
+		"""
 		super(MQTTBaseConfig, self).__init__()
+		from library.config import ConfigKeys
+		self.ConfigKeys = ConfigKeys
 		self._config = {}
 		self.config = mqtt_config_path
-
-	def load_config(self, config_path):
-		"""
-		Parse a config file
-		@param config_path: path to config file
-		@type config_path: str
-		@return: data from config file
-		@rtype: dict
-		"""
-		with open(config_path, 'r') as inf:
-			return json.load(inf)
 
 	@property
 	def config(self):
@@ -32,7 +29,8 @@ class MQTTBaseConfig(object):
 		@param config_path: path to config file
 		@type config_path: str
 		"""
-		self._config = self.load_config(config_path)
+		from library.config import load_config
+		self._config = load_config(config_path)
 
 	@property
 	def broker(self):
@@ -41,7 +39,7 @@ class MQTTBaseConfig(object):
 		@return: MQTT broker URL
 		@rtype: str or None
 		"""
-		return self.config.get('broker')
+		return self.config.get(self.ConfigKeys.BROKER)
 
 	@property
 	def port(self):
@@ -50,7 +48,7 @@ class MQTTBaseConfig(object):
 		@return: MQTT broker port
 		@rtype: int or None
 		"""
-		return self.config.get('port')
+		return self.config.get(self.ConfigKeys.PORT)
 
 	def __repr__(self):
 		return json.dumps(self.config, indent=2)
@@ -58,8 +56,16 @@ class MQTTBaseConfig(object):
 
 class MQTTConfig(MQTTBaseConfig):
 	def __init__(self, mqtt_config_path, sensor_config_path):
+		"""
+		Sensor-specific MQTT Configuration constructor
+		@param mqtt_config_path: path to MQTT configuration JSON file
+		@type mqtt_config_path: str
+		@param sensor_config_path: path to sensor-specific configuration file
+		@type sensor_config_path: str
+		"""
 		super(MQTTConfig, self).__init__(mqtt_config_path)
-		self.config.update(self.load_config(sensor_config_path).get('mqtt'))
+		from library.config import load_config
+		self.config.update(load_config(sensor_config_path).get(self.ConfigKeys.MQTT))
 
 	@property
 	def client_id(self):
@@ -68,7 +74,7 @@ class MQTTConfig(MQTTBaseConfig):
 		@return: MQTT client ID
 		@rtype: str
 		"""
-		return self.config.get('client_id', "")
+		return self.config.get(self.ConfigKeys.CLIENT_ID, "")
 
 	@client_id.setter
 	def client_id(self, client_id):
@@ -77,7 +83,7 @@ class MQTTConfig(MQTTBaseConfig):
 		@param client_id: new client ID
 		@type client_id: str
 		"""
-		self.config['client_id'] = client_id
+		self.config[self.ConfigKeys.CLIENT_ID] = client_id
 
 	@property
 	def topics_publish(self):
@@ -86,7 +92,11 @@ class MQTTConfig(MQTTBaseConfig):
 		@return: dict of publish topics
 		@rtype: dict
 		"""
-		return self.config.get('topics', {}).get('publish', {})
+		return self.config.get(
+			self.ConfigKeys.TOPICS, {}
+		).get(
+			self.ConfigKeys.PUBLISH, {}
+		)
 
 	@property
 	def topics_subscribe(self):
@@ -95,7 +105,10 @@ class MQTTConfig(MQTTBaseConfig):
 		@return: dict of subscribe topics
 		@rtype: dict
 		"""
-		return self.config.get('topics', {}).get('subscribe', {})
+		return self.config.get(
+			self.ConfigKeys.TOPICS, {}).get(
+			self.ConfigKeys.SUBSCRIBE, {}
+		)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from library.config.topconfig import ConfigurationHandler
+from library.config import ConfigurationHandler
 
 
 def parse_args():

@@ -1,4 +1,4 @@
-from library.config import BaseConfiguration
+from library.config import BaseConfiguration, ConfigKeys
 
 
 class EnvironmentConfig(BaseConfiguration):
@@ -7,7 +7,7 @@ class EnvironmentConfig(BaseConfiguration):
 		@param config_path: path to JSON configuration file
 		@type config_path: str
 		@param mqtt_config: MQTTConfig object if MQTT is to be used
-		@type mqtt_config: library.config.mqttconfig.MQTTConfig
+		@type mqtt_config: library.config.mqtt.MQTTConfig
 		"""
 		super(EnvironmentConfig, self).__init__(config_path)
 

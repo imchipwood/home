@@ -2,7 +2,7 @@ import json
 from paho.mqtt.client import Client, MQTTv311
 from paho.mqtt import publish
 
-from library.config.mqttconfig import MQTTConfig
+from library.config.mqtt import MQTTConfig
 
 
 class MQTTClient(Client):

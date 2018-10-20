@@ -1,7 +1,7 @@
 from inspect import ismethod
 import pytest
 
-from library.config.topconfig import ConfigurationHandler
+from library.config import ConfigurationHandler
 from library.config.environment import EnvironmentConfig
 from library.config.door_monitor import DoorMonitorConfig
 

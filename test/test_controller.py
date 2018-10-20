@@ -1,6 +1,6 @@
 import time
 
-from library.config.topconfig import ConfigurationHandler
+from library.config import ConfigurationHandler
 
 CONFIG_PATH = "test.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
