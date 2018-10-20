@@ -1,2 +1,3 @@
-install Adafruit_DHT following these instructions:
-https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
+# Install these packages to use python3.x on a raspberry pi
+# the ffi packages are required for python modules used by pushbullet
+sudo apt-get install python3-dev python3-cffi libffi-dev
