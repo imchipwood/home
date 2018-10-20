@@ -7,321 +7,321 @@ from library.controllers.environment import EnvironmentController
 
 
 class ConfigKeys:
-	MQTT = 'mqtt'
-	SENSORS = 'sensors'
-	LOG = 'log'
-	BROKER = 'broker'
-	PORT = 'port'
-	CLIENT_ID = 'client_id'
-	TOPICS = 'topics'
-	PUBLISH = 'publish'
-	SUBSCRIBE = 'subscribe'
+    MQTT = 'mqtt'
+    SENSORS = 'sensors'
+    LOG = 'log'
+    BROKER = 'broker'
+    PORT = 'port'
+    CLIENT_ID = 'client_id'
+    TOPICS = 'topics'
+    PUBLISH = 'publish'
+    SUBSCRIBE = 'subscribe'
 
 
 def load_config(config_path):
-	"""
-	Parse a config file
-	@param config_path: path to config file
-	@type config_path: str
-	@return: data from config file
-	@rtype: dict
-	"""
-	with open(config_path, 'r') as inf:
-		return json.load(inf)
+    """
+    Parse a config file
+    @param config_path: path to config file
+    @type config_path: str
+    @return: data from config file
+    @rtype: dict
+    """
+    with open(config_path, 'r') as inf:
+        return json.load(inf)
 
 
 class BaseConfiguration(object):
-	def __init__(self, config_path):
-		"""
-		@param config_path: path to configuration file
-		@type config_path: str
-		"""
-		super(BaseConfiguration, self).__init__()
+    def __init__(self, config_path):
+        """
+        @param config_path: path to configuration file
+        @type config_path: str
+        """
+        super(BaseConfiguration, self).__init__()
 
-		self._config_path = ""
-		self._config = {}
-		self.config = config_path
+        self._config_path = ""
+        self._config = {}
+        self.config = config_path
 
-	def __repr__(self):
-		return json.dumps(self.config, indent=2)
+    def __repr__(self):
+        return json.dumps(self.config, indent=2)
 
-	@property
-	def config(self):
-		"""
-		Get the current config dict
-		@return: current config dict
-		@rtype: dict
-		"""
-		return self._config
+    @property
+    def config(self):
+        """
+        Get the current config dict
+        @return: current config dict
+        @rtype: dict
+        """
+        return self._config
 
-	@config.setter
-	def config(self, config_path):
-		"""
-		Set a new config using a path to a JSON file
-		@param config_path: path to config file
-		@type config_path: str
-		"""
-		config_path = self.normalize_config_path(config_path)
-		self._config_path = config_path
-		self._config = load_config(self._config_path)
+    @config.setter
+    def config(self, config_path):
+        """
+        Set a new config using a path to a JSON file
+        @param config_path: path to config file
+        @type config_path: str
+        """
+        config_path = self.normalize_config_path(config_path)
+        self._config_path = config_path
+        self._config = load_config(self._config_path)
 
-	@staticmethod
-	def normalize_config_path(config_path):
-		"""
-		Normalize a config file path to the config dir of the repo
-		@param config_path: relative config path
-		@type config_path: str
-		@return: normalized, absolute config path
-		@rtype: str or None
-		"""
-		if not config_path:
-			return None
-		elif os.path.exists(config_path):
-			return config_path
-		else:
-			# Assume it's in the config directory
-			return os.path.join(CONFIG_DIR, config_path)
+    @staticmethod
+    def normalize_config_path(config_path):
+        """
+        Normalize a config file path to the config dir of the repo
+        @param config_path: relative config path
+        @type config_path: str
+        @return: normalized, absolute config path
+        @rtype: str or None
+        """
+        if not config_path:
+            return None
+        elif os.path.exists(config_path):
+            return config_path
+        else:
+            # Assume it's in the config directory
+            return os.path.join(CONFIG_DIR, config_path)
 
-	@property
-	def sensor_paths(self):
-		"""
-		Get the sensor config path dict
-		@return: dict of sensor config paths
-		@rtype: dict[str, str]
-		"""
-		return self.config.get(ConfigKeys.SENSORS)
+    @property
+    def sensor_paths(self):
+        """
+        Get the sensor config path dict
+        @return: dict of sensor config paths
+        @rtype: dict[str, str]
+        """
+        return self.config.get(ConfigKeys.SENSORS)
 
-	def get_sensor_path(self, sensor):
-		"""
-		Get the config path for the target sensor
-		@param sensor: target sensor
-		@type sensor: str
-		@return: Path to sensor config
-		@rtype: str
-		"""
-		return self.normalize_config_path(self.sensor_paths.get(sensor))
+    def get_sensor_path(self, sensor):
+        """
+        Get the config path for the target sensor
+        @param sensor: target sensor
+        @type sensor: str
+        @return: Path to sensor config
+        @rtype: str
+        """
+        return self.normalize_config_path(self.sensor_paths.get(sensor))
 
-	@property
-	def mqtt_path(self):
-		"""
-		Get the path to the base MQTT configuration file
-		@return: path to base MQTT configuration file if it exists
-		@rtype: str or None
-		"""
-		return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
+    @property
+    def mqtt_path(self):
+        """
+        Get the path to the base MQTT configuration file
+        @return: path to base MQTT configuration file if it exists
+        @rtype: str or None
+        """
+        return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
 
-	@property
-	def log(self):
-		"""
-		@return: Path to log file
-		@rtype: str
-		"""
-		return self.config.get(ConfigKeys.LOG)
+    @property
+    def log(self):
+        """
+        @return: Path to log file
+        @rtype: str
+        """
+        return self.config.get(ConfigKeys.LOG)
 
 
 class ConfigurationHandler(BaseConfiguration):
-	# Import all the sensor-specific configuration objects
-	from library.config.environment import EnvironmentConfig
-	from library.config.door_monitor import DoorMonitorConfig
+    # Import all the sensor-specific configuration objects
+    from library.config.environment import EnvironmentConfig
+    from library.config.door_monitor import DoorMonitorConfig
 
-	# TODO: Update these as they're developed
-	SENSOR_CLASS_MAP = {
-		'environment': EnvironmentController,
-		'door_monitor': None,
-		'door_control': None,
-	}
-	SENSOR_CONFIG_CLASS_MAP = {
-		'environment': EnvironmentConfig,
-		'door_monitor': DoorMonitorConfig,
-		'door_control': None,
-	}
+    # TODO: Update these as they're developed
+    SENSOR_CLASS_MAP = {
+        'environment': EnvironmentController,
+        'door_monitor': None,
+        'door_control': None,
+    }
+    SENSOR_CONFIG_CLASS_MAP = {
+        'environment': EnvironmentConfig,
+        'door_monitor': DoorMonitorConfig,
+        'door_control': None,
+    }
 
-	def __init__(self, config_path):
-		"""
-		@param config_path: path to top-level configuration JSON file
-		@type config_path: str
-		"""
-		super(ConfigurationHandler, self).__init__(config_path)
-		self._current_sensor = 0
-		self.sensors = list(self.config.get(ConfigKeys.SENSORS, {}))
+    def __init__(self, config_path):
+        """
+        @param config_path: path to top-level configuration JSON file
+        @type config_path: str
+        """
+        super(ConfigurationHandler, self).__init__(config_path)
+        self._current_sensor = 0
+        self.sensors = list(self.config.get(ConfigKeys.SENSORS, {}))
 
-	# region Sensors
+    # region Sensors
 
-	@property
-	def mqtt_config_path(self):
-		"""
-		Get the full path to the base MQTT configuration file
-		@return: path to the base MQTT configuration file
-		@rtype: str
-		"""
-		if os.path.exists(self.config.get(ConfigKeys.MQTT, '')):
-			return self.config[ConfigKeys.MQTT]
-		else:
-			return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
+    @property
+    def mqtt_config_path(self):
+        """
+        Get the full path to the base MQTT configuration file
+        @return: path to the base MQTT configuration file
+        @rtype: str
+        """
+        if os.path.exists(self.config.get(ConfigKeys.MQTT, '')):
+            return self.config[ConfigKeys.MQTT]
+        else:
+            return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
 
-	def get_sensor_mqtt_config(self, sensor):
-		"""
-		Get the MQTT config class for the given sensor
-		@param sensor: target sensor
-		@type sensor: str
-		@return: MQTT configuration object with sensor settings
-		@rtype: MQTTConfig
-		"""
-		if sensor in self.sensor_paths:
-			return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor))
-		else:
-			return None
+    def get_sensor_mqtt_config(self, sensor):
+        """
+        Get the MQTT config class for the given sensor
+        @param sensor: target sensor
+        @type sensor: str
+        @return: MQTT configuration object with sensor settings
+        @rtype: MQTTConfig
+        """
+        if sensor in self.sensor_paths:
+            return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor))
+        else:
+            return None
 
-	def get_sensor_config(self, sensor):
-		"""
-		Get the config class for the particular
-		@param sensor: target sensor
-		@type sensor: str
-		@return: the sensor config object for the given sensor if supported
-		@rtype: library.config.BaseConfiguration
-		"""
-		if sensor in self.SENSOR_CLASS_MAP and sensor in self.sensor_paths:
-			return self.SENSOR_CONFIG_CLASS_MAP[sensor](
-				self.sensor_paths[sensor],
-				self.get_sensor_mqtt_config(sensor)
-			)
-		else:
-			return None
+    def get_sensor_config(self, sensor):
+        """
+        Get the config class for the particular
+        @param sensor: target sensor
+        @type sensor: str
+        @return: the sensor config object for the given sensor if supported
+        @rtype: library.config.BaseConfiguration
+        """
+        if sensor in self.SENSOR_CLASS_MAP and sensor in self.sensor_paths:
+            return self.SENSOR_CONFIG_CLASS_MAP[sensor](
+                self.sensor_paths[sensor],
+                self.get_sensor_mqtt_config(sensor)
+            )
+        else:
+            return None
 
-	def get_sensor_controller(self, sensor):
-		"""
-		Get the sensor object for the given sensor
-		@param sensor: target sensor
-		@type sensor: str
-		@return: sensor object
-		@rtype: library.controllers.BaseController
-		"""
-		if sensor in self.SENSOR_CLASS_MAP:
-			return self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
-		else:
-			return None
+    def get_sensor_controller(self, sensor):
+        """
+        Get the sensor object for the given sensor
+        @param sensor: target sensor
+        @type sensor: str
+        @return: sensor object
+        @rtype: library.controllers.BaseController
+        """
+        if sensor in self.SENSOR_CLASS_MAP:
+            return self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
+        else:
+            return None
 
-	# endregion Sensors
-	# region BuiltIns
+    # endregion Sensors
+    # region BuiltIns
 
-	def __repr__(self):
-		"""
-		@rtype: str
-		"""
-		return "({})".format(", ".join(self.sensors))
+    def __repr__(self):
+        """
+        @rtype: str
+        """
+        return "({})".format(", ".join(self.sensors))
 
-	def __iter__(self):
-		"""
-		Yield a sensor one at a time
-		@return: sensor controllers iteratively
-		"""
-		self._current_sensor = 0
-		for sensor in self.config.get(ConfigKeys.SENSORS, {}):
-			yield self.get_sensor_controller(sensor)
+    def __iter__(self):
+        """
+        Yield a sensor one at a time
+        @return: sensor controllers iteratively
+        """
+        self._current_sensor = 0
+        for sensor in self.config.get(ConfigKeys.SENSORS, {}):
+            yield self.get_sensor_controller(sensor)
 
-	def __next__(self):
-		"""
-		Get the next sensor
-		@return: sensor controller
-		@rtype: library.controllers.BaseController
-		"""
-		if self._current_sensor < len(self.sensors):
-			sensor = self.sensors[self._current_sensor]
-			self._current_sensor += 1
-			return self.get_sensor_controller(sensor)
-		else:
-			raise StopIteration
+    def __next__(self):
+        """
+        Get the next sensor
+        @return: sensor controller
+        @rtype: library.controllers.BaseController
+        """
+        if self._current_sensor < len(self.sensors):
+            sensor = self.sensors[self._current_sensor]
+            self._current_sensor += 1
+            return self.get_sensor_controller(sensor)
+        else:
+            raise StopIteration
 
-		# endregion BuiltIns
+        # endregion BuiltIns
 
 
 if __name__ == "__main__":
-	configpath = "media.json"
-	config = ConfigurationHandler(configpath)
+    configpath = "media.json"
+    config = ConfigurationHandler(configpath)
 
-	# mqttconfig = config.get_sensor_mqtt_config('environment')
-	# print(mqttconfig.client_id)
+    # mqttconfig = config.get_sensor_mqtt_config('environment')
+    # print(mqttconfig.client_id)
 
-	env = config.get_sensor_config('environment')
-	# print(env)
-	print(env.mqtt_config)
-	print(env.pin)
-	print(env.type)
+    env = config.get_sensor_config('environment')
+    # print(env)
+    print(env.mqtt_config)
+    print(env.pin)
+    print(env.type)
 
 
 
 
 
 # class MQTTConfiguration(object):
-# 	def __init__(self, mqtt_dict):
-# 		super(MQTTConfiguration, self).__init__()
+#     def __init__(self, mqtt_dict):
+#         super(MQTTConfiguration, self).__init__()
 #
-# 		self._config = {}
-# 		self.config = mqtt_dict
+#         self._config = {}
+#         self.config = mqtt_dict
 #
-# 	@property
-# 	def config(self):
-# 		"""
-# 		Get the current config
-# 		@return: configuration dict
-# 		@rtype: dict[str, str]
-# 		"""
-# 		return self._config
+#     @property
+#     def config(self):
+#         """
+#         Get the current config
+#         @return: configuration dict
+#         @rtype: dict[str, str]
+#         """
+#         return self._config
 #
-# 	@config.setter
-# 	def config(self, config):
-# 		"""
-# 		Set a new config
-# 		@param config:
-# 		@type config:
-# 		@return:
-# 		@rtype:
-# 		"""
-# 		assert isinstance(config, dict), "Configuration must be of type dict!"
-# 		self._config = config
+#     @config.setter
+#     def config(self, config):
+#         """
+#         Set a new config
+#         @param config:
+#         @type config:
+#         @return:
+#         @rtype:
+#         """
+#         assert isinstance(config, dict), "Configuration must be of type dict!"
+#         self._config = config
 #
-# 		# Ensure there is a port - 1883 is the default used by MQTT servers
-# 		self.config.setdefault('port', 1883)
+#         # Ensure there is a port - 1883 is the default used by MQTT servers
+#         self.config.setdefault('port', 1883)
 #
-# 	@property
-# 	def client(self):
-# 		"""
-# 		Get the MQTT client name
-# 		@rtype: str
-# 		"""
-# 		return self._config.get('client', "")
+#     @property
+#     def client(self):
+#         """
+#         Get the MQTT client name
+#         @rtype: str
+#         """
+#         return self._config.get('client', "")
 #
-# 	@property
-# 	def broker(self):
-# 		"""
-# 		Get the MQTT broker URL
-# 		@rtype: str
-# 		"""
-# 		return self._config.get('broker', "")
+#     @property
+#     def broker(self):
+#         """
+#         Get the MQTT broker URL
+#         @rtype: str
+#         """
+#         return self._config.get('broker', "")
 #
-# 	@property
-# 	def port(self):
-# 		"""
-# 		Get the MQTT port
-# 		@rtype: int or None
-# 		"""
-# 		if 'port' in self.config:
-# 			return int(self._config.get('port'))
-# 		else:
-# 			return self.config.setdefault('port', 1883)
+#     @property
+#     def port(self):
+#         """
+#         Get the MQTT port
+#         @rtype: int or None
+#         """
+#         if 'port' in self.config:
+#             return int(self._config.get('port'))
+#         else:
+#             return self.config.setdefault('port', 1883)
 #
-# 	def __iter__(self):
-# 		for setting in self._config.values():
-# 			yield setting
+#     def __iter__(self):
+#         for setting in self._config.values():
+#             yield setting
 #
-# 	def __getitem__(self, item):
-# 		return self._config.get(item, None)
+#     def __getitem__(self, item):
+#         return self._config.get(item, None)
 #
-# 	def __repr__(self):
-# 		return json.dumps(self._config, indent=2)
+#     def __repr__(self):
+#         return json.dumps(self._config, indent=2)
 #
-# 	def items(self):
-# 		return iter([(x, y) for x, y in self._config.items()])
+#     def items(self):
+#         return iter([(x, y) for x, y in self._config.items()])
 #
-# 	def iteritems(self):
-# 		return iter([(x, y) for x, y in self._config.iteritems()])
+#     def iteritems(self):
+#         return iter([(x, y) for x, y in self._config.iteritems()])

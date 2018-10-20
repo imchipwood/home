@@ -7,43 +7,43 @@ LOG_DIR = os.path.join(HOME_DIR, 'log')
 
 
 def setup_logging(logger, logging_level=False, log_path=None):
-	"""
-	Set up logging stream and file handlers
-	@param logger: logger for the module/object we're setting up logging for
-	@type logger: logging.Logger
-	@param logging_level: logging level as defined by logging package
-	@type logging_level: int
-	@param log_path: (optional) path for file logging
-	@type log_path: str
-	@return: logger with handlers setup
-	@rtype: logging.Logger
-	"""
-	logger.info("Logging level: {}".format('DEBUG' if logging_level else 'INFO'))
+    """
+    Set up logging stream and file handlers
+    @param logger: logger for the module/object we're setting up logging for
+    @type logger: logging.Logger
+    @param logging_level: logging level as defined by logging package
+    @type logging_level: int
+    @param log_path: (optional) path for file logging
+    @type log_path: str
+    @return: logger with handlers setup
+    @rtype: logging.Logger
+    """
+    logger.info("Logging level: {}".format('DEBUG' if logging_level else 'INFO'))
 
-	# stdout stream handler
-	stream_handler = logging.StreamHandler()
-	stream_handler.setLevel(logging.DEBUG if logging_level else logging.INFO)
+    # stdout stream handler
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG if logging_level else logging.INFO)
 
-	# stdout logging formatting
-	stdout_format = "%(name)s - %(levelname)s - %(message)s"
-	stdout_formatter = logging.Formatter(stdout_format)
-	stream_handler.setFormatter(stdout_formatter)
+    # stdout logging formatting
+    stdout_format = "%(name)s - %(levelname)s - %(message)s"
+    stdout_formatter = logging.Formatter(stdout_format)
+    stream_handler.setFormatter(stdout_formatter)
 
-	# remove existing handlers then add the new one
-	logger.handlers = []
-	logger.addHandler(stream_handler)
+    # remove existing handlers then add the new one
+    logger.handlers = []
+    logger.addHandler(stream_handler)
 
-	# set up file handler logger - always debug level
-	if log_path:
-		logger.info("Logging to file: {}".format(log_path))
-		file_handler = logging.FileHandler(log_path)
-		file_handler.setLevel(logging.DEBUG)
+    # set up file handler logger - always debug level
+    if log_path:
+        logger.info("Logging to file: {}".format(log_path))
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setLevel(logging.DEBUG)
 
-		# file logging formatting
-		file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-		file_formatter = logging.Formatter(file_format)
-		file_handler.setFormatter(file_formatter)
-		logger.addHandler(file_handler)
-	else:
-		logger.warning("No log file path specified - file logging disabled")
-	return logger
+        # file logging formatting
+        file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        file_formatter = logging.Formatter(file_format)
+        file_handler.setFormatter(file_formatter)
+        logger.addHandler(file_handler)
+    else:
+        logger.warning("No log file path specified - file logging disabled")
+    return logger
