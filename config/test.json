@@ -1,0 +1,8 @@
+{
+  "sensors": {
+    "environment": "environment_test.json",
+    "door_monitor": "door_monitor_test.json",
+    "door_control": "door_control_test.json"
+  },
+  "mqtt": "mqtt.json"
+}

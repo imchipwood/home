@@ -6,7 +6,6 @@
 .idea
 #doc
 smb.conf
-test.json
 *venv*
 *pytest_cache*
 *pushbulletSettings*
