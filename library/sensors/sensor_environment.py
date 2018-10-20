@@ -3,7 +3,7 @@ import logging
 try:
 	import Adafruit_DHT
 except:
-	logging.warn("Couldn't import Adafruit_DHT - assuming this machine is not a Raspberry Pi and importing the mock module.")
+	logging.warning("Couldn't import Adafruit_DHT - assuming this machine is not a Raspberry Pi and importing the mock module.")
 	import library.sensors.Adafruit_DHT_mock as Adafruit_DHT
 
 from library.sensors.sensor import Sensor
@@ -61,7 +61,7 @@ class EnvironmentSensor(Sensor):
 		"""
 		if not self.state:
 			self.resetReadings()
-			logging.warn("Sensor is disabled - will not read as requested!")
+			logging.warning("Sensor is disabled - will not read as requested!")
 			return None, None
 
 		humidity, temperature = Adafruit_DHT.read_retry(self.sensorType, self.pin)
@@ -87,7 +87,7 @@ class EnvironmentSensor(Sensor):
 
 		# Check that we're enabled
 		if not self.state:
-			logging.warn("Sensor is disabled - will not read it {} times as requested!".format(n))
+			logging.warning("Sensor is disabled - will not read it {} times as requested!".format(n))
 			return None, None
 
 		# Everything is good - do the readings
