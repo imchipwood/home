@@ -1,3 +1,24 @@
-# Install these packages to use python3.x on a raspberry pi
-# the ffi packages are required for python modules used by pushbullet
-sudo apt-get install python3-dev python3-cffi libffi-dev
+'Home' is a personal project that allows simple configuration of Raspberry Pi's to do common tasks around the house
+- Humidity/Temperature Sensors (DHT11, DHT22, AM2302)
+- GPIO control (in/out)
+- Pi Camera support
+- Pushbullet notification support (text, image)
+- MQTT Support (for communication with other devices)
+
+Example uses:
+- Door monitor
+    - Send Pushbullet/MQTT messages on state change
+    - Capture Pi Camera image on state change, can send as notification
+- Door control (i.e. garage door)
+    - Use GPIO to control relay
+    - Receive commands via MQTT
+- Humidity/environment sensing
+    - Configurable sensor read frequency
+    - Configurable temperature units
+    - Send MQTT/Pushbullet messages on new reads
+
+Target Python Version: 3.4
+- Should work on any 3.x
+
+On RPi, some ffi system packages are required to install the Pushbullet Python module
+- sudo apt-get install python3-dev python3-cffi libffi-dev
