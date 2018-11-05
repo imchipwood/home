@@ -1,7 +1,7 @@
 import os
 import json
 
-from library import CONFIG_DIR
+from library import CONFIG_DIR, TEST_CONFIG_DIR
 from library.config.mqtt import MQTTConfig
 from library.controllers.environment import EnvironmentController
 
@@ -74,13 +74,23 @@ class BaseConfiguration(object):
         @return: normalized, absolute config path
         @rtype: str or None
         """
-        if not config_path:
-            return None
-        elif os.path.exists(config_path):
+        assert config_path, "No path provided"
+
+        # Was a raw path passed in?
+        if os.path.exists(config_path):
             return config_path
-        else:
-            # Assume it's in the config directory
-            return os.path.join(CONFIG_DIR, config_path)
+
+        # Path is relative - check config dir first then test config dir
+        potential_paths = [
+            os.path.join(CONFIG_DIR, config_path),
+            os.path.join(TEST_CONFIG_DIR, config_path)
+        ]
+        for potential_path in potential_paths:
+            if os.path.exists(potential_path):
+                return potential_path
+
+        # Can't figure out path - exit
+        raise OSError("Could not find config file {}".format(config_path))
 
     @property
     def sensor_paths(self):

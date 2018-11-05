@@ -3,6 +3,8 @@ import os
 
 HOME_DIR = os.path.join(os.path.dirname(__file__), '..')
 CONFIG_DIR = os.path.join(HOME_DIR, 'config')
+TEST_DIR = os.path.join(HOME_DIR, 'test')
+TEST_CONFIG_DIR = os.path.join(TEST_DIR, 'config')
 LOG_DIR = os.path.join(HOME_DIR, 'log')
 
 
