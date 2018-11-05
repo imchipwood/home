@@ -29,7 +29,7 @@ from threading import Thread
 
 from library.config.doorConfig import DoorConfig
 from library.config.pushbulletConfig import PushbulletConfig
-from cameraController import PiCameraController
+from library.sensors.cameraController import PiCameraController
 from library.services.pushbulletNotify import PushbulletImageNotify, PushbulletTextNotify
 
 

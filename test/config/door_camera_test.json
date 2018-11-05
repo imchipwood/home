@@ -11,8 +11,14 @@
     "brightness": 50,
     "contrast": 0
   },
-  "location": {
-    "city": "Seattle"
-  },
-  "capture_path": "/tmp/capture_test.jpg"
+  "city": "Seattle",
+  "capture_path": "/tmp/capture_test.jpg",
+  "mqtt": {
+    "client_id": "test_camera",
+    "topics": {
+      "subscribe": {
+        "capture": "home-assistant/test/capture"
+      }
+    }
+  }
 }

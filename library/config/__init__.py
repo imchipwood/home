@@ -37,6 +37,7 @@ class BaseConfiguration(object):
         @type config_path: str
         """
         super(BaseConfiguration, self).__init__()
+        self.config_keys = ConfigKeys
 
         self._config_path = ""
         self._config = {}

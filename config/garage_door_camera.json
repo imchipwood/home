@@ -11,8 +11,14 @@
     "brightness": 50,
     "contrast": 0
   },
-  "location": {
-    "city": "Seattle"
-  },
-  "capture_path": "/home/cpw/camera/captures/garage.jpg"
+  "city": "Seattle",
+  "capture_path": "/home/cpw/camera/captures/garage.jpg",
+  "mqtt": {
+    "client_id": "pi_garage_camera",
+    "topics": {
+      "subscribe": {
+        "capture": "home-assistant/garage/capture"
+      }
+    }
+  }
 }

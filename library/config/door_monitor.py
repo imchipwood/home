@@ -19,8 +19,6 @@ class DoorMonitorConfig(BaseConfiguration):
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
         super(DoorMonitorConfig, self).__init__(config_path)
-        from library.config import ConfigKeys
-        self.config_keys = ConfigKeys
 
         self.mqtt_config = mqtt_config
 
