@@ -1,9 +1,10 @@
 'Home' is a personal project that allows simple configuration of Raspberry Pi's to do common tasks around the house
 - Humidity/Temperature Sensors (DHT11, DHT22, AM2302)
 - GPIO control (in/out)
-- Pi Camera support
-- Pushbullet notification support (text, image)
-- MQTT Support (for communication with other devices)
+- Pi Camera
+- Pushbullet notification (text, image)
+- MQTT (for communication with other devices)
+- File logging
 
 Example uses:
 - Door monitor
@@ -12,10 +13,15 @@ Example uses:
 - Door control (i.e. garage door)
     - Use GPIO to control relay
     - Receive commands via MQTT
+- Security Camera
+    - Take images periodically or on demand via MQTT commands
 - Humidity/environment sensing
     - Configurable sensor read frequency
     - Configurable temperature units
     - Send MQTT/Pushbullet messages on new reads
+
+In addition, the MQTT communication can be used to communicate with home automation services
+such as Home Assistant. This provides a central location to view all sensor states and control the devices.
 
 Target Python Version: 3.4
 - Should work on any 3.x
