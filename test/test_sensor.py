@@ -1,4 +1,4 @@
-from library.sensors.sensor_environment import EnvironmentSensor
+from library.sensors.environment import EnvironmentSensor
 
 global env_sensor
 env_sensor = None

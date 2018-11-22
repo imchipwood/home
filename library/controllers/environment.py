@@ -10,7 +10,7 @@ import json
 
 from library.controllers import BaseController
 from library.communication.mqtt import MQTTClient
-from library.sensors.sensor_environment import EnvironmentSensor
+from library.sensors.environment import EnvironmentSensor
 
 
 class EnvironmentController(BaseController):
