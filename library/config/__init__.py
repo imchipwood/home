@@ -134,6 +134,7 @@ class ConfigurationHandler(BaseConfiguration):
     # Import all the sensor-specific configuration objects
     from library.config.environment import EnvironmentConfig
     from library.config.door_monitor import DoorMonitorConfig
+    from library.config.camera import CameraConfig
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
@@ -145,6 +146,7 @@ class ConfigurationHandler(BaseConfiguration):
         'environment': EnvironmentConfig,
         'door_monitor': DoorMonitorConfig,
         'door_control': None,
+        'camera': CameraConfig
     }
 
     def __init__(self, config_path):
@@ -191,7 +193,7 @@ class ConfigurationHandler(BaseConfiguration):
         @return: the sensor config object for the given sensor if supported
         @rtype: library.config.BaseConfiguration
         """
-        if sensor in self.SENSOR_CLASS_MAP and sensor in self.sensor_paths:
+        if sensor in self.SENSOR_CONFIG_CLASS_MAP and sensor in self.sensor_paths:
             return self.SENSOR_CONFIG_CLASS_MAP[sensor](
                 self.sensor_paths[sensor],
                 self.get_sensor_mqtt_config(sensor)

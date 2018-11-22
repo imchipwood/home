@@ -3,7 +3,6 @@
   "gpio": {
     "pin": 4
   },
-  "camera": "garage_door_camera.json",
   "mqtt": {
     "client_id": "pi_garage",
     "topics": {

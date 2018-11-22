@@ -4,6 +4,7 @@ import pytest
 from library.config import ConfigurationHandler
 from library.config.environment import EnvironmentConfig
 from library.config.door_monitor import DoorMonitorConfig
+from library.config.camera import CameraConfig
 
 from library.controllers.environment import EnvironmentController
 
@@ -14,6 +15,7 @@ CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 @pytest.mark.parametrize("target_type,expected_class", [
     ("environment", EnvironmentConfig),
     ("door_monitor", DoorMonitorConfig),
+    ("camera", CameraConfig),
 ])
 def test_get_sensor_config(target_type, expected_class):
     """
