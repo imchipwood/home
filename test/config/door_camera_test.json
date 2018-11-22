@@ -17,7 +17,7 @@
     "client_id": "test_camera",
     "topics": {
       "subscribe": {
-        "capture": "home-assistant/test/capture"
+        "capture": "home-assistant/test/sub"
       }
     }
   }

@@ -17,7 +17,7 @@
     "client_id": "pi_garage_camera",
     "topics": {
       "subscribe": {
-        "capture": "home-assistant/garage/capture"
+        "capture": "home-assistant/garage/state"
       }
     }
   }
