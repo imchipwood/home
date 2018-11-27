@@ -79,6 +79,7 @@ class TestMQTT:
     def test_payload(self):
         """
         Test that the Topic can create the correct payload
+        Also test that missing payload keys causes an exception
         """
         mqtt = MQTTConfig(self.mqtt_path, self.sensor_path)
         temperature = 123.45
@@ -93,3 +94,6 @@ class TestMQTT:
 
         payload = topic.payload(temperature=temperature, humidity=humidity, units=units)
         assert json.loads(payload) == expected_payload
+
+        with pytest.raises(Exception, message="Expected exception for missing 'units' key"):
+            topic.payload(temperature=temperature, humidity=humidity)

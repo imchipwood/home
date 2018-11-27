@@ -7,6 +7,87 @@ Author: Charles "Chip" Wood
 import json
 
 
+class Formatters:
+    """
+    Simple Formatting object for MQTT Topic payloads
+    """
+    def __init__(self):
+        """
+        Constructor for Formatters object
+        """
+        super(Formatters, self).__init__()
+        self._methods = [
+            self._format_payload_string,
+            self._format_payload_bool,
+            self._format_payload_float,
+            self._format_payload_int
+        ]
+
+    @staticmethod
+    def _format_payload_string(expected_value, actual_value):
+        """
+        Convert payload actual value to string if that's expected
+        @param expected_value: expected payload value type
+        @param actual_value: payload value passed by sensor or controller
+        @return: actual_value as formatted string or original actual_value if string not expected
+        """
+        if isinstance(expected_value, str):
+            # value won't change if expected_value is not a string formatter
+            new_value = expected_value.format(actual_value)
+            if new_value != expected_value:
+                # Value changed - expected_value was a string formatter
+                return new_value
+
+        return actual_value
+
+    @staticmethod
+    def _format_payload_int(expected_value, actual_value):
+        """
+        Convert payload actual value to int if that's expected
+        @param expected_value: expected payload value type
+        @param actual_value: payload value passed by sensor or controller
+        @return: actual_value as int or original actual_value if int not expected
+        """
+        if isinstance(expected_value, int):
+            return int(actual_value)
+
+        return actual_value
+
+    @staticmethod
+    def _format_payload_float(expected_value, actual_value):
+        """
+        Convert payload actual value to float if that's expected
+        @param expected_value: expected payload value type
+        @param actual_value: payload value passed by sensor or controller
+        @return: actual_value as float or original actual_value if float not expected
+        """
+        if isinstance(expected_value, float):
+            return float(actual_value)
+
+        return actual_value
+
+    @staticmethod
+    def _format_payload_bool(expected_value, actual_value):
+        """
+        Convert payload actual value to bool if that's expected
+        @param expected_value: expected payload value type
+        @param actual_value: payload value passed by sensor or controller
+        @return: actual_value as bool or original actual_value if bool not expected
+        """
+        if isinstance(expected_value, bool):
+            return bool(actual_value)
+
+        return actual_value
+
+    def __iter__(self):
+        """
+        Iteratively return the formatting methods
+        @rtype: method
+        """
+        for method in self._methods:
+            yield method
+
+
 class Topic(object):
     """
     Basic MQTT topic object with payload & pubsub properties
@@ -36,23 +117,43 @@ class Topic(object):
     def payload(self, **kwargs):
         """
         Get the Topic's payload
-        @return: payload dictionary
-        @rtype: dict
+        @return: payload as a string
+        @rtype: str
         """
+        # Get the expected payload
         payload = self._info.get("payload", {})
-        for key, val in payload.items():
-            actual_val = kwargs.get(key)
-            if type(val) != type(actual_val):
-                if isinstance(val, str):
-                    actual_val = val.format(actual_val)
-                elif isinstance(val, float):
-                    actual_val = float(actual_val)
-                elif isinstance(val, int):
-                    actual_val = int(actual_val)
+        new_payload = {}
 
-            payload[key] = actual_val
+        # Convert all the values
+        for expected_key, expected_val in payload.items():
+            # convert the value
+            actual_val = kwargs.get(expected_key)
+            actual_val = self.convert_payload_type(expected_val, actual_val)
 
-        return json.dumps(payload)
+            # Check we got the correct value
+            if actual_val is None or actual_val == "":
+                raise Exception("Missing payload key '{}'!".format(expected_key))
+
+            new_payload[expected_key] = actual_val
+
+        # Convert the payload to a string
+        return json.dumps(new_payload)
+
+    @staticmethod
+    def convert_payload_type(expected_value, actual_value):
+        """
+        Convert the value passed in to the payload creator to the
+        type defined in the payload configuration
+        @param expected_value: expected payload value type
+        @param actual_value: payload value passed by sensor or controller
+        @return: actual value converted to correct type
+        """
+        for formatter in Formatters():
+            new_value = formatter(expected_value, actual_value)
+            if new_value != actual_value:
+                return new_value
+
+        return actual_value
 
 
 class MQTTBaseConfig(object):
