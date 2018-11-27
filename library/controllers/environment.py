@@ -98,11 +98,12 @@ class EnvironmentController(BaseController):
         if not self.mqtt:
             return
 
-        payload = {
-            "temperature": "{:0.2f}".format(temperature),
-            "humidity": "{:0.2f}".format(humidity),
-            "units": units
-        }
+        payload = self.config.mqtt_topic.payload(
+            temperature=temperature,
+            humidity=humidity,
+            units=units
+        )
+
         self.logger.info(
             "Publishing to %s: %s",
             self.config.mqtt_topic,

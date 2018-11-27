@@ -1,0 +1,20 @@
+{
+  "log": "/tmp/environment.log",
+  "type": 22,
+  "pin": 4,
+  "units": "fahrenheit",
+  "period": 10,
+  "mqtt": {
+    "client_id": "pi_media",
+    "topics": {
+      "home-assistant/test/sub": {
+        "pubsub": "publish",
+        "payload": {
+          "temperature": "{:0.2f}",
+          "humidity": "{:0.2f}",
+          "units": ""
+        }
+      }
+    }
+  }
+}
