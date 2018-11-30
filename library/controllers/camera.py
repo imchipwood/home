@@ -9,6 +9,7 @@ import time
 import os
 import json
 from multiprocessing import Process
+from threading import Thread
 
 try:
     from picamera import PiCamera
@@ -146,7 +147,10 @@ class PiCameraController(PiCamera, BaseController):
             self.logger.info("Received capture command")
             # If no delay in message, pass in None - this will force camera to use
             # the delay defined in the config
-            self.capture(delay=message_data.get("delay", None))
+            kwargs = {"delay": message_data.get("delay", None)}
+            thread = Thread(target=self.capture, kwargs=kwargs)
+            thread.start()
+            # self.capture(delay=message_data.get("delay", None))
 
     def should_capture_from_command(self, message_topic, message_data):
         """
