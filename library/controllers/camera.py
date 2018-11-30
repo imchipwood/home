@@ -215,10 +215,13 @@ class PiCameraController(BaseController):
         """
         Update the camera ISO using the config's day/nighttime detection
         """
-        self.logger.debug("Updating camera ISO")
+        self.logger.debug("Updating camera ISO...")
         self.camera.stop_preview()
+        self.logger.debug("Calculating new ISO...")
         self.camera.iso = self.config.iso
         self.logger.debug("ISO set to %d", self.camera.iso)
+        # sleep a little to let the camera adjust
+        time.sleep(2)
         self.camera.start_preview()
 
     def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
@@ -282,7 +285,7 @@ class PiCameraController(BaseController):
         super(PiCameraController, self).cleanup()
         try:
             self.logger.debug("Disabling camera")
-            self.camera.stop_preview()
+            # self.camera.stop_preview()
             self.camera.close()
             self.logger.debug("Camera disabled")
         except:
