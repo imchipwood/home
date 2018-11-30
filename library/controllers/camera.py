@@ -46,6 +46,7 @@ class PiCameraController(PiCamera, BaseController):
         """
         Camera won't actually do threading - instead, we'll subscribe to an MQTT topic
         """
+        self.logger.debug("Staring Camera MQTT connection")
         self.mqtt.on_connect = self.on_connect
         self.mqtt.on_subscribe = self.on_subscribe
         self.mqtt.on_message = self.on_message
