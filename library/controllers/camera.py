@@ -209,7 +209,7 @@ class PiCameraController(BaseController):
         self.camera.brightness = self.config.brightness
         self.camera.contrast = self.config.contrast
         self.camera.resolution = self.config.resolution
-        self.camera.start_preview()
+        # self.camera.start_preview()
         self.update_camera_iso()
 
     def update_camera_iso(self):
