@@ -47,6 +47,7 @@ def execute():
             sensor.start()
 
         # Infinite loop while threads run
+        logging.info("Sensor threads launched - looping forever")
         while True:
             pass
 
