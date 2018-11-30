@@ -11,11 +11,7 @@ import json
 from multiprocessing import Process
 from threading import Thread
 
-try:
-    from picamera import PiCamera
-except:
-    logging.warning("Failed to import picamera - using mock")
-    from library.mock.mock_picamera import PiCamera
+from library.sensors.camera import Camera
 
 from library.controllers import BaseController
 from library.communication.mqtt import MQTTClient, MQTTError
@@ -35,31 +31,12 @@ class PiCameraController(BaseController):
         super(PiCameraController, self).__init__(config=config, debug=debug)
 
         # Set up the camera
-        self.camera = PiCamera()
-        self.iso = 200
-        self.logger.debug("initialized ISO to %d", self.iso)
-        self.setup()
+        self.camera = Camera(config, debug)
 
         self.mqtt = None
         """@type: MQTTClient"""
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
-
-    @property
-    def capture_delay(self):
-        """
-        @return: capture delay in seconds
-        @rtype: float
-        """
-        return self.config.delay
-
-    @property
-    def capture_path(self):
-        """
-        @return: where to save image to
-        @rtype: str
-        """
-        return self.config.capture_path
 
     # region Threading
 
@@ -167,9 +144,8 @@ class PiCameraController(BaseController):
             # If no delay in message, pass in None - this will force camera to use
             # the delay defined in the config
             kwargs = {"delay": message_data.get("delay", None)}
-            thread = Thread(target=self.capture, kwargs=kwargs)
+            thread = Thread(target=self.capture_loop, kwargs=kwargs)
             thread.start()
-            # self.capture(delay=message_data.get("delay", None))
 
     def should_capture_from_command(self, message_topic, message_data):
         """
@@ -202,84 +178,8 @@ class PiCameraController(BaseController):
     # endregion MQTT
     # region Camera
 
-    def setup(self):
-        """
-        Set up the PiCamera based on settings found in config file
-        """
-        self.logger.debug("Initializing camera settings from config")
-        self.camera.rotation = self.config.rotation
-        self.camera.brightness = self.config.brightness
-        self.camera.contrast = self.config.contrast
-        self.camera.resolution = self.config.resolution
-        # self.camera.start_preview()
-        self.update_camera_iso()
-
-    def update_camera_iso(self):
-        """
-        Update the camera ISO using the config's day/nighttime detection
-        """
-        self.logger.debug("Calculating ISO...")
-        iso = self.config.iso
-        self.logger.debug("ISO calculated as %d", iso)
-        if self.iso != iso:
-            self.logger.debug("Setting new ISO: %d", iso)
-            self.camera.iso = iso
-            self.iso = iso
-            # sleep a little to let the camera adjust
-            time.sleep(2)
-        else:
-            self.logger.debug("ISO unchanged")
-
-    def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
-        """
-        slight modification on built-in capture function to allow not specifying an output and updating camera ISO
-        on the fly based on time of day
-
-        @remark: More info here: http://picamera.readthedocs.io/en/release-1.10/api_camera.html
-
-        @param output: Optional, string path to save image to. Defaults to cameraFile attribute if none provided
-        @param format: Optional, format to save image in (jpeg, png, gif, etc.)
-        @param use_video_port: Optional, boolean, defaults False. Set to true to use video port instead of camera port if you need rapid capture
-        @param resize: Optional, tuple of (width, height) to resize image. defaults to None (no resize)
-        @param splitter_port: Optional, boolean, default 0, ignored when use_video_port=False. Defines port of video splitter that image encoder will be attached to
-        @param delay: Optional, integer, default None, use to delay the camera picture taking by 'delay' seconds
-        @param options: no documentation provided by picamera docs
-        """
-        # Use capture path from config if one wasn't provided
-        if not output:
-            output = self.capture_path
-
-        if not os.path.exists(os.path.dirname(output)):
-            # Ensure the output directory actually exists
-            os.makedirs(os.path.dirname(output))
-        elif os.path.exists(output):
-            # Delete old file if necessary
-            os.remove(output)
-
-        # update ISO
-        self.update_camera_iso()
-
-        # Handle capture delay
-        target_delay = 0
-        if delay is not None:
-            target_delay = delay
-        elif self.capture_delay:
-            target_delay = self.capture_delay
-        if target_delay > 0:
-            self.logger.debug("Delaying %f seconds before capture", target_delay)
-            time.sleep(target_delay)
-
-        self.logger.debug("Capturing image to %s...", output)
-        # super(PiCameraController, self).capture(
-        self.camera.capture(
-            output=output,
-            format=format,
-            use_video_port=use_video_port,
-            resize=resize,
-            splitter_port=splitter_port,
-            **options
-        )
-        self.logger.debug("Capture complete")
+    def capture_loop(self, delay=0):
+        self.camera.capture(delay=delay)
 
     # endregion Camera
 
@@ -288,13 +188,7 @@ class PiCameraController(BaseController):
         Gracefully exit
         """
         super(PiCameraController, self).cleanup()
-        try:
-            self.logger.debug("Disabling camera")
-            # self.camera.stop_preview()
-            self.camera.close()
-            self.logger.debug("Camera disabled")
-        except:
-            self.logger.exception("Exception while shutting down camera")
+        self.camera.cleanup()
 
     def __repr__(self):
         """
