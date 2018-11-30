@@ -79,6 +79,7 @@ class PiCameraController(PiCamera, BaseController):
         Simply connect to MQTT
         """
         if self.config.mqtt_topic and not self.running:
+            self.logger.debug("in connect_mqtt")
             self.mqtt.connect()
             self.mqtt.loop_start()
 
