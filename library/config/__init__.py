@@ -158,7 +158,8 @@ class ConfigurationHandler(BaseConfiguration):
         """
         super(ConfigurationHandler, self).__init__(config_path)
         self._current_sensor = 0
-        self.sensors = list(self.config.get(ConfigKeys.SENSORS, {}))
+        self.sensorTypes = list(self.config.get(ConfigKeys.SENSORS, {}))
+        self.sensors = {}
 
     # region Sensors
 
@@ -225,7 +226,7 @@ class ConfigurationHandler(BaseConfiguration):
         """
         @rtype: str
         """
-        return "({})".format(", ".join(self.sensors))
+        return "({})".format(", ".join(self.sensorTypes))
 
     def __iter__(self):
         """
@@ -243,7 +244,7 @@ class ConfigurationHandler(BaseConfiguration):
         @rtype: library.controllers.BaseController
         """
         if self._current_sensor < len(self.sensors):
-            sensor = self.sensors[self._current_sensor]
+            sensor = self.sensorTypes[self._current_sensor]
             self._current_sensor += 1
             return self.get_sensor_controller(sensor)
         else:
