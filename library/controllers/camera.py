@@ -153,7 +153,7 @@ class PiCameraController(PiCamera, BaseController):
         for key, val in message_data.items():
             if key == "delay":
                 continue
-            message_val = topic.payload.get(key, None)
+            message_val = topic.payload().get(key, None)
             if isinstance(message_val, str):
                 return message_val.lower() == val.lower()
             else:
