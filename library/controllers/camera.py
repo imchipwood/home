@@ -223,6 +223,10 @@ class PiCameraController(PiCamera, BaseController):
         if os.path.exists(output):
             os.remove(output)
 
+        # Ensure the output path actually exists
+        if not os.path.exists(os.path.dirname(output)):
+            os.makedirs(os.path.dirname(output))
+
         # Handle capture delay
         target_delay = 0
         if delay is not None:
