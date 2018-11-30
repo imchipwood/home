@@ -91,6 +91,9 @@ class Camera(PiCamera):
         self.logger.debug("Saving image to %s", output)
 
         # update ISO
+        self.logger.debug("Stopping preview")
+        self.stop_preview()
+        self.logger.debug("Setting ISO")
         self.iso = self.config.iso
 
         # Handle capture delay
