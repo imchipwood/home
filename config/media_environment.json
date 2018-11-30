@@ -7,8 +7,13 @@
   "mqtt": {
     "client_id": "pi_media",
     "topics": {
-      "publish": {
-        "environment": "home-assistant/media/environment"
+      "home-assistant/media/environment": {
+        "pubsub": "publish",
+        "payload": {
+          "temperature": "{:0.2f}",
+          "humidity": "{:0.2f}",
+          "units": ""
+        }
       }
     }
   }
