@@ -37,6 +37,7 @@ class PiCameraController(BaseController):
         # Set up the camera
         self.camera = PiCamera()
         self.setup()
+        self.iso = self.config.iso
 
         self.mqtt = None
         """@type: MQTTClient"""
@@ -219,9 +220,10 @@ class PiCameraController(BaseController):
         self.logger.debug("Calculating ISO...")
         iso = self.config.iso
         self.logger.debug("ISO calculated as %d", iso)
-        if self.camera.iso != iso:
+        if self.iso != iso:
             self.logger.debug("Setting new ISO: %d", iso)
             self.camera.iso = iso
+            self.iso = iso
             # sleep a little to let the camera adjust
             time.sleep(2)
         else:
