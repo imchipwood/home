@@ -133,7 +133,9 @@ class PiCameraController(PiCamera, BaseController):
         )
 
         # Convert message to JSON
-        message_data = json.loads(msg.payload.decode("utf-8"))
+        payload = msg.payload.decode("utf-8")
+        self.logger.debug("received payload: %s", payload)
+        message_data = json.loads(payload)
 
         # Check if it indicated a capture
         if self.should_capture_from_command(msg.topic, message_data):
