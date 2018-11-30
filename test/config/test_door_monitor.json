@@ -1,11 +1,14 @@
 {
   "log": "/tmp/door_monitor.log",
-  "pin": 4,
+  "pin": 5,
   "mqtt": {
     "client_id": "door_monitor_test",
     "topics": {
-      "publish": {
-        "state": "home-assistant/test/sub"
+      "home-assistant/test/sub": {
+        "pubsub": "publish",
+        "payload": {
+          "state": "Open|Closed"
+        }
       }
     }
   }
