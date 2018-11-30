@@ -209,20 +209,24 @@ class PiCameraController(BaseController):
         self.camera.brightness = self.config.brightness
         self.camera.contrast = self.config.contrast
         self.camera.resolution = self.config.resolution
+        self.camera.start_preview()
         self.update_camera_iso()
 
     def update_camera_iso(self):
         """
         Update the camera ISO using the config's day/nighttime detection
         """
-        self.logger.debug("Updating camera ISO...")
-        self.camera.stop_preview()
+        # self.logger.debug("Updating camera ISO...")
+        # self.camera.stop_preview()
         self.logger.debug("Calculating new ISO...")
-        self.camera.iso = self.config.iso
-        self.logger.debug("ISO set to %d", self.camera.iso)
-        # sleep a little to let the camera adjust
-        time.sleep(2)
-        self.camera.start_preview()
+        iso = self.config.iso
+        if self.camera.iso != iso:
+            self.logger.debug("ISO set to %d", self.camera.iso)
+            # self.camera.stop_preview()
+            self.camera.iso = iso
+            # self.camera.start_preview()
+            # sleep a little to let the camera adjust
+            time.sleep(2)
 
     def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
         """
