@@ -36,14 +36,28 @@ class PiCameraController(BaseController):
 
         # Set up the camera
         self.camera = PiCamera()
-        self.capture_path = None
-        self.capture_delay = 0
         self.setup()
 
         self.mqtt = None
         """@type: MQTTClient"""
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+
+    @property
+    def capture_delay(self):
+        """
+        @return: capture delay in seconds
+        @rtype: float
+        """
+        return self.config.delay
+
+    @property
+    def capture_path(self):
+        """
+        @return: where to save image to
+        @rtype: str
+        """
+        return self.config.capture_path
 
     # region Threading
 
@@ -191,12 +205,10 @@ class PiCameraController(BaseController):
         Set up the PiCamera based on settings found in config file
         """
         self.logger.debug("Initializing camera settings from config")
-        self.capture_path = self.config.capture_path
         self.camera.rotation = self.config.rotation
         self.camera.brightness = self.config.brightness
         self.camera.contrast = self.config.contrast
         self.camera.resolution = self.config.resolution
-        self.camera.capture_delay = self.config.delay
         self.update_camera_iso()
 
     def update_camera_iso(self):
@@ -223,15 +235,17 @@ class PiCameraController(BaseController):
         @param delay: Optional, integer, default None, use to delay the camera picture taking by 'delay' seconds
         @param options: no documentation provided by picamera docs
         """
-        # Handle output path
+        # Use capture path from config if one wasn't provided
         if not output:
             output = self.capture_path
-        if os.path.exists(output):
+
+        if not os.path.exists(os.path.dirname(output)):
+            # Ensure the output directory actually exists
+            os.makedirs(os.path.dirname(output))
+        elif os.path.exists(output):
+            # Delete old file if necessary
             os.remove(output)
 
-        # Ensure the output path actually exists
-        if not os.path.exists(os.path.dirname(output)):
-            os.makedirs(os.path.dirname(output))
 
         # Handle capture delay
         target_delay = 0
@@ -278,4 +292,3 @@ class PiCameraController(BaseController):
         @rtype: str
         """
         return "{}|{}|{}".format(self.__class__, self.config.type, self.mqtt._client_id)
-
