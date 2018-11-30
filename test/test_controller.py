@@ -32,7 +32,7 @@ class Test_CameraController:
     def test_thread(self):
         self.controller.start()
         assert self.controller.running
-        self.controller.capture()
+        self.controller.capture_loop()
         self.controller.stop()
         assert not self.controller.running
         self.controller.cleanup()
