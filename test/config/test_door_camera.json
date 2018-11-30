@@ -5,19 +5,29 @@
       "day": 200,
       "night": 800
     },
-    "delay": 10,
+    "delay": 0,
     "resolution": [3280, 2464],
     "rotation": 180,
     "brightness": 50,
-    "contrast": 0
+    "contrast": 0,
+    "city": "Seattle"
   },
-  "city": "Seattle",
   "capture_path": "/tmp/capture_test.jpg",
   "mqtt": {
     "client_id": "test_camera",
     "topics": {
-      "subscribe": {
-        "capture": "home-assistant/test/sub"
+      "home-assistant/test/state": {
+        "pubsub": "subscribe",
+        "payload": {
+          "state": "open"
+        }
+      },
+      "home-assistant/test/camera": {
+        "pubsub": "subscribe",
+        "payload": {
+          "capture": true,
+          "delay": 0
+        }
       }
     }
   }

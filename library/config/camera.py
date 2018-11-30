@@ -109,14 +109,22 @@ class CameraConfig(BaseConfiguration):
         """
         @rtype: int
         """
-        return self.iso.get(CameraConfigKeys.ISO_DAY)
+        return self.settings.get(
+            CameraConfigKeys.ISO, {}
+        ).get(
+            CameraConfigKeys.ISO_DAY, 200
+        )
 
     @property
     def iso_night(self):
         """
         @rtype: int
         """
-        return self.iso.get(CameraConfigKeys.ISO_NIGHT)
+        return self.settings.get(
+            CameraConfigKeys.ISO, {}
+        ).get(
+            CameraConfigKeys.ISO_NIGHT, 800
+        )
 
     @property
     def location(self):
@@ -130,7 +138,7 @@ class CameraConfig(BaseConfiguration):
         """
         @rtype: str
         """
-        return self.settings.get(CameraConfigKeys.CAPTURE_PATH)
+        return self.config.get(CameraConfigKeys.CAPTURE_PATH)
 
     @property
     def mqtt_topic(self):

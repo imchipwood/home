@@ -4,6 +4,7 @@ import json
 from library import CONFIG_DIR, TEST_CONFIG_DIR
 from library.config.mqtt import MQTTConfig
 from library.controllers.environment import EnvironmentController
+from library.controllers.camera import PiCameraController
 
 
 class ConfigKeys:
@@ -141,12 +142,13 @@ class ConfigurationHandler(BaseConfiguration):
         'environment': EnvironmentController,
         'door_monitor': None,
         'door_control': None,
+        'camera': PiCameraController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
         'environment': EnvironmentConfig,
         'door_monitor': DoorMonitorConfig,
         'door_control': None,
-        'camera': CameraConfig
+        'camera': CameraConfig,
     }
 
     def __init__(self, config_path):

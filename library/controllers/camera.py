@@ -27,10 +27,10 @@ class PiCameraController(PiCamera, BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(PiCameraController, self).__init__(config=config, debug=debug)
+        PiCamera.__init__(self)
+        BaseController.__init__(self, config=config, debug=debug)
 
         # Set up the camera
-        self.sensor = PiCamera()
         self.capture_path = None
         self.capture_delay = 0
         self.setup()
@@ -50,6 +50,13 @@ class PiCameraController(PiCamera, BaseController):
         self.mqtt.on_subscribe = self.on_subscribe
         self.mqtt.on_message = self.on_message
         self.connect_mqtt()
+        self.running = True
+
+    def loop(self):
+        """
+        No actual threading for Camera
+        """
+        return
 
     def stop(self):
         """
@@ -61,6 +68,7 @@ class PiCameraController(PiCamera, BaseController):
             self.mqtt.disconnect()
         except:
             self.logger.exception("Exception while disconnecting from MQTT - ignoring")
+        self.running = False
 
     # endregion Threading
     # region MQTT
@@ -69,8 +77,9 @@ class PiCameraController(PiCamera, BaseController):
         """
         Simply connect to MQTT
         """
-        self.mqtt.connect()
-        self.mqtt.loop_start()
+        if self.config.mqtt_topic:
+            self.mqtt.connect()
+            self.mqtt.loop_start()
 
     def on_connect(self, client, userdata, flags, rc):
         """
@@ -94,7 +103,8 @@ class PiCameraController(PiCamera, BaseController):
 
         # Nothing wrong with RC - subscribe to topic
         self.logger.info("Connection successful")
-        self.mqtt.subscribe(str(self.config.mqtt_topic), qos=1)
+        # Subscribe to all topics simultaneously
+        self.mqtt.subscribe([(x.name, 1) for x in self.config.mqtt_topic])
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         """
@@ -200,7 +210,7 @@ class PiCameraController(PiCamera, BaseController):
         elif self.capture_delay:
             target_delay = self.capture_delay
         if target_delay > 0:
-            self.logger.debug("Delaying %f seconds before capture", delay)
+            self.logger.debug("Delaying %f seconds before capture", target_delay)
             time.sleep(target_delay)
 
         super(PiCameraController, self).capture(
