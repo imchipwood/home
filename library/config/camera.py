@@ -92,13 +92,17 @@ class CameraConfig(BaseConfiguration):
         Calculate the iso based on the time of day
         @rtype: int
         """
+        print("In config/camera iso calc")
         sun = ephem.Sun()
+        print("In config/camera iso calc - city")
         city = ephem.city(self.location)
+        print("In config/camera iso calc - sun")
         sun.compute(city)
         # twilight = -12 * ephem.degree
         # daytime = sun.alt < twilight
         daytime = sun.alt > 0
 
+        print("In config/camera iso calc - return")
         if daytime:
             return self.iso_day
         else:
