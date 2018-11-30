@@ -191,11 +191,11 @@ class PiCameraController(BaseController):
         Set up the PiCamera based on settings found in config file
         """
         self.logger.debug("Initializing camera settings from config")
+        self.capture_path = self.config.capture_path
         self.camera.rotation = self.config.rotation
         self.camera.brightness = self.config.brightness
         self.camera.contrast = self.config.contrast
         self.camera.resolution = self.config.resolution
-        self.camera.capture_path = self.config.capture_path
         self.camera.capture_delay = self.config.delay
         self.update_camera_iso()
 
