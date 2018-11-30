@@ -19,7 +19,7 @@
       "home-assistant/test/state": {
         "pubsub": "subscribe",
         "payload": {
-          "state": "open"
+          "state": "Open"
         }
       },
       "home-assistant/test/camera": {

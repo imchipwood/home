@@ -125,7 +125,7 @@ class PiCameraController(PiCamera, BaseController):
         )
 
         # Convert message to JSON
-        message_data = json.loads(msg.payload)
+        message_data = json.loads(str(msg.payload))
 
         # Check if it indicated a capture
         if self.should_capture_from_command(msg.topic, message_data):
@@ -151,6 +151,8 @@ class PiCameraController(PiCamera, BaseController):
 
         # Check the payload - assumes a single value
         for key, val in message_data.items():
+            if key == "delay":
+                continue
             message_val = topic.payload.get(key, None)
             if isinstance(message_val, str):
                 return message_val.lower() == val.lower()
