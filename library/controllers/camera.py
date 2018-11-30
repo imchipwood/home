@@ -223,6 +223,8 @@ class PiCameraController(BaseController):
             self.camera.iso = iso
             # sleep a little to let the camera adjust
             time.sleep(2)
+        else:
+            self.logger.debug("ISO unchanged")
 
     def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
         """
