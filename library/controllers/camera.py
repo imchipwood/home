@@ -37,7 +37,7 @@ class PiCameraController(BaseController):
         # Set up the camera
         self.camera = PiCamera()
         self.setup()
-        self.iso = self.config.iso
+        self.iso = None
 
         self.mqtt = None
         """@type: MQTTClient"""
