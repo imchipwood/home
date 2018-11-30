@@ -215,6 +215,7 @@ class PiCameraController(BaseController):
         """
         Update the camera ISO using the config's day/nighttime detection
         """
+        self.logger.debug("Updating camera ISO")
         self.camera.stop_preview()
         self.camera.iso = self.config.iso
         self.logger.debug("ISO set to %d", self.camera.iso)
