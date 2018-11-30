@@ -88,6 +88,7 @@ class Camera(PiCamera):
         elif os.path.exists(output):
             # Delete old file if necessary
             os.remove(output)
+        self.logger.debug("Saving image to %s", output)
 
         # update ISO
         self.iso = self.config.iso
@@ -102,7 +103,7 @@ class Camera(PiCamera):
             self.logger.debug("Delaying %f seconds before capture", target_delay)
             time.sleep(target_delay)
 
-        self.logger.debug("Capturing image to %s...", output)
+        self.logger.debug("Capturing image...")
         super(Camera, self).capture(
             output=output,
             format=format,
