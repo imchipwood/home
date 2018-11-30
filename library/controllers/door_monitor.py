@@ -9,6 +9,7 @@ import timeit
 
 from library.controllers import BaseController
 from library.communication.mqtt import MQTTClient
+from library.sensors.gpio_monitor import GPIO_Monitor
 
 
 class DoorMonitorController(BaseController):
@@ -27,11 +28,22 @@ class DoorMonitorController(BaseController):
         """
         super(DoorMonitorController, self).__init__(config, debug)
 
+        self.sensor = GPIO_Monitor(
+            self.config.pin
+        )
+        self.state = self.sensor.read()
+
         # Set up MQTT
         self.mqtt = None
         """@type: MQTTClient"""
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+
+    def __repr__(self):
+        """
+        @rtype: str
+        """
+        return "Open" if self.state else "Closed"
 
     # region Threading
 
@@ -39,7 +51,7 @@ class DoorMonitorController(BaseController):
         """
         Start the thread
         """
-        self.logger.info("Starting environment thread")
+        self.logger.info("Starting GPIO monitor thread")
         self.thread = Thread(target=self.loop)
         self.thread.daemon = True
         self.running = True
@@ -49,56 +61,59 @@ class DoorMonitorController(BaseController):
         """
         Stop the thread
         """
-        self.logger.info("Stopping environment thread")
+        self.logger.info("Stopping GPIO monitor thread")
         self.running = False
 
     def loop(self):
         """
         Looping method for threading - reads sensor @ desired intervals and publishes results
         """
-        pass
-        # lasttime = 0
-        # while self.running:
-        #
-        #     # Read at the desired frequency
-        #     now = float(timeit.default_timer())
-        #     if now - lasttime > self.config.period:
-        #         lasttime = now
-        #
-        #         # Do the readings
-        #         try:
-        #             humidity, temperature = self.sensor.read_n_times(5)
-        #         except:
-        #             self.logger.exception('Failed to read environment sensor!')
-        #             continue
-        #
-        #         # Publish
-        #         self.publish(humidity, temperature, self.sensor.units)
+        lasttime = 0
+        while self.running:
+
+            # Read at the desired frequency
+            now = float(timeit.default_timer())
+            if now - lasttime > 1.0:
+                lasttime = now
+
+                # Do the readings
+                try:
+                    self.state = self.sensor.read()
+                except:
+                    self.logger.exception('Failed to read GPIO!')
+                    continue
+
+                # Publish
+                self.publish(str(self.state))
 
     # endregion Threading
     # region Communication
 
     def publish(self, state):
         """
-        Broadcast environment readings
+        Broadcast sensor readings
         @param state: door state (Open, Closed)
         @type state: str
         """
         if not self.mqtt:
             return
 
+        topic = self.config.mqtt_config
+
+        payload = topic.payload(state=state)
         self.logger.info(
             "Publishing to %s: %s",
-            self.config.mqtt_topic,
-            state
+            str(topic),
+            payload
         )
         try:
             self.mqtt.single(
-                topic=self.config.mqtt_topic,
-                payload=state
+                topic=str(topic),
+                payload=payload
             )
         except:
             self.logger.exception("Failed to publish MQTT data!")
+            raise
 
     # endregion Communication
 
@@ -107,10 +122,5 @@ class DoorMonitorController(BaseController):
         Shut down the thread
         """
         super(DoorMonitorController, self).cleanup()
+        self.sensor.cleanup()
         self.logger.info("Cleanup complete")
-
-    # def __repr__(self):
-    #     """
-    #     @rtype: str
-    #     """
-    #     return "{}|{}|{}".format(self.__class__, self.config.type, self.config.pin)

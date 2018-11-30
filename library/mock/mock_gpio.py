@@ -2,6 +2,9 @@ HIGH = 1
 LOW = 0
 OUT = 1
 IN = 0
+RISING = 1
+FALLING = 2
+BOTH = 3
 BCM = 'bcm'
 PUD_UP = True
 PUD_DOWN = False
@@ -38,3 +41,7 @@ def cleanup(pin=None):
 
 def input(pin):
     return STATE
+
+
+def add_event_detect(pin, rising_or_falling):
+    pass

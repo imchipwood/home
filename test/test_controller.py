@@ -36,3 +36,15 @@ class Test_CameraController:
         self.controller.stop()
         assert not self.controller.running
         self.controller.cleanup()
+
+
+class Test_DoorMonitorController:
+    controller = CONFIGURATION_HANDLER.get_sensor_controller('door_monitor')
+    """ @type: library.controllers.door_monitor.DoorMonitorController"""
+
+    def test_thread(self):
+        self.controller.start()
+        assert self.controller.running
+        self.controller.stop()
+        assert not self.controller.running
+        self.controller.cleanup()

@@ -9,6 +9,7 @@ from library.config.camera import CameraConfig
 from library.config.mqtt import MQTTConfig
 
 from library.controllers.environment import EnvironmentController
+from library.controllers.camera import PiCameraController
 
 CONFIG_PATH = "test.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
@@ -36,6 +37,7 @@ class Test_ConfigurationHandler:
 
     @pytest.mark.parametrize("target_type,expected_class", [
         ("environment", EnvironmentController),
+        ("camera", PiCameraController),
     ])
     def test_get_sensor_controller(self, target_type, expected_class):
         """
