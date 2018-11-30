@@ -8,6 +8,7 @@ import logging
 import time
 import os
 import json
+from multiprocessing import Process
 
 try:
     from picamera import PiCamera
@@ -57,7 +58,10 @@ class PiCameraController(PiCamera, BaseController):
         """
         No actual threading for Camera
         """
-        return
+        try:
+            self.mqtt.loop_forever()
+        except KeyboardInterrupt:
+            pass
 
     def stop(self):
         """
@@ -65,6 +69,7 @@ class PiCameraController(PiCamera, BaseController):
         """
         self.logger.info("Shutting down camera MQTT connection")
         try:
+            self.thread.terminate()
             self.mqtt.loop_stop()
             self.mqtt.disconnect()
         except:
@@ -81,7 +86,8 @@ class PiCameraController(PiCamera, BaseController):
         if self.config.mqtt_topic and not self.running:
             self.logger.debug("in connect_mqtt")
             self.mqtt.connect()
-            self.mqtt.loop_forever()
+            self.thread = Process(target=self.loop)
+            self.thread.start()
 
     def on_connect(self, client, userdata, flags, rc):
         """
