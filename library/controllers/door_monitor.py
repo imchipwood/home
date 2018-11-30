@@ -29,7 +29,8 @@ class DoorMonitorController(BaseController):
         super(DoorMonitorController, self).__init__(config, debug)
 
         self.sensor = GPIO_Monitor(
-            self.config.pin
+            self.config.pin,
+            debug=debug
         )
         self.state = self.sensor.read()
 
@@ -68,18 +69,19 @@ class DoorMonitorController(BaseController):
         """
         Looping method for threading - reads sensor @ desired intervals and publishes results
         """
-        lasttime = 0
+        last_time = 0
         last_state = self.state
         while self.running:
 
             # Read at the desired frequency
             now = float(timeit.default_timer())
-            if now - lasttime > 1.0:
-                lasttime = now
+            if now - last_time > 1.0:
+                last_time = now
 
                 # Do the readings
                 try:
                     self.state = self.sensor.read()
+                    self.logger.debug("Read GPIO with value %s", str(self))
                 except:
                     self.logger.exception('Failed to read GPIO!')
                     continue
