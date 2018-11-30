@@ -212,7 +212,9 @@ class ConfigurationHandler(BaseConfiguration):
         @rtype: library.controllers.BaseController
         """
         if sensor in self.SENSOR_CLASS_MAP:
-            return self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
+            if sensor not in self.sensors:
+                self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
+            return self.sensors[sensor]
         else:
             return None
 
