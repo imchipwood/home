@@ -84,7 +84,7 @@ class DoorMonitorController(BaseController):
                     continue
 
                 # Publish
-                self.publish(str(self.state))
+                self.publish(str(self))
 
     # endregion Threading
     # region Communication
@@ -98,22 +98,22 @@ class DoorMonitorController(BaseController):
         if not self.mqtt:
             return
 
-        topic = self.config.mqtt_config
+        for topic in self.config.mqtt_topic:
 
-        payload = topic.payload(state=state)
-        self.logger.info(
-            "Publishing to %s: %s",
-            str(topic),
-            payload
-        )
-        try:
-            self.mqtt.single(
-                topic=str(topic),
-                payload=payload
+            payload = topic.payload(state=state)
+            self.logger.info(
+                "Publishing to %s: %s",
+                str(topic),
+                payload
             )
-        except:
-            self.logger.exception("Failed to publish MQTT data!")
-            raise
+            try:
+                self.mqtt.single(
+                    topic=str(topic),
+                    payload=payload
+                )
+            except:
+                self.logger.exception("Failed to publish MQTT data!")
+                raise
 
     # endregion Communication
 
