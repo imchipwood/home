@@ -1,6 +1,6 @@
 {
   "log": "/tmp/door_monitor.log",
-  "pin": 5,
+  "pin": 3,
   "mqtt": {
     "client_id": "door_monitor_test",
     "topics": {
