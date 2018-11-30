@@ -233,7 +233,7 @@ class PiCameraController(PiCamera, BaseController):
             self.logger.debug("Delaying %f seconds before capture", target_delay)
             time.sleep(target_delay)
 
-        self.logger.debug("Capturing image...")
+        self.logger.debug("Capturing image to %s...", output)
         super(PiCameraController, self).capture(
             output=output,
             format=format,
