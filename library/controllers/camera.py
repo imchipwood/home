@@ -218,6 +218,7 @@ class PiCameraController(BaseController):
         """
         self.logger.debug("Calculating ISO...")
         iso = self.config.iso
+        self.logger.debug("ISO calculated as %d", iso)
         if self.camera.iso != iso:
             self.logger.debug("Setting new ISO: %d", iso)
             self.camera.iso = iso
