@@ -98,7 +98,8 @@ class EnvironmentController(BaseController):
         if not self.mqtt:
             return
 
-        payload = self.config.mqtt_topic.payload(
+        topic = self.config.mqtt_topic
+        payload = topic.payload(
             temperature=temperature,
             humidity=humidity,
             units=units
@@ -106,16 +107,17 @@ class EnvironmentController(BaseController):
 
         self.logger.info(
             "Publishing to %s: %s",
-            self.config.mqtt_topic,
+            topic,
             json.dumps(payload, indent=2)
         )
         try:
             self.mqtt.single(
-                topic=self.config.mqtt_topic,
+                topic=str(topic),
                 payload=payload
             )
         except:
             self.logger.exception("Failed to publish MQTT data!")
+            raise
 
     # endregion Communication
 

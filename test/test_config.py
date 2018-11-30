@@ -14,7 +14,7 @@ CONFIG_PATH = "test.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
 
-class TestTopConfig:
+class Test_ConfigurationHandler:
     @pytest.mark.parametrize("target_type,expected_class", [
         ("environment", EnvironmentConfig),
         ("door_monitor", DoorMonitorConfig),
@@ -33,7 +33,6 @@ class TestTopConfig:
 
         # Check the class is as expected
         assert isinstance(config, expected_class)
-
 
     @pytest.mark.parametrize("target_type,expected_class", [
         ("environment", EnvironmentController),
@@ -60,7 +59,7 @@ class TestTopConfig:
         assert ismethod(controller.cleanup)
 
 
-class TestMQTT:
+class Test_MQTT:
     mqtt_path = "test_mqtt.json"
     sensor_path = "test_environment.json"
     expected_topic_name = "home-assistant/test/sub"

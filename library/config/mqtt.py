@@ -155,6 +155,13 @@ class Topic(object):
 
         return actual_value
 
+    def __repr__(self):
+        """
+        Represent topic as a string
+        @rtype: str
+        """
+        return self.name
+
 
 class MQTTBaseConfig(object):
     """
