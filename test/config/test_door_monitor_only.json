@@ -1,0 +1,6 @@
+{
+  "sensors": {
+    "door_monitor": "test_door_monitor.json"
+  },
+  "mqtt": "test_mqtt.json"
+}
