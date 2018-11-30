@@ -216,15 +216,11 @@ class PiCameraController(BaseController):
         """
         Update the camera ISO using the config's day/nighttime detection
         """
-        # self.logger.debug("Updating camera ISO...")
-        # self.camera.stop_preview()
-        self.logger.debug("Calculating new ISO...")
+        self.logger.debug("Calculating ISO...")
         iso = self.config.iso
         if self.camera.iso != iso:
-            self.logger.debug("ISO set to %d", self.camera.iso)
-            # self.camera.stop_preview()
             self.camera.iso = iso
-            # self.camera.start_preview()
+            self.logger.debug("ISO set to %d", self.camera.iso)
             # sleep a little to let the camera adjust
             time.sleep(2)
 
@@ -254,6 +250,8 @@ class PiCameraController(BaseController):
             # Delete old file if necessary
             os.remove(output)
 
+        # update ISO
+        self.update_camera_iso()
 
         # Handle capture delay
         target_delay = 0
@@ -264,9 +262,6 @@ class PiCameraController(BaseController):
         if target_delay > 0:
             self.logger.debug("Delaying %f seconds before capture", target_delay)
             time.sleep(target_delay)
-
-        # update ISO
-        self.update_camera_iso()
 
         self.logger.debug("Capturing image to %s...", output)
         # super(PiCameraController, self).capture(
