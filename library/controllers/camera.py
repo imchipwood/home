@@ -118,8 +118,10 @@ class PiCameraController(PiCamera, BaseController):
         message_data = json.loads(msg.payload)
 
         # Check if it indicated a capture
-        if self.should_capture_from_command(message_data):
+        if self.should_capture_from_command(msg.topic, message_data):
             self.logger.info("Received capture command")
+            # If no delay in message, pass in None - this will force camera to use
+            # the delay defined in the config
             self.capture(delay=message_data.get("delay", None))
 
     def should_capture_from_command(self, message_topic, message_data):
@@ -133,20 +135,17 @@ class PiCameraController(PiCamera, BaseController):
         @rtype: bool
         """
         # Check all the topics we're subscribed to
-        for topic in self.config.mqtt_topic:
+        topic = self.config.mqtt_config.topics_subscribe.get(message_topic)
+        if not topic:
+            return False
 
-            # Correct topic?
-            if message_topic == topic:
-
-                # Check the payload
-                for key, val in message_data.items():
-                    message_val = topic.payload.get(key, None)
-                    if isinstance(message_val, str):
-                        return message_val.lower() == val.lower()
-                    else:
-                        return message_val == val
-
-        return False
+        # Check the payload - assumes a single value
+        for key, val in message_data.items():
+            message_val = topic.payload.get(key, None)
+            if isinstance(message_val, str):
+                return message_val.lower() == val.lower()
+            else:
+                return message_val == val
 
         # # Did this come from a door?
         # message = message_data.get("state", "")
@@ -196,7 +195,7 @@ class PiCameraController(PiCamera, BaseController):
 
         # Handle capture delay
         target_delay = 0
-        if delay:
+        if delay is not None:
             target_delay = delay
         elif self.capture_delay:
             target_delay = self.capture_delay

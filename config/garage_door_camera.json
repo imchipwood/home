@@ -24,7 +24,8 @@
     "home-assistant/garage/camera": {
       "pubsub": "subscribe",
       "payload": {
-        "capture": true
+        "capture": true,
+        "delay": 0
       }
     }
   }
