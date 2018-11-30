@@ -32,11 +32,22 @@ class Formatters:
         @return: actual_value as formatted string or original actual_value if string not expected
         """
         if isinstance(expected_value, str):
-            # value won't change if expected_value is not a string formatter
-            new_value = expected_value.format(actual_value)
-            if new_value != expected_value:
-                # Value changed - expected_value was a string formatter
-                return new_value
+            if "{" in expected_value:
+                # value won't change if expected_value is not a string formatter
+                new_value = expected_value.format(actual_value)
+                if new_value != expected_value:
+                    # Value changed - expected_value was a string formatter
+                    return new_value
+            else:
+                # Free-form string?
+                if expected_value == "":
+                    return actual_value
+                # Not a formatter, not freeform - pipe delimited list of valid values!
+                valid_values = expected_value.split("|")
+                if actual_value in valid_values:
+                    return actual_value
+                else:
+                    return None
 
         return actual_value
 
@@ -122,22 +133,29 @@ class Topic(object):
         """
         # Get the expected payload
         payload = self._info.get("payload", {})
-        new_payload = {}
 
-        # Convert all the values
-        for expected_key, expected_val in payload.items():
-            # convert the value
-            actual_val = kwargs.get(expected_key)
-            actual_val = self.convert_payload_type(expected_val, actual_val)
+        # Are we publishing or subscribing?
+        if self.pubsub == "publish":
+            new_payload = {}
 
-            # Check we got the correct value
-            if actual_val is None or actual_val == "":
-                raise Exception("Missing payload key '{}'!".format(expected_key))
+            # Convert all the values
+            for expected_key, expected_val in payload.items():
+                # convert the value
+                actual_val = kwargs.get(expected_key)
+                actual_val = self.convert_payload_type(expected_val, actual_val)
 
-            new_payload[expected_key] = actual_val
+                # Check we got the correct value
+                if actual_val is None or actual_val == "":
+                    raise Exception("Missing payload key '{}'!".format(expected_key))
 
-        # Convert the payload to a string
-        return json.dumps(new_payload)
+                new_payload[expected_key] = actual_val
+
+            # Convert the payload to a string
+            return json.dumps(new_payload)
+
+        else:
+            # Simply convert it to a string - let the controller figure out what to do with it
+            return payload
 
     @staticmethod
     def convert_payload_type(expected_value, actual_value):

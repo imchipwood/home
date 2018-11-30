@@ -94,7 +94,7 @@ class PiCameraController(PiCamera, BaseController):
 
         # Nothing wrong with RC - subscribe to topic
         self.logger.info("Connection successful")
-        self.mqtt.subscribe(self.config.mqtt_topic, qos=1)
+        self.mqtt.subscribe(str(self.config.mqtt_topic), qos=1)
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         """
@@ -122,22 +122,40 @@ class PiCameraController(PiCamera, BaseController):
             self.logger.info("Received capture command")
             self.capture(delay=message_data.get("delay", None))
 
-    def should_capture_from_command(self, message_data):
+    def should_capture_from_command(self, message_topic, message_data):
         """
         Check if the message indicates a capture command
-        @param message_data:
+        @param message_topic: topic message came from
+        @type message_topic: str
+        @param message_data: message data as dict
         @type message_data: dict
         @return: whether or not to capture
         @rtype: bool
         """
-        # Did this come from a door?
-        message = message_data.get("state", "")
-        if message:
-            return message.lower() == "open"
-        # Nope - was it a direct capture command?
-        message = message_data.get("capture", "")
-        if message:
-            return message.lower() == "capture"
+        # Check all the topics we're subscribed to
+        for topic in self.config.mqtt_topic:
+
+            # Correct topic?
+            if message_topic == topic:
+
+                # Check the payload
+                for key, val in message_data.items():
+                    message_val = topic.payload.get(key, None)
+                    if isinstance(message_val, str):
+                        return message_val.lower() == val.lower()
+                    else:
+                        return message_val == val
+
+        return False
+
+        # # Did this come from a door?
+        # message = message_data.get("state", "")
+        # if message:
+        #     return message.lower() == "open"
+        # # Nope - was it a direct capture command?
+        # message = message_data.get("capture", "")
+        # if message:
+        #     return message.lower() == "capture"
 
     # endregion MQTT
     # region Camera

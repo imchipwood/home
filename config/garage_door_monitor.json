@@ -6,8 +6,11 @@
   "mqtt": {
     "client_id": "pi_garage",
     "topics": {
-      "publish": {
-        "state": "home-assistant/garage/state"
+      "home-assistant/garage/state": {
+        "pubsub": "publish",
+        "payload": {
+          "state": "Open|Closed"
+        }
       }
     }
   }

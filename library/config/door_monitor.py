@@ -34,11 +34,23 @@ class DoorMonitorConfig(BaseConfiguration):
         """
         return self.config.get('pin')
 
+    # @property
+    # def mqtt_topic(self):
+    #     """
+    #     Get the MQTT topic to publish state info to
+    #     @return: topic to publish state info to
+    #     @rtype: str
+    #     """
+    #     return self.mqtt_config.topics_publish['state']
+
     @property
     def mqtt_topic(self):
         """
-        Get the MQTT topic to publish state info to
-        @return: topic to publish state info to
-        @rtype: str
+        Get the MQTT topic(s) to publish state info to
+        @return: topic(s) to publish state info to
+        @rtype: list[library.config.mqtt.Topic]
         """
-        return self.mqtt_config.topics_publish['state']
+        if not self.mqtt_config.topics_publish:
+            return None
+        else:
+            return list(self.mqtt_config.topics_publish.values())

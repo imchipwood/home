@@ -135,8 +135,11 @@ class CameraConfig(BaseConfiguration):
     @property
     def mqtt_topic(self):
         """
-        Get the MQTT topic to subscribe to for capture commands
-        @return: topic to subscribe to
-        @rtype: str
+        Get the MQTT topic(s) to subscribe to for capture commands
+        @return: topic(s) to subscribe to
+        @rtype: list[library.config.mqtt.Topic]
         """
-        return self.mqtt_config.topics_subscribe['capture']
+        if not self.mqtt_config.topics_subscribe:
+            return None
+        else:
+            return list(self.mqtt_config.topics_subscribe.values())
