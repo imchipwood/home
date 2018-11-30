@@ -69,6 +69,7 @@ class DoorMonitorController(BaseController):
         Looping method for threading - reads sensor @ desired intervals and publishes results
         """
         lasttime = 0
+        last_state = self.state
         while self.running:
 
             # Read at the desired frequency
@@ -84,7 +85,9 @@ class DoorMonitorController(BaseController):
                     continue
 
                 # Publish
-                self.publish(str(self))
+                if last_state != self.state:
+                    self.publish(str(self))
+                    last_state = self.state
 
     # endregion Threading
     # region Communication
