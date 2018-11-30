@@ -13,5 +13,8 @@ class PiCamera:
     def stop_preview(self):
         return
 
+    def start_preview(self):
+        return
+
     def capture(self, output, format=None, use_video_port=False, resize=None, splitter_port=0, bayer=False, **options):
         return

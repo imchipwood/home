@@ -21,7 +21,8 @@ from library.controllers import BaseController
 from library.communication.mqtt import MQTTClient, MQTTError
 
 
-class PiCameraController(PiCamera, BaseController):
+# class PiCameraController(PiCamera, BaseController):
+class PiCameraController(BaseController):
     def __init__(self, config, debug=False):
         """
         @param config: configuration object for PiCamera
@@ -29,10 +30,12 @@ class PiCameraController(PiCamera, BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        PiCamera.__init__(self)
-        BaseController.__init__(self, config=config, debug=debug)
+        # PiCamera.__init__(self)
+        # BaseController.__init__(self, config=config, debug=debug)
+        super(PiCameraController, self).__init__(config=config, debug=debug)
 
         # Set up the camera
+        self.camera = PiCamera()
         self.capture_path = None
         self.capture_delay = 0
         self.setup()
@@ -177,14 +180,8 @@ class PiCameraController(PiCamera, BaseController):
             else:
                 return message_val == val
 
-        # # Did this come from a door?
-        # message = message_data.get("state", "")
-        # if message:
-        #     return message.lower() == "open"
-        # # Nope - was it a direct capture command?
-        # message = message_data.get("capture", "")
-        # if message:
-        #     return message.lower() == "capture"
+        # Shouldn't ever get here but just in case...
+        return False
 
     # endregion MQTT
     # region Camera
@@ -193,14 +190,23 @@ class PiCameraController(PiCamera, BaseController):
         """
         Set up the PiCamera based on settings found in config file
         """
-        self.logger.debug("cameraSetup")
-        self.rotation = self.config.rotation
-        self.brightness = self.config.brightness
-        self.contrast = self.config.contrast
-        self.resolution = self.config.resolution
-        self.capture_path = self.config.capture_path
-        self.capture_delay = self.config.delay
-        self.iso = self.config.iso
+        self.logger.debug("Initializing camera settings from config")
+        self.camera.rotation = self.config.rotation
+        self.camera.brightness = self.config.brightness
+        self.camera.contrast = self.config.contrast
+        self.camera.resolution = self.config.resolution
+        self.camera.capture_path = self.config.capture_path
+        self.camera.capture_delay = self.config.delay
+        self.update_camera_iso()
+
+    def update_camera_iso(self):
+        """
+        Update the camera ISO using the config's day/nighttime detection
+        """
+        self.camera.stop_preview()
+        self.camera.iso = self.config.iso
+        self.logger.debug("ISO set to %d", self.camera.iso)
+        self.camera.start_preview()
 
     def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
         """
@@ -237,9 +243,12 @@ class PiCameraController(PiCamera, BaseController):
             self.logger.debug("Delaying %f seconds before capture", target_delay)
             time.sleep(target_delay)
 
+        # update ISO
+        self.update_camera_iso()
+
         self.logger.debug("Capturing image to %s...", output)
-        PiCameraController.capture(
-            self,
+        # super(PiCameraController, self).capture(
+        self.camera.capture(
             output=output,
             format=format,
             use_video_port=use_video_port,
@@ -258,8 +267,8 @@ class PiCameraController(PiCamera, BaseController):
         super(PiCameraController, self).cleanup()
         try:
             self.logger.debug("Disabling camera")
-            self.stop_preview()
-            self.close()
+            self.camera.stop_preview()
+            self.camera.close()
             self.logger.debug("Camera disabled")
         except:
             self.logger.exception("Exception while shutting down camera")
