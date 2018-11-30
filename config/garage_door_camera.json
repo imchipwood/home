@@ -19,7 +19,7 @@
       "home-assistant/garage/state": {
         "pubsub": "subscribe",
         "payload": {
-          "state": "open"
+          "state": "Open"
         }
       },
       "home-assistant/garage/camera": {
