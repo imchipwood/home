@@ -4,12 +4,13 @@ import pytest
 
 from library.config import ConfigurationHandler
 from library.config.environment import EnvironmentConfig
-from library.config.door_monitor import DoorMonitorConfig
+from library.config.gpio_monitor import GPIOMonitorConfig
 from library.config.camera import CameraConfig
 from library.config.mqtt import MQTTConfig
 
 from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
+from library.controllers.gpio_monitor import GPIOMonitorController
 
 CONFIG_PATH = "test.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
@@ -18,7 +19,7 @@ CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 class Test_ConfigurationHandler:
     @pytest.mark.parametrize("target_type,expected_class", [
         ("environment", EnvironmentConfig),
-        ("door_monitor", DoorMonitorConfig),
+        ("gpio_monitor", GPIOMonitorConfig),
         ("camera", CameraConfig),
     ])
     def test_get_sensor_config(self, target_type, expected_class):
@@ -38,6 +39,7 @@ class Test_ConfigurationHandler:
     @pytest.mark.parametrize("target_type,expected_class", [
         ("environment", EnvironmentController),
         ("camera", PiCameraController),
+        ("gpio_monitor", GPIOMonitorController),
     ])
     def test_get_sensor_controller(self, target_type, expected_class):
         """

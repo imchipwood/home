@@ -12,21 +12,19 @@ from library.communication.mqtt import MQTTClient
 from library.sensors.gpio_monitor import GPIO_Monitor
 
 
-class DoorMonitorController(BaseController):
+class GPIOMonitorController(BaseController):
     """
-    Basic controller with threads for monitoring door state
+    Basic controller with threads for monitoring GPIO state
     and publishing changes via MQTT.
-    Also supports PiCamera for snapping photos when the door opens
-    Door state changes & photos can be published via Pushbullet, too
     """
     def __init__(self, config, debug=False):
         """
         @param config: configuration object for environment sensing
-        @type config: library.config.door_monitor.DoorMonitorConfig
+        @type config: library.config.gpio_monitor.GPIOMonitorConfig
         @param debug: debug flag
         @type debug: bool
         """
-        super(DoorMonitorController, self).__init__(config, debug)
+        super(GPIOMonitorController, self).__init__(config, debug)
 
         self.sensor = GPIO_Monitor(
             self.config.pin,
@@ -81,7 +79,6 @@ class DoorMonitorController(BaseController):
                 # Do the readings
                 try:
                     self.state = self.sensor.read()
-                    self.logger.debug("Read GPIO with value %s", str(self))
                 except:
                     self.logger.exception('Failed to read GPIO!')
                     continue
@@ -126,6 +123,6 @@ class DoorMonitorController(BaseController):
         """
         Shut down the thread
         """
-        super(DoorMonitorController, self).cleanup()
+        super(GPIOMonitorController, self).cleanup()
         self.sensor.cleanup()
         self.logger.info("Cleanup complete")

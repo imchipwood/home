@@ -38,8 +38,8 @@ class Test_CameraController:
         self.controller.cleanup()
 
 
-class Test_DoorMonitorController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller('door_monitor')
+class Test_GPIOMonitorController:
+    controller = CONFIGURATION_HANDLER.get_sensor_controller('gpio_monitor')
     """ @type: library.controllers.door_monitor.DoorMonitorController"""
 
     def test_thread(self):

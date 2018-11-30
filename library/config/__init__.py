@@ -5,7 +5,7 @@ from library import CONFIG_DIR, TEST_CONFIG_DIR
 from library.config.mqtt import MQTTConfig
 from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
-from library.controllers.door_monitor import DoorMonitorController
+from library.controllers.gpio_monitor import GPIOMonitorController
 
 
 class ConfigKeys:
@@ -135,19 +135,19 @@ class BaseConfiguration(object):
 class ConfigurationHandler(BaseConfiguration):
     # Import all the sensor-specific configuration objects
     from library.config.environment import EnvironmentConfig
-    from library.config.door_monitor import DoorMonitorConfig
+    from library.config.gpio_monitor import GPIOMonitorConfig
     from library.config.camera import CameraConfig
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
         'environment': EnvironmentController,
-        'door_monitor': DoorMonitorController,
+        'gpio_monitor': GPIOMonitorController,
         'door_control': None,
         'camera': PiCameraController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
         'environment': EnvironmentConfig,
-        'door_monitor': DoorMonitorConfig,
+        'gpio_monitor': GPIOMonitorConfig,
         'door_control': None,
         'camera': CameraConfig,
     }
