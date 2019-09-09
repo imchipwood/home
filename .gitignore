@@ -3,7 +3,11 @@
 */*/*.pyc
 */*/*/*.pyc
 */cpw*
-.idea
+#.idea
+.idea/workspace.xml
+.idea/inspectionProfiles
+.idea/misc.xml
+.idea/*CACHE*
 #doc
 smb.conf
 *venv*
