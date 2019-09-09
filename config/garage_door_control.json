@@ -1,14 +1,17 @@
 {
-  "log": "/home/cpw/dev/logs/garageDoorControl.log",
+  "log": "/home/cpw/dev/logs/testDoorControl.log",
   "gpio": {
     "pin": 17,
     "toggle_delay": 0.3
   },
   "mqtt": {
-    "client_id": "pi_garage",
+    "client_id": "pi_test_door_control",
     "topics": {
-      "subscribe": {
-        "control": "home-assistant/garage/control"
+      "home-assistant/test/door/control": {
+        "pubsub": "subscribe",
+        "payload": {
+          "control": "Open|Close"
+        }
       }
     }
   }

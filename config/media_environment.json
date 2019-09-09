@@ -1,13 +1,13 @@
 {
-  "log": "/home/cpw/dev/logs/environment.log",
+  "log": "/home/cpw/dev/logs/testEnvironment.log",
   "type": 22,
   "pin": 4,
   "units": "fahrenheit",
   "period": 300,
   "mqtt": {
-    "client_id": "pi_media",
+    "client_id": "pi_test_environment",
     "topics": {
-      "home-assistant/media/environment": {
+      "home-assistant/test/environment": {
         "pubsub": "publish",
         "payload": {
           "temperature": "{:0.2f}",

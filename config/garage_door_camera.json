@@ -1,5 +1,5 @@
 {
-  "log": "/home/cpw/dev/logs/garageDoorCamera.txt",
+  "log": "/home/cpw/dev/logs/testDoorCamera.log",
   "settings": {
     "iso": {
       "day": 200,
@@ -12,17 +12,17 @@
     "contrast": 0,
     "city": "Seattle"
   },
-  "capture_path": "/home/cpw/camera/captures/garage.jpg",
+  "capture_path": "/home/cpw/camera/captures/test.jpg",
   "mqtt": {
-    "client_id": "pi_garage_camera",
+    "client_id": "pi_test_door_camera",
     "topics": {
-      "home-assistant/garage/state": {
+      "home-assistant/test/door/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Open"
         }
       },
-      "home-assistant/garage/camera": {
+      "home-assistant/test/door/camera": {
         "pubsub": "subscribe",
         "payload": {
           "capture": true,
