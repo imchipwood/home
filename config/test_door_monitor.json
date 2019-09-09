@@ -1,0 +1,15 @@
+{
+  "log": "/home/cpw/dev/logs/testDoorMonitor.log",
+  "pin": 27,
+  "mqtt": {
+    "client_id": "pi_test_door_monitor",
+    "topics": {
+      "home-assistant/test/door/state": {
+        "pubsub": "publish",
+        "payload": {
+          "state": "Open|Closed"
+        }
+      }
+    }
+  }
+}

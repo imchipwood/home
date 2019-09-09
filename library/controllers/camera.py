@@ -173,6 +173,7 @@ class PiCameraController(BaseController):
                 return message_val == val
 
         # Shouldn't ever get here but just in case...
+        self.logger.warning("Didn't find expected payload - not capturing!")
         return False
 
     # endregion MQTT

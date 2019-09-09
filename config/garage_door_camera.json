@@ -1,32 +1,31 @@
 {
-  "log": "/home/cpw/dev/logs/testDoorCamera.log",
+  "log": "/home/cpw/dev/logs/garageDoorCamera.log",
   "settings": {
     "iso": {
       "day": 200,
       "night": 800
     },
-    "delay": 2,
+    "delay": 10.0,
     "resolution": [3280, 2464],
     "rotation": 180,
     "brightness": 50,
     "contrast": 0,
     "city": "Seattle"
   },
-  "capture_path": "/home/cpw/camera/captures/test.jpg",
+  "capture_path": "/home/cpw/camera/captures/garage.jpg",
   "mqtt": {
-    "client_id": "pi_test_door_camera",
+    "client_id": "garage_door_camera",
     "topics": {
-      "home-assistant/test/door/state": {
+      "home-assistant/garage/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Open"
         }
       },
-      "home-assistant/test/door/camera": {
+      "home-assistant/garage/camera": {
         "pubsub": "subscribe",
         "payload": {
-          "capture": "CAPTURE",
-          "delay": 0
+          "capture": "CAPTURE"
         }
       }
     }

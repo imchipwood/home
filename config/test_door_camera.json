@@ -1,11 +1,11 @@
 {
-  "log": "/home/cpw/dev/logs/testCamera.log",
+  "log": "/home/cpw/dev/logs/testDoorCamera.log",
   "settings": {
     "iso": {
       "day": 200,
       "night": 800
     },
-    "delay": 2.0,
+    "delay": 10.0,
     "resolution": [3280, 2464],
     "rotation": 180,
     "brightness": 50,
@@ -14,8 +14,14 @@
   },
   "capture_path": "/home/cpw/camera/captures/test.jpg",
   "mqtt": {
-    "client_id": "pi_test_camera",
+    "client_id": "pi_test_door_camera",
     "topics": {
+      "home-assistant/test/door/state": {
+        "pubsub": "subscribe",
+        "payload": {
+          "state": "Open"
+        }
+      },
       "home-assistant/test/door/camera": {
         "pubsub": "subscribe",
         "payload": {
