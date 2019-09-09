@@ -115,6 +115,7 @@ class Camera(PiCamera):
             splitter_port=splitter_port,
             **options
         )
+        os.chmod(output, 0o777)
         self.logger.debug("Capture complete")
 
     def cleanup(self):
