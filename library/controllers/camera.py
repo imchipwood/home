@@ -31,7 +31,7 @@ class PiCameraController(BaseController):
         super(PiCameraController, self).__init__(config=config, debug=debug)
 
         # Set up the camera
-        self.camera = Camera(config, debug)
+        # self.camera = Camera(config, debug)
 
         self.mqtt = None
         """@type: MQTTClient"""
@@ -179,7 +179,9 @@ class PiCameraController(BaseController):
     # region Camera
 
     def capture_loop(self, delay=0):
-        self.camera.capture(delay=delay)
+        with Camera(self.config, self.debug) as camera:
+            camera.capture(delay=delay)
+        # self.camera.capture(delay=delay)
 
     # endregion Camera
 
@@ -188,7 +190,7 @@ class PiCameraController(BaseController):
         Gracefully exit
         """
         super(PiCameraController, self).cleanup()
-        self.camera.cleanup()
+        # self.camera.cleanup()
 
     def __repr__(self):
         """
