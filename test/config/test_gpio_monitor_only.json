@@ -1,0 +1,6 @@
+{
+  "sensors": {
+    "gpio_monitor": "test_gpio_monitor.json"
+  },
+  "mqtt": "test_mqtt.json"
+}

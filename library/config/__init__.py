@@ -4,6 +4,8 @@ import json
 from library import CONFIG_DIR, TEST_CONFIG_DIR
 from library.config.mqtt import MQTTConfig
 from library.controllers.environment import EnvironmentController
+from library.controllers.camera import PiCameraController
+from library.controllers.gpio_monitor import GPIOMonitorController
 
 
 class ConfigKeys:
@@ -16,6 +18,33 @@ class ConfigKeys:
     TOPICS = 'topics'
     PUBLISH = 'publish'
     SUBSCRIBE = 'subscribe'
+
+
+def normalize_config_path(config_path):
+    """
+    Normalize a config file path to the config dir of the repo
+    @param config_path: relative config path
+    @type config_path: str
+    @return: normalized, absolute config path
+    @rtype: str or None
+    """
+    assert config_path, "No path provided"
+
+    # Was a raw path passed in?
+    if os.path.exists(config_path):
+        return config_path
+
+    # Path is relative - check config dir first then test config dir
+    potential_paths = [
+        os.path.join(CONFIG_DIR, config_path),
+        os.path.join(TEST_CONFIG_DIR, config_path)
+    ]
+    for potential_path in potential_paths:
+        if os.path.exists(potential_path):
+            return potential_path
+
+    # Can't figure out path - exit
+    raise OSError("Could not find config file {}".format(config_path))
 
 
 def load_config(config_path):
@@ -62,36 +91,9 @@ class BaseConfiguration(object):
         @param config_path: path to config file
         @type config_path: str
         """
-        config_path = self.normalize_config_path(config_path)
+        config_path = normalize_config_path(config_path)
         self._config_path = config_path
         self._config = load_config(self._config_path)
-
-    @staticmethod
-    def normalize_config_path(config_path):
-        """
-        Normalize a config file path to the config dir of the repo
-        @param config_path: relative config path
-        @type config_path: str
-        @return: normalized, absolute config path
-        @rtype: str or None
-        """
-        assert config_path, "No path provided"
-
-        # Was a raw path passed in?
-        if os.path.exists(config_path):
-            return config_path
-
-        # Path is relative - check config dir first then test config dir
-        potential_paths = [
-            os.path.join(CONFIG_DIR, config_path),
-            os.path.join(TEST_CONFIG_DIR, config_path)
-        ]
-        for potential_path in potential_paths:
-            if os.path.exists(potential_path):
-                return potential_path
-
-        # Can't figure out path - exit
-        raise OSError("Could not find config file {}".format(config_path))
 
     @property
     def sensor_paths(self):
@@ -110,7 +112,7 @@ class BaseConfiguration(object):
         @return: Path to sensor config
         @rtype: str
         """
-        return self.normalize_config_path(self.sensor_paths.get(sensor))
+        return normalize_config_path(self.sensor_paths.get(sensor))
 
     @property
     def mqtt_path(self):
@@ -119,7 +121,7 @@ class BaseConfiguration(object):
         @return: path to base MQTT configuration file if it exists
         @rtype: str or None
         """
-        return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
+        return normalize_config_path(self.config.get(ConfigKeys.MQTT))
 
     @property
     def log(self):
@@ -133,18 +135,21 @@ class BaseConfiguration(object):
 class ConfigurationHandler(BaseConfiguration):
     # Import all the sensor-specific configuration objects
     from library.config.environment import EnvironmentConfig
-    from library.config.door_monitor import DoorMonitorConfig
+    from library.config.gpio_monitor import GPIOMonitorConfig
+    from library.config.camera import CameraConfig
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
         'environment': EnvironmentController,
-        'door_monitor': None,
+        'gpio_monitor': GPIOMonitorController,
         'door_control': None,
+        'camera': PiCameraController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
         'environment': EnvironmentConfig,
-        'door_monitor': DoorMonitorConfig,
+        'gpio_monitor': GPIOMonitorConfig,
         'door_control': None,
+        'camera': CameraConfig,
     }
 
     def __init__(self, config_path):
@@ -154,7 +159,8 @@ class ConfigurationHandler(BaseConfiguration):
         """
         super(ConfigurationHandler, self).__init__(config_path)
         self._current_sensor = 0
-        self.sensors = list(self.config.get(ConfigKeys.SENSORS, {}))
+        self.sensorTypes = list(self.config.get(ConfigKeys.SENSORS, {}))
+        self.sensors = {}
 
     # region Sensors
 
@@ -168,7 +174,7 @@ class ConfigurationHandler(BaseConfiguration):
         if os.path.exists(self.config.get(ConfigKeys.MQTT, '')):
             return self.config[ConfigKeys.MQTT]
         else:
-            return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
+            return normalize_config_path(self.config.get(ConfigKeys.MQTT))
 
     def get_sensor_mqtt_config(self, sensor):
         """
@@ -191,7 +197,7 @@ class ConfigurationHandler(BaseConfiguration):
         @return: the sensor config object for the given sensor if supported
         @rtype: library.config.BaseConfiguration
         """
-        if sensor in self.SENSOR_CLASS_MAP and sensor in self.sensor_paths:
+        if sensor in self.SENSOR_CONFIG_CLASS_MAP and sensor in self.sensor_paths:
             return self.SENSOR_CONFIG_CLASS_MAP[sensor](
                 self.sensor_paths[sensor],
                 self.get_sensor_mqtt_config(sensor)
@@ -208,7 +214,9 @@ class ConfigurationHandler(BaseConfiguration):
         @rtype: library.controllers.BaseController
         """
         if sensor in self.SENSOR_CLASS_MAP:
-            return self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
+            if sensor not in self.sensors:
+                self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
+            return self.sensors[sensor]
         else:
             return None
 
@@ -219,7 +227,7 @@ class ConfigurationHandler(BaseConfiguration):
         """
         @rtype: str
         """
-        return "({})".format(", ".join(self.sensors))
+        return "({})".format(", ".join(self.sensorTypes))
 
     def __iter__(self):
         """
@@ -237,7 +245,7 @@ class ConfigurationHandler(BaseConfiguration):
         @rtype: library.controllers.BaseController
         """
         if self._current_sensor < len(self.sensors):
-            sensor = self.sensors[self._current_sensor]
+            sensor = self.sensorTypes[self._current_sensor]
             self._current_sensor += 1
             return self.get_sensor_controller(sensor)
         else:
@@ -259,80 +267,3 @@ if __name__ == "__main__":
     print(env.pin)
     print(env.type)
 
-
-
-
-
-# class MQTTConfiguration(object):
-#     def __init__(self, mqtt_dict):
-#         super(MQTTConfiguration, self).__init__()
-#
-#         self._config = {}
-#         self.config = mqtt_dict
-#
-#     @property
-#     def config(self):
-#         """
-#         Get the current config
-#         @return: configuration dict
-#         @rtype: dict[str, str]
-#         """
-#         return self._config
-#
-#     @config.setter
-#     def config(self, config):
-#         """
-#         Set a new config
-#         @param config:
-#         @type config:
-#         @return:
-#         @rtype:
-#         """
-#         assert isinstance(config, dict), "Configuration must be of type dict!"
-#         self._config = config
-#
-#         # Ensure there is a port - 1883 is the default used by MQTT servers
-#         self.config.setdefault('port', 1883)
-#
-#     @property
-#     def client(self):
-#         """
-#         Get the MQTT client name
-#         @rtype: str
-#         """
-#         return self._config.get('client', "")
-#
-#     @property
-#     def broker(self):
-#         """
-#         Get the MQTT broker URL
-#         @rtype: str
-#         """
-#         return self._config.get('broker', "")
-#
-#     @property
-#     def port(self):
-#         """
-#         Get the MQTT port
-#         @rtype: int or None
-#         """
-#         if 'port' in self.config:
-#             return int(self._config.get('port'))
-#         else:
-#             return self.config.setdefault('port', 1883)
-#
-#     def __iter__(self):
-#         for setting in self._config.values():
-#             yield setting
-#
-#     def __getitem__(self, item):
-#         return self._config.get(item, None)
-#
-#     def __repr__(self):
-#         return json.dumps(self._config, indent=2)
-#
-#     def items(self):
-#         return iter([(x, y) for x, y in self._config.items()])
-#
-#     def iteritems(self):
-#         return iter([(x, y) for x, y in self._config.iteritems()])

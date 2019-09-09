@@ -109,14 +109,22 @@ class CameraConfig(BaseConfiguration):
         """
         @rtype: int
         """
-        return self.iso.get(CameraConfigKeys.ISO_DAY)
+        return self.settings.get(
+            CameraConfigKeys.ISO, {}
+        ).get(
+            CameraConfigKeys.ISO_DAY, 200
+        )
 
     @property
     def iso_night(self):
         """
         @rtype: int
         """
-        return self.iso.get(CameraConfigKeys.ISO_NIGHT)
+        return self.settings.get(
+            CameraConfigKeys.ISO, {}
+        ).get(
+            CameraConfigKeys.ISO_NIGHT, 800
+        )
 
     @property
     def location(self):
@@ -130,13 +138,16 @@ class CameraConfig(BaseConfiguration):
         """
         @rtype: str
         """
-        return self.settings.get(CameraConfigKeys.CAPTURE_PATH)
+        return self.config.get(CameraConfigKeys.CAPTURE_PATH)
 
     @property
     def mqtt_topic(self):
         """
-        Get the MQTT topic to subscribe to for capture commands
-        @return: topic to subscribe to
-        @rtype: str
+        Get the MQTT topic(s) to subscribe to for capture commands
+        @return: topic(s) to subscribe to
+        @rtype: list[library.config.mqtt.Topic]
         """
-        return self.mqtt_config.topics_subscribe['capture']
+        if not self.mqtt_config.topics_subscribe:
+            return None
+        else:
+            return list(self.mqtt_config.topics_subscribe.values())

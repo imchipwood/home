@@ -1,10 +1,10 @@
 {
-  "log": "/home/cpw/dev/logs/garageDoorMonitor.log",
-  "pin": 27,
+  "log": "/tmp/door_monitor.log",
+  "pin": 3,
   "mqtt": {
-    "client_id": "pi_garage",
+    "client_id": "door_monitor_test",
     "topics": {
-      "home-assistant/garage/state": {
+      "home-assistant/test/sub": {
         "pubsub": "publish",
         "payload": {
           "state": "Open|Closed"

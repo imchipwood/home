@@ -9,6 +9,10 @@ from paho.mqtt.client import Client, MQTTv311
 from paho.mqtt import publish
 
 
+class MQTTError(Exception):
+    pass
+
+
 class MQTTClient(Client):
     """
     paho.mqtt.client with support for passing in MQTTConfig object

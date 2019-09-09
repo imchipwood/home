@@ -1,8 +1,9 @@
 {
   "sensors": {
-    "environment": "environment_test.json",
-    "door_monitor": "door_monitor_test.json",
-    "door_control": "door_control_test.json"
+    "environment": "test_environment.json",
+    "gpio_monitor": "test_gpio_monitor.json",
+    "door_control": "test_door_control.json",
+    "camera": "test_door_camera.json"
   },
-  "mqtt": "mqtt.json"
+  "mqtt": "test_mqtt.json"
 }

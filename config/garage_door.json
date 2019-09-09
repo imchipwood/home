@@ -1,7 +1,7 @@
 {
   "sensors": {
-    "door_monitor": "garage_door_monitor.json",
-    "door_control": "garage_door_control.json"
+    "gpio_monitor": "garage_door_monitor.json",
+    "camera": "garage_door_camera.json"
   },
   "mqtt": "mqtt.json"
 }

@@ -1,4 +1,4 @@
-"""
+"""Environment
 Environment sensor configuration
 Author: Charles "Chip" Wood
         imchipwood@gmail.com
@@ -60,9 +60,14 @@ class EnvironmentConfig(BaseConfiguration):
         """
         Get the MQTT topic to publish state info to
         @return: topic to publish state info to
-        @rtype: str
+        @rtype: library.config.mqtt.Topic
         """
-        return self.mqtt_config.topics_publish['environment']
+        if not self.mqtt_config.topics_publish:
+            return None
+        elif len(self.mqtt_config.topics_publish) == 1:
+            return list(self.mqtt_config.topics_publish.values())[0]
+        else:
+            raise Exception("Multiple publish topics defined")
 
     @property
     def period(self):
