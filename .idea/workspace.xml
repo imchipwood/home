@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ba31035e-172f-4dae-930c-fb34bac83ec0" name="Default Changelist" comment="" />
+    <list default="true" id="ba31035e-172f-4dae-930c-fb34bac83ec0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/garage_door.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/garage_door.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/garage_door_camera.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/garage_door_camera.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/garage_door_monitor.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/garage_door_monitor.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/media_environment.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/media_environment.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/test_camera.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/test_camera.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library/controllers/camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/library/controllers/camera.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,12 +25,20 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1QZeHNzivorZ0yw6bxR80WOfhiK" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/config" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/config" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
