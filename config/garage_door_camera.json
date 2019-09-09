@@ -25,7 +25,7 @@
       "home-assistant/test/door/camera": {
         "pubsub": "subscribe",
         "payload": {
-          "capture": true,
+          "capture": "CAPTURE",
           "delay": 0
         }
       }

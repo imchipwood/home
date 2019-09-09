@@ -10,7 +10,7 @@
       "home-assistant/test/door/control": {
         "pubsub": "subscribe",
         "payload": {
-          "control": "Open|Close"
+          "control": "TOGGLE"
         }
       }
     }
