@@ -1,0 +1,28 @@
+{
+  "log": "/home/cpw/dev/logs/testCamera.log",
+  "settings": {
+    "iso": {
+      "day": 200,
+      "night": 800
+    },
+    "delay": 2,
+    "resolution": [3280, 2464],
+    "rotation": 180,
+    "brightness": 50,
+    "contrast": 0,
+    "city": "Seattle"
+  },
+  "capture_path": "/home/cpw/camera/captures/test.jpg",
+  "mqtt": {
+    "client_id": "pi_test_camera",
+    "topics": {
+      "home-assistant/test/door/camera": {
+        "pubsub": "subscribe",
+        "payload": {
+          "capture": "CAPTURE",
+          "delay": 0
+        }
+      }
+    }
+  }
+}
