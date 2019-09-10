@@ -14,18 +14,23 @@ def parse_args():
 		"recover in case no connection is made"
 	parser = argparse.ArgumentParser(description=description)
 	parser.add_argument(
-		"address",
+		"--address",
+		"-a",
+		default="192.168.1.1",
 		type=str,
 		help="Address to ping for connection test"
 	)
 	parser.add_argument(
-		"interface",
+		"--interface",
+		"-i",
+		default="wlan0",
 		type=str,
 		help="LAN interface to restart as first attempt at recovering"
 	)
 	parser.add_argument(
 		"--noreboot",
 		"-nr",
+		default=False,
 		action="store_true",
 		help="Flag to disable rebooting the Pi if no connection"
 	)
