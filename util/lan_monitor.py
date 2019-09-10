@@ -30,7 +30,7 @@ def parse_args():
 	parser.add_argument(
 		"--noreboot",
 		"-nr",
-		default=False,
+		default=True,
 		action="store_true",
 		help="Flag to disable rebooting the Pi if no connection"
 	)
