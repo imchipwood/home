@@ -1,46 +1,54 @@
 from library.sensors.environment import EnvironmentSensor
+from library.sensors.camera import Camera
+from library.config.camera import CameraConfig, CameraConfigKeys
 
-global env_sensor
-env_sensor = None
-""" @type: EnvironmentSensor """
+from library.config import ConfigurationHandler, SENSOR_CLASSES
+
+CONFIG_PATH = "pytest.json"
+CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
 
-def setup_module():
-    global env_sensor
-    env_sensor = EnvironmentSensor(
+class TestEnvironmentSensor:
+    sensor = EnvironmentSensor(
         sensor_type='22',
         pin=4,
         units='celsius',
         debug=True
     )
-
-
-class TestEnvironmentSensor:
     def test_read(self):
         """
         Check that reading the sensor returns new values
         """
-        env_sensor.reset_readings()
-        assert env_sensor.humidity == -999.0
-        assert env_sensor.temperature == -999.0
-        humidity, temperature = env_sensor.read()
+        self.sensor.reset_readings()
+        assert self.sensor.humidity == -999.0
+        assert self.sensor.temperature == -999.0
+        humidity, temperature = self.sensor.read()
         assert humidity != -999.0
-        assert humidity == env_sensor.humidity
+        assert humidity == self.sensor.humidity
         assert temperature != -999.0
-        assert temperature == env_sensor.temperature
+        assert temperature == self.sensor.temperature
 
     def test_units(self):
         """
         Check that the reading results match the desired units
         """
-        env_sensor.reset_readings()
-        env_sensor.units = 'celsius'
-        humidity, temperature = env_sensor.read()
+        self.sensor.reset_readings()
+        self.sensor.units = 'celsius'
+        humidity, temperature = self.sensor.read()
         fahrenheit = temperature * 9.0 / 5.0 + 32.0
-        assert fahrenheit == env_sensor.fahrenheit
-        assert temperature == env_sensor.temperature
-        assert temperature == env_sensor.celsius
+        assert fahrenheit == self.sensor.fahrenheit
+        assert temperature == self.sensor.temperature
+        assert temperature == self.sensor.celsius
 
         # Change units
-        env_sensor.units = 'fahrenheit'
-        assert fahrenheit == env_sensor.temperature
+        self.sensor.units = 'fahrenheit'
+        assert fahrenheit == self.sensor.temperature
+
+
+class Test_CameraSensor:
+    config = CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.CAMERA)
+    sensor = Camera(config)
+
+    def test_settings(self):
+        assert self.sensor.brightness == 50
+        assert self.sensor.resolution == [3280, 2464]
