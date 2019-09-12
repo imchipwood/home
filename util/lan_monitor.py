@@ -4,6 +4,11 @@ import argparse
 global DEBUG
 
 
+class Restart:
+	PI = "Raspberry Pi"
+	IFACE = "LAN Interface"
+
+
 def parse_args():
 	"""
 	Set up an argument parser and return the parsed arguments
@@ -16,7 +21,7 @@ def parse_args():
 	parser.add_argument(
 		"--address",
 		"-a",
-		default="192.168.1.1",
+		default="192.168.1.18",
 		type=str,
 		help="Address to ping for connection test"
 	)
@@ -28,11 +33,10 @@ def parse_args():
 		help="LAN interface to restart as first attempt at recovering"
 	)
 	parser.add_argument(
-		"--noreboot",
-		"-nr",
-		default=True,
+		"--reboot",
+		"-r",
 		action="store_true",
-		help="Flag to disable rebooting the Pi if no connection"
+		help="Flag to reboot the Pi if no connection"
 	)
 	parser.add_argument(
 		"--debug",
@@ -43,29 +47,29 @@ def parse_args():
 	return parser.parse_args()
 
 
-def WLAN_check(ping_address, interface, noreboot=False):
+def WLAN_check(ping_address, interface, reboot=False, debug=False):
 	"""
 	This function checks if the WLAN is still up by pinging the target address
 	@param ping_address: target address to ping
 	@type ping_address: str
 	@param interface: target LAN interface
 	@type interface: str
-	@param noreboot: Flag to disable rebooting. Default: False (allow reboot)
-	@type noreboot: bool
+	@param reboot: Flag to enable rebooting. Default: False (disable reboot)
+	@type reboot: bool
+	@param debug: debug flag - doesn't actually do anything if debug is enabled
+	@type debug: bool
 	"""
-	flag = True
-	for i in range(2 if not noreboot else 1):
-		flag = check_connection(ping_address, interface, flag)
-		msg = "Connection attempt {} - ".format(i + 1)
-		if flag:
-			# Connection is good - exit
-			msg += "Success! Exiting..."
-			print(msg)
-			return
-		else:
-			msg += "Failed! "
-			msg += "Rebooting Pi..." if not noreboot else "Exiting..."
-			print(msg)
+	# First attempt - restart the target interface
+	result = check_connection(ping_address, interface, Restart.IFACE, debug)
+	if result:
+		print("Connection is up - exiting")
+		return
+
+	# Second attempt - restart Pi if reboot==True, otherwise try a second interface restart
+	result = check_connection(ping_address, interface, Restart.PI if reboot else Restart.IFACE, debug)
+	if result:
+		print("Connection is up - exiting")
+		return
 
 
 def restart_pi():
@@ -86,65 +90,64 @@ def restart_interface(interface):
 	@type interface: str
 	"""
 	# try to recover the connection by resetting the LAN
+	print(f"Attempting to restart {interface}")
 	subprocess.call(
 		['logger "WLAN down - Pi resetting WLAN"'],
 		shell=True
 	)
-	cmd = "sudo /sbin/ifdown {iface} && sleep 10 && " \
-		"sudo /sbin/ifup --force {iface}".format(iface=interface)
+	cmd = f"sudo /sbin/ifdown {interface} && sleep 10 && " \
+		f"sudo /sbin/ifup --force {interface}"
 	subprocess.call(
 		[cmd],
 		shell=True
 	)
 
 
-def check_connection(ping_address, interface, restart_interface_flag=True):
+def check_connection(ping_address, interface, restart_target=Restart.PI, debug=False):
 	"""
 	Ping the address & either reboot the LAN interface
 	@param ping_address: address to ping
 	@type ping_address: str
 	@param interface: target interface to reboot
 	@type interface: str
-	@param restart_interface_flag: Reboot flag - True: interface, False: Pi
-	@type restart_interface_flag: bool
+	@param restart_target: Target for restarting
+	@type restart_target: str
+	@param debug: debug flag
+	@type debug: bool
 	@return: Result of ping - True if response received, False otherwise
 	@rtype: bool
 	"""
 	# This command pings the target address & looks for "1 received"
 	# It will return 0 if the ping is successful, and non-zero if not
-	ping_cmd = 'ping -c 2 -w 1 -q {} | grep "1 received" > ' \
-		'/dev/null 2> /dev/null'.format(ping_address)
+	ping_cmd = f'ping -c 2 -w 1 -q {ping_address} | grep "1 received" > ' \
+		'/dev/null 2> /dev/null'
 	response = subprocess.call([ping_cmd], shell=True)
 
-	if response != 0:
-		# Did not get a response
-		if restart_interface_flag:
-			# Try to reboot the interface first
-			if not DEBUG:
-				restart_interface(interface)
-			# Set flag to false so next iteration attempts a reboot
-			restart_interface_flag = False
-		else:
-			# Already tried rebooting interface - restart Pi in desperation
-			if not DEBUG:
-				restart_pi()
-	else:
-		# Response received - No need to continue
-		restart_interface_flag = True
+	if response == 0:
+		# Connection up - response was received
+		return True
 
-	return restart_interface_flag
+	else:
+		# Connection down - response was non-zero
+		if debug:
+			print(f"Debug mode enabled - would restart {restart_target} otherwise!)")
+			return False
+
+		if restart_target == Restart.IFACE:
+			# Target is interface
+			restart_interface(interface)
+		elif restart_target == Restart.PI:
+			# Target is pi
+			restart_pi()
+		else:
+			raise Exception(f"Unrecognized restart target: {restart_target}")
+
+		return False
 
 
 if __name__ == "__main__":
-	global DEBUG
 	args = parse_args()
-	DEBUG = args.debug
 	print(
-		"Address: {}\nInterface: {}\nDo not reboot: {}\nDEBUG: {}".format(
-			args.address,
-			args.interface,
-			args.noreboot,
-			DEBUG
-		)
+		f"Address: {args.address}\nInterface: {args.interface}\nDo not reboot: {not args.reboot}\nDebug: {args.debug}"
 	)
-	WLAN_check(args.address, args.interface, args.noreboot)
+	WLAN_check(args.address, args.interface, args.reboot, args.debug)
