@@ -1,7 +1,4 @@
-*.pyc
-*/*.pyc
-*/*/*.pyc
-*/*/*/*.pyc
+.pyc
 */cpw*
 #.idea
 .idea/workspace.xml
