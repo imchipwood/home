@@ -1,6 +1,5 @@
 from library.sensors.environment import EnvironmentSensor
 from library.sensors.camera import Camera
-from library.config.camera import CameraConfig, CameraConfigKeys
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
 
@@ -45,10 +44,8 @@ class TestEnvironmentSensor:
         assert fahrenheit == self.sensor.temperature
 
 
-class Test_CameraSensor:
-    config = CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.CAMERA)
-    sensor = Camera(config)
-
-    def test_settings(self):
-        assert self.sensor.brightness == 50
-        assert self.sensor.resolution == [3280, 2464]
+# def test_CameraSensor_settings():
+#     config = CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.CAMERA)
+#     with Camera(config) as sensor:
+#         assert sensor.brightness == 50
+#         assert sensor.resolution == [3280, 2464]
