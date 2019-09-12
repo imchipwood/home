@@ -76,11 +76,14 @@ def restart_pi():
 	"""
 	Restart the Pi as a last ditch effort
 	"""
+	print("Restarting Pi!")
 	subprocess.call(
 		['logger "WLAN down - Pi forcing reboot"'],
 		shell=True
 	)
-	subprocess.call(['sudo reboot'], shell=True)
+	cmd = 'sudo shutdown -r now'
+	print(f"Executing command:\n\t{cmd}")
+	subprocess.call([cmd], shell=True)
 
 
 def restart_interface(interface):
@@ -90,13 +93,15 @@ def restart_interface(interface):
 	@type interface: str
 	"""
 	# try to recover the connection by resetting the LAN
-	print(f"Attempting to restart {interface}")
+	print(f"Attempting to restart '{interface}'...")
 	subprocess.call(
-		['logger "WLAN down - Pi resetting WLAN"'],
+		[f'logger "{interface} down - Pi resetting {interface}"'],
 		shell=True
 	)
+
 	cmd = f"sudo /sbin/ifdown {interface} && sleep 10 && " \
 		f"sudo /sbin/ifup --force {interface}"
+	print(f"Executing command:\n\t{cmd}")
 	subprocess.call(
 		[cmd],
 		shell=True
@@ -119,8 +124,7 @@ def check_connection(ping_address, interface, restart_target=Restart.PI, debug=F
 	"""
 	# This command pings the target address & looks for "1 received"
 	# It will return 0 if the ping is successful, and non-zero if not
-	ping_cmd = f'ping -c 2 -w 1 -q {ping_address} | grep "1 received" > ' \
-		'/dev/null 2> /dev/null'
+	ping_cmd = f'ping -c 2 -w 1 -q {ping_address} | grep "1 received" > /dev/null 2> /dev/null'
 	response = subprocess.call([ping_cmd], shell=True)
 
 	if response == 0:
@@ -130,7 +134,7 @@ def check_connection(ping_address, interface, restart_target=Restart.PI, debug=F
 	else:
 		# Connection down - response was non-zero
 		if debug:
-			print(f"Debug mode enabled - would restart {restart_target} otherwise!)")
+			print(f"Debug mode enabled - would restart {restart_target} otherwise!")
 			return False
 
 		if restart_target == Restart.IFACE:
