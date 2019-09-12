@@ -1,13 +1,13 @@
 import time
 
-from library.config import ConfigurationHandler
+from library.config import ConfigurationHandler, SENSOR_CLASSES
 
-CONFIG_PATH = "test.json"
+CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
 
 class Test_EnvironmentController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller('environment')
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.ENVIRONMENT)
     """ @type: library.controllers.environment.EnvironmentController """
     def test_thread(self):
         self.controller.start()
@@ -26,20 +26,19 @@ class Test_EnvironmentController:
 
 
 class Test_CameraController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller('camera')
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.CAMERA)
     """ @type: library.controllers.camera.CameraController"""
 
     def test_thread(self):
         self.controller.start()
         assert self.controller.running
-        self.controller.capture_loop()
         self.controller.stop()
         assert not self.controller.running
         self.controller.cleanup()
 
 
 class Test_GPIOMonitorController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller('gpio_monitor')
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR)
     """ @type: library.controllers.door_monitor.DoorMonitorController"""
 
     def test_thread(self):

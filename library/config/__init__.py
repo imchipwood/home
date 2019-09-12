@@ -8,6 +8,13 @@ from library.controllers.camera import PiCameraController
 from library.controllers.gpio_monitor import GPIOMonitorController
 
 
+class SENSOR_CLASSES:
+    ENVIRONMENT = "environment"
+    GPIO_MONITOR = "gpio_monitor"
+    GPIO_DRIVER = "gpio_driver"
+    CAMERA = "camera"
+
+
 class ConfigKeys:
     MQTT = 'mqtt'
     SENSORS = 'sensors'
@@ -140,16 +147,16 @@ class ConfigurationHandler(BaseConfiguration):
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
-        'environment': EnvironmentController,
-        'gpio_monitor': GPIOMonitorController,
-        'door_control': None,
-        'camera': PiCameraController,
+        SENSOR_CLASSES.ENVIRONMENT: EnvironmentController,
+        SENSOR_CLASSES.GPIO_MONITOR: GPIOMonitorController,
+        SENSOR_CLASSES.GPIO_DRIVER: None,
+        SENSOR_CLASSES.CAMERA: PiCameraController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
-        'environment': EnvironmentConfig,
-        'gpio_monitor': GPIOMonitorConfig,
-        'door_control': None,
-        'camera': CameraConfig,
+        SENSOR_CLASSES.ENVIRONMENT: EnvironmentConfig,
+        SENSOR_CLASSES.GPIO_MONITOR: GPIOMonitorConfig,
+        SENSOR_CLASSES.GPIO_DRIVER: None,
+        SENSOR_CLASSES.CAMERA: CameraConfig,
     }
 
     def __init__(self, config_path):

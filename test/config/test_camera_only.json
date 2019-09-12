@@ -1,6 +1,0 @@
-{
-  "sensors": {
-    "camera": "test_door_camera.json"
-  },
-  "mqtt": "test_mqtt.json"
-}

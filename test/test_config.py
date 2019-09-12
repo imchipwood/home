@@ -2,7 +2,7 @@ from inspect import ismethod
 import json
 import pytest
 
-from library.config import ConfigurationHandler
+from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.config.environment import EnvironmentConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
 from library.config.camera import CameraConfig
@@ -12,15 +12,16 @@ from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
 from library.controllers.gpio_monitor import GPIOMonitorController
 
-CONFIG_PATH = "test.json"
+CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
 
 class Test_ConfigurationHandler:
+
     @pytest.mark.parametrize("target_type,expected_class", [
-        ("environment", EnvironmentConfig),
-        ("gpio_monitor", GPIOMonitorConfig),
-        ("camera", CameraConfig),
+        (SENSOR_CLASSES.ENVIRONMENT, EnvironmentConfig),
+        (SENSOR_CLASSES.GPIO_MONITOR, GPIOMonitorConfig),
+        (SENSOR_CLASSES.CAMERA, CameraConfig),
     ])
     def test_get_sensor_config(self, target_type, expected_class):
         """
@@ -37,9 +38,9 @@ class Test_ConfigurationHandler:
         assert isinstance(config, expected_class)
 
     @pytest.mark.parametrize("target_type,expected_class", [
-        ("environment", EnvironmentController),
-        ("camera", PiCameraController),
-        ("gpio_monitor", GPIOMonitorController),
+        (SENSOR_CLASSES.ENVIRONMENT, EnvironmentController),
+        (SENSOR_CLASSES.CAMERA, PiCameraController),
+        (SENSOR_CLASSES.GPIO_MONITOR, GPIOMonitorController),
     ])
     def test_get_sensor_controller(self, target_type, expected_class):
         """
@@ -64,8 +65,8 @@ class Test_ConfigurationHandler:
 
 
 class Test_MQTT:
-    mqtt_path = "test_mqtt.json"
-    sensor_path = "test_environment.json"
+    mqtt_path = "pytest_mqtt.json"
+    sensor_path = "pytest_environment.json"
     expected_topic_name = "home-assistant/test/sub"
 
     def test_topics(self):
