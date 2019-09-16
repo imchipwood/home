@@ -1,0 +1,10 @@
+[Unit]
+Description=Home Automation by Chip
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/cpw/dev/home_deploy/venv3.6/bin/python -B /home/cpw/dev/home_deploy/home.py full_test.json
+
+[Install]
+WantedBy=multi-user.target
