@@ -1,25 +1,10 @@
-import json
+from library.config import BaseConfiguration
 
 
-class PushbulletConfig(object):
-    def __init__(self, configPath):
-        super(PushbulletConfig, self).__init__()
-
-        self.configPath = configPath
-        self._config = self.loadConfig(self.configPath)
+class PushbulletConfig(BaseConfiguration):
+    def __init__(self, config_path):
+        super(PushbulletConfig, self).__init__(config_path)
 
     @property
-    def config(self):
-        return self._config
-
-    @config.setter
-    def config(self, configPath):
-        self._config = self.loadConfig(configPath)
-
-    @property
-    def apiKey(self):
-        return self._config.get("api")
-
-    def loadConfig(self, configPath):
-        with open(configPath, 'r') as inf:
-            return json.load(inf)
+    def api_key(self):
+        return self.config.get("api")
