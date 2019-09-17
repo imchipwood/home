@@ -149,7 +149,7 @@ class PushbulletController(BaseController):
 
                 pushbullet.PushbulletImageNotify(
                     self.config.api_key,
-                    notification.encode("utf-8")
+                    notification
                 )
             elif state == "Closed":
                 pushbullet.PushbulletTextNotify(

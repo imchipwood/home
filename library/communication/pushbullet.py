@@ -6,8 +6,7 @@ from pushbullet import Pushbullet
 class PushbulletImageNotify(Pushbullet):
 	def __init__(self, api_key, file_path):
 		super(PushbulletImageNotify, self).__init__(api_key)
-		# Pushbullet.__init__(self, api_key)
-		file_name = os.path.basename(file_path)
+		file_name = os.path.basename(file_path).encode("utf-8")
 		with open(file_path, 'rb') as pic:
 			file_data = self.upload_file(pic, file_name)
 		self.result = self.push_file(**file_data)
@@ -16,5 +15,4 @@ class PushbulletImageNotify(Pushbullet):
 class PushbulletTextNotify(Pushbullet):
 	def __init__(self, api_key, title_text, message_text):
 		super(PushbulletTextNotify, self).__init__(api_key)
-		# Pushbullet.__init__(self, api_key)
 		self.result = self.push_note(title_text, message_text)
