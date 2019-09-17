@@ -41,7 +41,8 @@ class CameraConfig(BaseConfiguration):
         self.mqtt_config = mqtt_config
 
         # Update the base configuration for easy dumping later
-        self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
+        if mqtt_config:
+            self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
     def settings(self):

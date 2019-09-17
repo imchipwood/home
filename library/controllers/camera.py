@@ -182,7 +182,6 @@ class PiCameraController(BaseController):
     def capture_loop(self, delay=0):
         with Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
-        # self.camera.capture(delay=delay)
 
     # endregion Camera
 
@@ -191,7 +190,6 @@ class PiCameraController(BaseController):
         Gracefully exit
         """
         super(PiCameraController, self).cleanup()
-        # self.camera.cleanup()
 
     def __repr__(self):
         """

@@ -2,7 +2,8 @@
   "sensors": {
     "environment": "pytest_environment.json",
     "gpio_monitor": "pytest_gpio_monitor.json",
-    "camera": "pytest_camera.json"
+    "camera": "pytest_camera.json",
+    "pushbullet": "pytest_pushbullet.json"
   },
   "mqtt": "pytest_mqtt.json"
 }

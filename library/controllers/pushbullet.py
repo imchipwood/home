@@ -140,6 +140,12 @@ class PushbulletController(BaseController):
 
     # endregion MQTT
 
+    def cleanup(self):
+        """
+        Gracefully exit
+        """
+        super(PushbulletController, self).cleanup()
+
     def __repr__(self):
         """
         @rtype: str

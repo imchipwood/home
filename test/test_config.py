@@ -6,11 +6,13 @@ from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.config.environment import EnvironmentConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
 from library.config.camera import CameraConfig
+from library.config.pushbulletConfig import PushbulletConfig
 from library.config.mqtt import MQTTConfig
 
 from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
 from library.controllers.gpio_monitor import GPIOMonitorController
+from library.controllers.pushbullet import PushbulletController
 
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
@@ -22,6 +24,7 @@ class Test_ConfigurationHandler:
         (SENSOR_CLASSES.ENVIRONMENT, EnvironmentConfig),
         (SENSOR_CLASSES.GPIO_MONITOR, GPIOMonitorConfig),
         (SENSOR_CLASSES.CAMERA, CameraConfig),
+        (SENSOR_CLASSES.PUSHBULLET, PushbulletConfig),
     ])
     def test_get_sensor_config(self, target_type, expected_class):
         """
@@ -41,6 +44,7 @@ class Test_ConfigurationHandler:
         (SENSOR_CLASSES.ENVIRONMENT, EnvironmentController),
         (SENSOR_CLASSES.CAMERA, PiCameraController),
         (SENSOR_CLASSES.GPIO_MONITOR, GPIOMonitorController),
+        (SENSOR_CLASSES.PUSHBULLET, PushbulletController),
     ])
     def test_get_sensor_controller(self, target_type, expected_class):
         """
