@@ -147,16 +147,22 @@ class PushbulletController(BaseController):
                         )
                         return
 
-                pushbullet.PushbulletImageNotify(
-                    self.config.api_key,
-                    notification
-                )
+                try:
+                    pushbullet.PushbulletImageNotify(
+                        self.config.api_key,
+                        notification
+                    )
+                except:
+                    self.logger.exception("Exception attempting to send Pushbullet image notification")
             elif state == "Closed":
-                pushbullet.PushbulletTextNotify(
-                    self.config.api_key,
-                    msg.topic,
-                    notification
-                )
+                try:
+                    pushbullet.PushbulletTextNotify(
+                        self.config.api_key,
+                        msg.topic,
+                        notification
+                    )
+                except:
+                    self.logger.exception("Exception attempting to send Pushbullet text notification")
 
     # endregion MQTT
 
