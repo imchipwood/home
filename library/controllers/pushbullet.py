@@ -54,7 +54,7 @@ class PushbulletController(BaseController):
         """
         Disconnect from MQTT
         """
-        self.logger.info("Shutting down camera MQTT connection")
+        self.logger.info("Shutting down pushbullet MQTT connection")
         try:
             self.mqtt.loop_stop()
             self.mqtt.disconnect()
