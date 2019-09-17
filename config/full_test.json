@@ -2,7 +2,8 @@
   "sensors": {
     "gpio_monitor": "test_door_monitor.json",
     "camera": "test_door_camera.json",
-    "environment": "test_environment.json"
+    "environment": "test_environment.json",
+    "pushbullet": "test_pushbullet.json"
   },
   "mqtt": "mqtt.json"
 }
