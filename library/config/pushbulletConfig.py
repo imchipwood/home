@@ -36,3 +36,15 @@ class PushbulletConfig(BaseConfiguration):
         @rtype: dict
         """
         return self.config.get("notify")
+
+    @property
+    def mqtt_topic(self):
+        """
+        Get the MQTT topic(s) to subscribe to for publishing
+        @return: topic(s) to subscribe to
+        @rtype: list[library.config.mqtt.Topic]
+        """
+        if not self.mqtt_config.topics_subscribe:
+            return None
+        else:
+            return list(self.mqtt_config.topics_subscribe.values())
