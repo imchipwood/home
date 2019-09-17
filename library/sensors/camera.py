@@ -9,6 +9,7 @@ import logging
 import time
 import os
 from library import setup_logging
+import getpass
 
 try:
     from picamera import PiCamera
@@ -116,6 +117,7 @@ class Camera(PiCamera):
             **options
         )
         os.chmod(output, 0o777)
+        os.chown(output, getpass.getuser())
         self.logger.debug("Capture complete")
 
     def cleanup(self):
