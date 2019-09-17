@@ -1,4 +1,5 @@
 {
+  "log": "/home/cpw/dev/logs/testPushbullet.log",
   "api": "o.sENK4wzqB4Wfh7ZiGGfuZjSl8CyzM91y",
   "notify": {
     "Open": "/home/cpw/camera/captures/test.jpg",

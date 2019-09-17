@@ -1,4 +1,5 @@
 {
+  "log": "/home/cpw/dev/logs/garageDoorPushbullet.log",
   "api": "o.sENK4wzqB4Wfh7ZiGGfuZjSl8CyzM91y",
   "notify": {
     "Open": "/home/cpw/camera/captures/garage.jpg",
