@@ -6,6 +6,7 @@ from library.config.mqtt import MQTTConfig
 from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
 from library.controllers.gpio_monitor import GPIOMonitorController
+from library.controllers.pushbullet import PushbulletController
 
 
 class SENSOR_CLASSES:
@@ -13,6 +14,7 @@ class SENSOR_CLASSES:
     GPIO_MONITOR = "gpio_monitor"
     GPIO_DRIVER = "gpio_driver"
     CAMERA = "camera"
+    PUSHBULLET = "pushbullet"
 
 
 class ConfigKeys:
@@ -144,6 +146,7 @@ class ConfigurationHandler(BaseConfiguration):
     from library.config.environment import EnvironmentConfig
     from library.config.gpio_monitor import GPIOMonitorConfig
     from library.config.camera import CameraConfig
+    from library.config.pushbulletConfig import PushbulletConfig
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
@@ -151,12 +154,14 @@ class ConfigurationHandler(BaseConfiguration):
         SENSOR_CLASSES.GPIO_MONITOR: GPIOMonitorController,
         SENSOR_CLASSES.GPIO_DRIVER: None,
         SENSOR_CLASSES.CAMERA: PiCameraController,
+		SENSOR_CLASSES.PUSHBULLET: PushbulletController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
         SENSOR_CLASSES.ENVIRONMENT: EnvironmentConfig,
         SENSOR_CLASSES.GPIO_MONITOR: GPIOMonitorConfig,
         SENSOR_CLASSES.GPIO_DRIVER: None,
         SENSOR_CLASSES.CAMERA: CameraConfig,
+        SENSOR_CLASSES.PUSHBULLET: PushbulletConfig,
     }
 
     def __init__(self, config_path):

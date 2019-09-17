@@ -8,3 +8,7 @@ class PushbulletConfig(BaseConfiguration):
     @property
     def api_key(self):
         return self.config.get("api")
+
+    @property
+    def notify(self):
+        return self.config.get("notify")

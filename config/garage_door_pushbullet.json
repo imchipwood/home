@@ -1,0 +1,18 @@
+{
+  "api": "o.sENK4wzqB4Wfh7ZiGGfuZjSl8CyzM91y",
+  "notify": {
+    "Open": "/home/cpw/camera/captures/garage.jpg",
+    "Closed": "Closed"
+  },
+  "mqtt": {
+    "client_id": "garage_door_pushbullet",
+    "topics": {
+      "home-assistant/garage/state": {
+        "pubsub": "subscribe",
+        "payload": {
+          "state": "Open|Closed"
+        }
+      }
+    }
+  }
+}

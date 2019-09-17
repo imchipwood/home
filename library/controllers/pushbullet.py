@@ -1,50 +1,40 @@
 """
-Camera Controller
+Simple Pushbullet controller to relay messages received via MQTT
 Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-import logging
-import time
-import os
 import json
-from multiprocessing import Process
 from threading import Thread
-
-from library.sensors.camera import Camera
 
 from library.controllers import BaseController
 from library.communication.mqtt import MQTTClient, MQTTError
+from library.communication import pushbullet
 
 
-# class PiCameraController(PiCamera, BaseController):
-class PiCameraController(BaseController):
+class PushbulletController(BaseController):
+    """
+    Basic threaded controller to relay MQTT messages
+    """
     def __init__(self, config, debug=False):
         """
-        @param config: configuration object for PiCamera
-        @type config: library.config.camera.CameraConfig
+
+        @param config: path to config file
+        @type config: str
         @param debug: debug flag
         @type debug: bool
         """
-        # PiCamera.__init__(self)
-        # BaseController.__init__(self, config=config, debug=debug)
-        super(PiCameraController, self).__init__(config=config, debug=debug)
+        super(PushbulletController, self).__init__(config, debug)
 
-        # Set up the camera
-        # self.camera = Camera(config, debug)
-
-        self.mqtt = None
-        """@type: MQTTClient"""
-        if self.config.mqtt_config:
-            self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
-
+        self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+        
     # region Threading
 
     def start(self):
         """
-        Camera won't actually do threading - instead, we'll subscribe to an MQTT topic
+        Pushbullet won't actually do threading - instead, subscribe to an MQTT topic
         """
-        self.logger.debug("Starting Camera MQTT connection")
+        self.logger.debug("Starting Pushbullet MQTT connection")
         self.mqtt.on_connect = self.on_connect
         self.mqtt.on_subscribe = self.on_subscribe
         self.mqtt.on_message = self.on_message
@@ -53,7 +43,7 @@ class PiCameraController(BaseController):
 
     def loop(self):
         """
-        No actual threading for Camera
+        No actual threading for Pushbullet
         """
         try:
             self.mqtt.loop_forever()
@@ -83,7 +73,8 @@ class PiCameraController(BaseController):
         if self.config.mqtt_topic and not self.running:
             self.logger.debug("in connect_mqtt")
             self.mqtt.connect()
-            self.thread = Process(target=self.loop)
+            self.thread = Thread(target=self.loop)
+            self.thread.daemon = True
             self.thread.start()
 
     def on_connect(self, client, userdata, flags, rc):
@@ -138,60 +129,16 @@ class PiCameraController(BaseController):
             self.logger.warning("Some error while converting string payload to dict: %s", e)
             return
 
-        # Check if it indicated a capture
-        if self.should_capture_from_command(msg.topic, message_data):
-            self.logger.info("Received capture command")
-            # If no delay in message, pass in None - this will force camera to use
-            # the delay defined in the config
-            kwargs = {"delay": message_data.get("delay", None)}
-            thread = Thread(target=self.capture_loop, kwargs=kwargs)
-            thread.start()
-
-    def should_capture_from_command(self, message_topic, message_data):
-        """
-        Check if the message indicates a capture command
-        @param message_topic: topic message came from
-        @type message_topic: str
-        @param message_data: message data as dict
-        @type message_data: dict
-        @return: whether or not to capture
-        @rtype: bool
-        """
-        # Check all the topics we're subscribed to
-        topic = self.config.mqtt_config.topics_subscribe.get(message_topic)
-        if not topic:
-            return False
-
-        # Check the payload - assumes a single value
-        for key, val in message_data.items():
-            if key == "delay":
-                continue
-            message_val = topic.payload().get(key, None)
-            if isinstance(message_val, str):
-                return message_val.lower() == val.lower()
-            else:
-                return message_val == val
-
-        # Shouldn't ever get here but just in case...
-        self.logger.warning("Didn't find expected payload - not capturing!")
-        return False
+        topic = self.mqtt.config.topics_subscribe.get(msg.topic)
+        if topic:
+            state = message_data.get("state")
+            notification = self.config.notify.get(state)
+            if state == "Open":
+                pushbullet.PushbulletImageNotify(notification)
+            elif state == "Closed":
+                pushbullet.PushbulletTextNotify(notification)
 
     # endregion MQTT
-    # region Camera
-
-    def capture_loop(self, delay=0):
-        with Camera(self.config, self.debug) as camera:
-            camera.capture(delay=delay)
-        # self.camera.capture(delay=delay)
-
-    # endregion Camera
-
-    def cleanup(self):
-        """
-        Gracefully exit
-        """
-        super(PiCameraController, self).cleanup()
-        # self.camera.cleanup()
 
     def __repr__(self):
         """
