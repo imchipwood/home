@@ -4,8 +4,10 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
+import os
 import json
 from threading import Thread
+from time import time, sleep
 
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient, MQTTError
@@ -135,6 +137,15 @@ class PushbulletController(BaseController):
             state = message_data.get("state")
             notification = self.config.notify.get(state)
             if state == "Open":
+                initial_time = time()
+                while not os.path.exists(notification):
+                    sleep(1)
+                    if (time() - initial_time) > self.config.max_notification_delay:
+                        self.logger.error(
+                            f"Did not detect image in {self.config.max_notification_delay} - no notification will be sent"
+                        )
+                        return
+
                 pushbullet.PushbulletImageNotify(
                     self.config.api_key,
                     notification

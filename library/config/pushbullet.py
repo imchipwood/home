@@ -38,6 +38,13 @@ class PushbulletConfig(BaseConfiguration):
         return self.config.get("notify")
 
     @property
+    def max_notification_delay(self):
+        """
+        @rtype: float
+        """
+        return self.config.get("max_notification_delay", 15.0)
+
+    @property
     def mqtt_topic(self):
         """
         Get the MQTT topic(s) to subscribe to for publishing

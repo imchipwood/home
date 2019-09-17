@@ -4,6 +4,7 @@
     "Open": "/home/cpw/camera/captures/garage.jpg",
     "Closed": "Closed"
   },
+  "max_notification_delay": 30.0,
   "mqtt": {
     "client_id": "garage_door_pushbullet",
     "topics": {
