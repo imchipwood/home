@@ -34,15 +34,6 @@ class GPIOMonitorConfig(BaseConfiguration):
         """
         return self.config.get('pin')
 
-    # @property
-    # def mqtt_topic(self):
-    #     """
-    #     Get the MQTT topic to publish state info to
-    #     @return: topic to publish state info to
-    #     @rtype: str
-    #     """
-    #     return self.mqtt_config.topics_publish['state']
-
     @property
     def mqtt_topic(self):
         """
