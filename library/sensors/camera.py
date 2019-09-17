@@ -118,7 +118,6 @@ class Camera(PiCamera):
             **options
         )
         os.chmod(output, 0o777)
-        os.chown(output, getpass.getuser(), getpass.getuser())
         self.logger.debug("Capture complete")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
