@@ -154,7 +154,7 @@ class ConfigurationHandler(BaseConfiguration):
         SENSOR_CLASSES.GPIO_MONITOR: GPIOMonitorController,
         SENSOR_CLASSES.GPIO_DRIVER: None,
         SENSOR_CLASSES.CAMERA: PiCameraController,
-		SENSOR_CLASSES.PUSHBULLET: PushbulletController,
+        SENSOR_CLASSES.PUSHBULLET: PushbulletController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
         SENSOR_CLASSES.ENVIRONMENT: EnvironmentConfig,
