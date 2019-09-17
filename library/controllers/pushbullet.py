@@ -135,9 +135,16 @@ class PushbulletController(BaseController):
             state = message_data.get("state")
             notification = self.config.notify.get(state)
             if state == "Open":
-                pushbullet.PushbulletImageNotify(notification)
+                pushbullet.PushbulletImageNotify(
+                    self.config.api_key,
+                    notification
+                )
             elif state == "Closed":
-                pushbullet.PushbulletTextNotify(notification)
+                pushbullet.PushbulletTextNotify(
+                    self.config.api_key,
+                    msg.topic,
+                    notification
+                )
 
     # endregion MQTT
 
