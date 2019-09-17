@@ -18,3 +18,9 @@ class PiCamera:
 
     def capture(self, output, format=None, use_video_port=False, resize=None, splitter_port=0, bayer=False, **options):
         return
+
+    def __enter__(self):
+        return
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return

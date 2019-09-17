@@ -117,8 +117,16 @@ class Camera(PiCamera):
             **options
         )
         os.chmod(output, 0o777)
-        os.chown(output, getpass.getuser())
+        os.chown(output, getpass.getuser(), getpass.getuser())
         self.logger.debug("Capture complete")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super(PiCamera, self).__exit__(exc_type, exc_val, exc_tb)
+        try:
+            self.stop_preview()
+            self.close()
+        except:
+            self.logger.exception("failed during picamera __exit__")
 
     def cleanup(self):
         """
