@@ -88,6 +88,7 @@ class Camera(PiCamera):
             os.makedirs(os.path.dirname(output))
         elif os.path.exists(output):
             # Delete old file if necessary
+            self.logger.debug("removing old image before capturing new one")
             os.remove(output)
         self.logger.debug("Saving image to %s", output)
 

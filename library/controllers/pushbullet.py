@@ -143,7 +143,8 @@ class PushbulletController(BaseController):
                     sleep(1)
                     if (time() - initial_time) > self.config.max_notification_delay:
                         self.logger.error(
-                            f"Did not detect image in {self.config.max_notification_delay} - no notification will be sent"
+                            f"Did not detect image in {self.config.max_notification_delay}"
+                            f" - no notification will be sent"
                         )
                         return
 
