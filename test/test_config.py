@@ -6,7 +6,7 @@ from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.config.environment import EnvironmentConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
 from library.config.camera import CameraConfig
-from library.config.pushbulletConfig import PushbulletConfig
+from library.config.pushbullet import PushbulletConfig
 from library.config.mqtt import MQTTConfig
 
 from library.controllers.environment import EnvironmentController

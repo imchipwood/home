@@ -7,7 +7,7 @@ Author: Charles "Chip" Wood
 import json
 from threading import Thread
 
-from library.controllers import BaseController
+from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient, MQTTError
 from library.communication import pushbullet
 
@@ -20,11 +20,13 @@ class PushbulletController(BaseController):
         """
 
         @param config: path to config file
-        @type config: str
+        @type config: library.config.pushbullet.PushbulletConfig
         @param debug: debug flag
         @type debug: bool
         """
         super(PushbulletController, self).__init__(config, debug)
+
+        self.logger = Get_Logger(__name__, debug, config.log)
 
         self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
         

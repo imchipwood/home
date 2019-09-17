@@ -8,7 +8,7 @@ from threading import Thread
 import timeit
 import json
 
-from library.controllers import BaseController
+from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
 from library.sensors.environment import EnvironmentSensor
 
@@ -26,6 +26,8 @@ class EnvironmentController(BaseController):
         @type debug: bool
         """
         super(EnvironmentController, self).__init__(config, debug)
+
+        self.logger = Get_Logger(__name__, debug, config.log)
 
         # Set up the sensor
         self.sensor = EnvironmentSensor(

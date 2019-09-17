@@ -146,7 +146,7 @@ class ConfigurationHandler(BaseConfiguration):
     from library.config.environment import EnvironmentConfig
     from library.config.gpio_monitor import GPIOMonitorConfig
     from library.config.camera import CameraConfig
-    from library.config.pushbulletConfig import PushbulletConfig
+    from library.config.pushbullet import PushbulletConfig
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {

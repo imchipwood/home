@@ -7,7 +7,7 @@ Author: Charles "Chip" Wood
 from threading import Thread
 import timeit
 
-from library.controllers import BaseController
+from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
 from library.sensors.gpio_monitor import GPIO_Monitor
 
@@ -25,6 +25,8 @@ class GPIOMonitorController(BaseController):
         @type debug: bool
         """
         super(GPIOMonitorController, self).__init__(config, debug)
+
+        self.logger = Get_Logger(__name__, debug, config.log)
 
         self.sensor = GPIO_Monitor(
             self.config.pin,

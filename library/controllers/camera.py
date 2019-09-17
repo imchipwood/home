@@ -13,11 +13,10 @@ from threading import Thread
 
 from library.sensors.camera import Camera
 
-from library.controllers import BaseController
+from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient, MQTTError
 
 
-# class PiCameraController(PiCamera, BaseController):
 class PiCameraController(BaseController):
     def __init__(self, config, debug=False):
         """
@@ -26,12 +25,9 @@ class PiCameraController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        # PiCamera.__init__(self)
-        # BaseController.__init__(self, config=config, debug=debug)
         super(PiCameraController, self).__init__(config=config, debug=debug)
 
-        # Set up the camera
-        # self.camera = Camera(config, debug)
+        self.logger = Get_Logger(__name__, debug, config.log)
 
         self.mqtt = None
         """@type: MQTTClient"""
