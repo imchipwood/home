@@ -136,6 +136,7 @@ class PushbulletController(BaseController):
         if topic:
             state = message_data.get("state")
             notification = self.config.notify.get(state)
+            self.logger.debug("Received notification {state}")
             if state == "Open":
                 initial_time = time()
                 while not os.path.exists(notification):
