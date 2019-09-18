@@ -1,8 +1,8 @@
 # wifi monitor
 */10 * * * * sudo /home/cpw/dev/home_deploy/venv3.6/bin/python /home/cpw/dev/home_deploy/util/lan_monitor.py
 
-# humidity sensor readings
-*/30 * * * * sudo systemctl restart home.service
+# home automation
+0 */6 * * * sudo systemctl restart home.service
 
-# Clear logs every sunday at 6am
-0 6 * * SUN sudo rm /home/cpw/dev/logs/*
+# Clear logs every Monday at 6am
+0 6 * * MON sudo rm /home/cpw/dev/logs/*
