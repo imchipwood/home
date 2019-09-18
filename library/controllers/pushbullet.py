@@ -137,16 +137,10 @@ class PushbulletController(BaseController):
             state = message_data.get("state")
             notification = self.config.notify.get(state)
             self.logger.debug(f"Received '{state}': {notification}")
+
             if state == "Open":
-                initial_time = time()
-                while not os.path.exists(notification):
-                    sleep(1)
-                    if (time() - initial_time) > self.config.max_notification_delay:
-                        self.logger.error(
-                            f"Did not detect image in {self.config.max_notification_delay}"
-                            f" - no notification will be sent"
-                        )
-                        return
+                if not self.wait_for_file_refresh(notification):
+                    return
 
                 try:
                     pushbullet.PushbulletImageNotify(
@@ -155,6 +149,7 @@ class PushbulletController(BaseController):
                     )
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet image notification")
+                    
             elif state == "Closed":
                 try:
                     pushbullet.PushbulletTextNotify(
@@ -164,6 +159,30 @@ class PushbulletController(BaseController):
                     )
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet text notification")
+
+    def wait_for_file_refresh(self, file_path):
+        """
+        Check if a file exists
+        @param file_path: path to
+        @type file_path: str
+        @return: whether or not the file was found
+        @rtype: bool
+        """
+        if os.path.exists(file_path):
+            # image exists - wait a couple seconds and then check again to make sure it's the right one
+            sleep(2)
+
+        initial_time = time()
+        while not os.path.exists(file_path):
+            sleep(1)
+            if (time() - initial_time) > self.config.max_notification_delay:
+                self.logger.error(
+                    f"Did not detect image in {self.config.max_notification_delay}"
+                    f" - no notification will be sent"
+                )
+                return False
+
+        return True
 
     # endregion MQTT
 
