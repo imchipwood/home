@@ -4,5 +4,5 @@
     "camera": "test_door_camera.json",
     "environment": "test_environment.json"
   },
-  "mqtt": "mqtt.json"
+  "mqtt": "test_mqtt.json"
 }

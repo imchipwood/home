@@ -5,5 +5,5 @@
     "environment": "test_environment.json",
     "pushbullet": "test_pushbullet.json"
   },
-  "mqtt": "mqtt.json"
+  "mqtt": "test_mqtt.json"
 }
