@@ -121,12 +121,10 @@ class Camera(PiCamera):
         self.logger.debug("Capture complete")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        super(PiCamera, self).__exit__(exc_type, exc_val, exc_tb)
-        try:
-            self.stop_preview()
-            self.close()
-        except:
-            self.logger.exception("failed during picamera __exit__")
+        """
+        Exit handler for with PiCamera() as blah:...
+        """
+        self.cleanup()
 
     def cleanup(self):
         """

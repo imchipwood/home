@@ -1,0 +1,9 @@
+{
+  "sensors": {
+    "gpio_monitor": "pitest_gpio_monitor.json",
+    "camera": "pitest_camera.json",
+    "environment": "pitest_environment.json",
+    "pushbullet": "pitest_pushbullet.json"
+  },
+  "mqtt": "pitest_mqtt.json"
+}
