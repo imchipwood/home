@@ -2,7 +2,6 @@ import os
 import json
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR
-from library.config.mqtt import MQTTConfig
 from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
 from library.controllers.gpio_monitor import GPIOMonitorController
@@ -29,46 +28,10 @@ class ConfigKeys:
     SUBSCRIBE = 'subscribe'
 
 
-def normalize_config_path(config_path):
-    """
-    Normalize a config file path to the config dir of the repo
-    @param config_path: relative config path
-    @type config_path: str
-    @return: normalized, absolute config path
-    @rtype: str or None
-    """
-    assert config_path, "No path provided"
-
-    # Was a raw path passed in?
-    if os.path.exists(config_path):
-        return config_path
-
-    # Path is relative - check config dir first then test config dir
-    potential_paths = [
-        os.path.join(CONFIG_DIR, config_path),
-        os.path.join(TEST_CONFIG_DIR, config_path)
-    ]
-    for potential_path in potential_paths:
-        if os.path.exists(potential_path):
-            return potential_path
-
-    # Can't figure out path - exit
-    raise OSError("Could not find config file {}".format(config_path))
-
-
-def load_config(config_path):
-    """
-    Parse a config file
-    @param config_path: path to config file
-    @type config_path: str
-    @return: data from config file
-    @rtype: dict
-    """
-    with open(config_path, 'r') as inf:
-        return json.load(inf)
-
-
 class BaseConfiguration(object):
+    # By assuming the
+    BASE_CONFIG_DIR = None
+
     def __init__(self, config_path):
         """
         @param config_path: path to configuration file
@@ -83,6 +46,52 @@ class BaseConfiguration(object):
 
     def __repr__(self):
         return json.dumps(self.config, indent=2)
+
+    def normalize_config_path(self, config_path):
+        """
+        Normalize a config file path to the config dir of the repo
+        @param config_path: relative or absolute config path
+        @type config_path: str
+        @return: normalized, absolute config path
+        @rtype: str or None
+        """
+        assert config_path, "No path provided"
+
+        # If path is absolute and exists, return it
+        if os.path.exists(config_path):
+            self.BASE_CONFIG_DIR = os.path.dirname(config_path)
+            return config_path
+
+        # Path doesn't exist (might be relative)
+        # Iterate over potential directories
+        potential_dirs = [
+            self.BASE_CONFIG_DIR,
+            CONFIG_DIR,
+            TEST_CONFIG_DIR
+        ]
+        for potential_dir in potential_dirs:
+            # BASE_CONFIG_DIR could not be set yet
+            if potential_dir:
+                # if the path exists, save the base dir for next time and return it
+                potential_path = os.path.join(potential_dir, config_path)
+                if os.path.exists(potential_path):
+                    self.BASE_CONFIG_DIR = potential_dir
+                    return potential_path
+
+        # Can't figure out path - exit
+        raise OSError("Could not find config file {}".format(config_path))
+
+    @staticmethod
+    def load_config(config_path):
+        """
+        Parse a config file
+        @param config_path: path to config file
+        @type config_path: str
+        @return: data from config file
+        @rtype: dict
+        """
+        with open(config_path, 'r') as inf:
+            return json.load(inf)
 
     @property
     def config(self):
@@ -100,9 +109,9 @@ class BaseConfiguration(object):
         @param config_path: path to config file
         @type config_path: str
         """
-        config_path = normalize_config_path(config_path)
+        config_path = self.normalize_config_path(config_path)
         self._config_path = config_path
-        self._config = load_config(self._config_path)
+        self._config = self.load_config(self._config_path)
 
     @property
     def sensor_paths(self):
@@ -121,7 +130,7 @@ class BaseConfiguration(object):
         @return: Path to sensor config
         @rtype: str
         """
-        return normalize_config_path(self.sensor_paths.get(sensor))
+        return self.normalize_config_path(self.sensor_paths.get(sensor))
 
     @property
     def mqtt_path(self):
@@ -130,7 +139,7 @@ class BaseConfiguration(object):
         @return: path to base MQTT configuration file if it exists
         @rtype: str or None
         """
-        return normalize_config_path(self.config.get(ConfigKeys.MQTT))
+        return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
 
     @property
     def log(self):
@@ -186,7 +195,7 @@ class ConfigurationHandler(BaseConfiguration):
         if os.path.exists(self.config.get(ConfigKeys.MQTT, '')):
             return self.config[ConfigKeys.MQTT]
         else:
-            return normalize_config_path(self.config.get(ConfigKeys.MQTT))
+            return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
 
     def get_sensor_mqtt_config(self, sensor):
         """
@@ -196,6 +205,7 @@ class ConfigurationHandler(BaseConfiguration):
         @return: MQTT configuration object with sensor settings
         @rtype: MQTTConfig
         """
+        from library.config.mqtt import MQTTConfig
         if sensor in self.sensor_paths:
             return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor))
         else:

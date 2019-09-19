@@ -1,4 +1,5 @@
 from inspect import ismethod
+import os
 import json
 import pytest
 
@@ -14,6 +15,7 @@ from library.controllers.camera import PiCameraController
 from library.controllers.gpio_monitor import GPIOMonitorController
 from library.controllers.pushbullet import PushbulletController
 
+# CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config", "pytest.json")
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 

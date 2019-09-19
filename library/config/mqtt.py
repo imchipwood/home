@@ -5,6 +5,7 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import json
+from library.config import BaseConfiguration, ConfigKeys
 
 
 class Formatters:
@@ -181,39 +182,17 @@ class Topic(object):
         return self.name
 
 
-class MQTTBaseConfig(object):
+class MQTTBaseConfig(BaseConfiguration):
     """
     Base configuration object for MQTT communication - handles broker & port
     """
-    def __init__(self, mqtt_config_path):
+    def __init__(self, config_path):
         """
         Base MQTT configuration handler with
-        @param mqtt_config_path:
-        @type mqtt_config_path:
+        @param config_path:
+        @type config_path:
         """
-        super(MQTTBaseConfig, self).__init__()
-        from library.config import ConfigKeys
-        self.config_keys = ConfigKeys
-        self._config = {}
-        self.config = mqtt_config_path
-
-    @property
-    def config(self):
-        """
-        @rtype: dict
-        """
-        return self._config
-
-    @config.setter
-    def config(self, config_path):
-        """
-        Set a new config
-        @param config_path: path to config file
-        @type config_path: str
-        """
-        from library.config import load_config, normalize_config_path
-        config_path = normalize_config_path(config_path)
-        self._config = load_config(config_path)
+        super(MQTTBaseConfig, self).__init__(config_path)
 
     @property
     def broker(self):
@@ -233,26 +212,22 @@ class MQTTBaseConfig(object):
         """
         return self.config.get(self.config_keys.PORT)
 
-    def __repr__(self):
-        return json.dumps(self.config, indent=2)
-
 
 class MQTTConfig(MQTTBaseConfig):
     """
     Sensor-based MQTT config - adds client_id & pub/sub topic support
     """
-    def __init__(self, mqtt_config_path, sensor_config_path):
+    def __init__(self, config_path, sensor_config_path):
         """
         Sensor-specific MQTT Configuration constructor
-        @param mqtt_config_path: path to MQTT configuration JSON file
-        @type mqtt_config_path: str
+        @param config_path: path to MQTT configuration JSON file
+        @type config_path: str
         @param sensor_config_path: path to sensor-specific configuration file
         @type sensor_config_path: str
         """
-        super(MQTTConfig, self).__init__(mqtt_config_path)
-        from library.config import load_config, normalize_config_path
-        sensor_config_path = normalize_config_path(sensor_config_path)
-        self.config.update(load_config(sensor_config_path).get(self.config_keys.MQTT))
+        super(MQTTConfig, self).__init__(config_path)
+        sensor_config_path = self.normalize_config_path(sensor_config_path)
+        self.config.update(self.load_config(sensor_config_path).get(ConfigKeys.MQTT))
 
     @property
     def client_id(self):
@@ -261,7 +236,7 @@ class MQTTConfig(MQTTBaseConfig):
         @return: MQTT client ID
         @rtype: str
         """
-        return self.config.get(self.config_keys.CLIENT_ID, "")
+        return self.config.get(ConfigKeys.CLIENT_ID, "")
 
     @client_id.setter
     def client_id(self, client_id):
@@ -270,7 +245,7 @@ class MQTTConfig(MQTTBaseConfig):
         @param client_id: new client ID
         @type client_id: str
         """
-        self.config[self.config_keys.CLIENT_ID] = client_id
+        self.config[ConfigKeys.CLIENT_ID] = client_id
 
     @property
     def topics(self):
@@ -279,7 +254,7 @@ class MQTTConfig(MQTTBaseConfig):
         @return: dictionary of all topics keyed by topic name
         @rtype: dict[str, Topic]
         """
-        all_topics = self.config.get(self.config_keys.TOPICS, {})
+        all_topics = self.config.get(ConfigKeys.TOPICS, {})
         topics = {}
         for topic, info in all_topics.items():
             topics[topic] = Topic(topic, info)
