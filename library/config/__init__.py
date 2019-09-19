@@ -80,7 +80,7 @@ class BaseConfiguration(object):
                     return potential_path
 
         # Can't figure out path - exit
-        raise OSError(f"Could not find config file {config_path}")
+        raise OSError(f"Could not find config file {config_path} at base dir {self.BASE_CONFIG_DIR}")
 
     @staticmethod
     def load_config(config_path):
