@@ -47,7 +47,8 @@ class BaseConfiguration(object):
     def __repr__(self):
         return json.dumps(self.config, indent=2)
 
-    def normalize_config_path(self, config_path):
+    @staticmethod
+    def normalize_config_path(config_path):
         """
         Normalize a config file path to the config dir of the repo
         @param config_path: relative or absolute config path
@@ -59,14 +60,14 @@ class BaseConfiguration(object):
 
         # If path is absolute and exists, return it
         if os.path.exists(config_path):
-            self.BASE_CONFIG_DIR = os.path.dirname(config_path)
-            print(f"New base configuration directory: {self.BASE_CONFIG_DIR}")
+            BaseConfiguration.BASE_CONFIG_DIR = os.path.dirname(config_path)
+            print(f"New base configuration directory: {BaseConfiguration.BASE_CONFIG_DIR}")
             return config_path
 
         # Path doesn't exist (might be relative)
         # Iterate over potential directories
         potential_dirs = [
-            self.BASE_CONFIG_DIR,
+            BaseConfiguration.BASE_CONFIG_DIR,
             CONFIG_DIR,
             TEST_CONFIG_DIR
         ]
@@ -76,11 +77,11 @@ class BaseConfiguration(object):
                 # if the path exists, save the base dir for next time and return it
                 potential_path = os.path.join(potential_dir, config_path)
                 if os.path.exists(potential_path):
-                    self.BASE_CONFIG_DIR = potential_dir
+                    BaseConfiguration.BASE_CONFIG_DIR = potential_dir
                     return potential_path
 
         # Can't figure out path - exit
-        raise OSError(f"Could not find config file {config_path} at base dir {self.BASE_CONFIG_DIR}")
+        raise OSError(f"Could not find config file {config_path} at base dir {BaseConfiguration.BASE_CONFIG_DIR}")
 
     @staticmethod
     def load_config(config_path):
