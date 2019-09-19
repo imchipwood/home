@@ -60,6 +60,7 @@ class BaseConfiguration(object):
         # If path is absolute and exists, return it
         if os.path.exists(config_path):
             self.BASE_CONFIG_DIR = os.path.dirname(config_path)
+            print(f"New base configuration directory: {self.BASE_CONFIG_DIR}")
             return config_path
 
         # Path doesn't exist (might be relative)
@@ -79,7 +80,7 @@ class BaseConfiguration(object):
                     return potential_path
 
         # Can't figure out path - exit
-        raise OSError("Could not find config file {}".format(config_path))
+        raise OSError(f"Could not find config file {config_path}")
 
     @staticmethod
     def load_config(config_path):
@@ -249,7 +250,7 @@ class ConfigurationHandler(BaseConfiguration):
         """
         @rtype: str
         """
-        return "({})".format(", ".join(self.sensorTypes))
+        return f"({', '.join(self.sensorTypes)})"
 
     def __iter__(self):
         """
