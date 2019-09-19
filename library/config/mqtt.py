@@ -147,7 +147,7 @@ class Topic(object):
 
                 # Check we got the correct value
                 if actual_val is None or actual_val == "":
-                    raise Exception("Missing payload key '{}'!".format(expected_key))
+                    raise Exception(f"Missing payload key '{expected_key}'!")
 
                 new_payload[expected_key] = actual_val
 
