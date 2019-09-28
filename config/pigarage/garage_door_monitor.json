@@ -1,6 +1,7 @@
 {
   "log": "/home/cpw/dev/logs/garageDoorMonitor.log",
-  "pin": 4,
+  "gpio_pin": 4,
+  "gpio_pull_up_down": "up",
   "mqtt": {
     "client_id": "garage_door_monitor",
     "topics": {

@@ -1,6 +1,7 @@
 {
   "log": "/home/cpw/dev/logs/testDoorMonitor.log",
-  "pin": 27,
+  "gpio_pin": 27,
+  "gpio_pull_up_down": "down",
   "mqtt": {
     "client_id": "pi_test_door_monitor",
     "topics": {

@@ -33,7 +33,18 @@ class GPIO_Monitor(object):
         GPIO.setmode(GPIO.BCM)
         self.pin = self.config.pin
         self.logger.debug(f"Setting up GPIO on pin {self.pin}")
-        GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.pin, GPIO.IN, pull_up_down=self.pull_up_down)
+
+    @property
+    def pull_up_down(self):
+        """
+        GPIO Pull direction
+        @rtype: bool
+        """
+        if self.config.pull_up_down.lower() == "down":
+            return GPIO.PUD_DOWN
+        else:
+            return GPIO.PUD_UP
 
     def read(self):
         """

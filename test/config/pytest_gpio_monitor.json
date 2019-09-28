@@ -1,6 +1,7 @@
 {
   "log": "/tmp/door_monitor.log",
-  "pin": 3,
+  "gpio_pin": 3,
+  "gpio_pull_up_down": "up",
   "mqtt": {
     "client_id": "door_monitor_test",
     "topics": {

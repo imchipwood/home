@@ -33,7 +33,7 @@ class GPIOMonitorConfig(BaseConfiguration):
         @return: GPIO pin # for sensor
         @rtype: int
         """
-        return self.config.get('pin')
+        return self.config.get('gpio_pin')
 
     @property
     def mqtt_topic(self):
@@ -46,3 +46,7 @@ class GPIOMonitorConfig(BaseConfiguration):
             return None
         else:
             return list(self.mqtt_config.topics_publish.values())
+
+    @property
+    def pull_up_down(self):
+        return self.config.get("gpio_pull_up_down")
