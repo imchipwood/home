@@ -32,9 +32,7 @@ class EnvironmentController(BaseController):
 
         # Set up the sensor
         self.sensor = EnvironmentSensor(
-            sensor_type=self.config.type,
-            pin=self.config.pin,
-            units=self.config.units,
+            config=self.config,
             debug=self.debug
         )
 

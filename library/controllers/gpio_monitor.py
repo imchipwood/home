@@ -19,7 +19,7 @@ class GPIOMonitorController(BaseController):
     """
     def __init__(self, config, debug=False):
         """
-        @param config: configuration object for environment sensing
+        @param config: configuration object for GPIO monitoring
         @type config: library.config.gpio_monitor.GPIOMonitorConfig
         @param debug: debug flag
         @type debug: bool
@@ -29,7 +29,7 @@ class GPIOMonitorController(BaseController):
         self.logger = Get_Logger(__name__, debug, config.log)
 
         self.sensor = GPIO_Monitor(
-            self.config.pin,
+            self.config,
             debug=debug
         )
         self.state = self.sensor.read()

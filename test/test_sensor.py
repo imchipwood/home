@@ -9,9 +9,7 @@ CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
 class TestEnvironmentSensor:
     sensor = EnvironmentSensor(
-        sensor_type='22',
-        pin=4,
-        units='celsius',
+        config=CONFIGURATION_HANDLER.get_sensor_config("environment"),
         debug=True
     )
     def test_read(self):
@@ -19,6 +17,7 @@ class TestEnvironmentSensor:
         Check that reading the sensor returns new values
         """
         self.sensor.reset_readings()
+        self.sensor.units = "celsius"
         assert self.sensor.humidity == -999.0
         assert self.sensor.temperature == -999.0
         humidity, temperature = self.sensor.read()

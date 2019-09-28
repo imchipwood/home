@@ -6,7 +6,7 @@ Author: Charles "Chip" Wood
 """
 import logging
 
-from library import setup_logging
+from library.controllers import Get_Logger
 
 try:
     import Adafruit_DHT
@@ -30,26 +30,20 @@ class EnvironmentSensor(object):
         "2302": Adafruit_DHT.AM2302
     }
 
-    def __init__(self, sensor_type, pin, units="fahrenheit", debug=False):
+    def __init__(self, config, debug=False):
         """
         Constructor for SensorHumidity object
-        @param sensor_type: Desired Adafruit DHT sensor type
-        @type sensor_type: int or str
-        @param pin: GPIO pin for reading sensor
-        @type pin: int or str
-        @param units: Desired temperature units. Fahrenheit or Celsius
-        @type units: str
+        @param config: configuration object for environment sensing
+        @type config: library.config.environment.EnvironmentConfig
         @param debug: Flag to enable/disable debug prints
         @type debug: bool
         """
         super(EnvironmentSensor, self).__init__()
 
+        self.config = config
         self.debug = debug
 
-        self.logger = setup_logging(
-            logging.getLogger(__name__),
-            logging_level=self.debug
-        )
+        self.logger = Get_Logger(__name__, debug, config.log)
 
         # Initialize values for readings
         self._temperature = -999.0
@@ -57,11 +51,11 @@ class EnvironmentSensor(object):
 
         # Set the sensor type & pin #
         self._sensor_type = Adafruit_DHT.DHT11
-        self.sensor_type = sensor_type
-        self.pin = pin
+        self.sensor_type = self.config.type
+        self.pin = self.config.pin
 
         self._units = "fahrenheit"
-        self.units = units
+        self.units = self.config.units
 
     def reset_readings(self):
         """

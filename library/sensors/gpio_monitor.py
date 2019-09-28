@@ -6,7 +6,7 @@ Author: Charles "Chip" Wood
 """
 import logging
 
-from library import setup_logging
+from library.controllers import Get_Logger
 
 try:
     import RPi.GPIO as GPIO
@@ -19,22 +19,20 @@ class GPIO_Monitor(object):
     """
     Simple GPIO monitoring class
     """
-    def __init__(self, gpio_pin, debug=False):
+    def __init__(self, config, debug=False):
         """
         Constructor for GPIO_Monitor
-        @param gpio_pin: GPIO pin to read
-        @type gpio_pin: int
+        @param config: configuration object for GPIO monitoring
+        @type config: library.config.gpio_monitor.GPIOMonitorConfig
         @param debug: debug print enable flag
         @type debug: bool
         """
         super(GPIO_Monitor, self).__init__()
-        self.logger = setup_logging(
-            logging.getLogger(__name__),
-            logging_level=debug
-        )
+        self.config = config
+        self.logger = Get_Logger(__name__, debug, config.log)
         GPIO.setmode(GPIO.BCM)
-        self.logger.debug("Setting up GPIO on pin %d", gpio_pin)
-        self.pin = gpio_pin
+        self.pin = self.config.pin
+        self.logger.debug(f"Setting up GPIO on pin {self.pin}")
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def read(self):
