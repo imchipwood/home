@@ -79,9 +79,15 @@ class EnvironmentSensor(object):
         @rtype: tuple[float, float]
         """
         humidity, temperature = Adafruit_DHT.read_retry(self.sensor_type, self.pin)
-        self.humidity = -999 or humidity
-        self.temperature = -999 or temperature
-        return -999 or humidity, -999 or temperature
+        if humidity is None:
+            humidity = -999.0
+            temperature = -999.0
+            self.logger.debug("Failed to read sensor!")
+        else:
+            self.logger.debug(f"hum: {humidity:0.1f}, temp: {temperature:0.1f}")
+        self.humidity = humidity
+        self.temperature = temperature
+        return humidity, temperature
 
     def read_n_times(self, num_reads=5):
         """
@@ -105,7 +111,6 @@ class EnvironmentSensor(object):
         self.reset_readings()
         for i in range(num_reads):
             humidity[i], temperature[i] = self.read()
-            self.logger.debug(f"{i} - hum: {humidity[i]:0.1f}, temp: {temperature[i]:0.1f}")
 
         self.humidity = avg(humidity)
         self.temperature = avg(temperature)
