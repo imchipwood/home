@@ -46,6 +46,11 @@ class EnvironmentSensor(object):
 
         self.debug = debug
 
+        self.logger = setup_logging(
+            logging.getLogger(__name__),
+            logging_level=self.debug
+        )
+
         # Initialize values for readings
         self._temperature = -999.0
         # self.temperature = -999.0
@@ -59,11 +64,6 @@ class EnvironmentSensor(object):
 
         self._units = "fahrenheit"
         self.units = units
-
-        self.logger = setup_logging(
-            logging.getLogger(__name__),
-            logging_level=self.debug
-        )
 
     def reset_readings(self):
         """
