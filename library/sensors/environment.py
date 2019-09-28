@@ -48,7 +48,8 @@ class EnvironmentSensor(object):
         # Initialize values for readings
         self._temperature = -999.0
         self._humidity = -999.0
-        self._pin = self.config.pin
+        self._pin = None
+        self.pin = self.config.pin
 
         # Set the sensor type & pin #
         self._sensor_type = Adafruit_DHT.DHT11
