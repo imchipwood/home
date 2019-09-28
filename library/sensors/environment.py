@@ -48,11 +48,11 @@ class EnvironmentSensor(object):
         # Initialize values for readings
         self._temperature = -999.0
         self._humidity = -999.0
+        self._pin = self.config.pin
 
         # Set the sensor type & pin #
         self._sensor_type = Adafruit_DHT.DHT11
         self.sensor_type = self.config.type
-        self.pin = self.config.pin
 
         self._units = "fahrenheit"
         self.units = self.config.units
@@ -167,6 +167,24 @@ class EnvironmentSensor(object):
         @rtype: float
         """
         return self._temperature
+
+    @property
+    def pin(self):
+        """
+        Get pin number
+        @rtype: int
+        """
+        return self._pin
+
+    @pin.setter
+    def pin(self, pin):
+        """
+        Set pin number
+        @param pin: pin number
+        @type pin: int
+        """
+        self._pin = pin
+        self.logger.debug(f"Pin set to {pin}")
 
     @property
     def units(self):
