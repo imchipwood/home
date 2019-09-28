@@ -6,6 +6,8 @@ Author: Charles "Chip" Wood
 """
 import logging
 
+from library import setup_logging
+
 try:
     import Adafruit_DHT
 except:
@@ -58,6 +60,11 @@ class EnvironmentSensor(object):
         self._units = "fahrenheit"
         self.units = units
 
+        self.logger = setup_logging(
+            logging.getLogger(__name__),
+            logging_level=self.debug
+        )
+
     def reset_readings(self):
         """
         Reset the stored temperature/humidity values
@@ -72,9 +79,9 @@ class EnvironmentSensor(object):
         @rtype: tuple[float, float]
         """
         humidity, temperature = Adafruit_DHT.read_retry(self.sensor_type, self.pin)
-        self.humidity = humidity
-        self.temperature = temperature
-        return humidity, temperature
+        self.humidity = -999 or humidity
+        self.temperature = -999 or temperature
+        return -999 or humidity, -999 or temperature
 
     def read_n_times(self, num_reads=5):
         """
@@ -98,11 +105,11 @@ class EnvironmentSensor(object):
         self.reset_readings()
         for i in range(num_reads):
             humidity[i], temperature[i] = self.read()
-            logging.debug("{} - hum: {:0.1f}, temp: {:0.1f}".format(i, humidity[i], temperature[i]))
+            self.logger.debug(f"{i} - hum: {humidity[i]:0.1f}, temp: {temperature[i]:0.1f}")
 
         self.humidity = avg(humidity)
         self.temperature = avg(temperature)
-        logging.debug("Averages - hum: {:0.1f}, temp: {:0.1f}".format(humidity[i], temperature[i]))
+        self.logger.debug(f"Averages - hum: {humidity[i]:0.1f}, temp: {temperature[i]:0.1f}")
 
         return self.humidity, self.temperature
 
@@ -184,7 +191,7 @@ class EnvironmentSensor(object):
         """
         EnvironmentSensor.validate_units(units)
         self._units = units.lower()
-        logging.debug("SensorHumidity: units set to %s", self.units)
+        self.logger.debug(f"SensorHumidity: units set to {self.units}")
 
     @property
     def sensor_type(self):
@@ -204,7 +211,7 @@ class EnvironmentSensor(object):
         """
         EnvironmentSensor.validate_sensor_type(sensor_type)
         self._sensor_type = self.VALID_DHT_TYPES[str(sensor_type)]
-        logging.debug("SensorHumidity type: %s", sensor_type)
+        self.logger.debug(f"SensorHumidity type: {sensor_type}")
 
     @staticmethod
     def validate_units(units):
@@ -214,9 +221,7 @@ class EnvironmentSensor(object):
         @type units: str
         """
         assert units.lower() in EnvironmentSensor.VALID_TEMPERATURE_UNITS, \
-            "Invalid units! Valid units: {}".format(
-                ", ".join(EnvironmentSensor.VALID_TEMPERATURE_UNITS)
-            )
+            f"Invalid units! Valid units: {EnvironmentSensor.VALID_TEMPERATURE_UNITS}"
 
     @staticmethod
     def validate_sensor_type(sensor_type):
@@ -226,6 +231,4 @@ class EnvironmentSensor(object):
         @type sensor_type: str or int
         """
         assert str(sensor_type) in EnvironmentSensor.VALID_DHT_TYPES.keys(), \
-            "Invalid sensor type! Valid types: {}".format(
-                ", ".join(EnvironmentSensor.VALID_DHT_TYPES.keys())
-            )
+            f"Invalid sensor type! Valid types: {EnvironmentSensor.VALID_DHT_TYPES.keys()}"
