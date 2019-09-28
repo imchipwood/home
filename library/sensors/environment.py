@@ -32,7 +32,7 @@ class EnvironmentSensor(object):
 
     def __init__(self, config, debug=False):
         """
-        Constructor for SensorHumidity object
+        Constructor for EnvironmentSensor object
         @param config: configuration object for environment sensing
         @type config: library.config.environment.EnvironmentConfig
         @param debug: Flag to enable/disable debug prints
@@ -184,7 +184,7 @@ class EnvironmentSensor(object):
         @type pin: int
         """
         self._pin = pin
-        self.logger.debug(f"Pin set to {pin}")
+        self.logger.debug(f"Pin set to: {pin}")
 
     @property
     def units(self):
@@ -204,7 +204,7 @@ class EnvironmentSensor(object):
         """
         EnvironmentSensor.validate_units(units)
         self._units = units.lower()
-        self.logger.debug(f"SensorHumidity: units set to {self.units}")
+        self.logger.debug(f"Units set to: {self.units}")
 
     @property
     def sensor_type(self):
@@ -224,7 +224,7 @@ class EnvironmentSensor(object):
         """
         EnvironmentSensor.validate_sensor_type(sensor_type)
         self._sensor_type = self.VALID_DHT_TYPES[str(sensor_type)]
-        self.logger.debug(f"SensorHumidity type: {sensor_type}")
+        self.logger.debug(f"Sensor type set to: {sensor_type}")
 
     @staticmethod
     def validate_units(units):
