@@ -7,3 +7,7 @@ def avg(l):
 	@rtype: float
 	"""
 	return sum(l) / len(l)
+
+
+class SensorError(Exception):
+	pass

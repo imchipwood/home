@@ -10,6 +10,7 @@ import json
 
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
+from library.sensors import SensorError
 from library.sensors.environment import EnvironmentSensor
 
 
@@ -77,8 +78,11 @@ class EnvironmentController(BaseController):
                 # Do the readings
                 try:
                     humidity, temperature = self.sensor.read_n_times(5)
+                except SensorError as e:
+                    self.logger.error(str(e))
+                    continue
                 except:
-                    self.logger.exception('Failed to read environment sensor!')
+                    self.logger.exception("Some error while reading sensor")
                     continue
 
                 # Publish

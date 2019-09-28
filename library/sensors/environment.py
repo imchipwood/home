@@ -14,7 +14,7 @@ except:
     logging.warning("Couldn't import Adafruit_DHT - importing the mock module.")
     import library.mock.mock_Adafruit_DHT as Adafruit_DHT
 
-from library.sensors import avg
+from library.sensors import avg, SensorError
 
 
 class EnvironmentSensor(object):
@@ -78,7 +78,7 @@ class EnvironmentSensor(object):
         """
         humidity, temperature = Adafruit_DHT.read_retry(self.sensor_type, self.pin)
         if humidity is None or temperature is None:
-            raise IOError("Failed to read sensor!")
+            raise SensorError("Failed to read sensor!")
         else:
             self.logger.debug(f"hum: {humidity:0.1f}, temp: {temperature:0.1f}")
         self.humidity = humidity
