@@ -1,0 +1,22 @@
+{
+  "log": "/home/cpw/dev/logs/mediaPushbullet.log",
+  "api": "o.sENK4wzqB4Wfh7ZiGGfuZjSl8CyzM91y",
+  "notify": {
+    "Open": "/home/cpw/camera/captures/test.jpg",
+    "Closed": "Closed"
+  },
+  "max_notification_delay": 0.0,
+  "mqtt": {
+    "client_id": "pi_media_pushbullet",
+    "topics": {
+      "home-assistant/media/environment": {
+        "pubsub": "subscribe",
+        "payload": {
+          "temperature": "",
+          "humidity": "",
+          "units": ""
+        }
+      }
+    }
+  }
+}
