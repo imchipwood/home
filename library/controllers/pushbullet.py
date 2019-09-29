@@ -10,7 +10,7 @@ from threading import Thread
 from time import time, sleep
 
 from library.controllers import BaseController, Get_Logger
-from library.communication.mqtt import MQTTClient, MQTTError
+from library.communication.mqtt import MQTTClient, MQTTError, Get_MQTT_Error_Message
 from library.communication import pushbullet
 
 
@@ -84,21 +84,14 @@ class PushbulletController(BaseController):
         """
         Event handler for MQTT connection
         """
-        self.logger.info("mqtt: (CONNECT) client %s received with code %d", client._client_id, rc)
+        self.logger.info(f"mqtt: (CONNECT) client {client._client_id} received with code {rc}")
 
         # Check the connection results
         if rc != 0:
-            # Something bad happened
-            message = "Error: rc={}, ".format(rc)
-            if rc == -4:
-                message += "Too many messages"
-            elif rc == -5:
-                message += "Invalid UTF-8 string"
-            elif rc == -9:
-                message += "Bad QoS"
+            message = Get_MQTT_Error_Message(rc)
 
             self.logger.error(message)
-            raise MQTTError("on_connect 'rc' failure - {}".format(message))
+            raise MQTTError(f"on_connect 'rc' failure - {message}")
 
         # Nothing wrong with RC - subscribe to topic
         self.logger.info("Connection successful")
@@ -109,27 +102,21 @@ class PushbulletController(BaseController):
         """
         Simply log subscription status
         """
-        self.logger.debug("mqtt: (SUBSCRIBE) client: %s, mid %s, granted_qos: %s", client._client_id, mid, granted_qos)
+        self.logger.debug(f"mqtt: (SUBSCRIBE) client: {client._client_id}, mid {mid}, granted_qos: {granted_qos}")
 
     def on_message(self, client, userdata, msg):
         """
         Handler for new MQTT message
         """
-        self.logger.debug(
-            "mqtt: (MESSAGE) client: %s, topic: %s, QOS: %d, payload: %s",
-            client._client_id,
-            msg.topic,
-            msg.qos,
-            msg.payload
-        )
+        self.logger.debug(f"mqtt: (MESSAGE) client: {client._client_id}, topic: {msg.topic}, QOS: {msg.qos}")
 
         # Convert message to JSON
         payload = msg.payload.decode("utf-8")
-        self.logger.debug("received payload: %s", payload)
+        self.logger.debug(f"received payload: {payload}")
         try:
             message_data = json.loads(payload)
         except ValueError as e:
-            self.logger.warning("Some error while converting string payload to dict: %s", e)
+            self.logger.warning(f"Some error while converting string payload to dict: {e}")
             return
 
         topic = self.mqtt.config.topics_subscribe.get(msg.topic)
@@ -196,4 +183,4 @@ class PushbulletController(BaseController):
         """
         @rtype: str
         """
-        return "{}|{}|{}".format(self.__class__, self.config.type, self.mqtt._client_id)
+        return f"{self.__class__}|{self.config.type}|{self.mqtt._client_id}"

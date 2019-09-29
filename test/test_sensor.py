@@ -1,4 +1,5 @@
 from library.sensors.environment import EnvironmentSensor
+from library.sensors.gpio_monitor import GPIO_Monitor, GPIO
 from library.sensors.camera import Camera
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
@@ -12,6 +13,7 @@ class TestEnvironmentSensor:
         config=CONFIGURATION_HANDLER.get_sensor_config("environment"),
         debug=True
     )
+
     def test_read(self):
         """
         Check that reading the sensor returns new values
@@ -43,8 +45,23 @@ class TestEnvironmentSensor:
         assert fahrenheit == self.sensor.temperature
 
 
-# def test_CameraSensor_settings():
-#     config = CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.CAMERA)
-#     with Camera(config) as sensor:
-#         assert sensor.brightness == 50
-#         assert sensor.resolution == [3280, 2464]
+class TestGPIOMonitorSensor:
+    def test_sensor(self):
+        sensor = GPIO_Monitor(
+            config=CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.GPIO_MONITOR),
+            debug=True
+        )
+        assert sensor.pull_up_down in [GPIO.PUD_UP, GPIO.PUD_DOWN]
+        sensor.read()
+        sensor.cleanup()
+
+
+class TestCamera:
+    def test_sensor(self):
+        config = CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.CAMERA)
+        with Camera(config, debug=True) as sensor:
+            assert sensor.capture_delay >= 0
+            assert len(sensor.resolution) == 2
+            assert sensor.iso
+
+            sensor.capture()

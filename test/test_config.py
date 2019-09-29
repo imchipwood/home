@@ -19,6 +19,9 @@ from library.controllers.pushbullet import PushbulletController
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
+ALT_CONFIG_PATH = "pytest_nomqtt.json"
+ALT_CONFIGURATION_HANDLER = ConfigurationHandler(ALT_CONFIG_PATH)
+
 
 class Test_ConfigurationHandler:
 
@@ -37,10 +40,12 @@ class Test_ConfigurationHandler:
         @param expected_class: Expected object based on target_type
         @type expected_class: library.config.BaseConfiguration
         """
-        config = CONFIGURATION_HANDLER.get_sensor_config(target_type)
+        for handler in [CONFIGURATION_HANDLER, ALT_CONFIGURATION_HANDLER]:
+            config = handler.get_sensor_config(target_type)
 
-        # Check the class is as expected
-        assert isinstance(config, expected_class)
+            # Check the class is as expected
+            assert isinstance(config, expected_class)
+            assert config.mqtt_topic
 
     @pytest.mark.parametrize("target_type,expected_class", [
         (SENSOR_CLASSES.ENVIRONMENT, EnvironmentController),
@@ -73,7 +78,6 @@ class Test_ConfigurationHandler:
 class Test_MQTT:
     mqtt_path = "pytest_mqtt.json"
     sensor_path = "pytest_environment.json"
-    expected_topic_name = "home-assistant/test/sub"
 
     def test_topics(self):
         """
@@ -82,9 +86,6 @@ class Test_MQTT:
         mqtt = MQTTConfig(self.mqtt_path, self.sensor_path)
 
         assert len(mqtt.topics) == 1
-
-        assert self.expected_topic_name in mqtt.topics
-        assert self.expected_topic_name in mqtt.topics_publish
 
     def test_payload(self):
         """
@@ -100,7 +101,7 @@ class Test_MQTT:
             "humidity": str(humidity),
             "units": units
         }
-        topic = mqtt.topics_publish.get(self.expected_topic_name)
+        topic = list(mqtt.topics.values())[0]
 
         payload = topic.payload(temperature=temperature, humidity=humidity, units=units)
         assert json.loads(payload) == expected_payload

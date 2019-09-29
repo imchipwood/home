@@ -105,11 +105,7 @@ class GPIOMonitorController(BaseController):
         for topic in self.config.mqtt_topic:
 
             payload = topic.payload(state=state)
-            self.logger.info(
-                "Publishing to %s: %s",
-                str(topic),
-                payload
-            )
+            self.logger.info(f'Publishing to {topic}: {payload}')
             try:
                 self.mqtt.single(
                     topic=str(topic),

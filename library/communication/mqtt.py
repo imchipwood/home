@@ -13,20 +13,31 @@ class MQTTError(Exception):
     pass
 
 
+def Get_MQTT_Error_Message(rc):
+    """
+    Get a human-readable error message from an MQTT return code
+    @param rc: return code
+    @type rc: int
+    @return: Human-readable error message
+    @rtype: str
+    """
+    # Something bad happened
+    message = f"Error: rc={rc}, "
+    if rc == -4:
+        message += "Too many messages"
+    elif rc == -5:
+        message += "Invalid UTF-8 string"
+    elif rc == -9:
+        message += "Bad QoS"
+    return message
+
+
 class MQTTClient(Client):
     """
     paho.mqtt.client with support for passing in MQTTConfig object
     for initialization instead of manually defining client_id, etc.
     """
-    def __init__(
-            self,
-            client_id="",
-            clean_session=True,
-            userdata=None,
-            protocol=MQTTv311,
-            transport="tcp",
-            mqtt_config=None
-    ):
+    def __init__(self, client_id="", clean_session=True, userdata=None, protocol=MQTTv311, transport="tcp", mqtt_config=None):
         """
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
@@ -48,7 +59,7 @@ class MQTTClient(Client):
                 transport=transport
             )
 
-    def connect(self, host="", port=1883, keepalive=60, bind_address=""):
+    def connect(self, host="", port=None, keepalive=60, bind_address=""):
         """
         Override connect with info from config if args are not provided
         @param host: hostname or IP address of the remote broker.
@@ -98,3 +109,9 @@ class MQTTClient(Client):
             protocol=protocol,
             transport=transport
         )
+
+    def __repr__(self):
+        """
+        @rtype: str
+        """
+        return f"{self.config.client_id} ({self.config.broker}:{self.config.port})"

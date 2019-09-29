@@ -16,13 +16,13 @@
   "mqtt": {
     "client_id": "test_camera",
     "topics": {
-      "home-assistant/test/state": {
+      "home-assistant/pytest/gpio_monitor/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Open"
         }
       },
-      "home-assistant/test/camera": {
+      "home-assistant/pytest/camera": {
         "pubsub": "subscribe",
         "payload": {
           "capture": true,

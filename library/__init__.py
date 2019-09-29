@@ -21,7 +21,8 @@ def setup_logging(logger, logging_level=False, log_path=None):
     @return: logger with handlers setup
     @rtype: logging.Logger
     """
-    logger.info("Logging level: {}".format('DEBUG' if logging_level else 'INFO'))
+    log_level_str = 'DEBUG' if logging_level else 'INFO'
+    logger.info(f"Logging level: {log_level_str}")
 
     # stdout stream handler
     stream_handler = logging.StreamHandler()
@@ -38,7 +39,7 @@ def setup_logging(logger, logging_level=False, log_path=None):
 
     # set up file handler logger - always debug level
     if log_path:
-        logger.info("Logging to file: {}".format(log_path))
+        logger.info(f"Logging to file: {log_path}")
         file_handler = logging.FileHandler(log_path)
         file_handler.setLevel(logging.DEBUG)
 

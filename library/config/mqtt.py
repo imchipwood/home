@@ -5,7 +5,18 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import json
+import socket
 from library.config import BaseConfiguration, ConfigKeys
+
+
+def Get_IP_Address():
+    """
+    Get the machine's current IP address
+    @rtype: str
+    """
+    host_name = socket.gethostname()
+    host_ip = socket.gethostbyname(host_name)
+    return host_ip
 
 
 class Formatters:
@@ -201,7 +212,7 @@ class MQTTBaseConfig(BaseConfiguration):
         @return: MQTT broker URL
         @rtype: str or None
         """
-        return self.config.get(self.config_keys.BROKER)
+        return self.config.get(self.config_keys.BROKER, Get_IP_Address())
 
     @property
     def port(self):
@@ -210,7 +221,7 @@ class MQTTBaseConfig(BaseConfiguration):
         @return: MQTT broker port
         @rtype: int or None
         """
-        return self.config.get(self.config_keys.PORT)
+        return self.config.get(self.config_keys.PORT, 1883)
 
 
 class MQTTConfig(MQTTBaseConfig):

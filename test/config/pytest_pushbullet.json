@@ -5,9 +5,9 @@
     "Closed": "Closed"
   },
   "mqtt": {
-    "client_id": "garage_door_pushbullet",
+    "client_id": "pytest_pushbullet",
     "topics": {
-      "home-assistant/garage/state": {
+      "home-assistant/pytest/gpio_monitor/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Open|Closed"

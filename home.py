@@ -60,7 +60,7 @@ def execute():
             try:
                 sensor.cleanup()
             except:
-                logging.exception("Exception cleaning up sensor %s", sensor)
+                logging.exception(f"Exception cleaning up sensor {sensor}")
 
 
 if __name__ == "__main__":

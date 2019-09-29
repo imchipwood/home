@@ -111,6 +111,9 @@ class BaseConfiguration(object):
         @param config_path: path to config file
         @type config_path: str
         """
+        if not config_path:
+            return
+
         config_path = self.normalize_config_path(config_path)
         self._config_path = config_path
         self._config = self.load_config(self._config_path)
@@ -141,7 +144,11 @@ class BaseConfiguration(object):
         @return: path to base MQTT configuration file if it exists
         @rtype: str or None
         """
-        return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
+        path = self.config.get(ConfigKeys.MQTT)
+        if not path:
+            return None
+        else:
+            return self.normalize_config_path(path)
 
     @property
     def log(self):
@@ -194,10 +201,13 @@ class ConfigurationHandler(BaseConfiguration):
         @return: path to the base MQTT configuration file
         @rtype: str
         """
-        if os.path.exists(self.config.get(ConfigKeys.MQTT, '')):
-            return self.config[ConfigKeys.MQTT]
+        config_path = self.config.get(ConfigKeys.MQTT)
+        if not config_path:
+            return None
+        elif os.path.exists(config_path):
+            return config_path
         else:
-            return self.normalize_config_path(self.config.get(ConfigKeys.MQTT))
+            return self.normalize_config_path(config_path)
 
     def get_sensor_mqtt_config(self, sensor):
         """
@@ -276,18 +286,3 @@ class ConfigurationHandler(BaseConfiguration):
             raise StopIteration
 
         # endregion BuiltIns
-
-
-if __name__ == "__main__":
-    configpath = "media.json"
-    config = ConfigurationHandler(configpath)
-
-    # mqttconfig = config.get_sensor_mqtt_config('environment')
-    # print(mqttconfig.client_id)
-
-    env = config.get_sensor_config('environment')
-    # print(env)
-    print(env.mqtt_config)
-    print(env.pin)
-    print(env.type)
-

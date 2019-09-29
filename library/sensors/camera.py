@@ -59,6 +59,7 @@ class Camera(PiCamera):
         self.brightness = self.config.brightness
         self.contrast = self.config.contrast
         self.resolution = self.config.resolution
+        self.iso = self.config.iso
 
     def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
         """
@@ -86,13 +87,14 @@ class Camera(PiCamera):
             # Delete old file if necessary
             self.logger.debug("removing old image before capturing new one")
             os.remove(output)
-        self.logger.debug("Saving image to %s", output)
+        self.logger.debug(f"Saving image to {output}")
 
         # update ISO
         self.logger.debug("Stopping preview")
         self.stop_preview()
-        self.logger.debug("Setting ISO")
-        self.iso = self.config.iso
+        if not self.iso:
+            self.logger.debug("Setting ISO")
+            self.iso = self.config.iso
 
         # Handle capture delay
         target_delay = 0
@@ -101,7 +103,7 @@ class Camera(PiCamera):
         elif self.capture_delay:
             target_delay = self.capture_delay
         if target_delay > 0:
-            self.logger.debug("Delaying %f seconds before capture", target_delay)
+            self.logger.debug(f"Delaying {target_delay:4.2f} seconds before capture")
             time.sleep(target_delay)
 
         self.logger.debug("Capturing image...")

@@ -109,11 +109,7 @@ class EnvironmentController(BaseController):
             units=units
         )
 
-        self.logger.info(
-            "Publishing to %s: %s",
-            topic,
-            json.dumps(payload, indent=2)
-        )
+        self.logger.info(f'Publishing to {topic}: {json.dumps(payload, indent=2)}')
         try:
             self.mqtt.single(
                 topic=str(topic),
@@ -136,4 +132,4 @@ class EnvironmentController(BaseController):
         """
         @rtype: str
         """
-        return "{}|{}|{}".format(self.__class__, self.config.type, self.config.pin)
+        return f"{self.__class__}|{self.config.type}|{self.config.pin}"

@@ -3,9 +3,9 @@
   "gpio_pin": 3,
   "gpio_pull_up_down": "up",
   "mqtt": {
-    "client_id": "door_monitor_test",
+    "client_id": "pytest_gpio_monitor",
     "topics": {
-      "home-assistant/test/sub": {
+      "home-assistant/pytest/gpio_monitor/state": {
         "pubsub": "publish",
         "payload": {
           "state": "Open|Closed"

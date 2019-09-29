@@ -4,9 +4,6 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-import logging
-import time
-import os
 import json
 from multiprocessing import Process
 from threading import Thread
@@ -14,7 +11,7 @@ from threading import Thread
 from library.sensors.camera import Camera
 
 from library.controllers import BaseController, Get_Logger
-from library.communication.mqtt import MQTTClient, MQTTError
+from library.communication.mqtt import MQTTClient, MQTTError, Get_MQTT_Error_Message
 
 
 class PiCameraController(BaseController):
@@ -29,21 +26,29 @@ class PiCameraController(BaseController):
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
+        self.thread = Process(target=self.loop)
+
         self.mqtt = None
         """@type: MQTTClient"""
-        if self.config.mqtt_config:
-            self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
 
     # region Threading
+
+    def setup(self):
+        """
+        Setup MQTT stuff
+        """
+        if self.config.mqtt_config:
+            self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+            self.logger.debug(f"MQTT Config: {self.mqtt}")
+            self.mqtt.on_connect = self.on_connect
+            self.mqtt.on_subscribe = self.on_subscribe
+            self.mqtt.on_message = self.on_message
 
     def start(self):
         """
         Camera won't actually do threading - instead, we'll subscribe to an MQTT topic
         """
         self.logger.debug("Starting Camera MQTT connection")
-        self.mqtt.on_connect = self.on_connect
-        self.mqtt.on_subscribe = self.on_subscribe
-        self.mqtt.on_message = self.on_message
         self.connect_mqtt()
         self.running = True
 
@@ -51,10 +56,13 @@ class PiCameraController(BaseController):
         """
         No actual threading for Camera
         """
+        self.logger.debug("Starting MQTT loop")
+        self.mqtt.loop_start()
         try:
-            self.mqtt.loop_forever()
+            while True:
+                continue
         except KeyboardInterrupt:
-            pass
+            self.logger.debug("KeyboardInterrupt, ignoring")
 
     def stop(self):
         """
@@ -62,12 +70,20 @@ class PiCameraController(BaseController):
         """
         self.logger.info("Shutting down camera MQTT connection")
         try:
-            self.thread.terminate()
+            if self.thread.is_alive():
+                self.thread.terminate()
             self.mqtt.loop_stop()
-            self.mqtt.disconnect()
+            result = self.mqtt.disconnect()
+            self.logger.debug(f"Disconnect result: {result}")
         except:
             self.logger.exception("Exception while disconnecting from MQTT - ignoring")
         self.running = False
+
+    def _start_thread(self):
+        """
+        Start the thread
+        """
+        self.thread.start()
 
     # endregion Threading
     # region MQTT
@@ -78,29 +94,22 @@ class PiCameraController(BaseController):
         """
         if self.config.mqtt_topic and not self.running:
             self.logger.debug("in connect_mqtt")
-            self.mqtt.connect()
-            self.thread = Process(target=self.loop)
-            self.thread.start()
+            self.setup()
+            result = self.mqtt.connect()
+            self.logger.debug(f"Connect result: {result}")
+            self._start_thread()
 
     def on_connect(self, client, userdata, flags, rc):
         """
         Event handler for MQTT connection
         """
-        self.logger.info("mqtt: (CONNECT) client %s received with code %d", client._client_id, rc)
+        self.logger.info(f"mqtt: (CONNECT) client {client._client_id} received with code {rc}")
 
         # Check the connection results
         if rc != 0:
-            # Something bad happened
-            message = "Error: rc={}, ".format(rc)
-            if rc == -4:
-                message += "Too many messages"
-            elif rc == -5:
-                message += "Invalid UTF-8 string"
-            elif rc == -9:
-                message += "Bad QoS"
-
+            message = Get_MQTT_Error_Message(rc)
             self.logger.error(message)
-            raise MQTTError("on_connect 'rc' failure - {}".format(message))
+            raise MQTTError(f"on_connect 'rc' failure - {message}")
 
         # Nothing wrong with RC - subscribe to topic
         self.logger.info("Connection successful")
@@ -111,27 +120,21 @@ class PiCameraController(BaseController):
         """
         Simply log subscription status
         """
-        self.logger.debug("mqtt: (SUBSCRIBE) client: %s, mid %s, granted_qos: %s", client._client_id, mid, granted_qos)
+        self.logger.debug(f"mqtt: (SUBSCRIBE) client: {client._client_id}, mid {mid}, granted_qos: {granted_qos}")
 
     def on_message(self, client, userdata, msg):
         """
         Handler for new MQTT message
         """
-        self.logger.debug(
-            "mqtt: (MESSAGE) client: %s, topic: %s, QOS: %d, payload: %s",
-            client._client_id,
-            msg.topic,
-            msg.qos,
-            msg.payload
-        )
+        self.logger.debug(f"mqtt: (MESSAGE) client: {client._client_id}, topic: {msg.topic}, QOS: {msg.qos}")
 
         # Convert message to JSON
         payload = msg.payload.decode("utf-8")
-        self.logger.debug("received payload: %s", payload)
+        self.logger.debug(f"received payload: {payload}")
         try:
             message_data = json.loads(payload)
         except ValueError as e:
-            self.logger.warning("Some error while converting string payload to dict: %s", e)
+            self.logger.warning(f"Some error while converting string payload to dict: {e}")
             return
 
         # Check if it indicated a capture
@@ -191,4 +194,4 @@ class PiCameraController(BaseController):
         """
         @rtype: str
         """
-        return "{}|{}|{}".format(self.__class__, self.config.type, self.mqtt._client_id)
+        return f"{self.__class__}|{self.config.type}|{self.mqtt._client_id}"
