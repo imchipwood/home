@@ -7,7 +7,7 @@
     },
     "delay": 10.0,
     "resolution": [3280, 2464],
-    "rotation": 270,
+    "rotation": 0,
     "brightness": 50,
     "contrast": 0,
     "city": "Seattle"
