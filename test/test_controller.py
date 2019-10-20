@@ -9,10 +9,8 @@ CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
 MESSAGE_RECEIVED = False
 
-def GetMqttClient(controller, topics):
+def GetMqttClient(controller, topics, message):
     client = MQTTClient("test")
-    global MESSAGE_RECEIVED
-    MESSAGE_RECEIVED = False
 
     def on_connect(client, userdata, flags, rc):
         if rc != 0:
@@ -23,8 +21,8 @@ def GetMqttClient(controller, topics):
     def on_message(client, userdata, msg):
         payload = msg.payload.decode("utf-8")
         print(f"Received payload: {payload}")
-        global MESSAGE_RECEIVED
-        MESSAGE_RECEIVED = True
+        global message
+        message = True
 
     client.on_connect = on_connect
     client.on_message = on_message
@@ -49,13 +47,13 @@ class Test_EnvironmentController:
                 assert False, "Thread didn't stop!"
 
     def test_publish(self):
-        global MESSAGE_RECEIVED
-        MESSAGE_RECEIVED = False
+        global message
+        message = False
         topics = [self.controller.config.mqtt_topic.name]
-        client = GetMqttClient(self.controller, topics)
+        client = GetMqttClient(self.controller, topics, message)
         self.controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
         client.disconnect()
-        assert MESSAGE_RECEIVED
+        assert message
 
 
 class Test_CameraController:
@@ -74,10 +72,10 @@ class Test_CameraController:
         self.controller.capture_loop()
 
     def test_mqtt(self, monkeypatch):
-        global MESSAGE_RECEIVED
-        MESSAGE_RECEIVED = False
+        global message
+        message = False
         topics = [x.name for x in self.controller.config.mqtt_topic]
-        client = GetMqttClient(self.controller, topics)
+        client = GetMqttClient(self.controller, topics, message)
 
         def mock_start_thread():
             self.controller.mqtt.loop_start()
@@ -88,14 +86,9 @@ class Test_CameraController:
         topic = self.controller.config.mqtt_topic[0]
         payload = topic.payload()
         self.controller.mqtt.single(topic.name, payload)
-        now = time.time()
-        while time.time() < (now + 2):
-            if MESSAGE_RECEIVED:
-                break
-            continue
         self.controller.stop()
         client.disconnect()
-        assert MESSAGE_RECEIVED
+        assert message
 
 
 class Test_GPIOMonitorController:
