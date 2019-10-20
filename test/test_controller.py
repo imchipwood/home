@@ -52,6 +52,7 @@ class Test_EnvironmentController:
         topics = [self.controller.config.mqtt_topic.name]
         client = GetMqttClient(self.controller, topics, message)
         self.controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
+        time.sleep(0.1)
         client.disconnect()
         assert message
 
@@ -86,6 +87,7 @@ class Test_CameraController:
         topic = self.controller.config.mqtt_topic[0]
         payload = topic.payload()
         self.controller.mqtt.single(topic.name, payload)
+        time.sleep(0.1)
         self.controller.stop()
         client.disconnect()
         assert message
