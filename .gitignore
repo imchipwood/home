@@ -10,3 +10,4 @@ smb.conf
 *venv*
 *pytest_cache*
 *pushbulletSettings*
+reports

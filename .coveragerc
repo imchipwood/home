@@ -1,0 +1,9 @@
+[run]
+data_file = reports/.coverage
+include =
+    ./library/*
+omit =
+    ./library/mock*
+
+[html]
+directory = reports/html/
