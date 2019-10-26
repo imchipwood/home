@@ -28,6 +28,16 @@ class TestEnvironmentSensor:
         assert temperature != -999.0
         assert temperature == self.sensor.temperature
 
+    def test_read_n_times(self):
+        """
+        Check that reading n times returns new values
+        """
+        self.sensor.reset_readings()
+        self.sensor.units = "celsius"
+        humidity, temperature = self.sensor.read_n_times(5)
+        assert humidity != -999
+        assert temperature != -999
+
     def test_units(self):
         """
         Check that the reading results match the desired units
