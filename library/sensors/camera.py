@@ -90,8 +90,8 @@ class Camera(PiCamera):
         self.logger.debug(f"Saving image to {output}")
 
         # update ISO
-        self.logger.debug("Stopping preview")
-        self.stop_preview()
+        # self.logger.debug("Stopping preview")
+        # self.stop_preview()
         if not self.iso:
             self.logger.debug("Setting ISO")
             self.iso = self.config.iso
@@ -130,7 +130,7 @@ class Camera(PiCamera):
         """
         try:
             self.logger.debug("Disabling camera")
-            self.stop_preview()
+            # self.stop_preview()
             self.close()
             self.logger.debug("Camera disabled")
         except:
