@@ -40,7 +40,7 @@ class Test_EnvironmentController:
         self.controller.cleanup()
         assert not self.controller.running
         i = 0
-        while self.controller.thread.isAlive():
+        while self.controller.thread.is_alive():
             time.sleep(0.01)
             i += 1
             if i > 1000:
