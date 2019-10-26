@@ -31,6 +31,19 @@ def GetMqttClient(controller, topics, message):
     return client
 
 
+mock_gpio_input = 0
+
+
+def MOCK_GPIO_INPUT():
+    global mock_gpio_input
+    if mock_gpio_input == 0:
+        mock_gpio_input = 1
+    else:
+        mock_gpio_input = 0
+    return bool(mock_gpio_input)
+    # return bool(randint(0, 1))
+
+
 class Test_EnvironmentController:
     controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.ENVIRONMENT)
     """ @type: library.controllers.environment.EnvironmentController """
@@ -64,7 +77,7 @@ class Test_CameraController:
     def test_thread(self):
         self.controller.start()
         assert self.controller.running
-        time.sleep(0.25)
+        # time.sleep(0.25)
         self.controller.stop()
         assert not self.controller.running
         self.controller.cleanup()
@@ -87,7 +100,7 @@ class Test_CameraController:
         topic = self.controller.config.mqtt_topic[0]
         payload = topic.payload()
         self.controller.mqtt.single(topic.name, payload)
-        time.sleep(0.1)
+        # time.sleep(0.1)
         self.controller.stop()
         client.disconnect()
         assert message
@@ -98,12 +111,10 @@ class Test_GPIOMonitorController:
     """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
 
     def test_thread(self, monkeypatch):
-        def mock_input():
-            return bool(randint(0, 1))
-        monkeypatch.setattr(self.controller.sensor, "read", mock_input)
+        monkeypatch.setattr(self.controller.sensor, "read", MOCK_GPIO_INPUT)
         self.controller.start()
         assert self.controller.running
-        time.sleep(2)
+        time.sleep(0.2)
         self.controller.stop()
         assert not self.controller.running
         self.controller.cleanup()

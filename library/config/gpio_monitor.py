@@ -6,6 +6,11 @@ Author: Charles "Chip" Wood
 """
 from library.config import BaseConfiguration
 
+class CONFIG_KEYS:
+    PIN = "gpio_pin"
+    PULL_UP_DOWN = "gpio_pull_up_down"
+    SENSE_FREQUENCY = "gpio_sense_frequency"
+
 
 class GPIOMonitorConfig(BaseConfiguration):
     """
@@ -36,6 +41,24 @@ class GPIOMonitorConfig(BaseConfiguration):
         return self.config.get('gpio_pin')
 
     @property
+    def pull_up_down(self):
+        """
+        Get GPIO pull up/down
+        @return: whether or not GPIO is pull-up or pull-down
+        @rtype: str
+        """
+        return self.config.get("gpio_pull_up_down")
+
+    @property
+    def frequency(self):
+        """
+        Get GPIO read frequency
+        @return: GPIO read frequency in Hz
+        @rtype: float
+        """
+        return self.config.get("gpio_sense_frequency", 1.0)
+
+    @property
     def mqtt_topic(self):
         """
         Get the MQTT topic(s) to publish state info to
@@ -46,7 +69,3 @@ class GPIOMonitorConfig(BaseConfiguration):
             return None
         else:
             return list(self.mqtt_config.topics_publish.values())
-
-    @property
-    def pull_up_down(self):
-        return self.config.get("gpio_pull_up_down")

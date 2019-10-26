@@ -71,11 +71,12 @@ class GPIOMonitorController(BaseController):
         """
         last_time = 0
         last_state = self.state
+        interval = 1.0 / self.config.frequency
         while self.running:
 
             # Read at the desired frequency
             now = float(timeit.default_timer())
-            if now - last_time > 1.0:
+            if now - last_time > interval:
                 last_time = now
 
                 # Do the readings
