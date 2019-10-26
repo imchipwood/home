@@ -26,7 +26,7 @@ class EnvironmentController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(EnvironmentController, self).__init__(config, debug)
+        super().__init__(config, debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
@@ -125,7 +125,7 @@ class EnvironmentController(BaseController):
         """
         Shut down the thread
         """
-        super(EnvironmentController, self).cleanup()
+        super().cleanup()
         self.logger.info("Cleanup complete")
 
     def __repr__(self):

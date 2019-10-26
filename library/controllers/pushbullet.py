@@ -26,7 +26,7 @@ class PushbulletController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(PushbulletController, self).__init__(config, debug)
+        super().__init__(config, debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
@@ -177,7 +177,7 @@ class PushbulletController(BaseController):
         """
         Gracefully exit
         """
-        super(PushbulletController, self).cleanup()
+        super().cleanup()
 
     def __repr__(self):
         """

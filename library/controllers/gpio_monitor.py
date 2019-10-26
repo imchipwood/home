@@ -24,7 +24,7 @@ class GPIOMonitorController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(GPIOMonitorController, self).__init__(config, debug)
+        super().__init__(config, debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
@@ -122,6 +122,6 @@ class GPIOMonitorController(BaseController):
         """
         Shut down the thread
         """
-        super(GPIOMonitorController, self).cleanup()
+        super().cleanup()
         self.sensor.cleanup()
         self.logger.info("Cleanup complete")

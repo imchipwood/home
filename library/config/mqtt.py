@@ -27,7 +27,7 @@ class Formatters:
         """
         Constructor for Formatters object
         """
-        super(Formatters, self).__init__()
+        super().__init__()
         self._methods = [
             self._format_payload_string,
             self._format_payload_bool,
@@ -123,7 +123,7 @@ class Topic(object):
         @param info: config dict from config file
         @type info: dict
         """
-        super(Topic, self).__init__()
+        super().__init__()
 
         self.name = name
         self._info = info
@@ -203,7 +203,7 @@ class MQTTBaseConfig(BaseConfiguration):
         @param config_path:
         @type config_path:
         """
-        super(MQTTBaseConfig, self).__init__(config_path)
+        super().__init__(config_path)
 
     @property
     def broker(self):
@@ -236,7 +236,7 @@ class MQTTConfig(MQTTBaseConfig):
         @param sensor_config_path: path to sensor-specific configuration file
         @type sensor_config_path: str
         """
-        super(MQTTConfig, self).__init__(config_path)
+        super().__init__(config_path)
         sensor_config_path = self.normalize_config_path(sensor_config_path)
         self.config.update(self.load_config(sensor_config_path).get(ConfigKeys.MQTT))
 

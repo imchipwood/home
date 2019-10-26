@@ -22,7 +22,7 @@ class PiCameraController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(PiCameraController, self).__init__(config=config, debug=debug)
+        super().__init__(config=config, debug=debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
@@ -188,7 +188,7 @@ class PiCameraController(BaseController):
         """
         Gracefully exit
         """
-        super(PiCameraController, self).cleanup()
+        super().cleanup()
 
     def __repr__(self):
         """

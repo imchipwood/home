@@ -38,7 +38,7 @@ class EnvironmentSensor(object):
         @param debug: Flag to enable/disable debug prints
         @type debug: bool
         """
-        super(EnvironmentSensor, self).__init__()
+        super().__init__()
 
         self.config = config
         self.debug = debug

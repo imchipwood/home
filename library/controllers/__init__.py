@@ -19,7 +19,7 @@ def Get_Logger(name, debug, path):
 class BaseController(ABC):
     """Base class for all controllers to extend"""
     def __init__(self, config, debug=False):
-        super(BaseController, self).__init__()
+        super().__init__()
 
         self.debug = debug
         self.config = config

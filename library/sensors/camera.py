@@ -26,7 +26,7 @@ class Camera(PiCamera):
         @param debug: debug flag
         @type debug: bool
         """
-        super(Camera, self).__init__()
+        super().__init__()
 
         self.debug = debug
         self.config = config
@@ -107,7 +107,7 @@ class Camera(PiCamera):
             time.sleep(target_delay)
 
         self.logger.debug("Capturing image...")
-        super(Camera, self).capture(
+        super().capture(
             output=output,
             format=format,
             use_video_port=use_video_port,

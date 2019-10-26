@@ -36,7 +36,7 @@ class CameraConfig(BaseConfiguration):
         @param mqtt_config: MQTTConfig object if MQTT is to be used
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
-        super(CameraConfig, self).__init__(config_path)
+        super().__init__(config_path)
 
         self.mqtt_config = mqtt_config
 

@@ -42,22 +42,22 @@ class MQTTClient(Client):
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
         self.config = mqtt_config
-        if mqtt_config:
-            super(MQTTClient, self).__init__(
-                client_id=self.config.client_id,
-                clean_session=clean_session,
-                userdata=userdata,
-                protocol=protocol,
-                transport=transport
-            )
-        else:
-            super(MQTTClient, self).__init__(
-                client_id=client_id,
-                clean_session=clean_session,
-                userdata=userdata,
-                protocol=protocol,
-                transport=transport
-            )
+        # if mqtt_config:
+        super().__init__(
+            client_id=self.config.client_id if mqtt_config else client_id,
+            clean_session=clean_session,
+            userdata=userdata,
+            protocol=protocol,
+            transport=transport
+        )
+        # else:
+        #     super().__init__(
+        #         client_id=client_id,
+        #         clean_session=clean_session,
+        #         userdata=userdata,
+        #         protocol=protocol,
+        #         transport=transport
+        #     )
 
     def connect(self, host="", port=None, keepalive=60, bind_address=""):
         """
@@ -77,7 +77,7 @@ class MQTTClient(Client):
         @return: connection result
         @rtype: int
         """
-        return super(MQTTClient, self).connect(
+        return super().connect(
             host=host or self.config.broker,
             port=port or self.config.port,
             keepalive=keepalive,

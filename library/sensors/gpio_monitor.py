@@ -27,7 +27,7 @@ class GPIO_Monitor(object):
         @param debug: debug print enable flag
         @type debug: bool
         """
-        super(GPIO_Monitor, self).__init__()
+        super().__init__()
         self.config = config
         self.logger = Get_Logger(__name__, debug, config.log)
         GPIO.setmode(GPIO.BCM)

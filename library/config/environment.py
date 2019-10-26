@@ -21,7 +21,7 @@ class EnvironmentConfig(BaseConfiguration):
         @param mqtt_config: MQTTConfig object if MQTT is to be used
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
-        super(EnvironmentConfig, self).__init__(config_path)
+        super().__init__(config_path)
 
         self.mqtt_config = mqtt_config
 

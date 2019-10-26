@@ -37,7 +37,7 @@ class BaseConfiguration(object):
         @param config_path: path to configuration file
         @type config_path: str
         """
-        super(BaseConfiguration, self).__init__()
+        super().__init__()
         self.config_keys = ConfigKeys
 
         self._config_path = ""
@@ -187,7 +187,7 @@ class ConfigurationHandler(BaseConfiguration):
         @param config_path: path to top-level configuration JSON file
         @type config_path: str
         """
-        super(ConfigurationHandler, self).__init__(config_path)
+        super().__init__(config_path)
         self._current_sensor = 0
         self.sensorTypes = list(self.config.get(ConfigKeys.SENSORS, {}))
         self.sensors = {}
