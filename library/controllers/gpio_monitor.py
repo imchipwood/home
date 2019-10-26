@@ -32,8 +32,7 @@ class GPIOMonitorController(BaseController):
             self.config,
             debug=debug
         )
-        self.sensor.add_rising_event_detection(self.publish_event)
-        self.sensor.add_falling_event_detection(self.publish_event)
+        self.sensor.add_both_event_detection(self.publish_event)
         self.state = self.sensor.read()
 
         # Set up MQTT
