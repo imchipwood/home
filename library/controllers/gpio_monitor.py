@@ -39,7 +39,7 @@ class GPIOMonitorController(BaseController):
         """@type: MQTTClient"""
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
-        
+
         self.sensor.add_event_detect(GPIO.BOTH, self.publish_event)
 
     def __repr__(self):

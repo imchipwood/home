@@ -35,7 +35,6 @@ class GPIO_Monitor(object):
         self.pin = self.config.pin
         self.logger.debug(f"Setting up GPIO on pin {self.pin}")
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=self.pull_up_down)
-        self.event_detect_enabled = False
 
     @property
     def pull_up_down(self):
@@ -58,10 +57,7 @@ class GPIO_Monitor(object):
         @param bouncetime: software debounce time in ms
         @type bouncetime: int
         """
-        if self.event_detect_enabled:
-            raise Exception("EVENT DETECTION ALREADY ENABLED ON THIS PIN")
         GPIO.add_event_detect(self.pin, edge, callback, bouncetime=bouncetime)
-        self.event_detect_enabled = True
 
     def read(self):
         """
@@ -74,7 +70,6 @@ class GPIO_Monitor(object):
         """
         Clean up the GPIO for shutting down the program
         """
-        if self.event_detect_enabled:
-            GPIO.remove_event_detect(self.pin)
-            self.event_detect_enabled = False
+        self.logger.debug("GPIO cleanup - removing event detection")
+        GPIO.remove_event_detect(self.pin)
         GPIO.cleanup(self.pin)
