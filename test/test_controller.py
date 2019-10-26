@@ -1,4 +1,5 @@
 import time
+import os
 from random import randint
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
@@ -83,7 +84,13 @@ class Test_CameraController:
         self.controller.cleanup()
 
     def test_capture(self):
+        config = self.controller.config
+        """ @type: library.config.camera.CameraConfig """
+        expectedPath = config.capture_path
+        if os.path.exists(expectedPath):
+            os.remove(expectedPath)
         self.controller.capture_loop()
+        assert os.path.exists(expectedPath)
 
     def test_mqtt(self, monkeypatch):
         global message
