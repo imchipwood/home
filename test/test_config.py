@@ -70,7 +70,7 @@ class Test_ConfigurationHandler:
         @param expected_class: Expected object based on target_type
         @type expected_class: library.controllers.BaseController
         """
-        controller = CONFIGURATION_HANDLER.get_sensor_controller(target_type)
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(target_type, debug=True)
 
         # Check the class is as expected
         assert isinstance(controller, expected_class)

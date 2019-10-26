@@ -52,7 +52,7 @@ def MOCK_GPIO_INPUT():
 
 
 class Test_EnvironmentController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.ENVIRONMENT)
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.ENVIRONMENT, debug=True)
     """ @type: library.controllers.environment.EnvironmentController """
     def test_thread(self):
         self.controller.start()
@@ -78,7 +78,7 @@ class Test_EnvironmentController:
 
 
 class Test_CameraController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.CAMERA)
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.CAMERA, debug=True)
     """ @type: library.controllers.camera.PiCameraController"""
 
     def test_thread(self):
@@ -120,7 +120,7 @@ class Test_CameraController:
 
 
 class Test_GPIOMonitorController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR)
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR, debug=True)
     """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
 
     def test_thread(self, monkeypatch):

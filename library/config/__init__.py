@@ -239,17 +239,19 @@ class ConfigurationHandler(BaseConfiguration):
         else:
             return None
 
-    def get_sensor_controller(self, sensor):
+    def get_sensor_controller(self, sensor, debug=False):
         """
         Get the sensor object for the given sensor
         @param sensor: target sensor
         @type sensor: str
+        @param debug: enable debug prints
+        @type debug: bool
         @return: sensor object
         @rtype: library.controllers.BaseController
         """
         if sensor in self.SENSOR_CLASS_MAP:
             if sensor not in self.sensors:
-                self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor))
+                self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor), debug=debug)
             return self.sensors[sensor]
         else:
             return None
