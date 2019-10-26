@@ -5,6 +5,7 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import logging
+from collections import defaultdict
 
 from library.controllers import Get_Logger
 
@@ -34,6 +35,7 @@ class GPIO_Monitor(object):
         self.pin = self.config.pin
         self.logger.debug(f"Setting up GPIO on pin {self.pin}")
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=self.pull_up_down)
+        self.event_detect_enabled = False
 
     @property
     def pull_up_down(self):
@@ -46,35 +48,20 @@ class GPIO_Monitor(object):
         else:
             return GPIO.PUD_UP
 
-    def add_both_event_detection(self, callback=None, bouncetime=200):
+    def add_event_detect(self, edge, callback=None, bouncetime=200):
         """
-        Add rising and falling event detection
+        Add rising or falling event detection
+        @param edge: rising/falling/both
+        @type edge: int
         @param callback: callback to use on event fired
         @type callback: method
         @param bouncetime: software debounce time in ms
         @type bouncetime: int
         """
-        GPIO.add_event_detect(self.pin, GPIO.BOTH, callback, bouncetime=bouncetime)
-
-    def add_rising_event_detection(self, callback=None, bouncetime=200):
-        """
-        Add rising event detection
-        @param callback: callback to use on event fired
-        @type callback: method
-        @param bouncetime: software debounce time in ms
-        @type bouncetime: int
-        """
-        GPIO.add_event_detect(self.pin, GPIO.RISING, callback, bouncetime=bouncetime)
-
-    def add_falling_event_detection(self, callback=None, bouncetime=200):
-        """
-        Add falling event detection
-        @param callback: callback to use on event fired
-        @type callback: method
-        @param bouncetime: software debounce time in ms
-        @type bouncetime: int
-        """
-        GPIO.add_event_detect(self.pin, GPIO.FALLING, callback, bouncetime=bouncetime)
+        if self.event_detect_enabled:
+            raise Exception("EVENT DETECTION ALREADY ENABLED ON THIS PIN")
+        GPIO.add_event_detect(self.pin, edge, callback, bouncetime=bouncetime)
+        self.event_detect_enabled = True
 
     def read(self):
         """
@@ -87,4 +74,7 @@ class GPIO_Monitor(object):
         """
         Clean up the GPIO for shutting down the program
         """
+        if self.event_detect_enabled:
+            GPIO.remove_event_detect(self.pin)
+            self.event_detect_enabled = False
         GPIO.cleanup(self.pin)

@@ -1,14 +1,14 @@
 HIGH = 1
 LOW = 0
-OUT = 1
-IN = 0
-RISING = 1
-FALLING = 2
-BOTH = 3
-BCM = 'bcm'
-PUD_UP = True
-PUD_DOWN = False
-PUD_OFF = None
+OUT = 0
+IN = 1
+RISING = 31
+FALLING = 32
+BOTH = 33
+BCM = 11
+PUD_UP = 22
+PUD_DOWN = 21
+PUD_OFF = 20
 
 global STATE
 
@@ -43,5 +43,9 @@ def input(pin):
     return STATE
 
 
-def add_event_detect(pin, rising_or_falling, callback=None, bouncetime=200):
+def add_event_detect(pin, edge, callback=None, bouncetime=200):
+    pass
+
+
+def remove_event_detect(pin):
     pass

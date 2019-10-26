@@ -9,7 +9,7 @@ import timeit
 
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
-from library.sensors.gpio_monitor import GPIO_Monitor
+from library.sensors.gpio_monitor import GPIO_Monitor, GPIO
 
 
 class GPIOMonitorController(BaseController):
@@ -32,7 +32,6 @@ class GPIOMonitorController(BaseController):
             self.config,
             debug=debug
         )
-        self.sensor.add_both_event_detection(self.publish_event)
         self.state = self.sensor.read()
 
         # Set up MQTT
@@ -40,6 +39,8 @@ class GPIOMonitorController(BaseController):
         """@type: MQTTClient"""
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+        
+        self.sensor.add_event_detect(GPIO.BOTH, self.publish_event)
 
     def __repr__(self):
         """
