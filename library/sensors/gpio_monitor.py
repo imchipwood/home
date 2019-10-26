@@ -46,6 +46,26 @@ class GPIO_Monitor(object):
         else:
             return GPIO.PUD_UP
 
+    def add_rising_event_detection(self, callback=None, bouncetime=200):
+        """
+        Add rising event detection
+        @param callback: callback to use on event fired
+        @type callback: method
+        @param bouncetime: software debounce time in ms
+        @type bouncetime: int
+        """
+        GPIO.add_event_detect(self.pin, rising_or_falling=GPIO.RISING, callback=callback, bouncetime=bouncetime)
+
+    def add_falling_event_detection(self, callback=None, bouncetime=200):
+        """
+        Add falling event detection
+        @param callback: callback to use on event fired
+        @type callback: method
+        @param bouncetime: software debounce time in ms
+        @type bouncetime: int
+        """
+        GPIO.add_event_detect(self.pin, rising_or_falling=GPIO.FALLING, callback=callback, bouncetime=bouncetime)
+
     def read(self):
         """
         Read the GPIO pin

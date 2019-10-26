@@ -43,5 +43,5 @@ def input(pin):
     return STATE
 
 
-def add_event_detect(pin, rising_or_falling):
+def add_event_detect(pin, rising_or_falling, callback=None, bouncetime=200):
     pass

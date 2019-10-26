@@ -32,6 +32,8 @@ class GPIOMonitorController(BaseController):
             self.config,
             debug=debug
         )
+        self.sensor.add_rising_event_detection(self.publish_event)
+        self.sensor.add_falling_event_detection(self.publish_event)
         self.state = self.sensor.read()
 
         # Set up MQTT
@@ -53,7 +55,8 @@ class GPIOMonitorController(BaseController):
         Start the thread
         """
         self.logger.info("Starting GPIO monitor thread")
-        self.thread = Thread(target=self.loop)
+        # self.thread = Thread(target=self.loop)
+        self.thread = Thread(target=self.loop2)
         self.thread.daemon = True
         self.running = True
         self.thread.start()
@@ -91,6 +94,10 @@ class GPIOMonitorController(BaseController):
                     self.publish(str(self))
                     last_state = self.state
 
+    def loop2(self):
+        while self.running:
+            pass
+
     # endregion Threading
     # region Communication
 
@@ -106,6 +113,29 @@ class GPIOMonitorController(BaseController):
         for topic in self.config.mqtt_topic:
 
             payload = topic.payload(state=state)
+            self.logger.info(f'Publishing to {topic}: {payload}')
+            try:
+                self.mqtt.single(
+                    topic=str(topic),
+                    payload=payload
+                )
+            except:
+                self.logger.exception("Failed to publish MQTT data!")
+                raise
+
+    def publish_event(self, channel):
+        """
+        Broadcast sensor readings
+        @param channel: GPIO pin event fired on
+        @type channel: int
+        """
+        if not self.mqtt:
+            return
+        self.state = self.sensor.read()
+
+        for topic in self.config.mqtt_topic:
+
+            payload = topic.payload(state=str(self))
             self.logger.info(f'Publishing to {topic}: {payload}')
             try:
                 self.mqtt.single(
