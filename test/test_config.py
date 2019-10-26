@@ -73,6 +73,7 @@ class Test_ConfigurationHandler:
         assert ismethod(controller.stop)
         assert ismethod(controller.loop)
         assert ismethod(controller.cleanup)
+        controller.cleanup()
 
 
 class Test_MQTT:
