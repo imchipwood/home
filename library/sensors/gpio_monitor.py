@@ -54,7 +54,7 @@ class GPIO_Monitor(object):
         @param bouncetime: software debounce time in ms
         @type bouncetime: int
         """
-        GPIO.add_event_detect(self.pin, rising_or_falling=GPIO.BOTH, callback=callback, bouncetime=bouncetime)
+        GPIO.add_event_detect(self.pin, GPIO.BOTH, callback, bouncetime=bouncetime)
 
     def add_rising_event_detection(self, callback=None, bouncetime=200):
         """
@@ -64,7 +64,7 @@ class GPIO_Monitor(object):
         @param bouncetime: software debounce time in ms
         @type bouncetime: int
         """
-        GPIO.add_event_detect(self.pin, rising_or_falling=GPIO.RISING, callback=callback, bouncetime=bouncetime)
+        GPIO.add_event_detect(self.pin, GPIO.RISING, callback, bouncetime=bouncetime)
 
     def add_falling_event_detection(self, callback=None, bouncetime=200):
         """
@@ -74,7 +74,7 @@ class GPIO_Monitor(object):
         @param bouncetime: software debounce time in ms
         @type bouncetime: int
         """
-        GPIO.add_event_detect(self.pin, rising_or_falling=GPIO.FALLING, callback=callback, bouncetime=bouncetime)
+        GPIO.add_event_detect(self.pin, GPIO.FALLING, callback, bouncetime=bouncetime)
 
     def read(self):
         """
