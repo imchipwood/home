@@ -119,11 +119,13 @@ class Test_CameraController:
 
 
 class Test_GPIOMonitorController:
-    def __init__(self):
-        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR, debug=True)
-        """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
+    # def __init__(self):
+    #     self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR, debug=True)
+    #     """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
 
     def test_thread(self, monkeypatch):
+        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR, debug=True)
+        """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
         monkeypatch.setattr(self.controller.sensor, "read", MOCK_GPIO_INPUT)
         self.controller.start()
         assert self.controller.running
