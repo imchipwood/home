@@ -23,6 +23,13 @@ ALT_CONFIG_PATH = "pytest_nomqtt.json"
 ALT_CONFIGURATION_HANDLER = ConfigurationHandler(ALT_CONFIG_PATH)
 
 
+def teardown_module():
+    for sensor in CONFIGURATION_HANDLER:
+        sensor.cleanup()
+    for sensor in ALT_CONFIGURATION_HANDLER:
+        sensor.cleanup()
+
+
 class Test_ConfigurationHandler:
 
     @pytest.mark.parametrize("target_type,expected_class", [
@@ -73,7 +80,6 @@ class Test_ConfigurationHandler:
         assert ismethod(controller.stop)
         assert ismethod(controller.loop)
         assert ismethod(controller.cleanup)
-        controller.cleanup()
 
 
 class Test_MQTT:

@@ -10,6 +10,12 @@ CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
 
 MESSAGE_RECEIVED = False
 
+
+def teardown_module():
+    for sensor in CONFIGURATION_HANDLER:
+        sensor.cleanup()
+
+
 def GetMqttClient(controller, topics, message):
     client = MQTTClient("test")
 
