@@ -40,8 +40,6 @@ class GPIOMonitorController(BaseController):
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
 
-        self.sensor.add_event_detect(GPIO.BOTH, self.publish_event)
-
     def __repr__(self):
         """
         @rtype: str
@@ -55,6 +53,7 @@ class GPIOMonitorController(BaseController):
         Start the thread
         """
         self.logger.info("Starting GPIO monitor thread")
+        self.sensor.add_event_detect(GPIO.BOTH, self.publish_event)
         # self.thread = Thread(target=self.loop)
         self.thread = Thread(target=self.loop2)
         self.thread.daemon = True
@@ -67,6 +66,7 @@ class GPIOMonitorController(BaseController):
         """
         self.logger.info("Stopping GPIO monitor thread")
         self.running = False
+        self.sensor.remove_event_detect()
 
     def loop(self):
         """

@@ -59,6 +59,12 @@ class GPIO_Monitor(object):
         """
         GPIO.add_event_detect(self.pin, edge, callback, bouncetime=bouncetime)
 
+    def remove_event_detect(self):
+        """
+        Remove event detection
+        """
+        GPIO.remove_event_detect(self.pin)
+
     def read(self):
         """
         Read the GPIO pin
@@ -71,5 +77,5 @@ class GPIO_Monitor(object):
         Clean up the GPIO for shutting down the program
         """
         self.logger.debug("GPIO cleanup - removing event detection")
-        GPIO.remove_event_detect(self.pin)
+        self.remove_event_detect()
         GPIO.cleanup(self.pin)
