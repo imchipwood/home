@@ -11,6 +11,7 @@ CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 MESSAGE_RECEIVED = False
 MOCK_GPIO_INPUT = 0
 MAX_WAIT_SECONDS = 2.5
+MAX_ENV_WAIT_SECONDS = MAX_WAIT_SECONDS * 3
 
 
 class TestTopic:
@@ -57,15 +58,16 @@ class Test_EnvironmentController:
     controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.ENVIRONMENT)
     """ @type: library.controllers.environment.EnvironmentController """
     def test_thread(self):
+        self.controller.sensor.reset_readings()
         self.controller.start()
         assert self.controller.running
         self.controller.cleanup()
         assert not self.controller.running
         i = 0
-        while self.controller.thread.is_alive():
+        while self.controller.thread.is_alive() or self.controller.sensor.humidity == -999.0:
             time.sleep(0.001)
             i += 1
-            if i > MAX_WAIT_SECONDS * 1000:
+            if i > MAX_ENV_WAIT_SECONDS * 1000:
                 assert False, "Thread didn't stop!"
 
     def test_publish(self):
