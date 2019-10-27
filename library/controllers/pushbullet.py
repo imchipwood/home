@@ -11,7 +11,7 @@ from time import time, sleep
 
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient, MQTTError, Get_MQTT_Error_Message
-from library.communication import pushbullet
+from library.communication.pushbullet import PushbulletNotify
 
 
 class PushbulletController(BaseController):
@@ -29,6 +29,8 @@ class PushbulletController(BaseController):
         super().__init__(config, debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
+
+        self.notifier = PushbulletNotify(self.config.api_key)
 
         self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
         
@@ -130,20 +132,13 @@ class PushbulletController(BaseController):
                     return
 
                 try:
-                    pushbullet.PushbulletImageNotify(
-                        self.config.api_key,
-                        notification
-                    )
+                    self.notifier.send_file(notification)
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet image notification")
                     
             elif state == "Closed":
                 try:
-                    pushbullet.PushbulletTextNotify(
-                        self.config.api_key,
-                        msg.topic,
-                        notification
-                    )
+                    self.notifier.send_text(msg.topic, notification)
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet text notification")
 
