@@ -1,3 +1,4 @@
+import pytest
 import time
 import os
 
@@ -8,6 +9,14 @@ CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
 MESSAGE_RECEIVED = False
+mock_gpio_input = 0
+
+
+class TestTopic:
+    def __init__(self, topic, payload, capture):
+        self.topic = topic
+        self.payload = payload
+        self.capture = capture
 
 
 def teardown_module():
@@ -15,7 +24,7 @@ def teardown_module():
         sensor.cleanup()
 
 
-def GetMqttClient(controller, topics, message):
+def get_mqtt_client(mqtt_config, topics, message):
     client = MQTTClient("test")
 
     def on_connect(client, userdata, flags, rc):
@@ -32,15 +41,21 @@ def GetMqttClient(controller, topics, message):
 
     client.on_connect = on_connect
     client.on_message = on_message
-    client.connect(host=controller.config.mqtt_config.broker, port=controller.config.mqtt_config.port)
+    client.connect(host=mqtt_config.broker, port=mqtt_config.port)
     client.loop_start()
     return client
 
 
-mock_gpio_input = 0
+def wait_for_message(message):
+    i = 0
+    while not message:
+        time.sleep(0.001)
+        i += 1
+        if i > 1000:
+            raise Exception("Never received message!")
 
 
-def MOCK_GPIO_INPUT():
+def mock_gpio_read():
     global mock_gpio_input
     mock_gpio_input = 1 if mock_gpio_input == 0 else 0
     return bool(mock_gpio_input)
@@ -56,7 +71,7 @@ class Test_EnvironmentController:
         assert not self.controller.running
         i = 0
         while self.controller.thread.is_alive():
-            time.sleep(0.01)
+            time.sleep(0.001)
             i += 1
             if i > 1000:
                 assert False, "Thread didn't stop!"
@@ -65,15 +80,10 @@ class Test_EnvironmentController:
         global message
         message = False
         topics = [x.name for x in self.controller.config.mqtt_topic]
-        client = GetMqttClient(self.controller, topics, message)
+        client = get_mqtt_client(self.controller.config.mqtt_config, topics, message)
         self.controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
 
-        i = 0
-        while not message:
-            time.sleep(0.01)
-            i += 1
-            if i > 1000:
-                assert False, "Never received the message"
+        wait_for_message(message)
         client.disconnect()
         assert message
 
@@ -99,11 +109,25 @@ class Test_CameraController:
         self.controller.capture_loop()
         assert os.path.exists(expectedPath)
 
+    @pytest.mark.parametrize(
+        "topic",
+        [
+            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": "Open"}, True),
+            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": "Closed"}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": True, "delay": 1.0}, True),
+            TestTopic("home-assistant/pytest/camera", {"delay": 1.0}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": False}, False),
+            TestTopic("fake_topic", {"capture": False}, False),
+        ]
+    )
+    def test_should_capture_from_command(self, topic):
+        assert self.controller.should_capture_from_command(topic.topic, topic.payload) == topic.capture
+
     def test_mqtt(self, monkeypatch):
         global message
         message = False
         topics = [x.name for x in self.controller.config.mqtt_topic]
-        client = GetMqttClient(self.controller, topics, message)
+        client = get_mqtt_client(self.controller.config.mqtt_config, topics, message)
 
         def mock_start_thread():
             self.controller.mqtt.loop_start()
@@ -115,12 +139,7 @@ class Test_CameraController:
         payload = topic.payload()
         self.controller.mqtt.single(topic.name, payload)
 
-        i = 0
-        while not message:
-            time.sleep(0.01)
-            i += 1
-            if i > 1000:
-                assert False, "Never received the message"
+        wait_for_message(message)
         self.controller.stop()
         client.disconnect()
         assert message
@@ -130,10 +149,10 @@ class Test_GPIOMonitorController:
     def test_thread(self, monkeypatch):
         self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR)
         """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
-        monkeypatch.setattr(self.controller.sensor, "read", MOCK_GPIO_INPUT)
+        monkeypatch.setattr(self.controller.sensor, "read", mock_gpio_read)
         self.controller.start()
         assert self.controller.running
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.controller.stop()
         assert not self.controller.running
         self.controller.cleanup()
@@ -141,20 +160,15 @@ class Test_GPIOMonitorController:
     def test_publish(self, monkeypatch):
         self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR)
         """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
-        monkeypatch.setattr(self.controller.sensor, "read", MOCK_GPIO_INPUT)
+        monkeypatch.setattr(self.controller.sensor, "read", mock_gpio_read)
 
         global message
         message = False
         topics = [x.name for x in self.controller.config.mqtt_topic]
-        client = GetMqttClient(self.controller, topics, message)
+        client = get_mqtt_client(self.controller.config.mqtt_config, topics, message)
 
         self.controller.publish_event(self.controller.sensor.config.pin)
 
-        i = 0
-        while not message:
-            time.sleep(0.01)
-            i += 1
-            if i > 1000:
-                assert False, "Never received the message"
+        wait_for_message(message)
         client.disconnect()
         assert message
