@@ -9,7 +9,8 @@ CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
 MESSAGE_RECEIVED = False
-mock_gpio_input = 0
+MOCK_GPIO_INPUT = 0
+MAX_WAIT_SECONDS = 2.5
 
 
 class TestTopic:
@@ -51,14 +52,14 @@ def wait_for_message(message):
     while not message:
         time.sleep(0.001)
         i += 1
-        if i > 1000:
-            raise Exception("Never received message!")
+        if i > MAX_WAIT_SECONDS * 1000:
+            raise Exception("Wait time exceeded!")
 
 
 def mock_gpio_read():
-    global mock_gpio_input
-    mock_gpio_input = 1 if mock_gpio_input == 0 else 0
-    return bool(mock_gpio_input)
+    global MOCK_GPIO_INPUT
+    MOCK_GPIO_INPUT = 1 if MOCK_GPIO_INPUT == 0 else 0
+    return bool(MOCK_GPIO_INPUT)
 
 
 class Test_EnvironmentController:
@@ -73,7 +74,7 @@ class Test_EnvironmentController:
         while self.controller.thread.is_alive():
             time.sleep(0.001)
             i += 1
-            if i > 1000:
+            if i > MAX_WAIT_SECONDS * 1000:
                 assert False, "Thread didn't stop!"
 
     def test_publish(self):
