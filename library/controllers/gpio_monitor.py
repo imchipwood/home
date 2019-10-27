@@ -33,6 +33,7 @@ class GPIOMonitorController(BaseController):
             debug=debug
         )
         self.state = self.sensor.read()
+        self.last_state = self.state
 
         # Set up MQTT
         self.mqtt = None
@@ -131,6 +132,9 @@ class GPIOMonitorController(BaseController):
         if not self.mqtt:
             return
         self.state = self.sensor.read()
+        if self.state == self.last_state:
+            return
+        self.last_state = self.state
 
         for topic in self.config.mqtt_topic:
 
