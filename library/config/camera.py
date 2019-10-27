@@ -4,7 +4,7 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-from typing import List, Dict
+from typing import List
 from library.config import BaseConfiguration
 import ephem
 
@@ -148,7 +148,4 @@ class CameraConfig(BaseConfiguration):
         @return: topic(s) to subscribe to
         @rtype: list[library.config.mqtt.Topic]
         """
-        if not self.mqtt_config.topics_subscribe:
-            return None
-        else:
-            return list(self.mqtt_config.topics_subscribe.values())
+        return list(self.mqtt_config.topics_subscribe.values())

@@ -2,7 +2,6 @@
   "log": "/tmp/door_monitor.log",
   "gpio_pin": 3,
   "gpio_pull_up_down": "up",
-  "gpio_sense_frequency": 50,
   "mqtt": {
     "client_id": "pytest_gpio_monitor",
     "topics": {

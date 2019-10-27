@@ -14,6 +14,9 @@ from library.controllers import Get_Logger
 try:
     from picamera import PiCamera
 except:
+    from . import IS_TEAMCITY
+    if IS_TEAMCITY:
+        raise
     logging.warning("Failed to import picamera - using mock")
     from library.mock.mock_picamera import PiCamera
 
@@ -90,8 +93,6 @@ class Camera(PiCamera):
         self.logger.debug(f"Saving image to {output}")
 
         # update ISO
-        # self.logger.debug("Stopping preview")
-        # self.stop_preview()
         if not self.iso:
             self.logger.debug("Setting ISO")
             self.iso = self.config.iso
@@ -130,7 +131,6 @@ class Camera(PiCamera):
         """
         try:
             self.logger.debug("Disabling camera")
-            # self.stop_preview()
             self.close()
             self.logger.debug("Camera disabled")
         except:

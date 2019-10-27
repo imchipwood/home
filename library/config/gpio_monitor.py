@@ -9,7 +9,6 @@ from library.config import BaseConfiguration
 class CONFIG_KEYS:
     PIN = "gpio_pin"
     PULL_UP_DOWN = "gpio_pull_up_down"
-    SENSE_FREQUENCY = "gpio_sense_frequency"
 
 
 class GPIOMonitorConfig(BaseConfiguration):
@@ -50,22 +49,10 @@ class GPIOMonitorConfig(BaseConfiguration):
         return self.config.get("gpio_pull_up_down")
 
     @property
-    def frequency(self) -> float:
-        """
-        Get GPIO read frequency
-        @return: GPIO read frequency in Hz
-        @rtype: float
-        """
-        return self.config.get("gpio_sense_frequency", 1.0)
-
-    @property
     def mqtt_topic(self):
         """
         Get the MQTT topic(s) to publish state info to
         @return: topic(s) to publish state info to
         @rtype: list[library.config.mqtt.Topic]
         """
-        if not self.mqtt_config.topics_publish:
-            return None
-        else:
-            return list(self.mqtt_config.topics_publish.values())
+        return list(self.mqtt_config.topics_publish.values())

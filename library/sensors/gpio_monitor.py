@@ -5,13 +5,15 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import logging
-from collections import defaultdict
 
 from library.controllers import Get_Logger
 
 try:
     import RPi.GPIO as GPIO
 except:
+    from . import IS_TEAMCITY
+    if IS_TEAMCITY:
+        raise
     logging.warning("Failed to import RPi.GPIO - using mock library")
     import library.mock.mock_gpio as GPIO
 

@@ -51,7 +51,4 @@ class PushbulletConfig(BaseConfiguration):
         @return: topic(s) to subscribe to
         @rtype: list[library.config.mqtt.Topic]
         """
-        if not self.mqtt_config.topics_subscribe:
-            return None
-        else:
-            return list(self.mqtt_config.topics_subscribe.values())
+        return list(self.mqtt_config.topics_subscribe.values())

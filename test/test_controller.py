@@ -1,6 +1,5 @@
 import time
 import os
-from random import randint
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.communication.mqtt import MQTTClient
@@ -43,10 +42,7 @@ mock_gpio_input = 0
 
 def MOCK_GPIO_INPUT():
     global mock_gpio_input
-    if mock_gpio_input == 0:
-        mock_gpio_input = 1
-    else:
-        mock_gpio_input = 0
+    mock_gpio_input = 1 if mock_gpio_input == 0 else 0
     return bool(mock_gpio_input)
 
 
@@ -119,10 +115,6 @@ class Test_CameraController:
 
 
 class Test_GPIOMonitorController:
-    # def __init__(self):
-    #     self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR, debug=True)
-    #     """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
-
     def test_thread(self, monkeypatch):
         self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR, debug=True)
         """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""

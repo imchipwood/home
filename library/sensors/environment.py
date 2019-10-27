@@ -12,6 +12,9 @@ from library.controllers import Get_Logger
 try:
     import Adafruit_DHT
 except:
+    from . import IS_TEAMCITY
+    if IS_TEAMCITY:
+        raise
     logging.warning("Couldn't import Adafruit_DHT - importing the mock module.")
     import library.mock.mock_Adafruit_DHT as Adafruit_DHT
 

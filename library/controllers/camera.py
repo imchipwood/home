@@ -179,6 +179,9 @@ class PiCameraController(BaseController):
     # region Camera
 
     def capture_loop(self, delay=0):
+        """
+        Simple method for capturing an image with PiCamera
+        """
         with Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
 
