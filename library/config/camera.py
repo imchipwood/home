@@ -4,7 +4,7 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-
+from typing import List
 from library.config import BaseConfiguration
 import ephem
 
@@ -36,7 +36,7 @@ class CameraConfig(BaseConfiguration):
         @param mqtt_config: MQTTConfig object if MQTT is to be used
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
-        super(CameraConfig, self).__init__(config_path)
+        super().__init__(config_path)
 
         self.mqtt_config = mqtt_config
 
@@ -45,7 +45,7 @@ class CameraConfig(BaseConfiguration):
             self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
-    def settings(self):
+    def settings(self) -> dict:
         """
         Get the camera settings dict
         @rtype: dict
@@ -53,42 +53,42 @@ class CameraConfig(BaseConfiguration):
         return self.config.get('settings', {})
 
     @property
-    def brightness(self):
+    def brightness(self) -> int:
         """
         @rtype: int
         """
         return self.settings.get(CameraConfigKeys.BRIGHTNESS)
 
     @property
-    def contrast(self):
+    def contrast(self) -> int:
         """
         @rtype: int
         """
         return self.settings.get(CameraConfigKeys.CONTRAST)
 
     @property
-    def delay(self):
+    def delay(self) -> float:
         """
         @rtype: float
         """
         return self.settings.get(CameraConfigKeys.DELAY)
 
     @property
-    def resolution(self):
+    def resolution(self) -> List[int]:
         """
         @rtype: list[int]
         """
         return self.settings.get(CameraConfigKeys.RESOLUTION)
 
     @property
-    def rotation(self):
+    def rotation(self) -> int:
         """
         @rtype: int
         """
         return self.settings.get(CameraConfigKeys.ROTATION)
 
     @property
-    def iso(self):
+    def iso(self) -> int:
         """
         Calculate the iso based on the time of day
         @rtype: int
@@ -106,7 +106,7 @@ class CameraConfig(BaseConfiguration):
             return self.iso_night
 
     @property
-    def iso_day(self):
+    def iso_day(self) -> int:
         """
         @rtype: int
         """
@@ -117,7 +117,7 @@ class CameraConfig(BaseConfiguration):
         )
 
     @property
-    def iso_night(self):
+    def iso_night(self) -> int:
         """
         @rtype: int
         """
@@ -128,14 +128,14 @@ class CameraConfig(BaseConfiguration):
         )
 
     @property
-    def location(self):
+    def location(self) -> str:
         """
-        @rtype: int
+        @rtype: str
         """
         return self.settings.get(CameraConfigKeys.CITY)
 
     @property
-    def capture_path(self):
+    def capture_path(self) -> str:
         """
         @rtype: str
         """
@@ -148,7 +148,4 @@ class CameraConfig(BaseConfiguration):
         @return: topic(s) to subscribe to
         @rtype: list[library.config.mqtt.Topic]
         """
-        if not self.mqtt_config.topics_subscribe:
-            return None
-        else:
-            return list(self.mqtt_config.topics_subscribe.values())
+        return list(self.mqtt_config.topics_subscribe.values())

@@ -1,3 +1,7 @@
+import os
+
+IS_TEAMCITY = os.environ.get("IS_TEAMCITY", "FALSE") == "TRUE"
+
 def avg(l):
 	"""
 	Average the values in a list

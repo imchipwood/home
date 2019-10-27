@@ -15,7 +15,7 @@ class PushbulletConfig(BaseConfiguration):
         @param mqtt_config: MQTTConfig object if MQTT is to be used
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """
-        super(PushbulletConfig, self).__init__(config_path)
+        super().__init__(config_path)
 
         self.mqtt_config = mqtt_config
 
@@ -24,21 +24,21 @@ class PushbulletConfig(BaseConfiguration):
             self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
-    def api_key(self):
+    def api_key(self) -> str:
         """
         @rtype: str
         """
         return self.config.get("api")
 
     @property
-    def notify(self):
+    def notify(self) -> dict:
         """
         @rtype: dict
         """
         return self.config.get("notify")
 
     @property
-    def max_notification_delay(self):
+    def max_notification_delay(self) -> float:
         """
         @rtype: float
         """
@@ -51,7 +51,4 @@ class PushbulletConfig(BaseConfiguration):
         @return: topic(s) to subscribe to
         @rtype: list[library.config.mqtt.Topic]
         """
-        if not self.mqtt_config.topics_subscribe:
-            return None
-        else:
-            return list(self.mqtt_config.topics_subscribe.values())
+        return list(self.mqtt_config.topics_subscribe.values())

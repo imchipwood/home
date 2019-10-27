@@ -26,7 +26,7 @@ class PushbulletController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(PushbulletController, self).__init__(config, debug)
+        super().__init__(config, debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
@@ -147,7 +147,7 @@ class PushbulletController(BaseController):
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet text notification")
 
-    def wait_for_file_refresh(self, file_path):
+    def wait_for_file_refresh(self, file_path) -> bool:
         """
         Check if a file exists
         @param file_path: path to
@@ -177,7 +177,7 @@ class PushbulletController(BaseController):
         """
         Gracefully exit
         """
-        super(PushbulletController, self).cleanup()
+        super().cleanup()
 
     def __repr__(self):
         """

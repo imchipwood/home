@@ -5,11 +5,10 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 from threading import Thread
-import timeit
 
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
-from library.sensors.gpio_monitor import GPIO_Monitor
+from library.sensors.gpio_monitor import GPIO_Monitor, GPIO
 
 
 class GPIOMonitorController(BaseController):
@@ -24,7 +23,7 @@ class GPIOMonitorController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(GPIOMonitorController, self).__init__(config, debug)
+        super().__init__(config, debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
@@ -53,6 +52,7 @@ class GPIOMonitorController(BaseController):
         Start the thread
         """
         self.logger.info("Starting GPIO monitor thread")
+        self.sensor.add_event_detect(GPIO.BOTH, self.publish_event)
         self.thread = Thread(target=self.loop)
         self.thread.daemon = True
         self.running = True
@@ -64,47 +64,28 @@ class GPIOMonitorController(BaseController):
         """
         self.logger.info("Stopping GPIO monitor thread")
         self.running = False
+        self.sensor.remove_event_detect()
 
     def loop(self):
-        """
-        Looping method for threading - reads sensor @ desired intervals and publishes results
-        """
-        last_time = 0
-        last_state = self.state
         while self.running:
-
-            # Read at the desired frequency
-            now = float(timeit.default_timer())
-            if now - last_time > 1.0:
-                last_time = now
-
-                # Do the readings
-                try:
-                    self.state = self.sensor.read()
-                except:
-                    self.logger.exception('Failed to read GPIO!')
-                    continue
-
-                # Publish
-                if last_state != self.state:
-                    self.publish(str(self))
-                    last_state = self.state
+            pass
 
     # endregion Threading
     # region Communication
 
-    def publish(self, state):
+    def publish_event(self, channel):
         """
         Broadcast sensor readings
-        @param state: door state (Open, Closed)
-        @type state: str
+        @param channel: GPIO pin event fired on
+        @type channel: int
         """
         if not self.mqtt:
             return
+        self.state = self.sensor.read()
 
         for topic in self.config.mqtt_topic:
 
-            payload = topic.payload(state=state)
+            payload = topic.payload(state=str(self))
             self.logger.info(f'Publishing to {topic}: {payload}')
             try:
                 self.mqtt.single(
@@ -121,6 +102,6 @@ class GPIOMonitorController(BaseController):
         """
         Shut down the thread
         """
-        super(GPIOMonitorController, self).cleanup()
+        super().cleanup()
         self.sensor.cleanup()
         self.logger.info("Cleanup complete")

@@ -23,6 +23,13 @@ ALT_CONFIG_PATH = "pytest_nomqtt.json"
 ALT_CONFIGURATION_HANDLER = ConfigurationHandler(ALT_CONFIG_PATH)
 
 
+def teardown_module():
+    for sensor in CONFIGURATION_HANDLER:
+        sensor.cleanup()
+    for sensor in ALT_CONFIGURATION_HANDLER:
+        sensor.cleanup()
+
+
 class Test_ConfigurationHandler:
 
     @pytest.mark.parametrize("target_type,expected_class", [
@@ -63,7 +70,7 @@ class Test_ConfigurationHandler:
         @param expected_class: Expected object based on target_type
         @type expected_class: library.controllers.BaseController
         """
-        controller = CONFIGURATION_HANDLER.get_sensor_controller(target_type)
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(target_type, debug=True)
 
         # Check the class is as expected
         assert isinstance(controller, expected_class)

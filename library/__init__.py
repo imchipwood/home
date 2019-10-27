@@ -9,7 +9,7 @@ CONFIG_DIRS = [CONFIG_DIR, TEST_CONFIG_DIR]
 LOG_DIR = os.path.join(HOME_DIR, 'log')
 
 
-def setup_logging(logger, logging_level=False, log_path=None):
+def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     """
     Set up logging stream and file handlers
     @param logger: logger for the module/object we're setting up logging for

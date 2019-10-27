@@ -22,7 +22,7 @@ class PiCameraController(BaseController):
         @param debug: debug flag
         @type debug: bool
         """
-        super(PiCameraController, self).__init__(config=config, debug=debug)
+        super().__init__(config=config, debug=debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
@@ -146,7 +146,7 @@ class PiCameraController(BaseController):
             thread = Thread(target=self.capture_loop, kwargs=kwargs)
             thread.start()
 
-    def should_capture_from_command(self, message_topic, message_data):
+    def should_capture_from_command(self, message_topic, message_data) -> bool:
         """
         Check if the message indicates a capture command
         @param message_topic: topic message came from
@@ -179,6 +179,9 @@ class PiCameraController(BaseController):
     # region Camera
 
     def capture_loop(self, delay=0):
+        """
+        Simple method for capturing an image with PiCamera
+        """
         with Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
 
@@ -188,7 +191,7 @@ class PiCameraController(BaseController):
         """
         Gracefully exit
         """
-        super(PiCameraController, self).cleanup()
+        super().cleanup()
 
     def __repr__(self):
         """

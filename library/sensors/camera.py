@@ -14,6 +14,9 @@ from library.controllers import Get_Logger
 try:
     from picamera import PiCamera
 except:
+    from . import IS_TEAMCITY
+    if IS_TEAMCITY:
+        raise
     logging.warning("Failed to import picamera - using mock")
     from library.mock.mock_picamera import PiCamera
 
@@ -26,7 +29,7 @@ class Camera(PiCamera):
         @param debug: debug flag
         @type debug: bool
         """
-        super(Camera, self).__init__()
+        super().__init__()
 
         self.debug = debug
         self.config = config
@@ -35,7 +38,7 @@ class Camera(PiCamera):
         self.setup()
 
     @property
-    def capture_delay(self):
+    def capture_delay(self) -> float:
         """
         @return: capture delay in seconds
         @rtype: float
@@ -43,7 +46,7 @@ class Camera(PiCamera):
         return self.config.delay
 
     @property
-    def capture_path(self):
+    def capture_path(self) -> str:
         """
         @return: where to save image to
         @rtype: str
@@ -90,8 +93,6 @@ class Camera(PiCamera):
         self.logger.debug(f"Saving image to {output}")
 
         # update ISO
-        self.logger.debug("Stopping preview")
-        self.stop_preview()
         if not self.iso:
             self.logger.debug("Setting ISO")
             self.iso = self.config.iso
@@ -107,7 +108,7 @@ class Camera(PiCamera):
             time.sleep(target_delay)
 
         self.logger.debug("Capturing image...")
-        super(Camera, self).capture(
+        super().capture(
             output=output,
             format=format,
             use_video_port=use_video_port,
@@ -130,7 +131,6 @@ class Camera(PiCamera):
         """
         try:
             self.logger.debug("Disabling camera")
-            self.stop_preview()
             self.close()
             self.logger.debug("Camera disabled")
         except:

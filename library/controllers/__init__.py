@@ -4,7 +4,7 @@ import logging
 from library import setup_logging
 
 
-def Get_Logger(name, debug, path):
+def Get_Logger(name, debug, path) -> logging.Logger:
     # Set up logging
     logging.getLogger().setLevel(logging.DEBUG)
     logger = setup_logging(
@@ -19,7 +19,7 @@ def Get_Logger(name, debug, path):
 class BaseController(ABC):
     """Base class for all controllers to extend"""
     def __init__(self, config, debug=False):
-        super(BaseController, self).__init__()
+        super().__init__()
 
         self.debug = debug
         self.config = config

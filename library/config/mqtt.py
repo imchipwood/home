@@ -27,7 +27,7 @@ class Formatters:
         """
         Constructor for Formatters object
         """
-        super(Formatters, self).__init__()
+        super().__init__()
         self._methods = [
             self._format_payload_string,
             self._format_payload_bool,
@@ -123,13 +123,13 @@ class Topic(object):
         @param info: config dict from config file
         @type info: dict
         """
-        super(Topic, self).__init__()
+        super().__init__()
 
         self.name = name
         self._info = info
 
     @property
-    def pubsub(self):
+    def pubsub(self) -> str:
         """
         Get the Topic's pub/sub type
         @return: pubsub string from config
@@ -137,7 +137,7 @@ class Topic(object):
         """
         return self._info.get("pubsub", "").lower()
 
-    def payload(self, **kwargs):
+    def payload(self, **kwargs) -> str:
         """
         Get the Topic's payload
         @return: payload as a string
@@ -203,23 +203,23 @@ class MQTTBaseConfig(BaseConfiguration):
         @param config_path:
         @type config_path:
         """
-        super(MQTTBaseConfig, self).__init__(config_path)
+        super().__init__(config_path)
 
     @property
-    def broker(self):
+    def broker(self) -> str:
         """
         Get the MQTT broker URL
         @return: MQTT broker URL
-        @rtype: str or None
+        @rtype: str
         """
         return self.config.get(self.config_keys.BROKER, Get_IP_Address())
 
     @property
-    def port(self):
+    def port(self) -> int:
         """
         Get the MQTT broker port
         @return: MQTT broker port
-        @rtype: int or None
+        @rtype: int
         """
         return self.config.get(self.config_keys.PORT, 1883)
 
@@ -236,12 +236,12 @@ class MQTTConfig(MQTTBaseConfig):
         @param sensor_config_path: path to sensor-specific configuration file
         @type sensor_config_path: str
         """
-        super(MQTTConfig, self).__init__(config_path)
+        super().__init__(config_path)
         sensor_config_path = self.normalize_config_path(sensor_config_path)
         self.config.update(self.load_config(sensor_config_path).get(ConfigKeys.MQTT))
 
     @property
-    def client_id(self):
+    def client_id(self) -> str:
         """
         Get the MQTT client ID
         @return: MQTT client ID
