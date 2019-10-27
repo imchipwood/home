@@ -5,7 +5,7 @@ from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.communication.mqtt import MQTTClient
 
 CONFIG_PATH = "pytest.json"
-CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
+CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
 MESSAGE_RECEIVED = False
 
@@ -47,7 +47,7 @@ def MOCK_GPIO_INPUT():
 
 
 class Test_EnvironmentController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.ENVIRONMENT, debug=True)
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.ENVIRONMENT)
     """ @type: library.controllers.environment.EnvironmentController """
     def test_thread(self):
         self.controller.start()
@@ -64,7 +64,7 @@ class Test_EnvironmentController:
     def test_publish(self):
         global message
         message = False
-        topics = [self.controller.config.mqtt_topic.name]
+        topics = [x.name for x in self.controller.config.mqtt_topic]
         client = GetMqttClient(self.controller, topics, message)
         self.controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
         time.sleep(0.1)
@@ -73,7 +73,7 @@ class Test_EnvironmentController:
 
 
 class Test_CameraController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.CAMERA, debug=True)
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.CAMERA)
     """ @type: library.controllers.camera.PiCameraController"""
 
     def test_thread(self):
@@ -116,7 +116,7 @@ class Test_CameraController:
 
 class Test_GPIOMonitorController:
     def test_thread(self, monkeypatch):
-        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR, debug=True)
+        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR)
         """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
         monkeypatch.setattr(self.controller.sensor, "read", MOCK_GPIO_INPUT)
         self.controller.start()
@@ -125,3 +125,17 @@ class Test_GPIOMonitorController:
         self.controller.stop()
         assert not self.controller.running
         self.controller.cleanup()
+
+    def test_publish(self, monkeypatch):
+        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.GPIO_MONITOR)
+        """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
+        monkeypatch.setattr(self.controller.sensor, "read", MOCK_GPIO_INPUT)
+
+        global message
+        message = False
+        topics = [x.name for x in self.controller.config.mqtt_topic]
+        client = GetMqttClient(self.controller, topics, message)
+
+        self.controller.publish_event(self.controller.sensor.config.pin)
+        client.disconnect()
+        assert message

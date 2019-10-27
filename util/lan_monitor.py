@@ -1,8 +1,6 @@
 import subprocess
 import argparse
 
-global DEBUG
-
 
 class Restart:
 	PI = "Raspberry Pi"

@@ -21,6 +21,8 @@ def Get_MQTT_Error_Message(rc):
     @return: Human-readable error message
     @rtype: str
     """
+    if rc == 0:
+        return ""
     # Something bad happened
     message = f"Error: rc={rc}, "
     if rc == -4:

@@ -32,13 +32,16 @@ class BaseConfiguration(object):
     # By assuming the
     BASE_CONFIG_DIR = None
 
-    def __init__(self, config_path):
+    def __init__(self, config_path, debug=False):
         """
         @param config_path: path to configuration file
         @type config_path: str
+        @param debug: debug flag
+        @type debug: bool
         """
         super().__init__()
         self.config_keys = ConfigKeys
+        self.debug = debug
 
         self._config_path = ""
         self._config = {}
@@ -182,12 +185,14 @@ class ConfigurationHandler(BaseConfiguration):
         SENSOR_CLASSES.PUSHBULLET: PushbulletConfig,
     }
 
-    def __init__(self, config_path):
+    def __init__(self, config_path, debug=False):
         """
         @param config_path: path to top-level configuration JSON file
         @type config_path: str
+        @param debug: debug flag
+        @type debug: bool
         """
-        super().__init__(config_path)
+        super().__init__(config_path, debug)
         self._current_sensor = 0
         self.sensorTypes = list(self.config.get(ConfigKeys.SENSORS, {}))
         self.sensors = {}
@@ -219,7 +224,7 @@ class ConfigurationHandler(BaseConfiguration):
         """
         from library.config.mqtt import MQTTConfig
         if sensor in self.sensor_paths:
-            return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor))
+            return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor), self.debug)
         else:
             return None
 
@@ -234,24 +239,23 @@ class ConfigurationHandler(BaseConfiguration):
         if sensor in self.SENSOR_CONFIG_CLASS_MAP and sensor in self.sensor_paths:
             return self.SENSOR_CONFIG_CLASS_MAP[sensor](
                 self.sensor_paths[sensor],
-                self.get_sensor_mqtt_config(sensor)
+                self.get_sensor_mqtt_config(sensor),
+                self.debug
             )
         else:
             return None
 
-    def get_sensor_controller(self, sensor, debug=False):
+    def get_sensor_controller(self, sensor):
         """
         Get the sensor object for the given sensor
         @param sensor: target sensor
         @type sensor: str
-        @param debug: enable debug prints
-        @type debug: bool
         @return: sensor object
         @rtype: library.controllers.BaseController
         """
         if sensor in self.SENSOR_CLASS_MAP:
             if sensor not in self.sensors:
-                self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor), debug=debug)
+                self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor), self.debug)
             return self.sensors[sensor]
         else:
             return None

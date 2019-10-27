@@ -15,14 +15,16 @@ class GPIOMonitorConfig(BaseConfiguration):
     """
     MQTT-enabled door monitoring configuration
     """
-    def __init__(self, config_path, mqtt_config=None):
+    def __init__(self, config_path, mqtt_config=None, debug=False):
         """
         @param config_path: path to JSON configuration file
         @type config_path: str
         @param mqtt_config: MQTTConfig object if MQTT is to be used
         @type mqtt_config: library.config.mqtt.MQTTConfig
+        @param debug: debug flag
+        @type debug: bool
         """
-        super().__init__(config_path)
+        super().__init__(config_path, debug)
 
         self.mqtt_config = mqtt_config
 

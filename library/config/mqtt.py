@@ -197,13 +197,15 @@ class MQTTBaseConfig(BaseConfiguration):
     """
     Base configuration object for MQTT communication - handles broker & port
     """
-    def __init__(self, config_path):
+    def __init__(self, config_path, debug=False):
         """
         Base MQTT configuration handler with
-        @param config_path:
-        @type config_path:
+        @param config_path: path to config file
+        @type config_path: str
+        @param debug: debug flag
+        @type debug: bool
         """
-        super().__init__(config_path)
+        super().__init__(config_path, debug)
 
     @property
     def broker(self) -> str:
@@ -228,15 +230,17 @@ class MQTTConfig(MQTTBaseConfig):
     """
     Sensor-based MQTT config - adds client_id & pub/sub topic support
     """
-    def __init__(self, config_path, sensor_config_path):
+    def __init__(self, config_path, sensor_config_path, debug=False):
         """
         Sensor-specific MQTT Configuration constructor
         @param config_path: path to MQTT configuration JSON file
         @type config_path: str
         @param sensor_config_path: path to sensor-specific configuration file
         @type sensor_config_path: str
+        @param debug: debug flag
+        @type debug: bool
         """
-        super().__init__(config_path)
+        super().__init__(config_path, debug)
         sensor_config_path = self.normalize_config_path(sensor_config_path)
         self.config.update(self.load_config(sensor_config_path).get(ConfigKeys.MQTT))
 

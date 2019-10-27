@@ -4,7 +4,6 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-
 from library.config import BaseConfiguration
 
 
@@ -14,14 +13,16 @@ class EnvironmentConfig(BaseConfiguration):
     Supports MQTT communication & the DHT11, DHT22, AM2302
     humidity/temperature sensors
     """
-    def __init__(self, config_path, mqtt_config=None):
+    def __init__(self, config_path, mqtt_config=None, debug=False):
         """
         @param config_path: path to JSON configuration file
         @type config_path: str
         @param mqtt_config: MQTTConfig object if MQTT is to be used
         @type mqtt_config: library.config.mqtt.MQTTConfig
+        @param debug: debug flag
+        @type debug: bool
         """
-        super().__init__(config_path)
+        super().__init__(config_path, debug)
 
         self.mqtt_config = mqtt_config
 
@@ -57,20 +58,6 @@ class EnvironmentConfig(BaseConfiguration):
         return self.config.get('units')
 
     @property
-    def mqtt_topic(self):
-        """
-        Get the MQTT topic to publish state info to
-        @return: topic to publish state info to
-        @rtype: library.config.mqtt.Topic
-        """
-        if not self.mqtt_config.topics_publish:
-            return None
-        elif len(self.mqtt_config.topics_publish) == 1:
-            return list(self.mqtt_config.topics_publish.values())[0]
-        else:
-            raise Exception("Multiple publish topics defined")
-
-    @property
     def period(self) -> int:
         """
         Get the period for reading the sensor
@@ -78,3 +65,12 @@ class EnvironmentConfig(BaseConfiguration):
         @rtype: int
         """
         return int(self.config.get('period', 5 * 60))
+
+    @property
+    def mqtt_topic(self):
+        """
+        Get the MQTT topic(s) to publish state info to
+        @return: topic(s) to publish state info to
+        @rtype: list[library.config.mqtt.Topic]
+        """
+        return list(self.mqtt_config.topics_publish.values())

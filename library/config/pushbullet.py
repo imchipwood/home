@@ -8,14 +8,16 @@ from library.config import BaseConfiguration
 
 
 class PushbulletConfig(BaseConfiguration):
-    def __init__(self, config_path, mqtt_config=None):
+    def __init__(self, config_path, mqtt_config=None, debug=False):
         """
-        @param config_path:
-        @type config_path:
+        @param config_path: config file path
+        @type config_path: str
         @param mqtt_config: MQTTConfig object if MQTT is to be used
         @type mqtt_config: library.config.mqtt.MQTTConfig
+        @param debug: debug flag
+        @type debug: bool
         """
-        super().__init__(config_path)
+        super().__init__(config_path, debug)
 
         self.mqtt_config = mqtt_config
 

@@ -5,7 +5,7 @@ from library.sensors.camera import Camera
 from library.config import ConfigurationHandler, SENSOR_CLASSES
 
 CONFIG_PATH = "pytest.json"
-CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
+CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
 
 class TestEnvironmentSensor:
@@ -58,8 +58,7 @@ class TestEnvironmentSensor:
 class TestGPIOMonitorSensor:
     def test_sensor(self):
         sensor = GPIO_Monitor(
-            config=CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.GPIO_MONITOR),
-            debug=True
+            config=CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.GPIO_MONITOR)
         )
         assert sensor.pull_up_down in [GPIO.PUD_UP, GPIO.PUD_DOWN]
         sensor.read()

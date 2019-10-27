@@ -11,7 +11,7 @@ from library.controllers import Get_Logger
 
 try:
     import Adafruit_DHT
-except:
+except:  # pragma: no cover
     from . import IS_TEAMCITY
     if IS_TEAMCITY:
         raise

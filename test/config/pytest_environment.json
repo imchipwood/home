@@ -3,7 +3,7 @@
   "type": 22,
   "pin": 4,
   "units": "fahrenheit",
-  "period": 10,
+  "period": 0.5,
   "mqtt": {
     "client_id": "pi_media",
     "topics": {

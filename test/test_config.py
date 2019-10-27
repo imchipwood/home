@@ -17,10 +17,10 @@ from library.controllers.pushbullet import PushbulletController
 
 # CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config", "pytest.json")
 CONFIG_PATH = "pytest.json"
-CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH)
+CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
 ALT_CONFIG_PATH = "pytest_nomqtt.json"
-ALT_CONFIGURATION_HANDLER = ConfigurationHandler(ALT_CONFIG_PATH)
+ALT_CONFIGURATION_HANDLER = ConfigurationHandler(ALT_CONFIG_PATH, debug=True)
 
 
 def teardown_module():
@@ -70,7 +70,7 @@ class Test_ConfigurationHandler:
         @param expected_class: Expected object based on target_type
         @type expected_class: library.controllers.BaseController
         """
-        controller = CONFIGURATION_HANDLER.get_sensor_controller(target_type, debug=True)
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(target_type)
 
         # Check the class is as expected
         assert isinstance(controller, expected_class)

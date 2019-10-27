@@ -10,7 +10,7 @@ from library.controllers import Get_Logger
 
 try:
     import RPi.GPIO as GPIO
-except:
+except:  # pragma: no cover
     from . import IS_TEAMCITY
     if IS_TEAMCITY:
         raise

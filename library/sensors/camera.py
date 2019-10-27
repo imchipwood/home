@@ -13,7 +13,7 @@ from library.controllers import Get_Logger
 
 try:
     from picamera import PiCamera
-except:
+except:  # pragma: no cover
     from . import IS_TEAMCITY
     if IS_TEAMCITY:
         raise
