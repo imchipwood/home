@@ -1,10 +1,12 @@
 import pytest
 import time
+import timeit
 import json
 import os
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.communication.mqtt import MQTTClient
+from library.communication.pushbullet import PushbulletNotify
 
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
@@ -22,9 +24,9 @@ class TestTopic:
         self.capture = capture
 
 
-def teardown_module():
-    for sensor in CONFIGURATION_HANDLER:
-        sensor.cleanup()
+# def teardown_module():
+#     for sensor in CONFIGURATION_HANDLER:
+#         sensor.cleanup()
 
 
 def get_mqtt_client(mqtt_config, topics, message):
@@ -33,12 +35,12 @@ def get_mqtt_client(mqtt_config, topics, message):
     def on_connect(client, userdata, flags, rc):
         if rc != 0:
             raise Exception("Failed to connect to MQTT")
-        print("CONNECTED, subscribing now")
+        print("TEST_MQTT: CONNECTED, subscribing now")
         client.subscribe([(x, 1) for x in topics])
 
     def on_message(client, userdata, msg):
         payload = msg.payload.decode("utf-8")
-        print(f"Received payload: {payload}")
+        print(f"TEST_MQTT: Received payload: {payload}")
         global message
         message = True
 
@@ -53,6 +55,13 @@ def mock_gpio_read():
     global MOCK_GPIO_INPUT
     MOCK_GPIO_INPUT = 1 if MOCK_GPIO_INPUT == 0 else 0
     return bool(MOCK_GPIO_INPUT)
+
+
+def wait_n_seconds(n):
+    start = timeit.default_timer()
+    now = timeit.default_timer()
+    while now - start < n:
+        now = timeit.default_timer()
 
 
 class Test_EnvironmentController:
@@ -181,45 +190,61 @@ class Test_GPIOMonitorController:
         assert message
 
 
-class Test_PushulletController:
-    def test_thread(self):
-        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.PUSHBULLET)
-        """ @type: library.controllers.pushbullet.PushbulletController"""
-        self.controller.start()
-        assert self.controller.running
-        self.controller.stop()
-        assert not self.controller.running
-
+class Test_PushbulletController:
     def test_publish(self, monkeypatch):
         self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.PUSHBULLET)
         """ @type: library.controllers.pushbullet.PushbulletController"""
+
         global message
+        global text_sent
+        global file_sent
+        text_sent, file_sent = False, False
+
         message = False
         topics = [x.name for x in self.controller.config.mqtt_topic]
         client = get_mqtt_client(self.controller.config.mqtt_config, topics, message)
 
         def mock_send_file(file_path):
+            global file_sent
+            file_sent = True
+            print("SEND FILE")
             print(f"Fake uploaded {file_path}")
 
         def mock_send_text(title, body):
+            global text_sent
+            text_sent = True
+            print("SEND TEXT")
             print(f"Fake pushed: {title}: {body}")
+
+        def mock_wait_for_file_refresh(file_path):
+            return True
 
         monkeypatch.setattr(self.controller.notifier, "send_file", mock_send_file)
         monkeypatch.setattr(self.controller.notifier, "send_text", mock_send_text)
+        monkeypatch.setattr(self.controller, "wait_for_file_refresh", mock_wait_for_file_refresh)
 
         topic = self.controller.config.mqtt_topic[0]
         payload = json.dumps(topic.payload())
 
         payload_closed = payload.replace("Open", "").replace("|", "")
         payload_open = payload.replace("Closed", "").replace("|", "")
-        for payload in [payload_closed, payload_open]:
+        self.controller.start()
+
+        for payload in [payload_open, payload_closed]:
             self.controller.mqtt.single(topic.name, payload)
-            i = 0
-            while not message:
-                time.sleep(0.001)
-                i += 1
-                if i > MAX_WAIT_SECONDS * 1000:
-                    raise Exception("Wait time exceeded!")
+            start = timeit.default_timer()
+            now = timeit.default_timer()
+            while now - start < 1:
+                now = timeit.default_timer()
+
+        start = timeit.default_timer()
+        now = timeit.default_timer()
+        while not (text_sent or file_sent) and now - start < MAX_WAIT_SECONDS * 2:
+            now = timeit.default_timer()
+
+        if not text_sent or not file_sent:
+            raise Exception(f"Messages not received! file: {file_sent}, text: {text_sent}")
+
         self.controller.stop()
         client.disconnect()
         assert message

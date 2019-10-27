@@ -197,4 +197,4 @@ class PiCameraController(BaseController):
         """
         @rtype: str
         """
-        return f"{self.__class__}|{self.config.type}|{self.mqtt._client_id}"
+        return f"{self.__class__}|{self.config.type}|{self.config.mqtt_config.client_id}"
