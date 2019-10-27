@@ -47,16 +47,6 @@ def get_mqtt_client(mqtt_config, topics, message):
     return client
 
 
-def wait_for_message(message):
-    global message
-    i = 0
-    while not message:
-        time.sleep(0.001)
-        i += 1
-        if i > MAX_WAIT_SECONDS * 1000:
-            raise Exception("Wait time exceeded!")
-
-
 def mock_gpio_read():
     global MOCK_GPIO_INPUT
     MOCK_GPIO_INPUT = 1 if MOCK_GPIO_INPUT == 0 else 0
@@ -84,8 +74,12 @@ class Test_EnvironmentController:
         topics = [x.name for x in self.controller.config.mqtt_topic]
         client = get_mqtt_client(self.controller.config.mqtt_config, topics, message)
         self.controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
-
-        wait_for_message(message)
+        i = 0
+        while not message:
+            time.sleep(0.001)
+            i += 1
+            if i > MAX_WAIT_SECONDS * 1000:
+                raise Exception("Wait time exceeded!")
         client.disconnect()
         assert message
 
@@ -140,8 +134,12 @@ class Test_CameraController:
         topic = self.controller.config.mqtt_topic[0]
         payload = topic.payload()
         self.controller.mqtt.single(topic.name, payload)
-
-        wait_for_message(message)
+        i = 0
+        while not message:
+            time.sleep(0.001)
+            i += 1
+            if i > MAX_WAIT_SECONDS * 1000:
+                raise Exception("Wait time exceeded!")
         self.controller.stop()
         client.disconnect()
         assert message
@@ -170,7 +168,11 @@ class Test_GPIOMonitorController:
         client = get_mqtt_client(self.controller.config.mqtt_config, topics, message)
 
         self.controller.publish_event(self.controller.sensor.config.pin)
-
-        wait_for_message(message)
+        i = 0
+        while not message:
+            time.sleep(0.001)
+            i += 1
+            if i > MAX_WAIT_SECONDS * 1000:
+                raise Exception("Wait time exceeded!")
         client.disconnect()
         assert message
