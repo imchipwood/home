@@ -6,7 +6,6 @@ import os
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.communication.mqtt import MQTTClient
-from library.communication.pushbullet import PushbulletNotify
 
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
