@@ -67,7 +67,13 @@ class Test_EnvironmentController:
         topics = [x.name for x in self.controller.config.mqtt_topic]
         client = GetMqttClient(self.controller, topics, message)
         self.controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
-        time.sleep(0.1)
+
+        i = 0
+        while not message:
+            time.sleep(0.01)
+            i += 1
+            if i > 1000:
+                assert False, "Never received the message"
         client.disconnect()
         assert message
 
@@ -108,7 +114,13 @@ class Test_CameraController:
         topic = self.controller.config.mqtt_topic[0]
         payload = topic.payload()
         self.controller.mqtt.single(topic.name, payload)
-        # time.sleep(0.1)
+
+        i = 0
+        while not message:
+            time.sleep(0.01)
+            i += 1
+            if i > 1000:
+                assert False, "Never received the message"
         self.controller.stop()
         client.disconnect()
         assert message
@@ -137,5 +149,12 @@ class Test_GPIOMonitorController:
         client = GetMqttClient(self.controller, topics, message)
 
         self.controller.publish_event(self.controller.sensor.config.pin)
+
+        i = 0
+        while not message:
+            time.sleep(0.01)
+            i += 1
+            if i > 1000:
+                assert False, "Never received the message"
         client.disconnect()
         assert message
