@@ -146,7 +146,7 @@ class PiCameraController(BaseController):
             thread = Thread(target=self.capture_loop, kwargs=kwargs)
             thread.start()
 
-    def should_capture_from_command(self, message_topic, message_data):
+    def should_capture_from_command(self, message_topic, message_data) -> bool:
         """
         Check if the message indicates a capture command
         @param message_topic: topic message came from

@@ -54,8 +54,7 @@ class GPIOMonitorController(BaseController):
         """
         self.logger.info("Starting GPIO monitor thread")
         self.sensor.add_event_detect(GPIO.BOTH, self.publish_event)
-        # self.thread = Thread(target=self.loop)
-        self.thread = Thread(target=self.loop2)
+        self.thread = Thread(target=self.loop)
         self.thread.daemon = True
         self.running = True
         self.thread.start()
@@ -68,60 +67,60 @@ class GPIOMonitorController(BaseController):
         self.running = False
         self.sensor.remove_event_detect()
 
+    # def loop(self):
+    #     """
+    #     Looping method for threading - reads sensor @ desired intervals and publishes results
+    #     """
+    #     last_time = 0
+    #     last_state = self.state
+    #     interval = 1.0 / self.config.frequency
+    #     while self.running:
+    #
+    #         # Read at the desired frequency
+    #         now = float(timeit.default_timer())
+    #         if now - last_time > interval:
+    #             last_time = now
+    #
+    #             # Do the readings
+    #             try:
+    #                 self.state = self.sensor.read()
+    #             except:
+    #                 self.logger.exception('Failed to read GPIO!')
+    #                 continue
+    #
+    #             # Publish
+    #             if last_state != self.state:
+    #                 self.publish(str(self))
+    #                 last_state = self.state
+
     def loop(self):
-        """
-        Looping method for threading - reads sensor @ desired intervals and publishes results
-        """
-        last_time = 0
-        last_state = self.state
-        interval = 1.0 / self.config.frequency
-        while self.running:
-
-            # Read at the desired frequency
-            now = float(timeit.default_timer())
-            if now - last_time > interval:
-                last_time = now
-
-                # Do the readings
-                try:
-                    self.state = self.sensor.read()
-                except:
-                    self.logger.exception('Failed to read GPIO!')
-                    continue
-
-                # Publish
-                if last_state != self.state:
-                    self.publish(str(self))
-                    last_state = self.state
-
-    def loop2(self):
         while self.running:
             pass
 
     # endregion Threading
     # region Communication
 
-    def publish(self, state):
-        """
-        Broadcast sensor readings
-        @param state: door state (Open, Closed)
-        @type state: str
-        """
-        if not self.mqtt:
-            return
-
-        for topic in self.config.mqtt_topic:
-
-            payload = topic.payload(state=state)
-            self.logger.info(f'Publishing to {topic}: {payload}')
-            try:
-                self.mqtt.single(
-                    topic=str(topic),
-                    payload=payload
-                )
-            except:
-                self.logger.exception("Failed to publish MQTT data!")
-                raise
+    # def publish(self, state):
+    #     """
+    #     Broadcast sensor readings
+    #     @param state: door state (Open, Closed)
+    #     @type state: str
+    #     """
+    #     if not self.mqtt:
+    #         return
+    #
+    #     for topic in self.config.mqtt_topic:
+    #
+    #         payload = topic.payload(state=state)
+    #         self.logger.info(f'Publishing to {topic}: {payload}')
+    #         try:
+    #             self.mqtt.single(
+    #                 topic=str(topic),
+    #                 payload=payload
+    #             )
+    #         except:
+    #             self.logger.exception("Failed to publish MQTT data!")
+    #             raise
 
     def publish_event(self, channel):
         """

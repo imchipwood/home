@@ -4,7 +4,7 @@ import logging
 from library import setup_logging
 
 
-def Get_Logger(name, debug, path):
+def Get_Logger(name, debug, path) -> logging.Logger:
     # Set up logging
     logging.getLogger().setLevel(logging.DEBUG)
     logger = setup_logging(

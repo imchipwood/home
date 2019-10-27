@@ -147,7 +147,7 @@ class PushbulletController(BaseController):
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet text notification")
 
-    def wait_for_file_refresh(self, file_path):
+    def wait_for_file_refresh(self, file_path) -> bool:
         """
         Check if a file exists
         @param file_path: path to

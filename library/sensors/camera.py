@@ -35,7 +35,7 @@ class Camera(PiCamera):
         self.setup()
 
     @property
-    def capture_delay(self):
+    def capture_delay(self) -> float:
         """
         @return: capture delay in seconds
         @rtype: float
@@ -43,7 +43,7 @@ class Camera(PiCamera):
         return self.config.delay
 
     @property
-    def capture_path(self):
+    def capture_path(self) -> str:
         """
         @return: where to save image to
         @rtype: str

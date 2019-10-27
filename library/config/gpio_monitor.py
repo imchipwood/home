@@ -32,7 +32,7 @@ class GPIOMonitorConfig(BaseConfiguration):
             self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
-    def pin(self):
+    def pin(self) -> int:
         """
         Get the GPIO pin #
         @return: GPIO pin # for sensor
@@ -41,7 +41,7 @@ class GPIOMonitorConfig(BaseConfiguration):
         return self.config.get('gpio_pin')
 
     @property
-    def pull_up_down(self):
+    def pull_up_down(self) -> str:
         """
         Get GPIO pull up/down
         @return: whether or not GPIO is pull-up or pull-down
@@ -50,7 +50,7 @@ class GPIOMonitorConfig(BaseConfiguration):
         return self.config.get("gpio_pull_up_down")
 
     @property
-    def frequency(self):
+    def frequency(self) -> float:
         """
         Get GPIO read frequency
         @return: GPIO read frequency in Hz

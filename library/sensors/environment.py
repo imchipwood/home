@@ -4,6 +4,7 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
+from typing import Tuple
 import logging
 
 from library.controllers import Get_Logger
@@ -65,7 +66,7 @@ class EnvironmentSensor(object):
         self.humidity = -999.0
         self.temperature = -999.0
 
-    def read(self):
+    def read(self) -> Tuple[float, float]:
         """
         Read sensor and store results
         @return: tuple of latest readings, humidity then temperature
@@ -80,7 +81,7 @@ class EnvironmentSensor(object):
         self.temperature = temperature
         return humidity, temperature
 
-    def read_n_times(self, num_reads=5):
+    def read_n_times(self, num_reads=5) -> Tuple[float, float]:
         """
         Read the environment sensor n times and return the average
         Also sets the humidity/temperature class properties to the calculated
@@ -110,7 +111,7 @@ class EnvironmentSensor(object):
         return self.humidity, self.temperature
 
     @property
-    def temperature(self):
+    def temperature(self) -> float:
         """
         @return: The most recent temperature reading in the desired units
         @rtype: float
@@ -127,7 +128,7 @@ class EnvironmentSensor(object):
         self._temperature = float(temperature) if temperature is not None else -999.0
 
     @property
-    def humidity(self):
+    def humidity(self) -> float:
         """
         @return: The most recent humidity reading
         @rtype: float
@@ -143,7 +144,7 @@ class EnvironmentSensor(object):
         """
         self._humidity = float(humidity) if humidity is not None else -999.0
 
-    def is_celsius(self):
+    def is_celsius(self) -> bool:
         """
         Check if we're set to Celsius
         @return: whether or not current units are set to celsius
@@ -152,7 +153,7 @@ class EnvironmentSensor(object):
         return self.units == 'celsius'
 
     @property
-    def fahrenheit(self):
+    def fahrenheit(self) -> float:
         """
         Get the most recent temperature reading in Fahrenheit
         @return: temperature in Fahrenheit
@@ -161,7 +162,7 @@ class EnvironmentSensor(object):
         return self._temperature * 9.0 / 5.0 + 32.0
 
     @property
-    def celsius(self):
+    def celsius(self) -> float:
         """
         Get the most recent temperature reading in Celsius
         @return: temperature in Celsius
@@ -170,7 +171,7 @@ class EnvironmentSensor(object):
         return self._temperature
 
     @property
-    def pin(self):
+    def pin(self) -> int:
         """
         Get pin number
         @rtype: int
@@ -188,7 +189,7 @@ class EnvironmentSensor(object):
         self.logger.debug(f"Pin set to: {pin}")
 
     @property
-    def units(self):
+    def units(self) -> str:
         """
         Get the current units
         @return: current units
@@ -208,7 +209,7 @@ class EnvironmentSensor(object):
         self.logger.debug(f"Units set to: {self.units}")
 
     @property
-    def sensor_type(self):
+    def sensor_type(self) -> int:
         """
         Get the current sensor type
         @return: current sensor type

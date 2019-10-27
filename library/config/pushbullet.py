@@ -24,21 +24,21 @@ class PushbulletConfig(BaseConfiguration):
             self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
-    def api_key(self):
+    def api_key(self) -> str:
         """
         @rtype: str
         """
         return self.config.get("api")
 
     @property
-    def notify(self):
+    def notify(self) -> dict:
         """
         @rtype: dict
         """
         return self.config.get("notify")
 
     @property
-    def max_notification_delay(self):
+    def max_notification_delay(self) -> float:
         """
         @rtype: float
         """

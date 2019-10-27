@@ -30,7 +30,7 @@ class EnvironmentConfig(BaseConfiguration):
             self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
-    def type(self):
+    def type(self) -> int:
         """
         Get the sensor type
         @return: Adafruit_DHT type
@@ -39,7 +39,7 @@ class EnvironmentConfig(BaseConfiguration):
         return self.config.get('type')
 
     @property
-    def pin(self):
+    def pin(self) -> int:
         """
         Get the GPIO pin #
         @return: GPIO pin # for environment sensor
@@ -48,7 +48,7 @@ class EnvironmentConfig(BaseConfiguration):
         return self.config.get('pin')
 
     @property
-    def units(self):
+    def units(self) -> str:
         """
         Get the desired temperature units
         @return: temperature units
@@ -71,7 +71,7 @@ class EnvironmentConfig(BaseConfiguration):
             raise Exception("Multiple publish topics defined")
 
     @property
-    def period(self):
+    def period(self) -> int:
         """
         Get the period for reading the sensor
         @return: period in seconds. Default: 300

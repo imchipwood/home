@@ -37,10 +37,10 @@ class GPIO_Monitor(object):
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=self.pull_up_down)
 
     @property
-    def pull_up_down(self):
+    def pull_up_down(self) -> int:
         """
         GPIO Pull direction
-        @rtype: bool
+        @rtype: int
         """
         if self.config.pull_up_down.lower() == "down":
             return GPIO.PUD_DOWN
@@ -65,7 +65,7 @@ class GPIO_Monitor(object):
         """
         GPIO.remove_event_detect(self.pin)
 
-    def read(self):
+    def read(self) -> bool:
         """
         Read the GPIO pin
         @rtype: bool

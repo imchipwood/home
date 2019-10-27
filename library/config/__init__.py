@@ -48,13 +48,13 @@ class BaseConfiguration(object):
         return json.dumps(self.config, indent=2)
 
     @staticmethod
-    def normalize_config_path(config_path):
+    def normalize_config_path(config_path) -> str:
         """
         Normalize a config file path to the config dir of the repo
         @param config_path: relative or absolute config path
         @type config_path: str
         @return: normalized, absolute config path
-        @rtype: str or None
+        @rtype: str
         """
         assert config_path, "No path provided"
 
@@ -84,7 +84,7 @@ class BaseConfiguration(object):
         raise OSError(f"Could not find config file {config_path} at base dir {BaseConfiguration.BASE_CONFIG_DIR}")
 
     @staticmethod
-    def load_config(config_path):
+    def load_config(config_path) -> dict:
         """
         Parse a config file
         @param config_path: path to config file
@@ -96,7 +96,7 @@ class BaseConfiguration(object):
             return json.load(inf)
 
     @property
-    def config(self):
+    def config(self) -> dict:
         """
         Get the current config dict
         @return: current config dict
@@ -119,7 +119,7 @@ class BaseConfiguration(object):
         self._config = self.load_config(self._config_path)
 
     @property
-    def sensor_paths(self):
+    def sensor_paths(self) -> dict:
         """
         Get the sensor config path dict
         @return: dict of sensor config paths
@@ -127,7 +127,7 @@ class BaseConfiguration(object):
         """
         return self.config.get(ConfigKeys.SENSORS)
 
-    def get_sensor_path(self, sensor):
+    def get_sensor_path(self, sensor) -> str:
         """
         Get the config path for the target sensor
         @param sensor: target sensor
@@ -138,25 +138,25 @@ class BaseConfiguration(object):
         return self.normalize_config_path(self.sensor_paths.get(sensor))
 
     @property
-    def mqtt_path(self):
+    def mqtt_path(self) -> str:
         """
         Get the path to the base MQTT configuration file
         @return: path to base MQTT configuration file if it exists
-        @rtype: str or None
+        @rtype: str
         """
         path = self.config.get(ConfigKeys.MQTT)
         if not path:
-            return None
+            return ""
         else:
             return self.normalize_config_path(path)
 
     @property
-    def log(self):
+    def log(self) -> str:
         """
         @return: Path to log file
         @rtype: str
         """
-        return self.config.get(ConfigKeys.LOG)
+        return self.config.get(ConfigKeys.LOG, "")
 
 
 class ConfigurationHandler(BaseConfiguration):
@@ -195,7 +195,7 @@ class ConfigurationHandler(BaseConfiguration):
     # region Sensors
 
     @property
-    def mqtt_config_path(self):
+    def mqtt_config_path(self) -> str:
         """
         Get the full path to the base MQTT configuration file
         @return: path to the base MQTT configuration file
@@ -203,7 +203,7 @@ class ConfigurationHandler(BaseConfiguration):
         """
         config_path = self.config.get(ConfigKeys.MQTT)
         if not config_path:
-            return None
+            return ""
         elif os.path.exists(config_path):
             return config_path
         else:
