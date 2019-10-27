@@ -48,6 +48,7 @@ def get_mqtt_client(mqtt_config, topics, message):
 
 
 def wait_for_message(message):
+    global message
     i = 0
     while not message:
         time.sleep(0.001)
