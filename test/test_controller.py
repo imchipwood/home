@@ -1,9 +1,11 @@
 import pytest
 import time
+import json
 import os
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.communication.mqtt import MQTTClient
+from library.communication.pushbullet import PushbulletTextNotify, PushbulletImageNotify
 
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
@@ -176,5 +178,55 @@ class Test_GPIOMonitorController:
             i += 1
             if i > MAX_WAIT_SECONDS * 1000:
                 raise Exception("Wait time exceeded!")
+        client.disconnect()
+        assert message
+
+
+class Test_PushulletController:
+    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSOR_CLASSES.PUSHBULLET)
+    """ @type: library.controllers.pushbullet.PushbulletController"""
+    def test_thread(self):
+        self.controller.start()
+        assert self.controller.running
+        self.controller.stop()
+        assert not self.controller.running
+
+    def test_publish(self, monkeypatch):
+        global message
+        message = False
+        topics = [x.name for x in self.controller.config.mqtt_topic]
+        client = get_mqtt_client(self.controller.config.mqtt_config, topics, message)
+
+        def mock_upload_file(f, file_name, file_type="jpeg"):
+            file_url = f"http://some.fake.url/{file_name}"
+            print(f"Fake uploaded {file_name}")
+            return {"file_type": file_type, "file_url": file_url, "file_name": file_name}
+
+        def mock_push_file(file_name, file_url, file_type):
+            print(f"Fake pushed {file_name}")
+            return {}
+
+        def mock_push_note(title, body):
+            print(f"Fake pushed: {title}: {body}")
+            return {"type": "note", "title": title, "body": body}
+
+        monkeypatch.setattr(PushbulletImageNotify, "upload_file", mock_upload_file)
+        monkeypatch.setattr(PushbulletImageNotify, "push_file", mock_push_file)
+        monkeypatch.setattr(PushbulletTextNotify, "push_note", mock_push_note)
+
+        topic = self.controller.config.mqtt_topic[0]
+        payload = json.dumps(topic.payload())
+
+        payload_closed = payload.replace("Open", "").replace("|", "")
+        payload_open = payload.replace("Closed", "").replace("|", "")
+        for payload in [payload_closed, payload_open]:
+            self.controller.mqtt.single(topic.name, payload)
+            i = 0
+            while not message:
+                time.sleep(0.001)
+                i += 1
+                if i > MAX_WAIT_SECONDS * 1000:
+                    raise Exception("Wait time exceeded!")
+        self.controller.stop()
         client.disconnect()
         assert message
