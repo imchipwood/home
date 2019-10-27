@@ -234,7 +234,7 @@ class Test_PushbulletController:
             self.controller.mqtt.single(topic.name, payload)
             start = timeit.default_timer()
             now = timeit.default_timer()
-            while now - start < 1:
+            while now - start < 2:
                 now = timeit.default_timer()
 
         start = timeit.default_timer()
