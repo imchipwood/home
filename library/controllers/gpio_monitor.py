@@ -41,12 +41,6 @@ class GPIOMonitorController(BaseController):
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
 
-        # set up database
-        self.db = None
-        if self.config.db_name:
-            self.db = Database(self.config.db_name, self.config.db_columns)
-            self.db.setup()
-
     def __repr__(self):
         """
         @rtype: str
@@ -90,9 +84,11 @@ class GPIOMonitorController(BaseController):
         if not self.mqtt:
             return
         self.state = self.sensor.read()
-        latest = self.db.get_latest_record()[1]
-        self.db.add_data([str(time.time()), 1 if self.state else 0])
-        if latest is not None and self.state == (latest[1] == 1):
+        with Database(self.config.db_name, self.config.db_columns) as db:
+            latest = db.get_latest_record()[1]
+            db.add_data([str(time.time()), 1 if self.state else 0])
+        
+        if latest is not None and self.state == (latest == 1):
             return
 
         for topic in self.config.mqtt_topic:
