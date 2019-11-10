@@ -84,13 +84,15 @@ class GPIOMonitorController(BaseController):
         if not self.mqtt:
             return
         self.state = self.sensor.read()
-        with Database(self.config.db_name, self.config.db_columns) as db:
-            latest = db.get_latest_record()[1]
-            self.logger.debug(f"Latest door state: {latest}, current state: {self.state}, equal: {self.state == (latest == 1)}")
-            db.add_data([int(time.time()), 1 if self.state else 0])
 
-        if latest is not None and self.state == (latest == 1):
-            return
+        if self.config.db_name:
+            with Database(self.config.db_name, self.config.db_columns) as db:
+                latest = db.get_latest_record()[1]
+                db.add_data([int(time.time()), 1 if self.state else 0])
+            self.logger.debug(f"Latest door state: {latest}, current state: {self.state}, equal: {self.state == (latest == 1)}")
+
+            if latest is not None and self.state == (latest == 1):
+                return
 
         for topic in self.config.mqtt_topic:
 
