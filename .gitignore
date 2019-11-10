@@ -11,3 +11,4 @@ smb.conf
 *pytest_cache*
 *pushbulletSettings*
 reports
+data/

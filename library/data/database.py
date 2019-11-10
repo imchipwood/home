@@ -24,6 +24,10 @@ class Column:
         self.type = col_type
         self.key = col_key
 
+    @property
+    def primary(self) -> bool:
+        return self.key.upper() == "PRIMARY KEY"
+
 
 class Database:
     def __init__(self, name: str, columns):
@@ -55,7 +59,10 @@ class Database:
         self.con.commit()
 
     def get_latest_record(self):
-        query = f"SELECT {self.columns_str()} FROM {self.name}"
+        primary = [x.name for x in self.columns if x.primary][0]
+        others = [x.name for x in self.columns if x.name != primary]
+        others_str = ', '.join(others)
+        query = f"SELECT MAX({primary}), {others_str} FROM {self.name}"
         self.cur.execute(query)
         result = self.cur.fetchall()
         return result
