@@ -59,3 +59,15 @@ def test_get_last_n_records():
         assert last_3[2][0] == 2
         assert last_3[2][1] == 0
 
+
+def test_get_latest_record():
+    with Database(DB_NAME, DB_COLUMNS) as db:
+        db.add_data([0, 0])
+        db.add_data([1, 0])
+        db.add_data([2, 0])
+        db.add_data([3, 1])
+        db.add_data([4, 1])
+
+        latest = db.get_latest_record()
+        assert latest[0] == 4
+        assert latest[1] == 1
