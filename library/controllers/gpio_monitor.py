@@ -92,6 +92,7 @@ class GPIOMonitorController(BaseController):
             self.logger.debug(f"Latest door state: {latest}, current state: {self.state}, equal: {self.state == (latest == 1)}")
 
             if latest is not None and self.state == (latest == 1):
+                self.logger.debug("No state change, not publishing")
                 return
 
         for topic in self.config.mqtt_topic:
