@@ -76,6 +76,19 @@ class Database:
         result = self.cur.fetchone()
         return result
 
+    def get_all_records(self):
+        query = f"SELECT {self.columns_str()} FROM {self.name}"
+        self.cur.execute(query)
+        result = self.cur.fetchall()
+        return result
+
+    def get_last_n_records(self, n: int):
+        primary = [x.name for x in self.columns if x.primary][0]
+        query = f"SELECT * FROM (SELECT * FROM {self.name} ORDER BY {primary} ASC limit {n}) order by {primary} DESC"
+        self.cur.execute(query)
+        result = self.cur.fetchall()
+        return result
+
     def __enter__(self):
         self.setup()
         return self
@@ -99,6 +112,10 @@ if __name__ == "__main__":
         data = [int(time.time()), randint(0, 100)]
         print(f"Adding data: {data}")
         db.add_data(data)
-        print(db.get_latest_record())
+        all_records = db.get_all_records()
+        sorted_records = sorted(all_records, key=lambda x: x[0])
+        print(all_records)
+        print(sorted_records)
+        print(db.get_last_n_records(2))
 
     print("done")
