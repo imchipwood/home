@@ -166,7 +166,6 @@ class PiCameraController(BaseController):
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
                 last_two = db.get_last_n_records(2)
-                self.logger.debug(f"Last two records: {last_two}")
                 latest = "open" if last_two[0][1] == 1 else "closed"
                 self.logger.debug(f"Latest state: {latest}")
 

@@ -84,7 +84,7 @@ class Database:
 
     def get_last_n_records(self, n: int):
         primary = [x.name for x in self.columns if x.primary][0]
-        query = f"SELECT * FROM (SELECT * FROM {self.name} ORDER BY {primary} ASC limit {n}) order by {primary} DESC"
+        query = f"SELECT * FROM (SELECT * FROM {self.name} ORDER BY {primary} DESC limit {n}) order by {primary} DESC"
         self.cur.execute(query)
         result = self.cur.fetchall()
         return result
