@@ -45,6 +45,7 @@ class Database:
         return result and result[0] == table_name
 
     def create_table(self, table_name: str, columns: List[Column]):
+        print(f"Creating table {table_name}")
         assert columns, "Must define columns"
         query = f"CREATE TABLE {table_name} ("
         for column in columns:
@@ -64,12 +65,14 @@ class Database:
         others_str = ', '.join(others)
         query = f"SELECT MAX({primary}), {others_str} FROM {self.name}"
         self.cur.execute(query)
-        result = self.cur.fetchall()
+        result = self.cur.fetchone()
         return result
 
     def __enter__(self):
         self.con = connect_to_database(self.name)
         self.cur = self.con.cursor()
+        if not self.does_table_exist(self.name):
+            self.create_table(self.name, self.columns)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -85,11 +88,9 @@ if __name__ == "__main__":
         Column("state", "integer", "NOT NULL")
     ]
     with Database(db_name, db_columns) as db:
-        print("Opened database")
-        if not db.does_table_exist(db_name):
-            print("Creating table")
-            db.create_table(db_name, db_columns)
-        db.add_data([int(time.time()), randint(0, 100)])
+        data = [int(time.time()), randint(0, 100)]
+        print(f"Adding data: {data}")
+        db.add_data(data)
         print(db.get_latest_record())
 
     print("done")

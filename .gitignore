@@ -11,4 +11,5 @@ smb.conf
 *pytest_cache*
 *pushbulletSettings*
 reports
-data/
+data/*.sqlite3
+.idea/dataSources.xml
