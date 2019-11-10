@@ -165,7 +165,7 @@ class PiCameraController(BaseController):
         latest = None
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
-                latest = "closed" if db.get_latest_record()[1] else "open"
+                latest = "open" if db.get_latest_record()[1] else "closed"
 
         # Check the payload - assumes a single value
         for key, val in message_data.items():
