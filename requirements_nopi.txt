@@ -1,0 +1,11 @@
+pytest==3.9.1
+coverage==4.5.1
+paho-mqtt==1.2
+RPi.GPIO==0.6.3
+#picamera==1.13
+pushbullet.py==0.11.0
+setuptools>=18.5
+pyephem==3.7.6.0
+paramiko==2.4.2
+teamcity-messages==1.25
+#git+https://github.com/adafruit/Adafruit_Python_DHT
