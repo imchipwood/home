@@ -5,6 +5,7 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 from library.config import BaseConfiguration
+from library.data.database import Column
 
 class CONFIG_KEYS:
     PIN = "gpio_pin"
@@ -58,3 +59,25 @@ class GPIOMonitorConfig(BaseConfiguration):
         @rtype: list[library.config.mqtt.Topic]
         """
         return list(self.mqtt_config.topics_publish.values())
+
+    @property
+    def db_name(self):
+        column_data = self.config.get("db")
+        if not column_data:
+            return ""
+        return column_data.get("name")
+
+    @property
+    def db_columns(self):
+        column_data = self.config.get("db")
+        if not column_data:
+            return []
+        columns = []
+        for column_dict in column_data.get("columns", []):
+            column = Column(
+                column_dict.get("col_name", ""),
+                column_dict.get("col_type", ""),
+                column_dict.get("col_key", ""),
+            )
+            columns.append(column)
+        return columns

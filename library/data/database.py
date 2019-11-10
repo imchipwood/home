@@ -34,6 +34,14 @@ class Database:
         super()
         self.name = name
         self.columns = columns
+        self.con = None
+        self.cur = None
+
+    def setup(self):
+        self.con = connect_to_database(self.name)
+        self.cur = self.con.cursor()
+        if not self.does_table_exist(self.name):
+            self.create_table(self.name, self.columns)
 
     def columns_str(self):
         return ', '.join([x.name for x in self.columns])
@@ -69,20 +77,20 @@ class Database:
         return result
 
     def __enter__(self):
-        self.con = connect_to_database(self.name)
-        self.cur = self.con.cursor()
-        if not self.does_table_exist(self.name):
-            self.create_table(self.name, self.columns)
+        self.setup()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cleanup()
+
+    def cleanup(self):
         self.con.close()
 
 
 if __name__ == "__main__":
     from random import randint
     import time
-    db_name = "test"
+    db_name = "test2"
     db_columns = [
         Column("timestamp", "integer", "PRIMARY KEY"),
         Column("state", "integer", "NOT NULL")

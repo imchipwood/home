@@ -4,11 +4,13 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
+import time
 from threading import Thread
 
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
 from library.sensors.gpio_monitor import GPIO_Monitor, GPIO
+from library.data.database import Database
 
 
 class GPIOMonitorController(BaseController):
@@ -38,6 +40,12 @@ class GPIOMonitorController(BaseController):
         """@type: MQTTClient"""
         if self.config.mqtt_config:
             self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+
+        # set up database
+        self.db = None
+        if self.config.db_name:
+            self.db = Database(self.config.db_name, self.config.db_columns)
+            self.db.setup()
 
     def __repr__(self):
         """
@@ -82,6 +90,10 @@ class GPIOMonitorController(BaseController):
         if not self.mqtt:
             return
         self.state = self.sensor.read()
+        latest = self.db.get_latest_record()[1]
+        self.db.add_data([str(time.time()), 1 if self.state else 0])
+        if latest is not None and self.state == (latest[1] == 1):
+            return
 
         for topic in self.config.mqtt_topic:
 
@@ -104,4 +116,6 @@ class GPIOMonitorController(BaseController):
         """
         super().cleanup()
         self.sensor.cleanup()
+        if self.db:
+            self.db.cleanup()
         self.logger.info("Cleanup complete")
