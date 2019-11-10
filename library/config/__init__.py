@@ -1,11 +1,13 @@
 import os
 import json
+from typing import List
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR
 from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
 from library.controllers.gpio_monitor import GPIOMonitorController
 from library.controllers.pushbullet import PushbulletController
+from library.data.database import Column
 
 
 class SENSOR_CLASSES:
@@ -26,6 +28,12 @@ class ConfigKeys:
     TOPICS = 'topics'
     PUBLISH = 'publish'
     SUBSCRIBE = 'subscribe'
+    DB = 'db'
+    DB_NAME = 'name'
+    DB_COLUMNS = 'columns'
+    DB_COLUMN_NAME = 'col_name'
+    DB_COLUMN_TYPE = 'col_type'
+    DB_COLUMN_KEY = 'col_key'
 
 
 class BaseConfiguration(object):
@@ -160,6 +168,36 @@ class BaseConfiguration(object):
         @rtype: str
         """
         return self.config.get(ConfigKeys.LOG, "")
+
+    @property
+    def db_name(self) -> str:
+        """
+        @return: database name
+        @rtype: str
+        """
+        column_data = self.config.get(ConfigKeys.DB)
+        if not column_data:
+            return ""
+        return column_data.get(ConfigKeys.DB_NAME)
+
+    @property
+    def db_columns(self) -> List[Column]:
+        """
+        @return: list of database column objects
+        @rtype: list[Column]
+        """
+        column_data = self.config.get(ConfigKeys.DB)
+        if not column_data:
+            return []
+        columns = []
+        for column_dict in column_data.get(ConfigKeys.DB_COLUMNS, []):
+            column = Column(
+                column_dict.get(ConfigKeys.DB_COLUMN_NAME, ""),
+                column_dict.get(ConfigKeys.DB_COLUMN_TYPE, ""),
+                column_dict.get(ConfigKeys.DB_COLUMN_KEY, ""),
+            )
+            columns.append(column)
+        return columns
 
 
 class ConfigurationHandler(BaseConfiguration):

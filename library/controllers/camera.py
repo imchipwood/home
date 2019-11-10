@@ -8,6 +8,7 @@ import json
 from multiprocessing import Process
 from threading import Thread
 
+from library.data.database import Database
 from library.sensors.camera import Camera
 
 from library.controllers import BaseController, Get_Logger
@@ -161,15 +162,26 @@ class PiCameraController(BaseController):
         if not topic:
             return False
 
+        latest = None
+        if self.config.db_name:
+            with Database(self.config.db_name, self.config.db_columns) as db:
+                latest = "closed" if db.get_latest_record()[1] else "open"
+
         # Check the payload - assumes a single value
         for key, val in message_data.items():
             if key == "delay":
                 continue
             message_val = topic.payload().get(key, None)
-            if isinstance(message_val, str):
-                return message_val.lower() == val.lower()
+            if latest:
+                if isinstance(message_val, str):
+                    return message_val.lower() == val.lower() and latest != val.lower()
+                else:
+                    return message_val == val
             else:
-                return message_val == val
+                if isinstance(message_val, str):
+                    return message_val.lower() == val.lower()
+                else:
+                    return message_val == val
 
         # Shouldn't ever get here but just in case...
         self.logger.warning("Didn't find expected payload - not capturing!")
