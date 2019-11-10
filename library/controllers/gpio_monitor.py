@@ -112,6 +112,4 @@ class GPIOMonitorController(BaseController):
         """
         super().cleanup()
         self.sensor.cleanup()
-        if self.db:
-            self.db.cleanup()
         self.logger.info("Cleanup complete")
