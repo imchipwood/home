@@ -86,6 +86,7 @@ class GPIOMonitorController(BaseController):
         self.state = self.sensor.read()
         with Database(self.config.db_name, self.config.db_columns) as db:
             latest = db.get_latest_record()[1]
+            self.logger.debug(f"Latest door state: {latest}, current state: {self.state}")
             db.add_data([int(time.time()), 1 if self.state else 0])
 
         if latest is not None and self.state == (latest == 1):
