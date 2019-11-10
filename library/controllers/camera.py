@@ -166,22 +166,22 @@ class PiCameraController(BaseController):
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
                 latest = "open" if db.get_latest_record()[1] else "closed"
+                self.logger.debug(f"Latest state: {latest}")
 
         # Check the payload - assumes a single value
         for key, val in message_data.items():
             if key == "delay":
                 continue
             message_val = topic.payload().get(key, None)
+
+            if isinstance(message_val, str):
+                message_val = message_val.lower()
+                val = val.lower()
+
             if latest:
-                if isinstance(message_val, str):
-                    return message_val.lower() == val.lower() and latest != val.lower()
-                else:
-                    return message_val == val
+                return message_val == val and latest != val
             else:
-                if isinstance(message_val, str):
-                    return message_val.lower() == val.lower()
-                else:
-                    return message_val == val
+                return message_val == val
 
         # Shouldn't ever get here but just in case...
         self.logger.warning("Didn't find expected payload - not capturing!")
