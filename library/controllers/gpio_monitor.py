@@ -87,7 +87,9 @@ class GPIOMonitorController(BaseController):
 
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
-                db.add_data([int(time.time()), 1 if self.state else 0])
+                data = [int(time.time()), 1 if self.state else 0]
+                self.logger.debug(f"Adding data to db: {data}")
+                db.add_data(data)
 
         for topic in self.config.mqtt_topic:
 
