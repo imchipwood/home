@@ -89,6 +89,11 @@ class Database:
         result = self.cur.fetchall()
         return result
 
+    def delete_all_except_last_n_records(self, n: int):
+        primary = [x.name for x in self.columns if x.primary][0]
+        query = f"DELETE FROM {self.name} WHERE {primary} <= (SELECT MAX({primary}) FROM (SELECT {primary} FROM {self.name} ORDER BY {primary} LIMIT {n + 1}))"
+        self.cur.execute(query)
+
     def __enter__(self):
         self.setup()
         return self

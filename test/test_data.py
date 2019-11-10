@@ -71,3 +71,15 @@ def test_get_latest_record():
         latest = db.get_latest_record()
         assert latest[0] == 4
         assert latest[1] == 1
+
+
+def test_delete_all_except_last_n_records():
+    with Database(DB_NAME, DB_COLUMNS) as db:
+        db.add_data([0, 0])
+        db.add_data([1, 0])
+        db.add_data([2, 0])
+        db.add_data([3, 1])
+        db.add_data([4, 1])
+
+        db.delete_all_except_last_n_records(2)
+        assert len(db.get_all_records()) == 2

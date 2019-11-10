@@ -90,6 +90,7 @@ class GPIOMonitorController(BaseController):
                 data = [int(time.time()), 1 if self.state else 0]
                 self.logger.debug(f"Adding data to db: {data}")
                 db.add_data(data)
+                db.delete_all_except_last_n_records(2)
 
         for topic in self.config.mqtt_topic:
 
