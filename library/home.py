@@ -3,7 +3,7 @@ import logging
 from library.config import ConfigurationHandler
 
 
-def execute(config_path, stop=lambda: True, debug=False):
+def execute(config_path, stop=lambda: False, debug=False):
     """
     Full flow - get arguments, parse configuration files, launch threads
     @param config_path: path to config file
