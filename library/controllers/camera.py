@@ -167,8 +167,9 @@ class PiCameraController(BaseController):
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
                 last_two = db.get_last_n_records(2)
-                latest = GarageDoorStates.OPEN if last_two[1][1] == 1 else GarageDoorStates.CLOSED
-                self.logger.debug(f"Latest state: {latest}")
+                if len(last_two) > 1:
+                    latest = GarageDoorStates.OPEN if last_two[1][1] == 1 else GarageDoorStates.CLOSED
+                    self.logger.debug(f"Latest state: {latest}")
 
         # Check the payload - assumes a single value
         for key, val in message_data.items():
