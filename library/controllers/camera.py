@@ -169,6 +169,7 @@ class PiCameraController(BaseController):
             with Database(self.config.db_name, self.config.db_columns) as db:
                 self.logger.info(f"Opened DB {self.config.db_name}")
                 last_two = db.get_last_n_records(2)
+                self.logger.info(f"Received {len(last_two)} records from db")
                 if last_two:
                     latest = GarageDoorStates.OPEN if last_two[-1][1] == 1 else GarageDoorStates.CLOSED
                     self.logger.info(f"Latest state: {latest}")
