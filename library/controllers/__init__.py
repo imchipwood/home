@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 import logging
 
@@ -18,6 +19,8 @@ def Get_Logger(name, debug_flag, log_path) -> logging.Logger:
     """
     # Set up logging
     logging.getLogger().setLevel(logging.DEBUG)
+    if log_path and not os.path.exists(os.path.dirname(log_path)):
+        os.makedirs(os.path.dirname(log_path))
     logger = setup_logging(
         logging.getLogger(name),
         logging_level=debug_flag,

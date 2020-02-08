@@ -2,6 +2,10 @@ import os
 from typing import List
 import sqlite3
 from library import HOME_DIR
+from library.controllers import Get_Logger
+
+log_path = os.path.realpath(os.path.join(HOME_DIR, '..', 'logs', 'database.log'))
+LOGGER = Get_Logger(__name__, debug_flag=True, log_path=log_path)
 
 
 def get_database_path(name: str) -> str:
@@ -13,9 +17,11 @@ def get_database_path(name: str) -> str:
     @rtype: str
     """
     data_dir = os.path.join(HOME_DIR, "data")
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
     database_path = os.path.join(data_dir, name + ".sqlite3")
+    LOGGER.debug(f"Looking for database {database_path}")
+    if not os.path.exists(data_dir):
+        LOGGER.debug(f"Didn't find {database_path} - creating {data_dir}")
+        os.makedirs(data_dir)
     return database_path
 
 
