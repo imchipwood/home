@@ -20,6 +20,9 @@ class PushbulletController(BaseController):
     """
     Basic threaded controller to relay MQTT messages
     """
+
+    RECENT_ENTRY_THRESHOLD = 5 * 60
+
     def __init__(self, config, debug=False):
         """
 
@@ -139,8 +142,10 @@ class PushbulletController(BaseController):
                     self.logger.exception("Exception attempting to send Pushbullet image notification")
 
             elif state == GarageDoorStates.CLOSED:
-                if self.check_if_latest_db_state_matches(state):
-                    self.logger.debug(f"Latest state {state} has not changed - will not send notification")
+                if self.check_if_latest_db_state_matches(state) \
+                        and self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
+                    # If state matches latest entry and it was recently entered
+                    self.logger.debug(f"Latest state {state} has not changed recently - will not send notification")
                     return
                 try:
                     self.notifier.send_text(msg.topic, notification)

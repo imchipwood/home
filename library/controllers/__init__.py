@@ -1,4 +1,5 @@
 import os
+from time import time
 from abc import ABC, abstractmethod
 import logging
 
@@ -75,7 +76,7 @@ class BaseController(ABC):
         """
         Get the latest value from the database
         @return:
-        @rtype: int or float or string
+        @rtype: list
         """
         latest = None
         if self.config.db_name:
@@ -87,6 +88,20 @@ class BaseController(ABC):
                     latest = last_two[-1][1]
                     self.logger.debug(f"Latest state: {latest}")
         return latest
+
+    def is_latest_entry_recent(self, delta_time: int) -> bool:
+        """
+        Check if the latest database entry is 'recent'
+        @param delta_time: amount of time to be considered 'recent'
+        @type delta_time: int
+        @return: whether the latest entry is 'recent' or not
+        @rtype: bool
+        """
+        latest = self.get_latest_db_entry()
+        if not latest:
+            return False
+
+        return time() - latest[0] > delta_time
 
     def check_if_latest_db_state_matches(self, target_value):
         """
