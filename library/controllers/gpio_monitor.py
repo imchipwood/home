@@ -86,33 +86,24 @@ class GPIOMonitorController(BaseController):
             return
         self.state = self.sensor.read()
 
-        latest = None
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
-                data = [int(time.time()), 1 if self.state else 0]
+                data = [int(time.time()), str(self.state)]
                 self.logger.debug(f"Adding data to db: {data}")
                 db.add_data(data)
                 db.delete_all_except_last_n_records(2)
 
-                last_two = db.get_last_n_records(2)
-                if last_two:
-                    latest = GarageDoorStates.OPEN if last_two[-1][1] == 1 else GarageDoorStates.CLOSED
-                    self.logger.debug(f"Latest state: {latest}")
-
         for topic in self.config.mqtt_topic:
-
-            # Publish if: state is not closed OR last state was not closed
-            if not latest or str(self) != GarageDoorStates.CLOSED or latest != GarageDoorStates.CLOSED:
-                payload = topic.payload(state=str(self))
-                self.logger.info(f'Publishing to {topic}: {payload}')
-                try:
-                    self.mqtt.single(
-                        topic=str(topic),
-                        payload=payload
-                    )
-                except:
-                    self.logger.exception("Failed to publish MQTT data!")
-                    raise
+            payload = topic.payload(state=str(self))
+            self.logger.info(f'Publishing to {topic}: {payload}')
+            try:
+                self.mqtt.single(
+                    topic=str(topic),
+                    payload=payload
+                )
+            except:
+                self.logger.exception("Failed to publish MQTT data!")
+                raise
 
     # endregion Communication
 

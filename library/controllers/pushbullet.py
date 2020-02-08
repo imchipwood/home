@@ -123,17 +123,6 @@ class PushbulletController(BaseController):
             self.logger.warning(f"Some error while converting string payload to dict: {e}")
             return
 
-        latest = None
-        if self.config.db_name:
-            self.logger.info(f"Opening DB {self.config.db_name}")
-            with Database(self.config.db_name, self.config.db_columns) as db:
-                self.logger.info(f"Opened DB {self.config.db_name}")
-                last_two = db.get_last_n_records(2)
-                self.logger.info(f"Received {len(last_two)} records from db")
-                if last_two:
-                    latest = GarageDoorStates.OPEN if last_two[-1][1] == 1 else GarageDoorStates.CLOSED
-                    self.logger.info(f"Latest state: {latest}")
-
         topic = self.mqtt.config.topics_subscribe.get(msg.topic)
         if topic:
             state = message_data.get("state")
@@ -149,7 +138,10 @@ class PushbulletController(BaseController):
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet image notification")
 
-            elif state == GarageDoorStates.CLOSED and latest != GarageDoorStates.CLOSED:
+            elif state == GarageDoorStates.CLOSED:
+                if self.check_if_latest_db_state_matches(state):
+                    self.logger.debug(f"Latest state {state} has not changed - will not send notification")
+                    return
                 try:
                     self.notifier.send_text(msg.topic, notification)
                 except:

@@ -2,7 +2,8 @@ import os
 from abc import ABC, abstractmethod
 import logging
 
-from library import setup_logging
+from library import setup_logging, GarageDoorStates
+from library.data.database import Database
 
 
 def Get_Logger(name, debug_flag, log_path) -> logging.Logger:
@@ -38,6 +39,7 @@ class BaseController(ABC):
         self.debug = debug
         self.config = config
 
+        self.logger = None
         self.running = False
         self.thread = None
 
@@ -68,3 +70,31 @@ class BaseController(ABC):
         Stop threads and do any other cleanup required
         """
         self.stop()
+
+    def get_latest_db_entry(self):
+        """
+        Get the latest value from the database
+        @return:
+        @rtype: int or float or string
+        """
+        latest = None
+        if self.config.db_name:
+            self.logger.debug(f"Opening DB {self.config.db_name}")
+            with Database(self.config.db_name, self.config.db_columns) as db:
+                last_two = db.get_last_n_records(2)
+                self.logger.debug(f"Received {len(last_two)} records from db")
+                if last_two:
+                    latest = last_two[-1][1]
+                    self.logger.debug(f"Latest state: {latest}")
+        return latest
+
+    def check_if_latest_db_state_matches(self, target_value):
+        """
+        Check the latest DB entry against a target value
+        @param target_value: target state to match
+        @type target_value: str or int
+        @return: whether the latest state matches the target
+        @rtype: bool
+        """
+        latest = self.get_latest_db_entry()
+        return latest == target_value

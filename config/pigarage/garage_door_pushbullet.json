@@ -27,7 +27,7 @@
       },
       {
         "col_name": "state",
-        "col_type": "integer",
+        "col_type": "text",
         "col_key": "NOT NULL"
       }
     ]
