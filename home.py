@@ -6,9 +6,7 @@ Author: Charles "Chip" Wood
 """
 
 import argparse
-import logging
-
-from library.config import ConfigurationHandler
+from library.home import execute
 
 
 def parse_args():
@@ -34,34 +32,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def execute():
-    """
-    Full flow - get arguments, parse configuration files, launch threads
-    """
-    args = parse_args()
-    handler = ConfigurationHandler(config_path=args.configpath)
-
-    try:
-        logging.info("Launching sensor threads")
-        for sensor in handler:
-            sensor.start()
-
-        # Infinite loop while threads run
-        logging.info("Sensor threads launched - looping forever")
-        while True:
-            pass
-
-    except KeyboardInterrupt:
-        logging.info("KeyboardInterrupt - exiting gracefully")
-
-    finally:
-        logging.info("Cleaning up sensor threads")
-        for sensor in handler:
-            try:
-                sensor.cleanup()
-            except:
-                logging.exception(f"Exception cleaning up sensor {sensor}")
-
-
 if __name__ == "__main__":
-    execute()
+    args = parse_args()
+    execute(args.configpath, debug=args.debug)
