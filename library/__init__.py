@@ -1,7 +1,7 @@
 import logging
 import os
 
-HOME_DIR = os.path.join(os.path.dirname(__file__), '..')
+HOME_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 CONFIG_DIR = os.path.join(HOME_DIR, 'config')
 TEST_DIR = os.path.join(HOME_DIR, 'test')
 TEST_CONFIG_DIR = os.path.join(TEST_DIR, 'config')

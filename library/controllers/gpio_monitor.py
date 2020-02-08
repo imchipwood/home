@@ -102,7 +102,7 @@ class GPIOMonitorController(BaseController):
         for topic in self.config.mqtt_topic:
 
             # Publish if: state is not closed OR last state was not closed
-            if str(self) != GarageDoorStates.CLOSED or latest != GarageDoorStates.CLOSED:
+            if not latest or str(self) != GarageDoorStates.CLOSED or latest != GarageDoorStates.CLOSED:
                 payload = topic.payload(state=str(self))
                 self.logger.info(f'Publishing to {topic}: {payload}')
                 try:
