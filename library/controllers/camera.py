@@ -108,7 +108,7 @@ class PiCameraController(BaseController):
         self.logger.info(f"mqtt: (CONNECT) client {client._client_id} received with code {rc}")
 
         # Check the connection results
-        if rc != 0:
+        if rc != 0:  # pragma: no cover
             message = Get_MQTT_Error_Message(rc)
             self.logger.error(message)
             raise MQTTError(f"on_connect 'rc' failure - {message}")

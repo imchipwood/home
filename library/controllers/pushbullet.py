@@ -13,7 +13,6 @@ from library import GarageDoorStates
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient, MQTTError, Get_MQTT_Error_Message
 from library.communication.pushbullet import PushbulletNotify
-from library.data.database import Database
 
 
 class PushbulletController(BaseController):
@@ -94,7 +93,7 @@ class PushbulletController(BaseController):
         self.logger.info(f"mqtt: (CONNECT) client {client._client_id} received with code {rc}")
 
         # Check the connection results
-        if rc != 0:
+        if rc != 0:  # pragma: no cover
             message = Get_MQTT_Error_Message(rc)
 
             self.logger.error(message)
@@ -133,7 +132,7 @@ class PushbulletController(BaseController):
             self.logger.debug(f"Received '{state}': {notification}")
 
             if state == GarageDoorStates.OPEN:
-                if not self.wait_for_file_refresh(notification):
+                if not self.wait_for_file_refresh(notification):  # pragma: no cover
                     return
 
                 try:
@@ -154,7 +153,7 @@ class PushbulletController(BaseController):
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet text notification")
 
-    def wait_for_file_refresh(self, file_path) -> bool:
+    def wait_for_file_refresh(self, file_path) -> bool:  # pragma: no cover
         """
         Check if a file exists
         @param file_path: path to

@@ -92,7 +92,7 @@ class BaseConfiguration:
                     return potential_path
 
         # Can't figure out path - exit
-        raise OSError(f"Could not find config file {config_path} at base dir {BaseConfiguration.BASE_CONFIG_DIR}")
+        raise OSError(f"Could not find config file {config_path} at base dir {BaseConfiguration.BASE_CONFIG_DIR}")  # pragma: no cover
 
     @staticmethod
     def load_config(config_path) -> dict:
@@ -264,7 +264,7 @@ class ConfigurationHandler(BaseConfiguration):
         if sensor in self.sensor_paths:
             return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor), self.debug)
         else:
-            return None
+            return None  # pragma: no cover
 
     def get_sensor_config(self, sensor):
         """
@@ -281,7 +281,7 @@ class ConfigurationHandler(BaseConfiguration):
                 self.debug
             )
         else:
-            return None
+            return None  # pragma: no cover
 
     def get_sensor_controller(self, sensor):
         """
@@ -296,7 +296,7 @@ class ConfigurationHandler(BaseConfiguration):
                 self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor), self.debug)
             return self.sensors[sensor]
         else:
-            return None
+            return None  # pragma: no cover
 
     # endregion Sensors
     # region BuiltIns
@@ -316,7 +316,7 @@ class ConfigurationHandler(BaseConfiguration):
         for sensor in self.config.get(ConfigKeys.SENSORS, {}):
             yield self.get_sensor_controller(sensor)
 
-    def __next__(self):
+    def __next__(self):  # pragma: no cover
         """
         Get the next sensor
         @return: sensor controller
