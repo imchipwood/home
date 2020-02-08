@@ -95,8 +95,8 @@ class GPIOMonitorController(BaseController):
                 db.delete_all_except_last_n_records(2)
 
                 last_two = db.get_last_n_records(2)
-                if len(last_two) > 1:
-                    latest = GarageDoorStates.OPEN if last_two[1][1] == 1 else GarageDoorStates.CLOSED
+                if last_two:
+                    latest = GarageDoorStates.OPEN if last_two[-1][1] == 1 else GarageDoorStates.CLOSED
                     self.logger.debug(f"Latest state: {latest}")
 
         for topic in self.config.mqtt_topic:
