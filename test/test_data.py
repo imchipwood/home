@@ -68,12 +68,12 @@ def test_get_last_n_records(name, columns, data_to_add):
         assert len(db.get_last_n_records(1)) == 1
         assert len(db.get_last_n_records(2)) == 2
         last_3 = db.get_last_n_records(3)
-        assert last_3[0][0] == 4
-        assert last_3[0][1] == data_to_add[-1]
-        assert last_3[1][0] == 3
-        assert last_3[1][1] == data_to_add[-2]
-        assert last_3[2][0] == 2
-        assert last_3[2][1] == data_to_add[-3]
+        assert last_3[0][columns[0].name] == 4
+        assert last_3[0][columns[1].name] == data_to_add[-1]
+        assert last_3[1][columns[0].name] == 3
+        assert last_3[1][columns[1].name] == data_to_add[-2]
+        assert last_3[2][columns[0].name] == 2
+        assert last_3[2][columns[1].name] == data_to_add[-3]
 
 
 @pytest.mark.parametrize("name,columns,data_to_add", [
@@ -86,8 +86,8 @@ def test_get_latest_record(name, columns, data_to_add):
             db.add_data([i, data_to_add[i]])
 
         latest = db.get_latest_record()
-        assert latest[0] == 4
-        assert latest[1] == data_to_add[-1]
+        assert latest[columns[0].name] == 4
+        assert latest[columns[1].name] == data_to_add[-1]
 
 
 @pytest.mark.parametrize("name,columns,data_to_add", [

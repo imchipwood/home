@@ -2,6 +2,7 @@ import os
 from time import time
 from abc import ABC, abstractmethod
 import logging
+from typing import List
 
 from library import setup_logging, GarageDoorStates
 from library.data.database import Database
@@ -72,24 +73,41 @@ class BaseController(ABC):
         """
         self.stop()
 
-    def get_latest_db_entry(self):
+    def get_latest_db_entry(self, column_name: str = 'state'):
         """
         Get the latest value from the database
         @return:
-        @rtype: list
+        @rtype: int or float or str
         """
         latest = None
         if self.config.db_name:
             self.logger.debug(f"Opening DB {self.config.db_name}")
             with Database(self.config.db_name, self.config.db_columns) as db:
-                last_two = db.get_last_n_records(2)
-                self.logger.debug(f"Received {len(last_two)} records from db")
-                if last_two:
-                    latest = last_two[-1][1]
-                    self.logger.debug(f"Latest state: {latest}")
+                record = db.get_latest_record()
+                if record:
+                    latest = record[column_name]
+                    self.logger.debug(f"Latest db entry at column {column_name}: {latest}")
         return latest
 
-    def is_latest_entry_recent(self, delta_time: int) -> bool:
+    def get_last_two_db_entries(self, column_name: str = 'state') -> List:
+        """
+        Get the last two entries from the DB
+        @param column_name: name of column to get
+        @type column_name: str
+        @return: list of values from last two entries
+        @rtype: list
+        """
+        entries = []
+        if self.config.db_name:
+            self.logger.debug(f"Opening DB {self.config.db_name}")
+            with Database(self.config.db_name, self.config.db_columns) as db:
+                records = db.get_last_n_records(2)
+                if records:
+                    entries = [record[column_name] for record in records]
+                    self.logger.debug(f"Latest db entry at column {column_name}: {entries}")
+        return entries
+
+    def is_latest_entry_recent(self, delta_time: int = 60) -> bool:
         """
         Check if the latest database entry is 'recent'
         @param delta_time: amount of time to be considered 'recent'
@@ -97,19 +115,21 @@ class BaseController(ABC):
         @return: whether the latest entry is 'recent' or not
         @rtype: bool
         """
-        latest = self.get_latest_db_entry()
+        latest = self.get_latest_db_entry('timestamp')
         if not latest:
             return False
 
-        return time() - latest[0] > delta_time
+        return time() - latest > delta_time
 
-    def check_if_latest_db_state_matches(self, target_value):
+    def check_if_latest_db_state_matches(self, column_name, target_value):
         """
         Check the latest DB entry against a target value
+        @param column_name: target column
+        @type column_name: str
         @param target_value: target state to match
         @type target_value: str or int
         @return: whether the latest state matches the target
         @rtype: bool
         """
-        latest = self.get_latest_db_entry()
+        latest = self.get_latest_db_entry(column_name)
         return latest == target_value

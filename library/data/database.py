@@ -57,6 +57,28 @@ class Column:
         return self.key.upper() == "PRIMARY KEY"
 
 
+class DatabaseEntry:
+    def __init__(self, columns: List[Column], entry):
+        super()
+        self.columns = columns
+        self.entry = entry
+        self._values = {}
+
+    @property
+    def values(self):
+        """
+        @return: dict of values
+        @rtype: dict[str, int or float or str]
+        """
+        if not self._values:
+            for i in range(len(self.entry)):
+                self._values[self.columns[i].name] = self.entry[i]
+        return self._values
+
+    def __getitem__(self, item):
+        return self.values.get(item)
+
+
 class Database:
     def __init__(self, name: str, columns: List[Column]):
         """
@@ -84,7 +106,7 @@ class Database:
     @property
     def columns_str(self) -> str:
         """
-
+        Columns as a string
         @return: column names in the table
         @rtype: str
         """
@@ -130,11 +152,32 @@ class Database:
         self.cur.execute(query, data_to_add)
         self.con.commit()
 
-    def get_latest_record(self) -> List:
+    def convert_query_result_to_database_entry(self, result: List) -> DatabaseEntry:
+        """
+        Convert a single query
+        result into a DatabaseEntry object
+        @param result: list of values from table entry
+        @type result: list
+        @return: DatabaseEntry object
+        @rtype: DatabaseEntry
+        """
+        return DatabaseEntry(self.columns, result)
+
+    def convert_query_results_to_database_entries(self, results: List) -> List[DatabaseEntry]:
+        """
+        Convert multiple query results into a list of DatabaseEntry objects
+        @param results: list of lists of table entry values
+        @type results: list[list]
+        @return: list of DatabaseEntry objects
+        @rtype: list[DatabaseEntry]
+        """
+        return [DatabaseEntry(self.columns, result) for result in results]
+
+    def get_latest_record(self) -> DatabaseEntry:
         """
         Get the latest record from the table
         @return: list of values from last record
-        @rtype: list[int]
+        @rtype: DatabaseEntry
         """
         primary = [x.name for x in self.columns if x.primary][0]
         others = [x.name for x in self.columns if x.name != primary]
@@ -142,18 +185,18 @@ class Database:
         query = f"SELECT MAX({primary}), {others_str} FROM {self.name}"
         self.cur.execute(query)
         result = self.cur.fetchone()
-        return result
+        return self.convert_query_result_to_database_entry(result)
 
-    def get_all_records(self) -> List:
+    def get_all_records(self) -> List[DatabaseEntry]:
         """
         Get all the records in the table
         @return: list of records
-        @rtype: list
+        @rtype: list[DatabaseEntry]
         """
         query = f"SELECT {self.columns_str} FROM {self.name}"
         self.cur.execute(query)
-        result = self.cur.fetchall()
-        return result
+        results = self.cur.fetchall()
+        return self.convert_query_results_to_database_entries(results)
 
     def get_last_n_records(self, n: int):
         """
@@ -161,13 +204,13 @@ class Database:
         @param n: number of records to get
         @type n: int
         @return: last n records
-        @rtype: list
+        @rtype: list[DatabaseEntry]
         """
         primary = [x.name for x in self.columns if x.primary][0]
         query = f"SELECT * FROM (SELECT * FROM {self.name} ORDER BY {primary} DESC limit {n}) order by {primary} DESC"
         self.cur.execute(query)
-        result = self.cur.fetchall()
-        return result
+        results = self.cur.fetchall()
+        return self.convert_query_results_to_database_entries(results)
 
     def delete_all_except_last_n_records(self, n: int):
         """

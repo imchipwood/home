@@ -142,11 +142,13 @@ class PushbulletController(BaseController):
                     self.logger.exception("Exception attempting to send Pushbullet image notification")
 
             elif state == GarageDoorStates.CLOSED:
-                if self.check_if_latest_db_state_matches(state) \
-                        and self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
-                    # If state matches latest entry and it was recently entered
-                    self.logger.debug(f"Latest state {state} has not changed recently - will not send notification")
-                    return
+                if self.config.db_name:
+                    last_two = self.get_last_two_db_entries('state')
+                    if len(last_two) == 2 and all(last == GarageDoorStates.CLOSED for last in last_two) \
+                            or not self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
+                        # If last two entries were both "Closed" OR it wasn't recent
+                        self.logger.debug(f"Latest state {state} has not changed recently - will not send notification")
+                        return
                 try:
                     self.notifier.send_text(msg.topic, notification)
                 except:
