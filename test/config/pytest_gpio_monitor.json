@@ -12,5 +12,20 @@
         }
       }
     }
+  },
+  "db": {
+    "name": "test_door",
+    "columns": [
+      {
+        "col_name": "timestamp",
+        "col_type": "integer",
+        "col_key": "PRIMARY KEY"
+      },
+      {
+        "col_name": "state",
+        "col_type": "text",
+        "col_key": "NOT NULL"
+      }
+    ]
   }
 }

@@ -29,3 +29,9 @@ Target Python Version: 3.7
 
 On RPi, some ffi system packages are required to install the Pushbullet Python module
 -  sudo apt-get install python3-dev python3-cffi libffi-dev
+
+### Running pytest with coverage
+```
+coverage run -m pytest
+coverage html
+```

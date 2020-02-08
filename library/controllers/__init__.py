@@ -50,21 +50,21 @@ class BaseController(ABC):
         """
         Start the thread
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def stop(self):
         """
         Stop the thread
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def loop(self):
         """
         Looping method for threading
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def cleanup(self):
@@ -121,16 +121,3 @@ class BaseController(ABC):
             return True
 
         return time() - latest < delta_time
-
-    def check_if_latest_db_state_matches(self, column_name, target_value):
-        """
-        Check the latest DB entry against a target value
-        @param column_name: target column
-        @type column_name: str
-        @param target_value: target state to match
-        @type target_value: str or int
-        @return: whether the latest state matches the target
-        @rtype: bool
-        """
-        latest = self.get_latest_db_entry(column_name)
-        return latest == target_value
