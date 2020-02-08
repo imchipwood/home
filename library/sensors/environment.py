@@ -21,7 +21,7 @@ except:  # pragma: no cover
 from library.sensors import avg, SensorError
 
 
-class EnvironmentSensor(object):
+class EnvironmentSensor:
     """
     Basic wrapper around Adafruit's DHT module with support for
     setting temperature units (Celsius, Fahrenheit) and averaging
@@ -42,7 +42,7 @@ class EnvironmentSensor(object):
         @param debug: Flag to enable/disable debug prints
         @type debug: bool
         """
-        super().__init__()
+        super()
 
         self.config = config
         self.debug = debug

@@ -30,7 +30,7 @@ def Get_Logger(name, debug_flag, log_path) -> logging.Logger:
 class BaseController(ABC):
     """Base class for all controllers to extend"""
     def __init__(self, config, debug=False):
-        super().__init__()
+        super()
 
         self.debug = debug
         self.config = config

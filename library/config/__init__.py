@@ -36,7 +36,7 @@ class ConfigKeys:
     DB_COLUMN_KEY = 'col_key'
 
 
-class BaseConfiguration(object):
+class BaseConfiguration:
     # By assuming the
     BASE_CONFIG_DIR = None
 
@@ -47,7 +47,7 @@ class BaseConfiguration(object):
         @param debug: debug flag
         @type debug: bool
         """
-        super().__init__()
+        super()
         self.config_keys = ConfigKeys
         self.debug = debug
 

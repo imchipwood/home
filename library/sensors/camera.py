@@ -29,7 +29,7 @@ class Camera(PiCamera):
         @param debug: debug flag
         @type debug: bool
         """
-        super().__init__()
+        super()
 
         self.debug = debug
         self.config = config

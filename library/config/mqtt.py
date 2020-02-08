@@ -27,7 +27,7 @@ class Formatters:
         """
         Constructor for Formatters object
         """
-        super().__init__()
+        super()
         self._methods = [
             self._format_payload_string,
             self._format_payload_bool,
@@ -111,7 +111,7 @@ class Formatters:
             yield method
 
 
-class Topic(object):
+class Topic:
     """
     Basic MQTT topic object with payload & pubsub properties
     """
@@ -123,7 +123,7 @@ class Topic(object):
         @param info: config dict from config file
         @type info: dict
         """
-        super().__init__()
+        super()
 
         self.name = name
         self._info = info

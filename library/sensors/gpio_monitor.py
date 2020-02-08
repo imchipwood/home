@@ -18,7 +18,7 @@ except:  # pragma: no cover
     import library.mock.mock_gpio as GPIO
 
 
-class GPIOMonitor(object):
+class GPIOMonitor:
     """
     Simple GPIO monitoring class
     """
@@ -30,7 +30,7 @@ class GPIOMonitor(object):
         @param debug: debug print enable flag
         @type debug: bool
         """
-        super().__init__()
+        super()
         self.config = config
         self.logger = Get_Logger(__name__, debug, config.log)
         GPIO.setmode(GPIO.BCM)
