@@ -117,9 +117,10 @@ class BaseController(ABC):
         """
         latest = self.get_latest_db_entry('timestamp')
         if not latest:
-            return False
+            # No recent entry
+            return True
 
-        return time() - latest > delta_time
+        return time() - latest < delta_time
 
     def check_if_latest_db_state_matches(self, column_name, target_value):
         """
