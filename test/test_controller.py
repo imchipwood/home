@@ -4,6 +4,7 @@ import timeit
 import json
 import os
 
+from library import GarageDoorStates
 from library.config import ConfigurationHandler, SENSOR_CLASSES
 from library.communication.mqtt import MQTTClient
 
@@ -119,8 +120,8 @@ class Test_CameraController:
     @pytest.mark.parametrize(
         "topic",
         [
-            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": "Open"}, True),
-            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": "Closed"}, False),
+            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True),
+            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.CLOSED}, False),
             TestTopic("home-assistant/pytest/camera", {"capture": True, "delay": 1.0}, True),
             TestTopic("home-assistant/pytest/camera", {"delay": 1.0}, False),
             TestTopic("home-assistant/pytest/camera", {"capture": False}, False),
@@ -225,8 +226,8 @@ class Test_PushbulletController:
         topic = self.controller.config.mqtt_topic[0]
         payload = json.dumps(topic.payload())
 
-        payload_closed = payload.replace("Open", "").replace("|", "")
-        payload_open = payload.replace("Closed", "").replace("|", "")
+        payload_closed = payload.replace(GarageDoorStates.OPEN, "").replace("|", "")
+        payload_open = payload.replace(GarageDoorStates.CLOSED, "").replace("|", "")
         self.controller.start()
 
         for payload in [payload_open, payload_closed]:

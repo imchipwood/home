@@ -9,6 +9,11 @@ CONFIG_DIRS = [CONFIG_DIR, TEST_CONFIG_DIR]
 LOG_DIR = os.path.join(HOME_DIR, 'log')
 
 
+class GarageDoorStates:
+    OPEN = 'Open'
+    CLOSED = 'Closed'
+
+
 def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     """
     Set up logging stream and file handlers
