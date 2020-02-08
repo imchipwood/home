@@ -18,7 +18,7 @@ except:  # pragma: no cover
     import library.mock.mock_gpio as GPIO
 
 
-class GPIO_Monitor(object):
+class GPIOMonitor(object):
     """
     Simple GPIO monitoring class
     """

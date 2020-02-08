@@ -9,7 +9,7 @@ from threading import Thread
 
 from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
-from library.sensors.gpio_monitor import GPIO_Monitor, GPIO
+from library.sensors.gpio_monitor import GPIOMonitor, GPIO
 from library.data.database import Database
 
 
@@ -29,7 +29,7 @@ class GPIOMonitorController(BaseController):
 
         self.logger = Get_Logger(__name__, debug, config.log)
 
-        self.sensor = GPIO_Monitor(
+        self.sensor = GPIOMonitor(
             self.config,
             debug=debug
         )

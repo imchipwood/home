@@ -1,5 +1,5 @@
 from library.sensors.environment import EnvironmentSensor
-from library.sensors.gpio_monitor import GPIO_Monitor, GPIO
+from library.sensors.gpio_monitor import GPIOMonitor, GPIO
 from library.sensors.camera import Camera
 
 from library.config import ConfigurationHandler, SENSOR_CLASSES
@@ -57,7 +57,7 @@ class TestEnvironmentSensor:
 
 class TestGPIOMonitorSensor:
     def test_sensor(self):
-        sensor = GPIO_Monitor(
+        sensor = GPIOMonitor(
             config=CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.GPIO_MONITOR)
         )
         assert sensor.pull_up_down in [GPIO.PUD_UP, GPIO.PUD_DOWN]
