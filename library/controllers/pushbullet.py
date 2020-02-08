@@ -8,6 +8,7 @@ import os
 import json
 from threading import Thread
 from time import time, sleep
+from urllib3.exceptions import MaxRetryError
 
 from library import GarageDoorStates
 from library.controllers import BaseController, Get_Logger
@@ -33,8 +34,11 @@ class PushbulletController(BaseController):
         super().__init__(config, debug)
 
         self.logger = Get_Logger(__name__, debug, config.log)
-
-        self.notifier = PushbulletNotify(self.config.api_key)
+        try:
+            self.notifier = PushbulletNotify(self.config.api_key)
+        except MaxRetryError:
+            self.logger.exception("Failed to connect pushbullet")
+            self.notifier = None
 
         self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
 
@@ -130,6 +134,13 @@ class PushbulletController(BaseController):
             state = message_data.get("state")
             notification = self.config.notify.get(state)
             self.logger.debug(f"Received '{state}': {notification}")
+
+            if not self.notifier:  # pragma: no cover
+                self.logger.warning("No PushBullet connection - trying again")
+                try:
+                    self.notifier = PushbulletNotify(self.config.api_key)
+                except MaxRetryError:
+                    return
 
             if state == GarageDoorStates.OPEN:
                 if not self.wait_for_file_refresh(notification):  # pragma: no cover
