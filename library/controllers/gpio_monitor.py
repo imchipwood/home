@@ -88,7 +88,7 @@ class GPIOMonitorController(BaseController):
 
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
-                data = [int(time.time()), str(self.state)]
+                data = [int(time.time()), GarageDoorStates.OPEN if self.state else GarageDoorStates.CLOSED]
                 self.logger.debug(f"Adding data to db: {data}")
                 db.add_data(data)
                 db.delete_all_except_last_n_records(2)
