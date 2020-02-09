@@ -13,6 +13,7 @@ class EnvironmentConfig(BaseConfiguration):
     Supports MQTT communication & the DHT11, DHT22, AM2302
     humidity/temperature sensors
     """
+
     def __init__(self, config_path, mqtt_config=None, debug=False):
         """
         @param config_path: path to JSON configuration file

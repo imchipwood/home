@@ -5,15 +5,16 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import json
-from paho.mqtt.client import Client, MQTTv311
+
 from paho.mqtt import publish
+from paho.mqtt.client import Client, MQTTv311
 
 
 class MQTTError(Exception):
     pass
 
 
-def Get_MQTT_Error_Message(rc):
+def get_mqtt_error_message(rc):
     """
     Get a human-readable error message from an MQTT return code
     @param rc: return code
@@ -39,7 +40,9 @@ class MQTTClient(Client):
     paho.mqtt.client with support for passing in MQTTConfig object
     for initialization instead of manually defining client_id, etc.
     """
-    def __init__(self, client_id="", clean_session=True, userdata=None, protocol=MQTTv311, transport="tcp", mqtt_config=None):
+
+    def __init__(self, client_id="", clean_session=True, userdata=None, protocol=MQTTv311, transport="tcp",
+                 mqtt_config=None):
         """
         @type mqtt_config: library.config.mqtt.MQTTConfig
         """

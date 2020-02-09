@@ -6,7 +6,10 @@
       "night": 800
     },
     "delay": 0,
-    "resolution": [3280, 2464],
+    "resolution": [
+      3280,
+      2464
+    ],
     "rotation": 180,
     "brightness": 50,
     "contrast": 0,

@@ -1,5 +1,6 @@
 import pytest
-from library.communication.mqtt import Get_MQTT_Error_Message
+
+from library.communication.mqtt import get_mqtt_error_message
 
 
 @pytest.mark.parametrize(
@@ -8,8 +9,8 @@ from library.communication.mqtt import Get_MQTT_Error_Message
         (x, False if x == 0 else True) for x in range(0, -10, -1)
     ]
 )
-def test_Get_MQTT_Error_Message(rc, expect_response):
+def test_get_mqtt_error_message(rc, expect_response):
     if expect_response:
-        assert Get_MQTT_Error_Message(rc)
+        assert get_mqtt_error_message(rc)
     else:
-        assert not Get_MQTT_Error_Message(rc)
+        assert not get_mqtt_error_message(rc)

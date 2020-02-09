@@ -13,3 +13,5 @@ smb.conf
 reports
 data/*.sqlite3
 .idea/dataSources.xml
+util/htmlcov
+pi_image

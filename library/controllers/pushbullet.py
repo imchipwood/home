@@ -4,16 +4,17 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-import os
 import json
+import os
 from threading import Thread
-from time import time, sleep
+from time import time
+
 from urllib3.exceptions import MaxRetryError
 
 from library import GarageDoorStates
-from library.controllers import BaseController, Get_Logger
-from library.communication.mqtt import MQTTClient, MQTTError, Get_MQTT_Error_Message
+from library.communication.mqtt import MQTTClient, MQTTError, get_mqtt_error_message
 from library.communication.pushbullet import PushbulletNotify
+from library.controllers import BaseController, get_logger
 
 
 class PushbulletController(BaseController):
@@ -33,7 +34,7 @@ class PushbulletController(BaseController):
         """
         super().__init__(config, debug)
 
-        self.logger = Get_Logger(__name__, debug, config.log)
+        self.logger = get_logger(__name__, debug, config.log)
         try:
             self.notifier = PushbulletNotify(self.config.api_key)
         except MaxRetryError:
@@ -98,7 +99,7 @@ class PushbulletController(BaseController):
 
         # Check the connection results
         if rc != 0:  # pragma: no cover
-            message = Get_MQTT_Error_Message(rc)
+            message = get_mqtt_error_message(rc)
 
             self.logger.error(message)
             raise MQTTError(f"on_connect 'rc' failure - {message}")
@@ -174,11 +175,12 @@ class PushbulletController(BaseController):
         """
         if os.path.exists(file_path):
             # image exists - wait a couple seconds and then check again to make sure it's the right one
-            sleep(2)
+            start = time()
+            while time() - start < 2:
+                pass
 
         initial_time = time()
         while not os.path.exists(file_path):
-            sleep(1)
             if (time() - initial_time) > self.config.max_notification_delay:
                 self.logger.error(
                     f"Did not detect image in {self.config.max_notification_delay}"

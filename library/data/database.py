@@ -1,6 +1,7 @@
 import os
-from typing import List
 import sqlite3
+from typing import List
+
 from library import HOME_DIR
 
 
@@ -237,6 +238,7 @@ class Database:
 if __name__ == "__main__":
     from random import randint
     import time
+
     db_name = "test2"
     db_columns = [
         Column("timestamp", "integer", "PRIMARY KEY"),

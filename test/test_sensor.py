@@ -1,16 +1,19 @@
+from library.config import ConfigurationHandler, SENSORCLASSES
+from library.config.camera import CameraConfig
+from library.config.environment import EnvironmentConfig
+from library.config.gpio_monitor import GPIOMonitorConfig
+from library.sensors.camera import Camera
 from library.sensors.environment import EnvironmentSensor
 from library.sensors.gpio_monitor import GPIOMonitor, GPIO
-from library.sensors.camera import Camera
-
-from library.config import ConfigurationHandler, SENSOR_CLASSES
 
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
 
 class TestEnvironmentSensor:
+    config = CONFIGURATION_HANDLER.get_sensor_config("environment")  # type: EnvironmentConfig
     sensor = EnvironmentSensor(
-        config=CONFIGURATION_HANDLER.get_sensor_config("environment"),
+        config=config,
         debug=True
     )
 
@@ -57,8 +60,9 @@ class TestEnvironmentSensor:
 
 class TestGPIOMonitorSensor:
     def test_sensor(self):
+        config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_MONITOR)  # type: GPIOMonitorConfig
         sensor = GPIOMonitor(
-            config=CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.GPIO_MONITOR)
+            config=config
         )
         assert sensor.pull_up_down in [GPIO.PUD_UP, GPIO.PUD_DOWN]
         sensor.read()
@@ -67,7 +71,7 @@ class TestGPIOMonitorSensor:
 
 class TestCamera:
     def test_sensor(self):
-        config = CONFIGURATION_HANDLER.get_sensor_config(SENSOR_CLASSES.CAMERA)
+        config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.CAMERA)  # type: CameraConfig
         with Camera(config, debug=True) as sensor:
             assert sensor.capture_delay >= 0
             assert len(sensor.resolution) == 2

@@ -1,4 +1,5 @@
 from random import randrange
+
 DHT11 = 11
 DHT22 = 22
 AM2302 = DHT22

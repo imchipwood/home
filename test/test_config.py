@@ -1,17 +1,16 @@
-from inspect import ismethod
-import os
 import json
+from inspect import ismethod
+
 import pytest
 
-from library.config import ConfigurationHandler, SENSOR_CLASSES
+from library.config import ConfigurationHandler, SENSORCLASSES
+from library.config.camera import CameraConfig
 from library.config.environment import EnvironmentConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
-from library.config.camera import CameraConfig
-from library.config.pushbullet import PushbulletConfig
 from library.config.mqtt import MQTTConfig
-
-from library.controllers.environment import EnvironmentController
+from library.config.pushbullet import PushbulletConfig
 from library.controllers.camera import PiCameraController
+from library.controllers.environment import EnvironmentController
 from library.controllers.gpio_monitor import GPIOMonitorController
 from library.controllers.pushbullet import PushbulletController
 
@@ -33,10 +32,10 @@ def teardown_module():
 class Test_ConfigurationHandler:
 
     @pytest.mark.parametrize("target_type,expected_class", [
-        (SENSOR_CLASSES.ENVIRONMENT, EnvironmentConfig),
-        (SENSOR_CLASSES.GPIO_MONITOR, GPIOMonitorConfig),
-        (SENSOR_CLASSES.CAMERA, CameraConfig),
-        (SENSOR_CLASSES.PUSHBULLET, PushbulletConfig),
+        (SENSORCLASSES.ENVIRONMENT, EnvironmentConfig),
+        (SENSORCLASSES.GPIO_MONITOR, GPIOMonitorConfig),
+        (SENSORCLASSES.CAMERA, CameraConfig),
+        (SENSORCLASSES.PUSHBULLET, PushbulletConfig),
     ])
     def test_get_sensor_config(self, target_type, expected_class):
         """
@@ -51,14 +50,14 @@ class Test_ConfigurationHandler:
             config = handler.get_sensor_config(target_type)
 
             # Check the class is as expected
-            assert isinstance(config, expected_class)
-            assert config.mqtt_topic
+            assert config.__class__ == expected_class
+            assert hasattr(config, "mqtt_topic")
 
     @pytest.mark.parametrize("target_type,expected_class", [
-        (SENSOR_CLASSES.ENVIRONMENT, EnvironmentController),
-        (SENSOR_CLASSES.CAMERA, PiCameraController),
-        (SENSOR_CLASSES.GPIO_MONITOR, GPIOMonitorController),
-        (SENSOR_CLASSES.PUSHBULLET, PushbulletController),
+        (SENSORCLASSES.ENVIRONMENT, EnvironmentController),
+        (SENSORCLASSES.CAMERA, PiCameraController),
+        (SENSORCLASSES.GPIO_MONITOR, GPIOMonitorController),
+        (SENSORCLASSES.PUSHBULLET, PushbulletController),
     ])
     def test_get_sensor_controller(self, target_type, expected_class):
         """
@@ -73,7 +72,7 @@ class Test_ConfigurationHandler:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(target_type)
 
         # Check the class is as expected
-        assert isinstance(controller, expected_class)
+        assert controller.__class__ == expected_class
 
         # Check all the methods are defined
         assert ismethod(controller.start)

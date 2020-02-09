@@ -9,7 +9,7 @@ def execute(config_path, stop=lambda: False, debug=False):
     @param config_path: path to config file
     @type config_path: str
     @param stop: method to stop the process
-    @type stop: function
+    @type stop: method
     @param debug: debug flag
     @type debug: bool
     """

@@ -6,15 +6,16 @@ Author: Charles "Chip" Wood
 """
 
 import logging
-import time
 import os
+import time
 
-from library.controllers import Get_Logger
+from library.controllers import get_logger
 
 try:
     from picamera import PiCamera
-except:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from . import IS_TEAMCITY
+
     if IS_TEAMCITY:
         raise
     logging.warning("Failed to import picamera - using mock")
@@ -34,7 +35,7 @@ class Camera(PiCamera):
         self.debug = debug
         self.config = config
 
-        self.logger = Get_Logger(__name__, debug, config.log)
+        self.logger = get_logger(__name__, debug, config.log)
         self.setup()
 
     @property
@@ -64,7 +65,8 @@ class Camera(PiCamera):
         self.resolution = self.config.resolution
         self.iso = self.config.iso
 
-    def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None, **options):
+    def capture(self, output=None, format=None, use_video_port=False, resize=None, splitter_port=0, delay=None,
+                **options):
         """
         slight modification on built-in capture function to allow not specifying an output and updating camera ISO
         on the fly based on time of day

@@ -5,8 +5,10 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 from typing import List
-from library.config import BaseConfiguration
+
 import ephem
+
+from library.config import BaseConfiguration
 
 
 class CameraConfigKeys:
@@ -29,6 +31,7 @@ class CameraConfig(BaseConfiguration):
     Image support only
     Supports MQTT communication to start a capture
     """
+
     def __init__(self, config_path, mqtt_config=None, debug=False):
         """
         @param config_path: path to JSON configuration file

@@ -6,22 +6,24 @@ Author: Charles "Chip" Wood
 """
 import logging
 
-from library.controllers import Get_Logger
+from library.controllers import get_logger
 
 try:
     import RPi.GPIO as GPIO
-except:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from . import IS_TEAMCITY
+
     if IS_TEAMCITY:
         raise
     logging.warning("Failed to import RPi.GPIO - using mock library")
-    import library.mock.mock_gpio as GPIO
+    from library.mock.mock_gpio import GPIO
 
 
 class GPIOMonitor:
     """
     Simple GPIO monitoring class
     """
+
     def __init__(self, config, debug=False):
         """
         Constructor for GPIO_Monitor
@@ -32,7 +34,7 @@ class GPIOMonitor:
         """
         super()
         self.config = config
-        self.logger = Get_Logger(__name__, debug, config.log)
+        self.logger = get_logger(__name__, debug, config.log)
         GPIO.setmode(GPIO.BCM)
         self.pin = self.config.pin
         self.logger.debug(f"Setting up GPIO on pin {self.pin}")

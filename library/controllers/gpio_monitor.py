@@ -8,10 +8,10 @@ import time
 from threading import Thread
 
 from library import GarageDoorStates
-from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
-from library.sensors.gpio_monitor import GPIOMonitor, GPIO
+from library.controllers import BaseController, get_logger
 from library.data.database import Database
+from library.sensors.gpio_monitor import GPIOMonitor, GPIO
 
 
 class GPIOMonitorController(BaseController):
@@ -19,6 +19,7 @@ class GPIOMonitorController(BaseController):
     Basic controller with threads for monitoring GPIO state
     and publishing changes via MQTT.
     """
+
     def __init__(self, config, debug=False):
         """
         @param config: configuration object for GPIO monitoring
@@ -28,7 +29,7 @@ class GPIOMonitorController(BaseController):
         """
         super().__init__(config, debug)
 
-        self.logger = Get_Logger(__name__, debug, config.log)
+        self.logger = get_logger(__name__, debug, config.log)
 
         self.sensor = GPIOMonitor(
             self.config,

@@ -4,15 +4,16 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-from typing import Tuple
 import logging
+from typing import Tuple
 
-from library.controllers import Get_Logger
+from library.controllers import get_logger
 
 try:
     import Adafruit_DHT
-except:  # pragma: no cover
+except ImportError:  # pragma: no cover
     from . import IS_TEAMCITY
+
     if IS_TEAMCITY:
         raise
     logging.warning("Couldn't import Adafruit_DHT - importing the mock module.")
@@ -47,7 +48,7 @@ class EnvironmentSensor:
         self.config = config
         self.debug = debug
 
-        self.logger = Get_Logger(__name__, debug, config.log)
+        self.logger = get_logger(__name__, debug, config.log)
 
         # Initialize values for readings
         self._temperature = -999.0

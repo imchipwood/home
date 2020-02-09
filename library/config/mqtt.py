@@ -6,10 +6,11 @@ Author: Charles "Chip" Wood
 """
 import json
 import socket
+
 from library.config import BaseConfiguration, ConfigKeys
 
 
-def Get_IP_Address():
+def get_ip_address():
     """
     Get the machine's current IP address
     @rtype: str
@@ -23,6 +24,7 @@ class Formatters:
     """
     Simple Formatting object for MQTT Topic payloads
     """
+
     def __init__(self):
         """
         Constructor for Formatters object
@@ -43,25 +45,22 @@ class Formatters:
         @param actual_value: payload value passed by sensor or controller
         @return: actual_value as formatted string or original actual_value if string not expected
         """
+        value = actual_value
         if isinstance(expected_value, str):
             if "{" in expected_value:
                 # value won't change if expected_value is not a string formatter
                 new_value = expected_value.format(actual_value)
                 if new_value != expected_value:
-                    # Value changed - expected_value was a string formatter
-                    return new_value
+                    value = new_value
             else:
                 # Free-form string?
-                if expected_value == "":
-                    return actual_value
-                # Not a formatter, not freeform - pipe delimited list of valid values!
                 valid_values = expected_value.split("|")
-                if actual_value in valid_values:
-                    return actual_value
+                if expected_value == "" or actual_value in valid_values:
+                    value = actual_value
                 else:
-                    return None
+                    value = None
 
-        return actual_value
+        return value
 
     @staticmethod
     def _format_payload_int(expected_value, actual_value):
@@ -115,6 +114,7 @@ class Topic:
     """
     Basic MQTT topic object with payload & pubsub properties
     """
+
     def __init__(self, name, info):
         """
         Topic constructor
@@ -197,6 +197,7 @@ class MQTTBaseConfig(BaseConfiguration):
     """
     Base configuration object for MQTT communication - handles broker & port
     """
+
     def __init__(self, config_path, debug=False):
         """
         Base MQTT configuration handler with
@@ -214,7 +215,7 @@ class MQTTBaseConfig(BaseConfiguration):
         @return: MQTT broker URL
         @rtype: str
         """
-        return self.config.get(self.config_keys.BROKER, Get_IP_Address())
+        return self.config.get(self.config_keys.BROKER, get_ip_address())
 
     @property
     def port(self) -> int:
@@ -230,6 +231,7 @@ class MQTTConfig(MQTTBaseConfig):
     """
     Sensor-based MQTT config - adds client_id & pub/sub topic support
     """
+
     def __init__(self, config_path, sensor_config_path, debug=False):
         """
         Sensor-specific MQTT Configuration constructor
@@ -300,4 +302,3 @@ class MQTTConfig(MQTTBaseConfig):
             for name, topic in self.topics.items()
             if topic.pubsub in ["subscribe", "both"]
         }
-

@@ -1,14 +1,15 @@
-import os
-from time import time
-from abc import ABC, abstractmethod
 import logging
+import os
+from abc import ABC, abstractmethod
+from multiprocessing import Process
+from time import time
 from typing import List
 
-from library import setup_logging, GarageDoorStates
+from library import setup_logging
 from library.data.database import Database
 
 
-def Get_Logger(name, debug_flag, log_path) -> logging.Logger:
+def get_logger(name, debug_flag, log_path) -> logging.Logger:
     """
     Get a logging.Logger
     @param name: name of logger
@@ -35,6 +36,7 @@ def Get_Logger(name, debug_flag, log_path) -> logging.Logger:
 
 class BaseController(ABC):
     """Base class for all controllers to extend"""
+
     def __init__(self, config, debug=False):
         super()
 
@@ -43,7 +45,7 @@ class BaseController(ABC):
 
         self.logger = None
         self.running = False
-        self.thread = None
+        self.thread = None  # type: Process
 
     @abstractmethod
     def start(self):

@@ -7,7 +7,7 @@ Author: Charles "Chip" Wood
 from library.config import BaseConfiguration
 
 
-class CONFIG_KEYS:
+class CONFIGKEYS:
     PIN = "gpio_pin"
     PULL_UP_DOWN = "gpio_pull_up_down"
 
@@ -16,6 +16,7 @@ class GPIOMonitorConfig(BaseConfiguration):
     """
     MQTT-enabled door monitoring configuration
     """
+
     def __init__(self, config_path, mqtt_config=None, debug=False):
         """
         @param config_path: path to JSON configuration file

@@ -34,7 +34,7 @@ def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     stream_handler.setLevel(logging.DEBUG if logging_level else logging.INFO)
 
     # stdout logging formatting
-    stdout_format = "%(name)s - %(levelname)s - %(message)s"
+    stdout_format = "[%(asctime)s] %(name)s - %(levelname)s - %(message)s"
     stdout_formatter = logging.Formatter(stdout_format)
     stream_handler.setFormatter(stdout_formatter)
 

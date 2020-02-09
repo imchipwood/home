@@ -4,12 +4,12 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-from threading import Thread
-import timeit
 import json
+import timeit
+from threading import Thread
 
-from library.controllers import BaseController, Get_Logger
 from library.communication.mqtt import MQTTClient
+from library.controllers import BaseController, get_logger
 from library.sensors import SensorError
 from library.sensors.environment import EnvironmentSensor
 
@@ -19,6 +19,7 @@ class EnvironmentController(BaseController):
     Simple controller with threads for reading environment sensors
     and publishing data via MQTT
     """
+
     def __init__(self, config, debug=False):
         """
         @param config: configuration object for environment sensing
@@ -28,7 +29,7 @@ class EnvironmentController(BaseController):
         """
         super().__init__(config, debug)
 
-        self.logger = Get_Logger(__name__, debug, config.log)
+        self.logger = get_logger(__name__, debug, config.log)
 
         # Set up the sensor
         self.sensor = EnvironmentSensor(

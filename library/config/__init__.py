@@ -1,16 +1,16 @@
-import os
 import json
+import os
 from typing import List
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR
-from library.controllers.environment import EnvironmentController
 from library.controllers.camera import PiCameraController
+from library.controllers.environment import EnvironmentController
 from library.controllers.gpio_monitor import GPIOMonitorController
 from library.controllers.pushbullet import PushbulletController
 from library.data.database import Column
 
 
-class SENSOR_CLASSES:
+class SENSORCLASSES:
     ENVIRONMENT = "environment"
     GPIO_MONITOR = "gpio_monitor"
     GPIO_DRIVER = "gpio_driver"
@@ -58,8 +58,8 @@ class BaseConfiguration:
     def __repr__(self):
         return json.dumps(self.config, indent=2)
 
-    @staticmethod
-    def normalize_config_path(config_path) -> str:
+    @classmethod
+    def normalize_config_path(cls, config_path) -> str:
         """
         Normalize a config file path to the config dir of the repo
         @param config_path: relative or absolute config path
@@ -71,14 +71,16 @@ class BaseConfiguration:
 
         # If path is absolute and exists, return it
         if os.path.exists(config_path):
-            BaseConfiguration.BASE_CONFIG_DIR = os.path.dirname(config_path)
-            print(f"New base configuration directory: {BaseConfiguration.BASE_CONFIG_DIR}")
+            base_dir = os.path.dirname(config_path)
+            if cls.BASE_CONFIG_DIR != base_dir:
+                cls.BASE_CONFIG_DIR = base_dir
+                print(f"New base configuration directory: {base_dir}")
             return config_path
 
         # Path doesn't exist (might be relative)
         # Iterate over potential directories
         potential_dirs = [
-            BaseConfiguration.BASE_CONFIG_DIR,
+            cls.BASE_CONFIG_DIR,
             CONFIG_DIR,
             TEST_CONFIG_DIR
         ]
@@ -88,11 +90,11 @@ class BaseConfiguration:
                 # if the path exists, save the base dir for next time and return it
                 potential_path = os.path.join(potential_dir, config_path)
                 if os.path.exists(potential_path):
-                    BaseConfiguration.BASE_CONFIG_DIR = potential_dir
+                    cls.BASE_CONFIG_DIR = potential_dir
                     return potential_path
 
         # Can't figure out path - exit
-        raise OSError(f"Could not find config file {config_path} at base dir {BaseConfiguration.BASE_CONFIG_DIR}")  # pragma: no cover
+        raise OSError(f"Could not find config file {config_path} at base dir {cls.BASE_CONFIG_DIR}")  # pragma: no cover
 
     @staticmethod
     def load_config(config_path) -> dict:
@@ -149,19 +151,6 @@ class BaseConfiguration:
         return self.normalize_config_path(self.sensor_paths.get(sensor))
 
     @property
-    def mqtt_path(self) -> str:
-        """
-        Get the path to the base MQTT configuration file
-        @return: path to base MQTT configuration file if it exists
-        @rtype: str
-        """
-        path = self.config.get(ConfigKeys.MQTT)
-        if not path:
-            return ""
-        else:
-            return self.normalize_config_path(path)
-
-    @property
     def log(self) -> str:
         """
         @return: Path to log file
@@ -209,18 +198,18 @@ class ConfigurationHandler(BaseConfiguration):
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
-        SENSOR_CLASSES.ENVIRONMENT: EnvironmentController,
-        SENSOR_CLASSES.GPIO_MONITOR: GPIOMonitorController,
-        SENSOR_CLASSES.GPIO_DRIVER: None,
-        SENSOR_CLASSES.CAMERA: PiCameraController,
-        SENSOR_CLASSES.PUSHBULLET: PushbulletController,
+        SENSORCLASSES.ENVIRONMENT: EnvironmentController,
+        SENSORCLASSES.GPIO_MONITOR: GPIOMonitorController,
+        SENSORCLASSES.GPIO_DRIVER: None,
+        SENSORCLASSES.CAMERA: PiCameraController,
+        SENSORCLASSES.PUSHBULLET: PushbulletController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
-        SENSOR_CLASSES.ENVIRONMENT: EnvironmentConfig,
-        SENSOR_CLASSES.GPIO_MONITOR: GPIOMonitorConfig,
-        SENSOR_CLASSES.GPIO_DRIVER: None,
-        SENSOR_CLASSES.CAMERA: CameraConfig,
-        SENSOR_CLASSES.PUSHBULLET: PushbulletConfig,
+        SENSORCLASSES.ENVIRONMENT: EnvironmentConfig,
+        SENSORCLASSES.GPIO_MONITOR: GPIOMonitorConfig,
+        SENSORCLASSES.GPIO_DRIVER: None,
+        SENSORCLASSES.CAMERA: CameraConfig,
+        SENSORCLASSES.PUSHBULLET: PushbulletConfig,
     }
 
     def __init__(self, config_path, debug=False):

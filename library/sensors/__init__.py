@@ -2,16 +2,17 @@ import os
 
 IS_TEAMCITY = os.environ.get("IS_TEAMCITY", "FALSE") == "TRUE"
 
+
 def avg(l):
-	"""
-	Average the values in a list
-	@param l: list of floats or ints
-	@type l: list[float]
-	@return: average of values in list
-	@rtype: float
-	"""
-	return sum(l) / len(l)
+    """
+    Average the values in a list
+    @param l: list of floats or ints
+    @type l: list[float]
+    @return: average of values in list
+    @rtype: float
+    """
+    return sum(l) / len(l)
 
 
 class SensorError(Exception):
-	pass
+    pass

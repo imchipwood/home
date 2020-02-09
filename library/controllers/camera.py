@@ -8,12 +8,9 @@ import json
 from multiprocessing import Process
 from threading import Thread
 
-from library import GarageDoorStates
-from library.data.database import Database
+from library.communication.mqtt import MQTTClient, MQTTError, get_mqtt_error_message
+from library.controllers import BaseController, get_logger
 from library.sensors.camera import Camera
-
-from library.controllers import BaseController, Get_Logger
-from library.communication.mqtt import MQTTClient, MQTTError, Get_MQTT_Error_Message
 
 
 class PiCameraController(BaseController):
@@ -26,9 +23,10 @@ class PiCameraController(BaseController):
         """
         super().__init__(config=config, debug=debug)
 
-        self.logger = Get_Logger(__name__, debug, config.log)
+        self.logger = get_logger(__name__, debug, config.log)
 
-        self.thread = Process(target=self.loop)
+        self.thread = Process(target=self._loop, args=(self.running,))  # type: Process
+        # self.thread.daemon = True
 
         self.mqtt = None
         """@type: MQTTClient"""
@@ -52,34 +50,41 @@ class PiCameraController(BaseController):
         """
         self.logger.debug("Starting Camera MQTT connection")
         self.connect_mqtt()
-        self.running = True
+        # self.running = True
 
-    def loop(self):
+    def loop(self):  # pragma: no cover
+        return
+
+    def _loop(self, running: bool):  # pragma: no cover
         """
         No actual threading for Camera
+        No coverage because
         """
-        self.logger.debug("Starting MQTT loop")
         self.mqtt.loop_start()
+        self.logger.debug("Starting MQTT loop")
         try:
             while True:
-                continue
+                if not running:
+                    self.logger.debug("RUNNING SET TO FALSE")
+                    break
         except KeyboardInterrupt:
             self.logger.debug("KeyboardInterrupt, ignoring")
+        finally:
+            self.stop()
 
     def stop(self):
         """
         Disconnect from MQTT
         """
         self.logger.info("Shutting down camera MQTT connection")
+        self.running = False
         try:
-            if self.thread.is_alive():
-                self.thread.terminate()
-            self.mqtt.loop_stop()
-            result = self.mqtt.disconnect()
-            self.logger.debug(f"Disconnect result: {result}")
+            if self.mqtt:
+                self.mqtt.loop_stop()
+                result = self.mqtt.disconnect()
+                self.logger.debug(f"Disconnect result: {result}")
         except:
             self.logger.exception("Exception while disconnecting from MQTT - ignoring")
-        self.running = False
 
     def _start_thread(self):
         """
@@ -99,6 +104,7 @@ class PiCameraController(BaseController):
             self.setup()
             result = self.mqtt.connect()
             self.logger.debug(f"Connect result: {result}")
+            self.running = True
             self._start_thread()
 
     def on_connect(self, client, userdata, flags, rc):
@@ -109,7 +115,7 @@ class PiCameraController(BaseController):
 
         # Check the connection results
         if rc != 0:  # pragma: no cover
-            message = Get_MQTT_Error_Message(rc)
+            message = get_mqtt_error_message(rc)
             self.logger.error(message)
             raise MQTTError(f"on_connect 'rc' failure - {message}")
 

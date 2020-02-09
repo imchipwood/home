@@ -1,5 +1,5 @@
-from time import time
 from threading import Thread
+from time import time
 
 from library.home import execute
 
@@ -12,7 +12,7 @@ def test_execute():
     stop_threads = True
     thread.join(timeout=0.1)
     start = time()
-    while time() - start < 5 and thread.isAlive():
+    while time() - start < 5 and thread.is_alive():
         pass
     # thread.terminate()
-    assert not thread.isAlive()
+    assert not thread.is_alive()

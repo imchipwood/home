@@ -1,4 +1,3 @@
-
 class PiCamera:
     def __init__(self):
         self.rotation = 0

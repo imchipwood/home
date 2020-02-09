@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from library.data.database import Column, Database, get_database_path
@@ -22,15 +23,11 @@ def remove_db():
             os.remove(db_path)
 
 
-def setup_module():
-    remove_db()
+# def setup_module():
+#     remove_db()
 
 
-def teardown_function():
-    remove_db()
-
-
-def teardown_module():
+def setup_function():
     remove_db()
 
 
@@ -38,9 +35,10 @@ def teardown_module():
     (DB0_NAME, DB0_COLUMNS),
     (DB1_NAME, DB1_COLUMNS)
 ])
-def test_create_database(name, columns):
+def test_create_table(name, columns):
     with Database(name, columns) as db:
         assert os.path.exists(get_database_path(name))
+        assert db.does_table_exist(name)
 
 
 @pytest.mark.parametrize("name,columns,data_to_add", [
