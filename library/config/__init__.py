@@ -72,15 +72,15 @@ class BaseConfiguration:
         # If path is absolute and exists, return it
         if os.path.exists(config_path):
             base_dir = os.path.dirname(config_path)
-            if cls.BASE_CONFIG_DIR != base_dir:
-                cls.BASE_CONFIG_DIR = base_dir
+            if BaseConfiguration.BASE_CONFIG_DIR != base_dir:
+                BaseConfiguration.BASE_CONFIG_DIR = base_dir
                 print(f"New base configuration directory: {base_dir}")
             return config_path
 
         # Path doesn't exist (might be relative)
         # Iterate over potential directories
         potential_dirs = [
-            cls.BASE_CONFIG_DIR,
+            BaseConfiguration.BASE_CONFIG_DIR,
             CONFIG_DIR,
             TEST_CONFIG_DIR
         ]
@@ -90,11 +90,11 @@ class BaseConfiguration:
                 # if the path exists, save the base dir for next time and return it
                 potential_path = os.path.join(potential_dir, config_path)
                 if os.path.exists(potential_path):
-                    cls.BASE_CONFIG_DIR = potential_dir
+                    BaseConfiguration.BASE_CONFIG_DIR = potential_dir
                     return potential_path
 
         # Can't figure out path - exit
-        raise OSError(f"Could not find config file {config_path} at base dir {cls.BASE_CONFIG_DIR}")  # pragma: no cover
+        raise OSError(f"Could not find config file {config_path} at base dir {BaseConfiguration.BASE_CONFIG_DIR}")  # pragma: no cover
 
     @staticmethod
     def load_config(config_path) -> dict:
