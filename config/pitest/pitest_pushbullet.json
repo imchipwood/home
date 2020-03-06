@@ -3,6 +3,7 @@
   "api": "o.sENK4wzqB4Wfh7ZiGGfuZjSl8CyzM91y",
   "notify": {
     "Open": "/home/cpw/camera/captures/test.jpg",
+    "publish": "/home/cpw/camera/captures/test.jpg",
     "Closed": "Closed"
   },
   "max_notification_delay": 30.0,
@@ -12,7 +13,13 @@
       "home-assistant/test/door/state": {
         "pubsub": "subscribe",
         "payload": {
-          "state": "Open|Closed"
+          "state": "Closed"
+        }
+      },
+      "home-assistant/test/door/camera_publish": {
+        "pubsub": "subscribe",
+        "payload": {
+          "state": "publish"
         }
       }
     }

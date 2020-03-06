@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import pytest
 
@@ -17,14 +18,13 @@ DB1_COLUMNS = [
 
 
 def remove_db():
+    """
+    Remove all databases
+    """
     for db_name in [DB0_NAME, DB1_NAME]:
         db_path = get_database_path(db_name)
         if os.path.exists(db_path):
             os.remove(db_path)
-
-
-# def setup_module():
-#     remove_db()
 
 
 def setup_function():
@@ -35,7 +35,14 @@ def setup_function():
     (DB0_NAME, DB0_COLUMNS),
     (DB1_NAME, DB1_COLUMNS)
 ])
-def test_create_table(name, columns):
+def test_create_table(name: str, columns: List[Column]):
+    """
+    Test creating table works
+    @param name: name of table
+    @type name: str
+    @param columns: list of columns to add to table
+    @type columns: list[Column]
+    """
     with Database(name, columns) as db:
         assert os.path.exists(get_database_path(name))
         assert db.does_table_exist(name)
@@ -45,7 +52,16 @@ def test_create_table(name, columns):
     (DB0_NAME, DB0_COLUMNS, 0),
     (DB1_NAME, DB1_COLUMNS, "hello")
 ])
-def test_add_to_database(name, columns, data_to_add):
+def test_add_to_table(name: str, columns: List[Column], data_to_add: int or str):
+    """
+    Test adding info to tables work
+    @param name: name of table
+    @type name: str
+    @param columns: list of columns to add to table
+    @type columns: List[Column]
+    @param data_to_add: data to add to table
+    @type data_to_add: int or str
+    """
     with Database(name, columns) as db:
         db.add_data([0, data_to_add])
         db.add_data([1, data_to_add])
@@ -59,6 +75,15 @@ def test_add_to_database(name, columns, data_to_add):
     (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
 ])
 def test_get_last_n_records(name, columns, data_to_add):
+    """
+    Test getting last n records from table works
+    @param name: name of table
+    @type name: str
+    @param columns: list of columns to add to table
+    @type columns: List[Column]
+    @param data_to_add: data to add to table
+    @type data_to_add: int or str
+    """
     with Database(name, columns) as db:
         for i in range(5):
             db.add_data([i, data_to_add[i]])
@@ -79,6 +104,15 @@ def test_get_last_n_records(name, columns, data_to_add):
     (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
 ])
 def test_get_latest_record(name, columns, data_to_add):
+    """
+    Test getting latest table record works
+    @param name: name of table
+    @type name: str
+    @param columns: list of columns to add to table
+    @type columns: List[Column]
+    @param data_to_add: data to add to table
+    @type data_to_add: int or str
+    """
     with Database(name, columns) as db:
         for i in range(5):
             db.add_data([i, data_to_add[i]])
@@ -93,9 +127,19 @@ def test_get_latest_record(name, columns, data_to_add):
     (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
 ])
 def test_delete_all_except_last_n_records(name, columns, data_to_add):
+    """
+    Test removing all but last N records from table works
+    @param name: name of table
+    @type name: str
+    @param columns: list of columns to add to table
+    @type columns: List[Column]
+    @param data_to_add: data to add to table
+    @type data_to_add: int or str
+    """
     with Database(name, columns) as db:
         for i in range(5):
             db.add_data([i, data_to_add[i]])
 
-        db.delete_all_except_last_n_records(2)
-        assert len(db.get_all_records()) == 2
+        for i in range(5, 0, -1):
+            db.delete_all_except_last_n_records(i)
+            assert len(db.get_all_records()) == i

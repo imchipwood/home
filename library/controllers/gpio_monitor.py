@@ -11,7 +11,7 @@ from library import GarageDoorStates
 from library.communication.mqtt import MQTTClient
 from library.controllers import BaseController, get_logger
 from library.data.database import Database
-from library.sensors.gpio_monitor import GPIOMonitor, GPIO
+from library.sensors.gpio_monitor import GPIOMonitor
 
 
 class GPIOMonitorController(BaseController):
@@ -35,19 +35,27 @@ class GPIOMonitorController(BaseController):
             self.config,
             debug=debug
         )
-        self.state = self.sensor.read()
+        self._state = self.sensor.read()
 
-        # Set up MQTT
-        self.mqtt = None
-        """@type: MQTTClient"""
-        if self.config.mqtt_config:
-            self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+    @property
+    def state(self) -> bool:
+        """
+        Current GPIO pin state
+        @rtype: bool
+        """
+        return self._state
 
-    def __repr__(self):
+    @state.setter
+    def state(self, state: bool):
         """
-        @rtype: str
+        Set the state
+        @param state: new state
+        @type state: bool
         """
-        return GarageDoorStates.OPEN if self.state else GarageDoorStates.CLOSED
+        last_state = self.state
+        self._state = state
+        if last_state != state:
+            self.publish()
 
     # region Threading
 
@@ -56,10 +64,9 @@ class GPIOMonitorController(BaseController):
         Start the thread
         """
         self.logger.info("Starting GPIO monitor thread")
-        self.sensor.add_event_detect(GPIO.BOTH, self.publish_event)
+        super().start()
         self.thread = Thread(target=self.loop)
         self.thread.daemon = True
-        self.running = True
         self.thread.start()
 
     def stop(self):
@@ -67,27 +74,30 @@ class GPIOMonitorController(BaseController):
         Stop the thread
         """
         self.logger.info("Stopping GPIO monitor thread")
-        self.running = False
-        self.sensor.remove_event_detect()
+        super().stop()
 
     def loop(self):
+        """
+        Loop for monitoring GPIO
+        """
+        last_time = time.time()
         while self.running:
-            pass
+            current_time = time.time()
+            if current_time - last_time > self.sensor.config.period:
+                last_time = current_time
+                self.state = self.sensor.read()
 
     # endregion Threading
     # region Communication
 
-    def publish_event(self, channel):
+    def publish(self):
         """
         Broadcast sensor readings
-        @param channel: GPIO pin event fired on
-        @type channel: int
         """
         if not self.mqtt:
             return
 
-        # Update the current state
-        self.state = self.sensor.read()
+        self.logger.debug(f"{self.config.mqtt_config.client_id} state changed: {self}")
 
         # Check if the state should be published
         if self.should_publish():
@@ -99,9 +109,10 @@ class GPIOMonitorController(BaseController):
 
                 # Convert state to MQTT payload and attempt to publish
                 payload = topic.payload(state=str(self))
-                self.logger.info(f'Publishing to {topic}: {payload}')
+                self.logger.info(f"Publishing to {topic}: {payload}")
                 try:
-                    self.mqtt.single(topic=str(topic), payload=payload)
+                    self.mqtt.single(topic=str(topic), payload=payload, qos=2)
+                    self.logger.debug(f"Published to {topic}")
                 except:
                     self.logger.exception(f"Failed to publish to topic {topic.name}:\n\t{payload}")
                     raise
@@ -112,18 +123,22 @@ class GPIOMonitorController(BaseController):
         @rtype: bool
         """
         # Default is to publish
-        shouldPublish = True
+        should_publish = True
 
         if self.config.db_name:
             # Database exists - check previous state against current
             # and check if previous entry is old
-            lastState = self.get_latest_db_entry()
-            isRecent = self.is_latest_entry_recent(3)
+            last_state = self.get_latest_db_entry()
+            is_recent = self.is_latest_entry_recent(15)
 
             # Only publish if the state changed or the previous reading is old
-            shouldPublish = lastState != str(self.state) or not isRecent
+            state_changed = last_state != str(self)
+            should_publish = state_changed or not is_recent
+            _isRecent = str(is_recent).rjust(5, " ")
+            _stateChanged = str(state_changed).rjust(5, " ")
+            self.logger.debug(f"Recent: {_isRecent}, State changed: {_stateChanged}")
 
-        return shouldPublish
+        return should_publish
 
     def add_entry_to_database(self):
         """
@@ -132,7 +147,7 @@ class GPIOMonitorController(BaseController):
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
                 # Create the entry
-                data = [int(time.time()), str(self.state)]
+                data = [int(time.time()), str(self)]
                 self.logger.debug(f"Adding data to db: {data}")
                 db.add_data(data)
                 db.delete_all_except_last_n_records(2)
@@ -146,3 +161,20 @@ class GPIOMonitorController(BaseController):
         super().cleanup()
         self.sensor.cleanup()
         self.logger.info("Cleanup complete")
+
+    @staticmethod
+    def get_state_as_string(state: bool) -> str:
+        """
+        Convert state to string
+        @param state: state as bool
+        @type state: bool
+        @return: state as string
+        @rtype: str
+        """
+        return GarageDoorStates.OPEN if state else GarageDoorStates.CLOSED
+
+    def __repr__(self) -> str:
+        """
+        @rtype: str
+        """
+        return self.get_state_as_string(self.state)

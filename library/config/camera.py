@@ -55,7 +55,7 @@ class CameraConfig(BaseConfiguration):
         Get the camera settings dict
         @rtype: dict
         """
-        return self.config.get('settings', {})
+        return self.config.get("settings", {})
 
     @property
     def brightness(self) -> int:

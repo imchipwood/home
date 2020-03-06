@@ -16,7 +16,7 @@ class PiCamera:
         return
 
     def capture(self, output, format=None, use_video_port=False, resize=None, splitter_port=0, bayer=False, **options):
-        with open(output, 'w') as oup:
+        with open(output, "w") as oup:
             oup.write("HI\n")
 
     def __enter__(self):

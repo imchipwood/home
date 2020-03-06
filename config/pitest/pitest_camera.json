@@ -27,6 +27,12 @@
         "payload": {
           "capture": "CAPTURE"
         }
+      },
+      "home-assistant/test/door/camera_publish": {
+        "pubsub": "publish",
+        "payload": {
+          "state": "publish"
+        }
       }
     }
   },

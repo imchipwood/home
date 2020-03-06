@@ -1,0 +1,26 @@
+{
+  "mqtt": {
+    "client_id": "mqtt_config_test",
+    "topics": {
+      "topic1": {
+        "pubsub": "subscribe",
+        "payload": {
+          "state": "Open"
+        }
+      },
+      "topic2": {
+        "pubsub": "both",
+        "payload": {
+          "capture": true,
+          "delay": 0
+        }
+      },
+      "topic3": {
+        "pubsub": "publish",
+        "payload": {
+          "state": "publish"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteMappingsManager">
+    <list>
+      <list>
+        <remote-mappings server-id="python@sftp://cpw@192.168.1.154:22/home/cpw/dev/home/venv3.6/bin/python">
+          <settings>
+            <list>
+              <mapping local-root="$PROJECT_DIR$" remote-root="/tmp/pycharm_project_684" />
+            </list>
+          </settings>
+        </remote-mappings>
+        <remote-mappings server-id="python@sftp://cpw@192.168.1.151:22/home/cpw/dev/home/venv3.6/bin/python">
+          <settings>
+            <list>
+              <mapping local-root="$PROJECT_DIR$/../hom" remote-root="/tmp/pycharm_project_873" />
+            </list>
+          </settings>
+        </remote-mappings>
+      </list>
+    </list>
+  </component>
+</project>

@@ -5,15 +5,14 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import json
-import os
 from threading import Thread
-from time import time
 
 from urllib3.exceptions import MaxRetryError
 
 from library import GarageDoorStates
 from library.communication.mqtt import MQTTClient, MQTTError, get_mqtt_error_message
-from library.communication.pushbullet import PushbulletNotify
+from library.communication.pushbullet import PushBulletNotify
+from library.config import PubSubKeys
 from library.controllers import BaseController, get_logger
 
 
@@ -36,12 +35,10 @@ class PushbulletController(BaseController):
 
         self.logger = get_logger(__name__, debug, config.log)
         try:
-            self.notifier = PushbulletNotify(self.config.api_key)
+            self.notifier = PushBulletNotify(self.config.api_key)
         except MaxRetryError:
             self.logger.exception("Failed to connect pushbullet")
             self.notifier = None
-
-        self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
 
     # region Threading
 
@@ -49,33 +46,33 @@ class PushbulletController(BaseController):
         """
         Pushbullet won't actually do threading - instead, subscribe to an MQTT topic
         """
-        self.logger.debug("Starting Pushbullet MQTT connection")
+        self.logger.debug("Starting PushBullet MQTT connection")
+        super().start()
         self.mqtt.on_connect = self.on_connect
         self.mqtt.on_subscribe = self.on_subscribe
         self.mqtt.on_message = self.on_message
         self.connect_mqtt()
-        self.running = True
-
-    def loop(self):
-        """
-        No actual threading for Pushbullet
-        """
-        try:
-            self.mqtt.loop_forever()
-        except KeyboardInterrupt:
-            pass
 
     def stop(self):
         """
         Disconnect from MQTT
         """
-        self.logger.info("Shutting down pushbullet MQTT connection")
+        self.logger.info("Shutting down PushBullet MQTT connection")
+        super().stop()
         try:
             self.mqtt.loop_stop()
             self.mqtt.disconnect()
         except:
             self.logger.exception("Exception while disconnecting from MQTT - ignoring")
-        self.running = False
+
+    def loop(self):
+        """
+        No actual threading for PushBullet
+        """
+        try:
+            self.mqtt.loop_forever()
+        except KeyboardInterrupt:
+            pass
 
     # endregion Threading
     # region MQTT
@@ -84,7 +81,7 @@ class PushbulletController(BaseController):
         """
         Simply connect to MQTT
         """
-        if self.config.mqtt_topic and not self.running:
+        if self.config.mqtt_topic:
             self.logger.debug("in connect_mqtt")
             self.mqtt.connect()
             self.thread = Thread(target=self.loop)
@@ -107,7 +104,7 @@ class PushbulletController(BaseController):
         # Nothing wrong with RC - subscribe to topic
         self.logger.info("Connection successful")
         # Subscribe to all topics simultaneously
-        self.mqtt.subscribe([(x.name, 1) for x in self.config.mqtt_topic])
+        self.mqtt.subscribe([(x.name, 2) for x in self.config.mqtt_topic])
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         """
@@ -132,29 +129,20 @@ class PushbulletController(BaseController):
 
         topic = self.mqtt.config.topics_subscribe.get(msg.topic)
         if topic:
-            state = message_data.get("state")
+            state = message_data.get(PubSubKeys.STATE)
             notification = self.config.notify.get(state)
             self.logger.debug(f"Received '{state}': {notification}")
 
             if not self.notifier:  # pragma: no cover
                 self.logger.warning("No PushBullet connection - trying again")
                 try:
-                    self.notifier = PushbulletNotify(self.config.api_key)
+                    self.notifier = PushBulletNotify(self.config.api_key)
                 except MaxRetryError:
                     return
 
-            if state == GarageDoorStates.OPEN:
-                if not self.wait_for_file_refresh(notification):  # pragma: no cover
-                    return
-
-                try:
-                    self.notifier.send_file(notification)
-                except:
-                    self.logger.exception("Exception attempting to send Pushbullet image notification")
-
-            elif state == GarageDoorStates.CLOSED:
+            if state == GarageDoorStates.CLOSED:
                 if self.config.db_name:
-                    last_two = self.get_last_two_db_entries('state')
+                    last_two = self.get_last_two_db_entries(PubSubKeys.STATE)
                     if len(last_two) == 2 and all(last == GarageDoorStates.CLOSED for last in last_two) \
                             or not self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
                         # If last two entries were both "Closed" OR it wasn't recent
@@ -165,30 +153,11 @@ class PushbulletController(BaseController):
                 except:
                     self.logger.exception("Exception attempting to send Pushbullet text notification")
 
-    def wait_for_file_refresh(self, file_path) -> bool:  # pragma: no cover
-        """
-        Check if a file exists
-        @param file_path: path to
-        @type file_path: str
-        @return: whether or not the file was found
-        @rtype: bool
-        """
-        if os.path.exists(file_path):
-            # image exists - wait a couple seconds and then check again to make sure it's the right one
-            start = time()
-            while time() - start < 2:
-                pass
-
-        initial_time = time()
-        while not os.path.exists(file_path):
-            if (time() - initial_time) > self.config.max_notification_delay:
-                self.logger.error(
-                    f"Did not detect image in {self.config.max_notification_delay}"
-                    f" - no notification will be sent"
-                )
-                return False
-
-        return True
+            elif state == PubSubKeys.PUBLISH:
+                try:
+                    self.notifier.send_file(notification)
+                except:
+                    self.logger.exception("Exception attempting to send Pushbullet image notification")
 
     # endregion MQTT
 
@@ -198,8 +167,8 @@ class PushbulletController(BaseController):
         """
         super().cleanup()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         @rtype: str
         """
-        return f"{self.__class__}|{self.config.type}|{self.mqtt._client_id}"
+        return f"{self.__class__}|{self.config.__class__}|{self.mqtt._client_id}"

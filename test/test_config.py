@@ -29,7 +29,7 @@ def teardown_module():
         sensor.cleanup()
 
 
-class Test_ConfigurationHandler:
+class TestConfigurationHandler:
 
     @pytest.mark.parametrize("target_type,expected_class", [
         (SENSORCLASSES.ENVIRONMENT, EnvironmentConfig),
@@ -81,7 +81,7 @@ class Test_ConfigurationHandler:
         assert ismethod(controller.cleanup)
 
 
-class Test_MQTT:
+class TestMQTT:
     mqtt_path = "pytest_mqtt.json"
     sensor_path = "pytest_environment.json"
 
@@ -92,6 +92,30 @@ class Test_MQTT:
         mqtt = MQTTConfig(self.mqtt_path, self.sensor_path)
 
         assert len(mqtt.topics) == 1
+
+    def test_topics_deep(self):
+        """
+        Test that topics act as expected
+        """
+        config_path = "mqtt_config_test.json"
+        config = MQTTConfig(self.mqtt_path, config_path)
+        assert config.client_id == "mqtt_config_test"
+        assert config.topics
+
+        assert config.topics_subscribe
+        subscribe = config.topics_subscribe["topic1"]
+        assert subscribe.raw_payload == {"state": "Open"}
+        assert subscribe.payload(state="Open") == {"state": "Open"}
+
+        assert config.topics_publish
+        both = config.topics_publish["topic2"]
+        expected = {"capture": True, "delay": 5}
+        received = json.loads(both.payload(capture=True, delay=5))
+        assert received == expected
+
+        publish = config.topics_publish["topic3"]
+        assert publish.raw_payload == {"state": "publish"}
+        assert publish.payload(state="publish") == json.dumps({"state": "publish"})
 
     def test_payload(self):
         """

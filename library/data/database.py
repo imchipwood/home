@@ -57,6 +57,12 @@ class Column:
         """
         return self.key.upper() == "PRIMARY KEY"
 
+    def __repr__(self) -> str:
+        """
+        @rtype: str
+        """
+        return f"{self.name} {self.type} {self.key}"
+
 
 class DatabaseEntry:
     def __init__(self, columns: List[Column], entry):
@@ -111,7 +117,7 @@ class Database:
         @return: column names in the table
         @rtype: str
         """
-        return ', '.join([x.name for x in self.columns])
+        return ", ".join([x.name for x in self.columns])
 
     def does_table_exist(self, table_name: str) -> bool:
         """
@@ -121,7 +127,11 @@ class Database:
         @return: whether or not the table exists
         @rtype: bool
         """
-        query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';"
+        query = f"""
+SELECT name FROM sqlite_master
+WHERE type='table'
+AND name='{table_name}';
+"""
         self.cur.execute(query)
         result = self.cur.fetchone()
         return result and result[0] == table_name
@@ -134,13 +144,10 @@ class Database:
         @param columns: list of columns to add to the table
         @type columns: list[Column]
         """
+        assert table_name, "Must define table name"
+        assert columns and all([isinstance(x, Column) for x in columns]), "Must define columns"
         print(f"Creating table {table_name}")
-        assert columns, "Must define columns"
-        query = f"CREATE TABLE {table_name} ("
-        for column in columns:
-            query += f"{column.name} {column.type} {column.key}, "
-        query = query[:-2]
-        query += ")"
+        query = f"CREATE TABLE {table_name} ({', '.join([str(x) for x in columns])})"
         self.cur.execute(query)
 
     def add_data(self, data_to_add: List):
@@ -149,7 +156,13 @@ class Database:
         @param data_to_add: data to add to table
         @type data_to_add: list
         """
-        query = f"INSERT INTO {self.name} ({self.columns_str}) VALUES ({', '.join(['?' for x in data_to_add])})"
+        query = f"""
+INSERT INTO {self.name} (
+  {self.columns_str}
+) VALUES (
+  {', '.join(['?' for x in data_to_add])}
+)
+"""
         self.cur.execute(query, data_to_add)
         self.con.commit()
 
@@ -182,7 +195,7 @@ class Database:
         """
         primary = [x.name for x in self.columns if x.primary][0]
         others = [x.name for x in self.columns if x.name != primary]
-        others_str = ', '.join(others)
+        others_str = ", ".join(others)
         query = f"SELECT MAX({primary}), {others_str} FROM {self.name}"
         self.cur.execute(query)
         result = self.cur.fetchone()
@@ -208,7 +221,14 @@ class Database:
         @rtype: list[DatabaseEntry]
         """
         primary = [x.name for x in self.columns if x.primary][0]
-        query = f"SELECT * FROM (SELECT * FROM {self.name} ORDER BY {primary} DESC limit {n}) order by {primary} DESC"
+        query = f"""
+SELECT * FROM (
+  SELECT * 
+  FROM {self.name}
+  ORDER BY {primary} DESC
+  LIMIT {n}
+) ORDER BY {primary} DESC
+"""
         self.cur.execute(query)
         results = self.cur.fetchall()
         return self.convert_query_results_to_database_entries(results)
@@ -220,9 +240,20 @@ class Database:
         @type n: int
         """
         primary = [x.name for x in self.columns if x.primary][0]
-        query = f"DELETE FROM {self.name} WHERE {primary} <= (SELECT MAX({primary}) " \
-                f"FROM (SELECT {primary} FROM {self.name} ORDER BY {primary} LIMIT {n + 1}))"
+        query = f"""
+DELETE FROM {self.name}
+  WHERE {primary} <= (
+    SELECT {primary}
+    FROM (
+      SELECT {primary}
+      FROM {self.name}
+      ORDER BY {primary} DESC
+      LIMIT 1 OFFSET {n}
+    )
+  )
+"""
         self.cur.execute(query)
+        self.con.commit()
 
     def __enter__(self):
         self.setup()

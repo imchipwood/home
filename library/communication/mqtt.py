@@ -81,7 +81,7 @@ class MQTTClient(Client):
         )
 
     def single(
-            self, topic, payload=None, qos=1, retain=True, hostname=None,
+            self, topic, payload=None, qos=2, retain=True, hostname=None,
             port=None, client_id="", keepalive=60, will=None, auth=None,
             tls=None, protocol=MQTTv311, transport="tcp"
     ):

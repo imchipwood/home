@@ -46,7 +46,7 @@ class TestEnvironmentSensor:
         Check that the reading results match the desired units
         """
         self.sensor.reset_readings()
-        self.sensor.units = 'celsius'
+        self.sensor.units = "celsius"
         humidity, temperature = self.sensor.read()
         fahrenheit = temperature * 9.0 / 5.0 + 32.0
         assert fahrenheit == self.sensor.fahrenheit
@@ -54,11 +54,12 @@ class TestEnvironmentSensor:
         assert temperature == self.sensor.celsius
 
         # Change units
-        self.sensor.units = 'fahrenheit'
+        self.sensor.units = "fahrenheit"
         assert fahrenheit == self.sensor.temperature
 
 
 class TestGPIOMonitorSensor:
+    
     def test_sensor(self):
         config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_MONITOR)  # type: GPIOMonitorConfig
         sensor = GPIOMonitor(

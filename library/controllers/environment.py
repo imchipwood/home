@@ -37,12 +37,6 @@ class EnvironmentController(BaseController):
             debug=self.debug
         )
 
-        # Set up MQTT
-        self.mqtt = None
-        """@type: MQTTClient"""
-        if self.config.mqtt_config:
-            self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
-
     # region Threading
 
     def start(self):
@@ -50,9 +44,9 @@ class EnvironmentController(BaseController):
         Start the thread
         """
         self.logger.info("Starting environment thread")
+        super().start()
         self.thread = Thread(target=self.loop)
         self.thread.daemon = True
-        self.running = True
         self.thread.start()
 
     def stop(self):
@@ -60,19 +54,19 @@ class EnvironmentController(BaseController):
         Stop the thread
         """
         self.logger.info("Stopping environment thread")
-        self.running = False
+        super().stop()
 
     def loop(self):
         """
         Looping method for threading - reads sensor @ desired intervals and publishes results
         """
-        lasttime = 0
+        last_time = 0
         while self.running:
 
             # Read at the desired frequency
             now = float(timeit.default_timer())
-            if now - lasttime > self.config.period:
-                lasttime = now
+            if now - last_time > self.config.period:
+                last_time = now
 
                 # Do the readings
                 try:
@@ -110,11 +104,12 @@ class EnvironmentController(BaseController):
                 units=units
             )
 
-            self.logger.info(f'Publishing to {topic}: {json.dumps(payload, indent=2)}')
+            self.logger.info(f"Publishing to {topic}: {json.dumps(payload, indent=2)}")
             try:
                 self.mqtt.single(
                     topic=str(topic),
-                    payload=payload
+                    payload=payload,
+                    qos=2
                 )
             except:
                 self.logger.exception("Failed to publish MQTT data!")
@@ -129,8 +124,8 @@ class EnvironmentController(BaseController):
         super().cleanup()
         self.logger.info("Cleanup complete")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         @rtype: str
         """
-        return f"{self.__class__}|{self.config.type}|{self.config.pin}"
+        return f"{self.__class__}|{self.config.sensor_type}|{self.config.pin}"

@@ -5,9 +5,10 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import json
+import re
 import socket
 
-from library.config import BaseConfiguration, ConfigKeys
+from library.config import BaseConfiguration, ConfigKeys, PubSubKeys
 
 
 def get_ip_address():
@@ -135,23 +136,43 @@ class Topic:
         @return: pubsub string from config
         @rtype: str
         """
-        return self._info.get("pubsub", "").lower()
+        return self._info.get(PubSubKeys.PUBSUB, "")
 
-    def payload(self, **kwargs) -> str:
+    @property
+    def is_publish(self) -> bool:
+        """
+        Check if this topic is a publishing topic
+        @rtype: bool
+        """
+        publish_keys = [PubSubKeys.PUBLISH, PubSubKeys.BOTH]
+        return bool(
+            re.search(
+                self.pubsub,
+                "|".join(publish_keys),
+                re.I
+            )
+        )
+
+    @property
+    def raw_payload(self) -> dict:
+        """
+        Get the raw payload dict for this topic
+        @rtype: dict
+        """
+        return self._info.get(PubSubKeys.PAYLOAD, {})
+
+    def payload(self, **kwargs) -> str or dict:
         """
         Get the Topic's payload
         @return: payload as a string
-        @rtype: str
+        @rtype: str or dict
         """
-        # Get the expected payload
-        payload = self._info.get("payload", {})
-
         # Are we publishing or subscribing?
-        if self.pubsub == "publish":
+        if self.is_publish:
             new_payload = {}
 
             # Convert all the values
-            for expected_key, expected_val in payload.items():
+            for expected_key, expected_val in self.raw_payload.items():
                 # convert the value
                 actual_val = kwargs.get(expected_key)
                 actual_val = self.convert_payload_type(expected_val, actual_val)
@@ -167,7 +188,7 @@ class Topic:
 
         else:
             # Simply convert it to a string - let the controller figure out what to do with it
-            return payload
+            return self.raw_payload
 
     @staticmethod
     def convert_payload_type(expected_value, actual_value):
@@ -287,7 +308,7 @@ class MQTTConfig(MQTTBaseConfig):
         return {
             name: topic
             for name, topic in self.topics.items()
-            if topic.pubsub in ["publish", "both"]
+            if topic.pubsub in [PubSubKeys.PUBLISH, PubSubKeys.BOTH]
         }
 
     @property
@@ -300,5 +321,5 @@ class MQTTConfig(MQTTBaseConfig):
         return {
             name: topic
             for name, topic in self.topics.items()
-            if topic.pubsub in ["subscribe", "both"]
+            if topic.pubsub in [PubSubKeys.SUBSCRIBE, PubSubKeys.BOTH]
         }

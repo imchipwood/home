@@ -35,13 +35,29 @@ class GPIOMonitorConfig(BaseConfiguration):
             self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
+    def period(self) -> float:
+        """
+        Get the GPIO monitor period
+        @rtype: float
+        """
+        return 1.0 / self.frequency
+
+    @property
+    def frequency(self) -> float:
+        """
+        Get the GPIO monitor frequency
+        @rtype: float
+        """
+        return self.config.get("gpio_monitor_frequency", 1.0)
+
+    @property
     def pin(self) -> int:
         """
         Get the GPIO pin #
         @return: GPIO pin # for sensor
         @rtype: int
         """
-        return self.config.get('gpio_pin')
+        return self.config.get("gpio_pin")
 
     @property
     def pull_up_down(self) -> str:

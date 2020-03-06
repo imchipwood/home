@@ -3,10 +3,6 @@ import os
 from typing import List
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR
-from library.controllers.camera import PiCameraController
-from library.controllers.environment import EnvironmentController
-from library.controllers.gpio_monitor import GPIOMonitorController
-from library.controllers.pushbullet import PushbulletController
 from library.data.database import Column
 
 
@@ -19,21 +15,33 @@ class SENSORCLASSES:
 
 
 class ConfigKeys:
-    MQTT = 'mqtt'
-    SENSORS = 'sensors'
-    LOG = 'log'
-    BROKER = 'broker'
-    PORT = 'port'
-    CLIENT_ID = 'client_id'
-    TOPICS = 'topics'
-    PUBLISH = 'publish'
-    SUBSCRIBE = 'subscribe'
-    DB = 'db'
-    DB_NAME = 'name'
-    DB_COLUMNS = 'columns'
-    DB_COLUMN_NAME = 'col_name'
-    DB_COLUMN_TYPE = 'col_type'
-    DB_COLUMN_KEY = 'col_key'
+    MQTT = "mqtt"
+    SENSORS = "sensors"
+    LOG = "log"
+    BROKER = "broker"
+    PORT = "port"
+    CLIENT_ID = "client_id"
+    TOPICS = "topics"
+    PUBLISH = "publish"
+    SUBSCRIBE = "subscribe"
+    DB = "db"
+    DB_NAME = "name"
+    DB_COLUMNS = "columns"
+    DB_COLUMN_NAME = "col_name"
+    DB_COLUMN_TYPE = "col_type"
+    DB_COLUMN_KEY = "col_key"
+
+
+class PubSubKeys:
+    """
+    Simple class to avoid using raw strings all over the place
+    """
+    PUBSUB = "pubsub"
+    SUBSCRIBE = "subscribe"
+    PUBLISH = "publish"
+    BOTH = "both"
+    PAYLOAD = "payload"
+    STATE = "state"
 
 
 class BaseConfiguration:
@@ -55,7 +63,10 @@ class BaseConfiguration:
         self._config = {}
         self.config = config_path
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        @rtype: str
+        """
         return json.dumps(self.config, indent=2)
 
     @classmethod
@@ -105,7 +116,7 @@ class BaseConfiguration:
         @return: data from config file
         @rtype: dict
         """
-        with open(config_path, 'r') as inf:
+        with open(config_path, "r") as inf:
             return json.load(inf)
 
     @property
@@ -190,6 +201,11 @@ class BaseConfiguration:
 
 
 class ConfigurationHandler(BaseConfiguration):
+    # Import all the sensor-specific controller objects
+    from library.controllers.camera import PiCameraController
+    from library.controllers.environment import EnvironmentController
+    from library.controllers.gpio_monitor import GPIOMonitorController
+    from library.controllers.pushbullet import PushbulletController
     # Import all the sensor-specific configuration objects
     from library.config.environment import EnvironmentConfig
     from library.config.gpio_monitor import GPIOMonitorConfig

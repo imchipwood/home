@@ -32,13 +32,13 @@ class EnvironmentConfig(BaseConfiguration):
             self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
-    def type(self) -> int:
+    def sensor_type(self) -> int:
         """
         Get the sensor type
         @return: Adafruit_DHT type
         @rtype: int
         """
-        return self.config.get('type')
+        return self.config.get("type")
 
     @property
     def pin(self) -> int:
@@ -47,7 +47,7 @@ class EnvironmentConfig(BaseConfiguration):
         @return: GPIO pin # for environment sensor
         @rtype: int
         """
-        return self.config.get('pin')
+        return self.config.get("pin")
 
     @property
     def units(self) -> str:
@@ -56,7 +56,7 @@ class EnvironmentConfig(BaseConfiguration):
         @return: temperature units
         @rtype: str
         """
-        return self.config.get('units')
+        return self.config.get("units")
 
     @property
     def period(self) -> int:
@@ -65,7 +65,7 @@ class EnvironmentConfig(BaseConfiguration):
         @return: period in seconds. Default: 300
         @rtype: int
         """
-        return int(self.config.get('period', 5 * 60))
+        return int(self.config.get("period", 5 * 60))
 
     @property
     def mqtt_topic(self):

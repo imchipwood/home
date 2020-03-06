@@ -6,7 +6,11 @@ from time import time
 from typing import List
 
 from library import setup_logging
+from library.communication.mqtt import MQTTClient
 from library.data.database import Database
+from library.data import DatabaseKeys
+
+RUNNING = False
 
 
 def get_logger(name, debug_flag, log_path) -> logging.Logger:
@@ -43,23 +47,51 @@ class BaseController(ABC):
         self.debug = debug
         self.config = config
 
+        self._mqtt = None
         self.logger = None
-        self.running = False
         self.thread = None  # type: Process
+
+    @property
+    def running(self) -> bool:
+        """
+        Check if monitor is running
+        @rtype: bool
+        """
+        global RUNNING
+        return RUNNING
+
+    @running.setter
+    def running(self, running: bool):
+        """
+        Set running flag
+        @type running: bool
+        """
+        global RUNNING
+        RUNNING = running
+
+    @property
+    def mqtt(self) -> MQTTClient:
+        """
+        Get the MQTTClient
+        @rtype: MQTTClient
+        """
+        if not self._mqtt and self.config.mqtt_config:
+            self._mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
+        return self._mqtt
 
     @abstractmethod
     def start(self):
         """
         Start the thread
         """
-        pass  # pragma: no cover
+        self.running = True
 
     @abstractmethod
     def stop(self):
         """
         Stop the thread
         """
-        pass  # pragma: no cover
+        self.running = False
 
     @abstractmethod
     def loop(self):
@@ -75,23 +107,38 @@ class BaseController(ABC):
         """
         self.stop()
 
-    def get_latest_db_entry(self, column_name: str = 'state'):
+    @property
+    def db_enabled(self) -> bool:
+        """
+        Check if a database is available
+        @rtype: bool
+        """
+        return self.config.db_name and self.config.db_columns
+
+    @property
+    def db(self) -> Database:
+        """
+        Get the Database object for this controller
+        @rtype: Database
+        """
+        return Database(self.config.db_name, self.config.db_columns)
+
+    def get_latest_db_entry(self, column_name: str = DatabaseKeys.STATE) -> int or float or str:
         """
         Get the latest value from the database
-        @return:
         @rtype: int or float or str
         """
         latest = None
         if self.config.db_name:
             self.logger.debug(f"Opening DB {self.config.db_name}")
-            with Database(self.config.db_name, self.config.db_columns) as db:
+            with self.db as db:
                 record = db.get_latest_record()
                 if record:
                     latest = record[column_name]
                     self.logger.debug(f"Latest db entry at column {column_name}: {latest}")
         return latest
 
-    def get_last_two_db_entries(self, column_name: str = 'state') -> List:
+    def get_last_two_db_entries(self, column_name: str = DatabaseKeys.STATE) -> List:
         """
         Get the last two entries from the DB
         @param column_name: name of column to get
@@ -102,9 +149,9 @@ class BaseController(ABC):
         entries = []
         if self.config.db_name:
             self.logger.debug(f"Opening DB {self.config.db_name}")
-            with Database(self.config.db_name, self.config.db_columns) as db:
+            with self.db as db:
                 records = db.get_last_n_records(2)
-                if records:
+                if len(records) == 2:
                     entries = [record[column_name] for record in records]
                     self.logger.debug(f"Latest db entry at column {column_name}: {entries}")
         return entries
@@ -117,7 +164,7 @@ class BaseController(ABC):
         @return: whether the latest entry is 'recent' or not
         @rtype: bool
         """
-        latest = self.get_latest_db_entry('timestamp')
+        latest = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
         if not latest:
             # No recent entry
             return True

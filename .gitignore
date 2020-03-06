@@ -1,10 +1,11 @@
 **.pyc
 */cpw*
 #.idea
-.idea/workspace.xml
-.idea/inspectionProfiles
+#.idea/workspace.xml
+#.idea/inspectionProfiles
 .idea/misc.xml
 .idea/*CACHE*
+.idea/dataSources.xml
 #doc
 smb.conf
 *venv*
@@ -12,6 +13,5 @@ smb.conf
 *pushbulletSettings*
 reports
 data/*.sqlite3
-.idea/dataSources.xml
 util/htmlcov
 pi_image

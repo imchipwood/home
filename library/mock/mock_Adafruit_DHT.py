@@ -19,7 +19,7 @@ def read(sensor, pin, platform=None):
     @rtype: tuple(float, float)
     """
     if sensor not in SENSORS:
-        raise ValueError('Expected DHT11, DHT22, or AM2302 sensor value.')
+        raise ValueError("Expected DHT11, DHT22, or AM2302 sensor value.")
 
     humidity = randrange(0, 10000) / 100.0
     temperature = randrange(-40, 80) + randrange(0, 100) / 100.0

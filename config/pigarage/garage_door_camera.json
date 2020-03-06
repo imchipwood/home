@@ -27,6 +27,12 @@
         "payload": {
           "capture": "CAPTURE"
         }
+      },
+      "home-assistant/garage/camera_publish": {
+        "pubsub": "publish",
+        "payload": {
+          "state": "publish"
+        }
       }
     }
   },

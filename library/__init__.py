@@ -1,17 +1,17 @@
 import logging
 import os
 
-HOME_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
-CONFIG_DIR = os.path.join(HOME_DIR, 'config')
-TEST_DIR = os.path.join(HOME_DIR, 'test')
-TEST_CONFIG_DIR = os.path.join(TEST_DIR, 'config')
+HOME_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
+CONFIG_DIR = os.path.join(HOME_DIR, "config")
+TEST_DIR = os.path.join(HOME_DIR, "test")
+TEST_CONFIG_DIR = os.path.join(TEST_DIR, "config")
 CONFIG_DIRS = [CONFIG_DIR, TEST_CONFIG_DIR]
-LOG_DIR = os.path.join(HOME_DIR, 'log')
+LOG_DIR = os.path.join(HOME_DIR, "log")
 
 
 class GarageDoorStates:
-    OPEN = 'Open'
-    CLOSED = 'Closed'
+    OPEN = "Open"
+    CLOSED = "Closed"
 
 
 def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
@@ -26,7 +26,7 @@ def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     @return: logger with handlers setup
     @rtype: logging.Logger
     """
-    log_level_str = 'DEBUG' if logging_level else 'INFO'
+    log_level_str = "DEBUG" if logging_level else "INFO"
     logger.info(f"Logging level: {log_level_str}")
 
     # stdout stream handler

@@ -79,7 +79,7 @@ def restart_pi():
         ['logger "WLAN down - Pi forcing reboot"'],
         shell=True
     )
-    cmd = 'sudo shutdown -r now'
+    cmd = "sudo shutdown -r now"
     print(f"Executing command:\n\t{cmd}")
     subprocess.call([cmd], shell=True)
 

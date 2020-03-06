@@ -3,7 +3,7 @@ import os
 from pushbullet.filetype import get_file_type
 
 from library import TEST_CONFIG_DIR
-from library.communication.pushbullet import PushbulletNotify
+from library.communication.pushbullet import PushBulletNotify
 from library.config import ConfigurationHandler, SENSORCLASSES
 from library.config.pushbullet import PushbulletConfig
 
@@ -29,10 +29,14 @@ def mock_upload_file(f, file_name, file_type=None):
     return {"file_type": file_type, "file_url": "http://some.fake/url", "file_name": file_name}
 
 
-class Test_PushbulletCommunication:
+class TestPushBulletCommunication:
+
     def test_pushbullet(self, monkeypatch):
+        """
+        Test send file/text methods
+        """
         config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.PUSHBULLET)  # type: PushbulletConfig
-        pb = PushbulletNotify(config.api_key)
+        pb = PushBulletNotify(config.api_key)
 
         monkeypatch.setattr(pb, "push_note", mock_push_note)
         monkeypatch.setattr(pb, "push_file", mock_push_file)

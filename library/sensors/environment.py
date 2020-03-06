@@ -57,8 +57,7 @@ class EnvironmentSensor:
         self.pin = self.config.pin
 
         # Set the sensor type & pin #
-        self._sensor_type = Adafruit_DHT.DHT11
-        self.sensor_type = self.config.type
+        self._sensor_type = self.config.sensor_type or Adafruit_DHT.DHT11
 
         self._units = "fahrenheit"
         self.units = self.config.units
@@ -154,7 +153,7 @@ class EnvironmentSensor:
         @return: whether or not current units are set to celsius
         @rtype: bool
         """
-        return self.units == 'celsius'
+        return self.units == "celsius"
 
     @property
     def fahrenheit(self) -> float:

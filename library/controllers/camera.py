@@ -5,11 +5,11 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import json
-from multiprocessing import Process
 from threading import Thread
 
-from library.communication.mqtt import MQTTClient, MQTTError, get_mqtt_error_message
+from library.communication.mqtt import MQTTError, get_mqtt_error_message
 from library.controllers import BaseController, get_logger
+from library.data import DatabaseKeys
 from library.sensors.camera import Camera
 
 
@@ -25,11 +25,25 @@ class PiCameraController(BaseController):
 
         self.logger = get_logger(__name__, debug, config.log)
 
-        self.thread = Process(target=self._loop, args=(self.running,))  # type: Process
-        # self.thread.daemon = True
+        self.thread = Thread(target=self.loop)
+        self._last_capture_timestamp = 0
 
-        self.mqtt = None
-        """@type: MQTTClient"""
+    @property
+    def last_capture_timestamp(self) -> float or int:
+        """
+        Last time a picture was taken
+        @rtype: float or int
+        """
+        return self._last_capture_timestamp
+
+    @last_capture_timestamp.setter
+    def last_capture_timestamp(self, timestamp: float or int):
+        """
+        Set the last capture time
+        @param timestamp: new capture timestamp
+        @type timestamp: float or int
+        """
+        self._last_capture_timestamp = timestamp
 
     # region Threading
 
@@ -37,47 +51,35 @@ class PiCameraController(BaseController):
         """
         Setup MQTT stuff
         """
-        if self.config.mqtt_config:
-            self.mqtt = MQTTClient(mqtt_config=self.config.mqtt_config)
-            self.logger.debug(f"MQTT Config: {self.mqtt}")
-            self.mqtt.on_connect = self.on_connect
-            self.mqtt.on_subscribe = self.on_subscribe
-            self.mqtt.on_message = self.on_message
+        if not self.mqtt:
+            self.logger.warning("No MQTT client defined! Nothing for camera controller to do.")
+            return
+
+        self.logger.debug(f"MQTT Config: {self.mqtt}")
+        self.mqtt.on_connect = self.on_connect
+        self.mqtt.on_subscribe = self.on_subscribe
+        self.mqtt.on_message = self.on_message
+
+        self.logger.debug("Connecting MQTT")
+        result = self.mqtt.connect()
+        self.logger.debug(f"Connect result: {result}")
+        self.mqtt.loop_start()
 
     def start(self):
         """
         Camera won't actually do threading - instead, we'll subscribe to an MQTT topic
         """
         self.logger.debug("Starting Camera MQTT connection")
-        self.connect_mqtt()
-        # self.running = True
-
-    def loop(self):  # pragma: no cover
-        return
-
-    def _loop(self, running: bool):  # pragma: no cover
-        """
-        No actual threading for Camera
-        No coverage because
-        """
-        self.mqtt.loop_start()
-        self.logger.debug("Starting MQTT loop")
-        try:
-            while True:
-                if not running:
-                    self.logger.debug("RUNNING SET TO FALSE")
-                    break
-        except KeyboardInterrupt:
-            self.logger.debug("KeyboardInterrupt, ignoring")
-        finally:
-            self.stop()
+        super().start()
+        self.setup()
+        self.thread.start()
 
     def stop(self):
         """
         Disconnect from MQTT
         """
         self.logger.info("Shutting down camera MQTT connection")
-        self.running = False
+        super().stop()
         try:
             if self.mqtt:
                 self.mqtt.loop_stop()
@@ -86,26 +88,22 @@ class PiCameraController(BaseController):
         except:
             self.logger.exception("Exception while disconnecting from MQTT - ignoring")
 
-    def _start_thread(self):
+    def loop(self):  # pragma: no cover
         """
-        Start the thread
+        No actual threading for Camera
+        No coverage because
         """
-        self.thread.start()
+        self.logger.debug("Starting MQTT loop")
+        try:
+            while self.running:
+                pass
+        except KeyboardInterrupt:
+            self.logger.debug("KeyboardInterrupt, ignoring")
+        finally:
+            self.stop()
 
     # endregion Threading
     # region MQTT
-
-    def connect_mqtt(self):
-        """
-        Simply connect to MQTT
-        """
-        if self.config.mqtt_topic and not self.running:
-            self.logger.debug("in connect_mqtt")
-            self.setup()
-            result = self.mqtt.connect()
-            self.logger.debug(f"Connect result: {result}")
-            self.running = True
-            self._start_thread()
 
     def on_connect(self, client, userdata, flags, rc):
         """
@@ -122,7 +120,7 @@ class PiCameraController(BaseController):
         # Nothing wrong with RC - subscribe to topic
         self.logger.info("Connection successful")
         # Subscribe to all topics simultaneously
-        self.mqtt.subscribe([(x.name, 1) for x in self.config.mqtt_topic])
+        self.mqtt.subscribe([(x.name, 2) for x in self.config.mqtt_topic])
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         """
@@ -147,7 +145,6 @@ class PiCameraController(BaseController):
 
         # Check if it indicated a capture
         if self.should_capture_from_command(msg.topic, message_data):
-            self.logger.info("Received capture command")
             # If no delay in message, pass in None - this will force camera to use
             # the delay defined in the config
             kwargs = {"delay": message_data.get("delay", None)}
@@ -169,26 +166,56 @@ class PiCameraController(BaseController):
         if not topic:
             return False
 
-        latest = self.get_latest_db_entry()
+        latest_timestamp = None
+        last_two_states = []
+        if self.db_enabled:
+            latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
+            last_two_states = self.get_last_two_db_entries()
+
+            if message_data.get("capture"):
+                self.logger.info("Received direct capture command")
+                self.last_capture_timestamp = latest_timestamp
+                return True
 
         # Check the payload - assumes a single value
         for key, val in message_data.items():
             if key == "delay":
+                # Ignore the delay
                 continue
+
             message_val = topic.payload().get(key, None)
 
             if isinstance(message_val, str):
                 message_val = message_val.lower()
                 val = val.lower()
 
-            if latest:
-                return message_val == val and latest != val
+            if self.db_enabled and latest_timestamp is not None and len(last_two_states) == 2:
+                # Capture if message matches
+                # and state changed (requires two entries)
+                # and timestamp is new
+                should_capture = message_val == val
+                should_capture &= last_two_states[0] != last_two_states[1]
+                should_capture &= latest_timestamp != self.last_capture_timestamp
             else:
-                return message_val == val
+                should_capture = message_val == val
+
+            if should_capture:
+                self.logger.info("Received message indicating capture")
+                self.last_capture_timestamp = latest_timestamp
+                return should_capture
 
         # Shouldn't ever get here but just in case...
         self.logger.warning("Didn't find expected payload - not capturing!")
         return False
+
+    def publish(self):
+        """
+        Broadcast that an image was taken
+        """
+        if self.mqtt:
+            for name, topic in self.config.mqtt_config.topics_publish.items():
+                self.logger.info(f"Publish to {name}: {topic.raw_payload}")
+                self.mqtt.single(str(topic), payload=topic.raw_payload, qos=2)
 
     # endregion MQTT
     # region Camera
@@ -199,6 +226,7 @@ class PiCameraController(BaseController):
         """
         with Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
+            self.publish()
 
     # endregion Camera
 
@@ -208,8 +236,8 @@ class PiCameraController(BaseController):
         """
         super().cleanup()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         @rtype: str
         """
-        return f"{self.__class__}|{self.config.type}|{self.config.mqtt_config.client_id}"
+        return f"{self.__class__}|{self.config.__class__}|{self.config.mqtt_config.client_id}"

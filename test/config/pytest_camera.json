@@ -31,6 +31,12 @@
           "capture": true,
           "delay": 0
         }
+      },
+      "home-assistant/pytest/camera_publish": {
+        "pubsub": "publish",
+        "payload": {
+          "state": "publish"
+        }
       }
     }
   },
