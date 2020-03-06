@@ -1,6 +1,6 @@
 {
   "log": "/home/cpw/dev/logs/mediaEnvironment.log",
-  "type": 22,
+  "sensor_type": 22,
   "pin": 4,
   "units": "fahrenheit",
   "period": 30,

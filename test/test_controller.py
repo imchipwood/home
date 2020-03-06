@@ -8,7 +8,7 @@ import pytest
 
 from library import GarageDoorStates
 from library.communication.mqtt import MQTTClient
-from library.config import ConfigurationHandler, SENSORCLASSES, ConfigKeys
+from library.config import ConfigurationHandler, SENSORCLASSES
 from library.config.mqtt import MQTTConfig
 from library.data import DatabaseKeys
 
@@ -25,6 +25,11 @@ MAX_ENV_WAIT_SECONDS = MAX_WAIT_SECONDS * 3
 @pytest.fixture
 def mock_get_latest_db_entry(mocker):
     mocker.patch("library.controllers.camera.PiCameraController.get_latest_db_entry", return_value=None)
+
+
+@pytest.fixture
+def mock_db_enabled(mocker):
+    mocker.patch("library.controllers.pushbullet.PushBulletController.db_enabled", return_value=False)
 
 
 class TestTopic:
@@ -321,14 +326,13 @@ class TestGPIOMonitorController:
 
 class TestPushBulletController:
 
+    @pytest.mark.usefixtures("mock_db_enabled")
     def test_mqtt(self, monkeypatch):
         """
         Test that controller subscribes to topics and receives published messages
         """
-        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
-        """ @type: library.controllers.pushbullet.PushbulletController"""
-        # don't use the database
-        self.controller.config.config[ConfigKeys.DB] = None
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
+        """ @type: library.controllers.pushbullet.PushBulletController"""
 
         global MESSAGE
         global text_sent
@@ -336,8 +340,8 @@ class TestPushBulletController:
         text_sent, file_sent = False, False
 
         MESSAGE = False
-        topics = [x.name for x in self.controller.config.mqtt_topic]
-        client = get_mqtt_client(self.controller.config.mqtt_config, topics)
+        topics = [x.name for x in controller.config.mqtt_topic]
+        client = get_mqtt_client(controller.config.mqtt_config, topics)
 
         def mock_send_file(file_path):
             global file_sent
@@ -351,27 +355,71 @@ class TestPushBulletController:
             print("SEND TEXT")
             print(f"Fake pushed: {title}: {body}")
 
-        monkeypatch.setattr(self.controller.notifier, "send_file", mock_send_file)
-        monkeypatch.setattr(self.controller.notifier, "send_text", mock_send_text)
+        def mock_should_text_notify():
+            return True
 
-        topic_state = self.controller.config.mqtt_topic[0]
-        topic_publish = self.controller.config.mqtt_topic[1]
+        monkeypatch.setattr(controller, "should_text_notify", mock_should_text_notify)
+        monkeypatch.setattr(controller.notifier, "send_file", mock_send_file)
+        monkeypatch.setattr(controller.notifier, "send_text", mock_send_text)
+
+        topic_state = controller.config.mqtt_topic[0]
+        topic_publish = controller.config.mqtt_topic[1]
         payload_closed = json.dumps(topic_state.payload())
         payload_capture = json.dumps(topic_publish.payload())
-        self.controller.start()
+        controller.start()
 
         for payload in [payload_closed, payload_capture]:
-            self.controller.mqtt.single(topic_state.name, payload, qos=2)
+            controller.mqtt.single(topic_state.name, payload, qos=2)
             wait_n_seconds(2)
 
         start = timeit.default_timer()
         now = start
-        while not (text_sent or file_sent) and now - start < MAX_WAIT_SECONDS:
+        while not (text_sent and file_sent) and now - start < MAX_WAIT_SECONDS:
             now = timeit.default_timer()
 
         if not text_sent or not file_sent:
             raise Exception(f"Messages not received! file: {file_sent}, text: {text_sent}")
 
-        self.controller.stop()
+        controller.stop()
         client.disconnect()
         assert MESSAGE
+
+    def test_should_text_notify(self):
+        """
+        Test the should_text_notify method
+        """
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
+        """ @type: library.controllers.pushbullet.PushBulletController"""
+
+        # clear DB entries
+        with controller.db as db:
+            db.delete_all_except_last_n_records(0)
+
+            # Notify if no DB entries
+            assert controller.should_text_notify()
+
+            # Notify if last entry is old
+            db.add_data([0, GarageDoorStates.CLOSED])
+            assert controller.should_text_notify()
+            db.delete_all_except_last_n_records(0)
+
+            # Notify if only one DB entry
+            cur_time = int(time.time())
+            i = 0
+            db.add_data([cur_time + i, GarageDoorStates.CLOSED])
+            assert controller.should_text_notify()
+
+            # Don't notify if last two entries are "CLOSED"
+            i += 1
+            db.add_data([cur_time + i, GarageDoorStates.CLOSED])
+            assert not controller.should_text_notify()
+
+            # Don't notify if last entry is "OPEN"
+            i += 1
+            db.add_data([cur_time + i, GarageDoorStates.OPEN])
+            assert not controller.should_text_notify()
+
+            # Notify if last entry is CLOSED and previous two are not both CLOSED or OPEN
+            i += 1
+            db.add_data([cur_time + i, GarageDoorStates.CLOSED])
+            assert controller.should_text_notify()

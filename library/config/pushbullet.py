@@ -7,6 +7,11 @@ Author: Charles "Chip" Wood
 from library.config import BaseConfiguration
 
 
+class ConfigKeys:
+    API_KEY = "api"
+    NOTIFY = "notify"
+
+
 class PushbulletConfig(BaseConfiguration):
     def __init__(self, config_path, mqtt_config=None, debug=False):
         """
@@ -30,21 +35,14 @@ class PushbulletConfig(BaseConfiguration):
         """
         @rtype: str
         """
-        return self.config.get("api")
+        return self.config.get(ConfigKeys.API_KEY)
 
     @property
     def notify(self) -> dict:
         """
         @rtype: dict
         """
-        return self.config.get("notify")
-
-    @property
-    def max_notification_delay(self) -> float:
-        """
-        @rtype: float
-        """
-        return self.config.get("max_notification_delay", 15.0)
+        return self.config.get(ConfigKeys.NOTIFY)
 
     @property
     def mqtt_topic(self):

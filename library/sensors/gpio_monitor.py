@@ -51,24 +51,6 @@ class GPIOMonitor:
         else:
             return GPIO.PUD_UP
 
-    def add_event_detect(self, edge, callback=None, bouncetime=200):
-        """
-        Add rising or falling event detection
-        @param edge: rising/falling/both
-        @type edge: int
-        @param callback: callback to use on event fired
-        @type callback: method
-        @param bouncetime: software debounce time in ms
-        @type bouncetime: int
-        """
-        GPIO.add_event_detect(self.pin, edge, callback, bouncetime=bouncetime)
-
-    def remove_event_detect(self):
-        """
-        Remove event detection
-        """
-        GPIO.remove_event_detect(self.pin)
-
     def read(self) -> bool:
         """
         Read the GPIO pin
@@ -81,5 +63,4 @@ class GPIOMonitor:
         Clean up the GPIO for shutting down the program
         """
         self.logger.debug("GPIO cleanup - removing event detection")
-        self.remove_event_detect()
         GPIO.cleanup(self.pin)

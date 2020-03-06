@@ -7,6 +7,13 @@ Author: Charles "Chip" Wood
 from library.config import BaseConfiguration
 
 
+class ConfigKeys:
+    SENSOR_TYPE = "sensor_type"
+    PIN = "pin"
+    UNITS = "units"
+    PERIOD = "period"
+
+
 class EnvironmentConfig(BaseConfiguration):
     """
     Basic configuration for environment sensor
@@ -38,7 +45,7 @@ class EnvironmentConfig(BaseConfiguration):
         @return: Adafruit_DHT type
         @rtype: int
         """
-        return self.config.get("type")
+        return self.config.get(ConfigKeys.SENSOR_TYPE)
 
     @property
     def pin(self) -> int:
@@ -47,7 +54,7 @@ class EnvironmentConfig(BaseConfiguration):
         @return: GPIO pin # for environment sensor
         @rtype: int
         """
-        return self.config.get("pin")
+        return self.config.get(ConfigKeys.PIN)
 
     @property
     def units(self) -> str:
@@ -56,7 +63,7 @@ class EnvironmentConfig(BaseConfiguration):
         @return: temperature units
         @rtype: str
         """
-        return self.config.get("units")
+        return self.config.get(ConfigKeys.UNITS)
 
     @property
     def period(self) -> int:
@@ -65,7 +72,7 @@ class EnvironmentConfig(BaseConfiguration):
         @return: period in seconds. Default: 300
         @rtype: int
         """
-        return int(self.config.get("period", 5 * 60))
+        return int(self.config.get(ConfigKeys.PERIOD, 5 * 60))
 
     @property
     def mqtt_topic(self):

@@ -57,7 +57,8 @@ class EnvironmentSensor:
         self.pin = self.config.pin
 
         # Set the sensor type & pin #
-        self._sensor_type = self.config.sensor_type or Adafruit_DHT.DHT11
+        self._sensor_type = Adafruit_DHT.DHT11
+        self.sensor_type = self.config.sensor_type
 
         self._units = "fahrenheit"
         self.units = self.config.units
@@ -77,7 +78,7 @@ class EnvironmentSensor:
         """
         humidity, temperature = Adafruit_DHT.read_retry(self.sensor_type, self.pin)
         if humidity is None or temperature is None:
-            raise SensorError("Failed to read sensor!")
+            raise SensorError("Failed to read sensor!")  # pragma: no cover
         else:
             self.logger.debug(f"hum: {humidity:0.1f}, temp: {temperature:0.1f}")
         self.humidity = humidity

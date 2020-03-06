@@ -11,7 +11,7 @@ import ephem
 from library.config import BaseConfiguration
 
 
-class CameraConfigKeys:
+class ConfigKeys:
     SETTINGS = "settings"
     ISO = "iso"
     ISO_DAY = "day"
@@ -55,42 +55,42 @@ class CameraConfig(BaseConfiguration):
         Get the camera settings dict
         @rtype: dict
         """
-        return self.config.get("settings", {})
+        return self.config.get(ConfigKeys.SETTINGS, {})
 
     @property
     def brightness(self) -> int:
         """
         @rtype: int
         """
-        return self.settings.get(CameraConfigKeys.BRIGHTNESS)
+        return self.settings.get(ConfigKeys.BRIGHTNESS)
 
     @property
     def contrast(self) -> int:
         """
         @rtype: int
         """
-        return self.settings.get(CameraConfigKeys.CONTRAST)
+        return self.settings.get(ConfigKeys.CONTRAST)
 
     @property
     def delay(self) -> float:
         """
         @rtype: float
         """
-        return self.settings.get(CameraConfigKeys.DELAY)
+        return self.settings.get(ConfigKeys.DELAY)
 
     @property
     def resolution(self) -> List[int]:
         """
         @rtype: list[int]
         """
-        return self.settings.get(CameraConfigKeys.RESOLUTION)
+        return self.settings.get(ConfigKeys.RESOLUTION)
 
     @property
     def rotation(self) -> int:
         """
         @rtype: int
         """
-        return self.settings.get(CameraConfigKeys.ROTATION)
+        return self.settings.get(ConfigKeys.ROTATION)
 
     @property
     def iso(self) -> int:
@@ -116,9 +116,9 @@ class CameraConfig(BaseConfiguration):
         @rtype: int
         """
         return self.settings.get(
-            CameraConfigKeys.ISO, {}
+            ConfigKeys.ISO, {}
         ).get(
-            CameraConfigKeys.ISO_DAY, 200
+            ConfigKeys.ISO_DAY, 200
         )
 
     @property
@@ -127,9 +127,9 @@ class CameraConfig(BaseConfiguration):
         @rtype: int
         """
         return self.settings.get(
-            CameraConfigKeys.ISO, {}
+            ConfigKeys.ISO, {}
         ).get(
-            CameraConfigKeys.ISO_NIGHT, 800
+            ConfigKeys.ISO_NIGHT, 800
         )
 
     @property
@@ -137,14 +137,14 @@ class CameraConfig(BaseConfiguration):
         """
         @rtype: str
         """
-        return self.settings.get(CameraConfigKeys.CITY)
+        return self.settings.get(ConfigKeys.CITY)
 
     @property
     def capture_path(self) -> str:
         """
         @rtype: str
         """
-        return self.config.get(CameraConfigKeys.CAPTURE_PATH)
+        return self.config.get(ConfigKeys.CAPTURE_PATH)
 
     @property
     def mqtt_topic(self):

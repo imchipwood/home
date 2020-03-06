@@ -165,7 +165,7 @@ class BaseController(ABC):
         @rtype: bool
         """
         latest = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-        if not latest:
+        if latest is None:
             # No recent entry
             return True
 

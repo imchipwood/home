@@ -10,13 +10,13 @@ from threading import Thread
 from urllib3.exceptions import MaxRetryError
 
 from library import GarageDoorStates
-from library.communication.mqtt import MQTTClient, MQTTError, get_mqtt_error_message
+from library.communication.mqtt import MQTTError, get_mqtt_error_message
 from library.communication.pushbullet import PushBulletNotify
 from library.config import PubSubKeys
 from library.controllers import BaseController, get_logger
 
 
-class PushbulletController(BaseController):
+class PushBulletController(BaseController):
     """
     Basic threaded controller to relay MQTT messages
     """
@@ -37,7 +37,7 @@ class PushbulletController(BaseController):
         try:
             self.notifier = PushBulletNotify(self.config.api_key)
         except MaxRetryError:
-            self.logger.exception("Failed to connect pushbullet")
+            self.logger.exception("Failed to connect to PushBullet")
             self.notifier = None
 
     # region Threading
@@ -141,23 +141,42 @@ class PushbulletController(BaseController):
                     return
 
             if state == GarageDoorStates.CLOSED:
-                if self.config.db_name:
-                    last_two = self.get_last_two_db_entries(PubSubKeys.STATE)
-                    if len(last_two) == 2 and all(last == GarageDoorStates.CLOSED for last in last_two) \
-                            or not self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
-                        # If last two entries were both "Closed" OR it wasn't recent
-                        self.logger.debug(f"Latest state {state} has not changed recently - will not send notification")
-                        return
+                # Message from GPIO monitor saying CLOSED
+                if self.db_enabled and not self.should_text_notify():  # pragma: no cover
+                    self.logger.debug(f"Latest state '{state}' has not changed recently - will not send notification")
+                    return
                 try:
                     self.notifier.send_text(msg.topic, notification)
                 except:
-                    self.logger.exception("Exception attempting to send Pushbullet text notification")
+                    self.logger.exception("Exception attempting to send PushBullet text notification")
 
             elif state == PubSubKeys.PUBLISH:
+                # Message is from camera saying to publish the image
                 try:
                     self.notifier.send_file(notification)
                 except:
-                    self.logger.exception("Exception attempting to send Pushbullet image notification")
+                    self.logger.exception("Exception attempting to send PushBullet image notification")
+
+    def should_text_notify(self) -> bool:
+        """
+        Check if a text notification should be sent
+        @rtype: bool
+        """
+        # Notify if last entry is old
+        if not self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
+            return True
+
+        # Notify if there aren't two entries
+        last_two = self.get_last_two_db_entries(PubSubKeys.STATE)
+        if len(last_two) != 2:
+            return True
+
+        # Don't notify if last entry is OPEN
+        if last_two[0] == GarageDoorStates.OPEN:
+            return False
+
+        # Notify if not all entries are CLOSED
+        return last_two[0] != last_two[1]
 
     # endregion MQTT
 

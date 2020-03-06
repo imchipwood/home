@@ -1,9 +1,11 @@
 import json
 from inspect import ismethod
+import os
 
 import pytest
 
-from library.config import ConfigurationHandler, SENSORCLASSES
+from library import TEST_CONFIG_DIR
+from library.config import ConfigurationHandler, SENSORCLASSES, BaseConfiguration
 from library.config.camera import CameraConfig
 from library.config.environment import EnvironmentConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
@@ -12,7 +14,7 @@ from library.config.pushbullet import PushbulletConfig
 from library.controllers.camera import PiCameraController
 from library.controllers.environment import EnvironmentController
 from library.controllers.gpio_monitor import GPIOMonitorController
-from library.controllers.pushbullet import PushbulletController
+from library.controllers.pushbullet import PushBulletController
 
 # CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config", "pytest.json")
 CONFIG_PATH = "pytest.json"
@@ -30,6 +32,17 @@ def teardown_module():
 
 
 class TestConfigurationHandler:
+
+    def test_normalize_config_path(self):
+        """
+        Test that normalize_config_path properly changes base directory
+        """
+        first_config = "pytest.json"
+        second_config = os.path.join(TEST_CONFIG_DIR, "inner_config", "pytest2.json")
+        BaseConfiguration.normalize_config_path(first_config)
+        assert BaseConfiguration.BASE_CONFIG_DIR == TEST_CONFIG_DIR
+        BaseConfiguration.normalize_config_path(second_config)
+        assert BaseConfiguration.BASE_CONFIG_DIR == os.path.join(TEST_CONFIG_DIR, "inner_config")
 
     @pytest.mark.parametrize("target_type,expected_class", [
         (SENSORCLASSES.ENVIRONMENT, EnvironmentConfig),
@@ -57,7 +70,7 @@ class TestConfigurationHandler:
         (SENSORCLASSES.ENVIRONMENT, EnvironmentController),
         (SENSORCLASSES.CAMERA, PiCameraController),
         (SENSORCLASSES.GPIO_MONITOR, GPIOMonitorController),
-        (SENSORCLASSES.PUSHBULLET, PushbulletController),
+        (SENSORCLASSES.PUSHBULLET, PushBulletController),
     ])
     def test_get_sensor_controller(self, target_type, expected_class):
         """
