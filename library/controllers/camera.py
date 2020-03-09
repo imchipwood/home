@@ -193,12 +193,13 @@ class PiCameraController(BaseController):
                 message_val = message_val.lower()
                 val = val.lower()
 
-            if self.db_enabled and latest_timestamp is not None and len(last_two_states) == 2:
+            if self.db_enabled and latest_timestamp is not None:
                 # Capture if message matches
                 # and state changed (requires two entries)
                 # and timestamp is new
                 should_capture = message_val == val
-                should_capture &= last_two_states[0] != last_two_states[1]
+                if len(last_two_states) == 2:
+                    should_capture &= last_two_states[0] != last_two_states[1]
                 should_capture &= latest_timestamp != self.last_capture_timestamp
                 should_capture &= not has_captured
             else:

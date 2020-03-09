@@ -238,6 +238,20 @@ class TestCameraController:
             controller.last_capture_timestamp = -999
             db.delete_all_except_last_n_records(0)
 
+            # No records - capture
+            assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+
+            # One record with captured=False - capture
+            db.add_data([0, GarageDoorStates.OPEN, int(False), int(False)])
+            assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+            db.delete_all_except_last_n_records(0)
+
+            # One record with captured=True - do not capture
+            db.add_data([0, GarageDoorStates.OPEN, int(True), int(False)])
+            assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+            db.delete_all_except_last_n_records(0)
+
+            # Multiple records - capture then don't
             db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
             db.add_data([1, GarageDoorStates.OPEN, int(False), int(False)])
             assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
