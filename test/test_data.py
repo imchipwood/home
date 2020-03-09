@@ -9,11 +9,13 @@ DB0_NAME = "PITEST_DB0"
 DB1_NAME = "PITEST_DB1"
 DB0_COLUMNS = [
     Column("timestamp", "integer", "PRIMARY KEY"),
-    Column("state", "integer", "NOT NULL")
+    Column("state", "integer", "NOT NULL"),
+    Column("notified", "integer", "NOT NULL")
 ]
 DB1_COLUMNS = [
     Column("timestamp", "integer", "PRIMARY KEY"),
-    Column("state", "string", "NOT NULL")
+    Column("state", "string", "NOT NULL"),
+    Column("notified", "integer", "NOT NULL")
 ]
 
 
@@ -63,9 +65,9 @@ def test_add_to_table(name: str, columns: List[Column], data_to_add: int or str)
     @type data_to_add: int or str
     """
     with Database(name, columns) as db:
-        db.add_data([0, data_to_add])
-        db.add_data([1, data_to_add])
-        db.add_data([2, data_to_add])
+        db.add_data([0, data_to_add, int(False)])
+        db.add_data([1, data_to_add, int(False)])
+        db.add_data([2, data_to_add, int(False)])
 
         assert len(db.get_all_records()) == 3
 
@@ -85,8 +87,8 @@ def test_get_last_n_records(name, columns, data_to_add):
     @type data_to_add: int or str
     """
     with Database(name, columns) as db:
-        for i in range(5):
-            db.add_data([i, data_to_add[i]])
+        for i in range(len(data_to_add)):
+            db.add_data([i, data_to_add[i], int(False)])
 
         assert len(db.get_last_n_records(1)) == 1
         assert len(db.get_last_n_records(2)) == 2
@@ -114,8 +116,8 @@ def test_get_latest_record(name, columns, data_to_add):
     @type data_to_add: int or str
     """
     with Database(name, columns) as db:
-        for i in range(5):
-            db.add_data([i, data_to_add[i]])
+        for i in range(len(data_to_add)):
+            db.add_data([i, data_to_add[i], int(False)])
 
         latest = db.get_latest_record()
         assert latest[columns[0].name] == 4
@@ -137,9 +139,53 @@ def test_delete_all_except_last_n_records(name, columns, data_to_add):
     @type data_to_add: int or str
     """
     with Database(name, columns) as db:
-        for i in range(5):
-            db.add_data([i, data_to_add[i]])
+        for i in range(len(data_to_add)):
+            db.add_data([i, data_to_add[i], int(False)])
 
         for i in range(5, 0, -1):
             db.delete_all_except_last_n_records(i)
             assert len(db.get_all_records()) == i
+
+
+@pytest.mark.parametrize("name,columns,data_to_add", [
+    (DB0_NAME, DB0_COLUMNS, [0, 0, 0, 1, 1]),
+    (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
+])
+def test_get_record(name, columns, data_to_add):
+    """
+    Test removing all but last N records from table works
+    @param name: name of table
+    @type name: str
+    @param columns: list of columns to add to table
+    @type columns: List[Column]
+    @param data_to_add: data to add to table
+    @type data_to_add: int or str
+    """
+    with Database(name, columns) as db:
+        for i in range(len(data_to_add)):
+            db.add_data([i, data_to_add[i], int(False)])
+
+        primary_column_name = [x.name for x in columns if x.primary][0]
+
+        for primary_key_value in [2, 3]:
+            entry = db.get_record(primary_key_value)
+            assert entry[primary_column_name] == primary_key_value
+            assert entry["state"] == data_to_add[primary_key_value]
+            assert not entry["notified"]
+
+
+@pytest.mark.parametrize("name,columns,data_to_add", [
+    (DB0_NAME, DB0_COLUMNS, [0, 0, 0, 1, 1]),
+    (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
+])
+def test_update_record(name, columns, data_to_add):
+    with Database(name, columns) as db:
+        for i in range(len(data_to_add)):
+            db.add_data([i, data_to_add[i], int(False)])
+
+        for primary_key_value in [2, 3]:
+            entry = db.get_record(primary_key_value)
+            assert not entry["notified"]
+            db.update_record(primary_key_value, "notified", int(True))
+            entry = db.get_record(primary_key_value)
+            assert entry["notified"]

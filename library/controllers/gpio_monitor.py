@@ -134,9 +134,9 @@ class GPIOMonitorController(BaseController):
             # Only publish if the state changed or the previous reading is old
             state_changed = last_state != str(self)
             should_publish = state_changed or not is_recent
-            _isRecent = str(is_recent).rjust(5, " ")
-            _stateChanged = str(state_changed).rjust(5, " ")
-            self.logger.debug(f"Recent: {_isRecent}, State changed: {_stateChanged}")
+            _is_recent = str(is_recent).rjust(5, " ")
+            _state_changed = str(state_changed).rjust(5, " ")
+            self.logger.debug(f"Recent: {_is_recent}, State changed: {_state_changed}")
 
         return should_publish
 
@@ -147,7 +147,7 @@ class GPIOMonitorController(BaseController):
         if self.config.db_name:
             with Database(self.config.db_name, self.config.db_columns) as db:
                 # Create the entry
-                data = [int(time.time()), str(self)]
+                data = [int(time.time()), str(self), int(False), int(False)]
                 self.logger.debug(f"Adding data to db: {data}")
                 db.add_data(data)
                 db.delete_all_except_last_n_records(2)

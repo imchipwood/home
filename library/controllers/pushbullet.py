@@ -14,6 +14,7 @@ from library.communication.mqtt import MQTTError, get_mqtt_error_message
 from library.communication.pushbullet import PushBulletNotify
 from library.config import PubSubKeys
 from library.controllers import BaseController, get_logger
+from library.data import DatabaseKeys
 
 
 class PushBulletController(BaseController):
@@ -147,21 +148,37 @@ class PushBulletController(BaseController):
                     return
                 try:
                     self.notifier.send_text(msg.topic, notification)
+                    self.mark_latest_entry_notified()
                 except:
                     self.logger.exception("Exception attempting to send PushBullet text notification")
 
             elif state == PubSubKeys.PUBLISH:
                 # Message is from camera saying to publish the image
-                try:
-                    self.notifier.send_file(notification)
-                except:
-                    self.logger.exception("Exception attempting to send PushBullet image notification")
+                if self.should_image_notify():
+                    try:
+                        self.notifier.send_file(notification)
+                        self.mark_latest_entry_notified()
+                    except:
+                        self.logger.exception("Exception attempting to send PushBullet image notification")
+
+    def mark_latest_entry_notified(self):
+        """
+        Mark the latest entry as "notified"
+        """
+        if self.db_enabled:
+            latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
+            if latest_timestamp:
+                self.db.update_record(latest_timestamp, DatabaseKeys.NOTIFIED, int(True))
 
     def should_text_notify(self) -> bool:
         """
         Check if a text notification should be sent
         @rtype: bool
         """
+        latest_entry = self.get_latest_db_entry(None)
+        if latest_entry[DatabaseKeys.NOTIFIED]:
+            return False
+
         # Notify if last entry is old
         if not self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
             return True
@@ -177,6 +194,27 @@ class PushBulletController(BaseController):
 
         # Notify if not all entries are CLOSED
         return last_two[0] != last_two[1]
+
+    def should_image_notify(self) -> bool:
+        """
+        Check if an image notification should be sent
+        @rtype: bool
+        """
+        # If no DB, no way to check if notification has already been sent
+        if not self.db_enabled:
+            return True
+
+        # If there are no entries, notify
+        if self.get_latest_db_entry(DatabaseKeys.TIMESTAMP) is None:
+            return True
+
+        # If last entry is "closed", don't notify
+        latest_entry = self.get_latest_db_entry(None)
+        if latest_entry[DatabaseKeys.STATE] == GarageDoorStates.CLOSED:
+            return False
+        else:
+            # Last entry is OPEN - has it already been notified?
+            return not latest_entry[DatabaseKeys.NOTIFIED]
 
     # endregion MQTT
 

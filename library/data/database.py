@@ -1,3 +1,4 @@
+import json
 import os
 import sqlite3
 from typing import List
@@ -82,8 +83,11 @@ class DatabaseEntry:
                 self._values[self.columns[i].name] = self.entry[i]
         return self._values
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> int or float or str:
         return self.values.get(item)
+
+    def __repr__(self) -> str:
+        return json.dumps(self._values)
 
 
 class Database:
@@ -109,6 +113,14 @@ class Database:
         self.cur = self.con.cursor()
         if not self.does_table_exist(self.name):
             self.create_table(self.name, self.columns)
+
+    @property
+    def primary_column_name(self) -> str:
+        """
+        Get the primary column name
+        @rtype: str
+        """
+        return [x.name for x in self.columns if x.primary][0]
 
     @property
     def columns_str(self) -> str:
@@ -166,6 +178,24 @@ INSERT INTO {self.name} (
         self.cur.execute(query, data_to_add)
         self.con.commit()
 
+    def update_record(self, primary_key_value: int or float or str, column_name: str, new_value: int or float or str):
+        """
+        Update a record in the database
+        @param primary_key_value: value of the primary column corresponding to the target entry
+        @type primary_key_value: int or float or str
+        @param column_name: name of the column to update
+        @type column_name: str
+        @param new_value: new value for the column
+        @type new_value: int or float or str
+        """
+        query = f"""
+UPDATE {self.name}
+SET {column_name} = {new_value}
+WHERE {self.primary_column_name} = {primary_key_value}
+"""
+        self.cur.execute(query)
+        self.con.commit()
+
     def convert_query_result_to_database_entry(self, result: List) -> DatabaseEntry:
         """
         Convert a single query
@@ -187,6 +217,19 @@ INSERT INTO {self.name} (
         """
         return [DatabaseEntry(self.columns, result) for result in results]
 
+    def get_record(self, primary_key_value: int or float or str) -> DatabaseEntry:
+        """
+        Get the target record
+        @param primary_key_value: value of the primary column corresponding to the target entry
+        @type primary_key_value: int or float or str
+        @return: DatabaseEntry for the target row
+        @rtype: DatabaseEntry
+        """
+        query = f"""SELECT * FROM {self.name} WHERE {self.primary_column_name} = {primary_key_value}"""
+        self.cur.execute(query)
+        result = self.cur.fetchone()
+        return self.convert_query_result_to_database_entry(result)
+
     def get_latest_record(self) -> DatabaseEntry:
         """
         Get the latest record from the table
@@ -196,7 +239,7 @@ INSERT INTO {self.name} (
         primary = [x.name for x in self.columns if x.primary][0]
         others = [x.name for x in self.columns if x.name != primary]
         others_str = ", ".join(others)
-        query = f"SELECT MAX({primary}), {others_str} FROM {self.name}"
+        query = f"SELECT MAX({self.primary_column_name}), {others_str} FROM {self.name}"
         self.cur.execute(query)
         result = self.cur.fetchone()
         return self.convert_query_result_to_database_entry(result)

@@ -48,6 +48,16 @@
         "col_name": "state",
         "col_type": "text",
         "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "captured",
+        "col_type": "integer",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "notified",
+        "col_type": "integer",
+        "col_key": "NOT NULL"
       }
     ]
   }

@@ -7,7 +7,7 @@ from typing import List
 
 from library import setup_logging
 from library.communication.mqtt import MQTTClient
-from library.data.database import Database
+from library.data.database import Database, DatabaseEntry
 from library.data import DatabaseKeys
 
 RUNNING = False
@@ -121,12 +121,16 @@ class BaseController(ABC):
         Get the Database object for this controller
         @rtype: Database
         """
-        return Database(self.config.db_name, self.config.db_columns)
+        db = Database(self.config.db_name, self.config.db_columns)
+        db.setup()
+        return db
 
-    def get_latest_db_entry(self, column_name: str = DatabaseKeys.STATE) -> int or float or str:
+    def get_latest_db_entry(self, column_name: str or None = DatabaseKeys.STATE) -> int or float or str:
         """
         Get the latest value from the database
-        @rtype: int or float or str
+        @param column_name: (Optional) target column name, if None, returns whole row
+        @type column_name: str or None
+        @rtype: int or float or str or DatabaseEntry
         """
         latest = None
         if self.config.db_name:
@@ -134,15 +138,19 @@ class BaseController(ABC):
             with self.db as db:
                 record = db.get_latest_record()
                 if record:
-                    latest = record[column_name]
-                    self.logger.debug(f"Latest db entry at column {column_name}: {latest}")
+                    if column_name:
+                        latest = record[column_name]
+                        self.logger.debug(f"Latest db entry at column {column_name}: {latest}")
+                    else:
+                        latest = record
+                        self.logger.debug(f"Latest db entry: {latest}")
         return latest
 
-    def get_last_two_db_entries(self, column_name: str = DatabaseKeys.STATE) -> List:
+    def get_last_two_db_entries(self, column_name: str or None = DatabaseKeys.STATE) -> List:
         """
         Get the last two entries from the DB
-        @param column_name: name of column to get
-        @type column_name: str
+        @param column_name: (Optional) name of column to get, if None, returns whole rows
+        @type column_name: str or None
         @return: list of values from last two entries
         @rtype: list
         """
@@ -152,8 +160,12 @@ class BaseController(ABC):
             with self.db as db:
                 records = db.get_last_n_records(2)
                 if len(records) == 2:
-                    entries = [record[column_name] for record in records]
-                    self.logger.debug(f"Latest db entry at column {column_name}: {entries}")
+                    if column_name:
+                        entries = [record[column_name] for record in records]
+                        self.logger.debug(f"Latest two db entries at column {column_name}: {entries}")
+                    else:
+                        entries = records
+                        self.logger.debug(f"Latest two db entries: {entries}")
         return entries
 
     def is_latest_entry_recent(self, delta_time: int = 60) -> bool:

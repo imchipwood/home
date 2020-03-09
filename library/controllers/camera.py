@@ -168,14 +168,18 @@ class PiCameraController(BaseController):
 
         latest_timestamp = None
         last_two_states = []
+        has_captured = False
         if self.db_enabled:
             latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-            last_two_states = self.get_last_two_db_entries()
+            if latest_timestamp is not None:
+                last_two_states = self.get_last_two_db_entries()
+                last_entry = self.db.get_record(latest_timestamp)
+                has_captured = last_entry[DatabaseKeys.CAPTURED]
 
-            if message_data.get("capture"):
-                self.logger.info("Received direct capture command")
-                self.last_capture_timestamp = latest_timestamp
-                return True
+        if message_data.get("capture"):
+            self.logger.info("Received direct capture command")
+            self.last_capture_timestamp = latest_timestamp
+            return True
 
         # Check the payload - assumes a single value
         for key, val in message_data.items():
@@ -196,6 +200,7 @@ class PiCameraController(BaseController):
                 should_capture = message_val == val
                 should_capture &= last_two_states[0] != last_two_states[1]
                 should_capture &= latest_timestamp != self.last_capture_timestamp
+                should_capture &= not has_captured
             else:
                 should_capture = message_val == val
 
@@ -217,6 +222,15 @@ class PiCameraController(BaseController):
                 self.logger.info(f"Publish to {name}: {topic.raw_payload}")
                 self.mqtt.single(str(topic), payload=topic.raw_payload, qos=2)
 
+    def update_database_entry(self):
+        """
+        Update the latest database entry to indicate capturing has happened
+        """
+        if self.db_enabled:
+            latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
+            if latest_timestamp is not None:
+                self.db.update_record(latest_timestamp, DatabaseKeys.CAPTURED, int(True))
+
     # endregion MQTT
     # region Camera
 
@@ -227,6 +241,7 @@ class PiCameraController(BaseController):
         with Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
             self.publish()
+            self.update_database_entry()
 
     # endregion Camera
 
