@@ -1,5 +1,5 @@
 {
-  "log": "/home/cpw/dev/logs/testEnvironment.log",
+  "log": "/home/cpw/dev/logs/environment.log",
   "sensor_type": 22,
   "pin": 4,
   "units": "fahrenheit",

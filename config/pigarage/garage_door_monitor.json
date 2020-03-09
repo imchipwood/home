@@ -1,5 +1,5 @@
 {
-  "log": "/home/cpw/dev/logs/garageDoorMonitor.log",
+  "log": "/home/cpw/dev/logs/monitor.log",
   "gpio_pin": 4,
   "gpio_pull_up_down": "up",
   "gpio_monitor_frequency": 2,

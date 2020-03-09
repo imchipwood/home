@@ -1,5 +1,5 @@
 {
-  "log": "/home/cpw/dev/logs/testDoorControl.log",
+  "log": "/home/cpw/dev/logs/gpioControl.log",
   "gpio": {
     "pin": 17,
     "toggle_delay": 0.3
