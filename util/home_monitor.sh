@@ -3,9 +3,9 @@
 ALIVE="$(ps aux | grep -v "grep" | grep "home.py")"
 if [ -z "$ALIVE" ]
 then
-  echo "\nhome.service DEAD - restarting"
+  echo "home.service DEAD - restarting"
   eval "$(systemctl restart home.service)"
 else
-  echo "\nhome.service ALIVE - exiting"
+  echo "home.service ALIVE - exiting"
 fi
 exit 0
