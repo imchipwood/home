@@ -2,7 +2,7 @@
 */5 * * * * sudo /home/cpw/dev/home_deploy/venv3.6/bin/python /home/cpw/dev/home_deploy/util/lan_monitor.py
 
 # home automation - restart every 6 hours
-0 */6 * * * sudo systemctl restart home.service
+*/5 * * * * sudo /home/cpw/dev/home_deploy/util/home_monitor.sh
 
 # Clear logs every day at 5:59am
 59 5 * * * sudo rm -f /home/cpw/dev/logs/*
