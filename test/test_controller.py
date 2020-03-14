@@ -8,7 +8,7 @@ import pytest
 
 from library import GarageDoorStates
 from library.communication.mqtt import MQTTClient
-from library.config import ConfigurationHandler, SENSORCLASSES
+from library.config import ConfigurationHandler, SENSORCLASSES, PubSubKeys
 from library.config.mqtt import MQTTConfig
 from library.data import DatabaseKeys
 from library.data.database import get_database_path
@@ -36,6 +36,16 @@ def mock_db_enabled_pushbullet(mocker):
 @pytest.fixture
 def mock_db_enabled_camera(mocker):
     mocker.patch("library.controllers.camera.PiCameraController.db_enabled", return_value=False)
+
+
+@pytest.fixture
+def mock_should_capture_from_command(mocker):
+    mocker.patch("library.controllers.camera.PiCameraController.should_capture_from_command", return_value=True)
+
+
+@pytest.fixture
+def mock_capture_loop(mocker):
+    mocker.patch("library.controllers.camera.PiCameraController.capture_loop", return_value=None)
 
 
 class TestTopic:
@@ -164,17 +174,13 @@ class TestEnvironmentController:
 
 class TestCameraController:
 
-    def test_thread(self, monkeypatch):
+    @pytest.mark.usefixtures("mock_should_capture_from_command")
+    def test_thread(self):
         """
         Test that the thread starts and stops properly
         """
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.CAMERA)
         """ @type: library.controllers.camera.PiCameraController"""
-
-        def mock_should_capture_from_command(message_topic, message_data):
-            return True
-
-        monkeypatch.setattr(controller, "should_capture_from_command", mock_should_capture_from_command)
 
         controller.start()
         assert controller.running
@@ -187,43 +193,28 @@ class TestCameraController:
                 break
         assert not controller.thread.is_alive()
 
-    def test_capture(self, monkeypatch):
+    @pytest.mark.usefixtures("mock_should_capture_from_command")
+    @pytest.mark.parametrize(
+        "force_cmd",
+        [
+            True,
+            False
+        ]
+    )
+    def test_capture(self, force_cmd):
         """
         Test that the capture loop creates the image
         """
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.CAMERA)
         """ @type: library.controllers.camera.PiCameraController"""
 
-        def mock_should_capture_from_command(message_topic, message_data):
-            return True
-
-        monkeypatch.setattr(controller, "should_capture_from_command", mock_should_capture_from_command)
-
         config = controller.config
         """ @type: library.config.camera.CameraConfig """
         expected_path = config.capture_path
         if os.path.exists(expected_path):
             os.remove(expected_path)
-        controller.capture_loop()
+        controller.capture_loop(force=force_cmd)
         assert os.path.exists(expected_path)
-
-    # @pytest.mark.parametrize(
-    #     "topic",
-    #     [
-    #         TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True),
-    #         TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.CLOSED}, False),
-    #         TestTopic("home-assistant/pytest/camera", {"capture": True, "delay": 1.0}, True),
-    #         TestTopic("home-assistant/pytest/camera", {"delay": 1.0}, False),
-    #         TestTopic("home-assistant/pytest/camera", {"capture": False}, False),
-    #         TestTopic("fake_topic", {"capture": False}, False),
-    #     ]
-    # )
-    # def test_should_capture_from_command(self, topic):
-    #     """
-    #     Test that should_capture_from_command properly detects when to capture
-    #     """
-    #     self.controller.last_capture_timestamp = -999
-    #     assert self.controller.should_capture_from_command(topic.topic, topic.payload) == topic.capture
 
     def test_should_capture_from_command_db(self):
         """
@@ -255,10 +246,27 @@ class TestCameraController:
             db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
             db.add_data([1, GarageDoorStates.OPEN, int(False), int(False)])
             assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+            controller.update_database_entry()
             assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
 
     @pytest.mark.usefixtures("mock_db_enabled_camera")
-    def test_should_capture_from_command_nodb(self):
+    @pytest.mark.parametrize(
+        "topic",
+        [
+            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True),
+            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.CLOSED}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": True, "delay": 1.0}, PubSubKeys.FORCE),
+            TestTopic("home-assistant/pytest/camera", {"delay": 1.0}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": False}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "True"}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "False"}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "Force"}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "Force", "delay": 1.0}, False),
+            TestTopic("home-assistant/pytest/camera", {"capture": True, "force": "Force", "delay": 1.0}, PubSubKeys.FORCE),
+            TestTopic("fake_topic", {"capture": False}, False),
+        ]
+    )
+    def test_should_capture_from_command_nodb(self, topic):
         """
         Test should_capture_from_command works without database access
         """
@@ -266,10 +274,10 @@ class TestCameraController:
         """ @type: library.controllers.camera.PiCameraController"""
         controller.db.delete_all_except_last_n_records(0)
 
-        topic = TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True)
         assert controller.should_capture_from_command(topic.topic, topic.payload) == topic.capture
 
-    def test_mqtt(self, monkeypatch):
+    @pytest.mark.usefixtures("mock_should_capture_from_command", "mock_capture_loop")
+    def test_mqtt(self):
         """
         Test that MQTT topic subscription works and published messages are received
         """
@@ -280,15 +288,6 @@ class TestCameraController:
         MESSAGE = False
         topics = [x.name for x in controller.config.mqtt_topic]
         client = get_mqtt_client(controller.config.mqtt_config, topics)
-
-        def mock_should_capture_from_command(message_topic, message_data):
-            return True
-
-        def mock_capture_loop(delay=0):
-            return
-
-        monkeypatch.setattr(controller, "should_capture_from_command", mock_should_capture_from_command)
-        monkeypatch.setattr(controller, "capture_loop", mock_capture_loop)
 
         controller.setup()
         topic = controller.config.mqtt_topic[0]
@@ -407,15 +406,20 @@ class TestPushBulletController:
             print("SEND TEXT")
             print(f"Fake pushed: {title}: {body}")
 
+        def mock_should_image_notify(force=True):
+            return force
+
         monkeypatch.setattr(controller, "should_text_notify", lambda: True)
-        monkeypatch.setattr(controller, "should_image_notify", lambda: True)
+        monkeypatch.setattr(controller, "should_image_notify", mock_should_image_notify)
         monkeypatch.setattr(controller.notifier, "send_file", mock_send_file)
         monkeypatch.setattr(controller.notifier, "send_text", mock_send_text)
 
         topic_state = controller.config.mqtt_topic[0]
         topic_publish = controller.config.mqtt_topic[1]
         payload_closed = json.dumps(topic_state.payload())
-        payload_capture = json.dumps(topic_publish.payload())
+        payload_capture = topic_publish.payload()
+        payload_capture[PubSubKeys.FORCE] = True
+        payload_capture = json.dumps(payload_capture)
         controller.start()
 
         for payload in [payload_closed, payload_capture]:
@@ -474,7 +478,7 @@ class TestPushBulletController:
             db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
             assert controller.should_text_notify()
 
-    def test_should_image_notify(self, monkeypatch):
+    def test_should_image_notify(self):
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
         """ @type: library.controllers.pushbullet.PushBulletController"""
 
@@ -499,3 +503,6 @@ class TestPushBulletController:
             i += 1
             db.add_data([i, GarageDoorStates.OPEN, int(False), int(True)])
             assert not controller.should_image_notify()
+
+            # Notify if force no matter what
+            assert controller.should_image_notify(force=True)

@@ -18,7 +18,8 @@
       "home-assistant/garage/camera_publish": {
         "pubsub": "subscribe",
         "payload": {
-          "state": "publish"
+          "state": "publish",
+          "force": "True|False"
         }
       }
     }

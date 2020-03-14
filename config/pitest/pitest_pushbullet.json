@@ -2,7 +2,6 @@
   "log": "/home/cpw/dev/logs/pushbullet.log",
   "api": "o.sENK4wzqB4Wfh7ZiGGfuZjSl8CyzM91y",
   "notify": {
-    "Open": "/home/cpw/camera/captures/test.jpg",
     "publish": "/home/cpw/camera/captures/test.jpg",
     "Closed": "Closed"
   },
@@ -19,7 +18,8 @@
       "home-assistant/test/door/camera_publish": {
         "pubsub": "subscribe",
         "payload": {
-          "state": "publish"
+          "state": "publish",
+          "force": "True|False"
         }
       }
     }

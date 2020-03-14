@@ -28,14 +28,15 @@
       "home-assistant/pytest/camera": {
         "pubsub": "subscribe",
         "payload": {
-          "capture": true,
+          "capture": "CAPTURE",
           "delay": 0
         }
       },
       "home-assistant/pytest/camera_publish": {
         "pubsub": "publish",
         "payload": {
-          "state": "publish"
+          "state": "publish",
+          "force": "True|False"
         }
       }
     }

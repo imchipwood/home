@@ -8,6 +8,8 @@ import json
 from threading import Thread, Lock
 
 from library.communication.mqtt import MQTTError, get_mqtt_error_message
+from library.config import PubSubKeys
+from library.config.camera import ConfigKeys
 from library.controllers import BaseController, get_logger
 from library.data import DatabaseKeys
 from library.sensors.camera import Camera
@@ -146,14 +148,21 @@ class PiCameraController(BaseController):
             return
 
         # Check if it indicated a capture
-        if self.should_capture_from_command(msg.topic, message_data):
+        should_capture = self.should_capture_from_command(msg.topic, message_data)
+        if should_capture is not False:
             # If no delay in message, pass in None - this will force camera to use
             # the delay defined in the config
-            kwargs = {"delay": message_data.get("delay", None)}
+            kwargs = {
+                ConfigKeys.DELAY: message_data.get(ConfigKeys.DELAY, None),
+                PubSubKeys.FORCE: message_data.get(
+                    PubSubKeys.FORCE,
+                    True if should_capture == PubSubKeys.FORCE else False
+                )
+            }
             thread = Thread(target=self.capture_loop, kwargs=kwargs)
             thread.start()
 
-    def should_capture_from_command(self, message_topic, message_data) -> bool:
+    def should_capture_from_command(self, message_topic, message_data) -> bool or str:
         """
         Check if the message indicates a capture command
         @param message_topic: topic message came from
@@ -161,32 +170,30 @@ class PiCameraController(BaseController):
         @param message_data: message data as dict
         @type message_data: dict
         @return: whether or not to capture
-        @rtype: bool
+        @rtype: bool or str
         """
         # Check all the topics we're subscribed to
         topic = self.config.mqtt_config.topics_subscribe.get(message_topic)
         if not topic:
             return False
 
-        latest_timestamp = None
-        last_two_states = []
+        # Check the database to see if capturing already occurred for latest entry
         has_captured = False
         if self.db_enabled:
             latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
             if latest_timestamp is not None:
-                last_two_states = self.get_last_two_db_entries()
                 last_entry = self.db.get_record(latest_timestamp)
-                has_captured = last_entry[DatabaseKeys.CAPTURED]
+                has_captured = bool(last_entry[DatabaseKeys.CAPTURED])
 
-        if message_data.get("capture"):
+        # Check
+        if message_data.get(PubSubKeys.CAPTURE):
             self.logger.info("Received direct capture command")
-            self.last_capture_timestamp = latest_timestamp
-            return True
+            return PubSubKeys.FORCE
 
         # Check the payload - assumes a single value
         for key, val in message_data.items():
-            if key == "delay":
-                # Ignore the delay
+            if key != PubSubKeys.STATE:
+                # Ignore non-state keys - they are handled elsewhere
                 continue
 
             message_val = topic.payload().get(key, None)
@@ -195,35 +202,39 @@ class PiCameraController(BaseController):
                 message_val = message_val.lower()
                 val = val.lower()
 
-            if self.db_enabled and latest_timestamp is not None:
-                # Capture if message matches
-                # and state changed (requires two entries)
-                # and timestamp is new
-                should_capture = message_val == val
-                if len(last_two_states) == 2:
-                    should_capture &= last_two_states[0] != last_two_states[1]
-                should_capture &= latest_timestamp != self.last_capture_timestamp
-                should_capture &= not has_captured
-            else:
-                should_capture = message_val == val
+            # Capture if message matches
+            should_capture = message_val == val
 
+            # Don't capture if latest DB entry has already been captured
+            if self.db_enabled:
+                should_capture &= not has_captured
+
+            # Return now if should_capture is True
             if should_capture:
                 self.logger.info("Received message indicating capture")
-                self.last_capture_timestamp = latest_timestamp
                 return should_capture
 
-        # Shouldn't ever get here but just in case...
-        self.logger.warning("Didn't find expected payload - not capturing!")
+        # Not capturing
+        self.logger.debug(f"Not capturing for latest message: {message_topic} - {message_data}")
         return False
 
-    def publish(self):
+    def publish(self, force=False):
         """
         Broadcast that an image was taken
+        @param force: whether or not to force publishing of the image
+        @type force: bool
         """
         if self.mqtt:
             for name, topic in self.config.mqtt_config.topics_publish.items():
+                if PubSubKeys.FORCE in topic.raw_payload:
+                    raw_payload = topic.raw_payload
+                    force_publish = True if force else False
+                    raw_payload[PubSubKeys.FORCE] = force_publish
+                    payload = topic.payload(**raw_payload)
+                else:
+                    payload = topic.raw_payload
                 self.logger.info(f"Publish to {name}: {topic.raw_payload}")
-                self.mqtt.single(str(topic), payload=topic.raw_payload, qos=2)
+                self.mqtt.single(str(topic), payload=payload, qos=2)
 
     def update_database_entry(self):
         """
@@ -237,13 +248,13 @@ class PiCameraController(BaseController):
     # endregion MQTT
     # region Camera
 
-    def capture_loop(self, delay=0):
+    def capture_loop(self, delay=0, force=False):
         """
         Simple method for capturing an image with PiCamera
         """
         with mutex, Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
-            self.publish()
+            self.publish(force=force)
             self.update_database_entry()
 
     # endregion Camera

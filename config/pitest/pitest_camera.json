@@ -6,7 +6,10 @@
       "night": 800
     },
     "delay": 0.5,
-    "resolution": [3280, 2464],
+    "resolution": [
+      3280,
+      2464
+    ],
     "rotation": 180,
     "brightness": 50,
     "contrast": 0,
@@ -25,13 +28,15 @@
       "home-assistant/test/door/camera": {
         "pubsub": "subscribe",
         "payload": {
-          "capture": "CAPTURE"
+          "capture": "CAPTURE",
+          "delay": 0
         }
       },
       "home-assistant/test/door/camera_publish": {
         "pubsub": "publish",
         "payload": {
-          "state": "publish"
+          "state": "publish",
+          "force": "True|False"
         }
       }
     }

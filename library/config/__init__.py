@@ -39,6 +39,8 @@ class PubSubKeys:
     PUBSUB = "pubsub"
     SUBSCRIBE = "subscribe"
     PUBLISH = "publish"
+    CAPTURE = "capture"
+    FORCE = "force"
     BOTH = "both"
     PAYLOAD = "payload"
     STATE = "state"

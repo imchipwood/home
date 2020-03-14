@@ -131,6 +131,7 @@ class PushBulletController(BaseController):
         topic = self.mqtt.config.topics_subscribe.get(msg.topic)
         if topic:
             state = message_data.get(PubSubKeys.STATE)
+            force = message_data.get(PubSubKeys.FORCE, False)
             notification = self.config.notify.get(state)
             self.logger.debug(f"Received '{state}': {notification}")
 
@@ -154,12 +155,16 @@ class PushBulletController(BaseController):
 
             elif state == PubSubKeys.PUBLISH:
                 # Message is from camera saying to publish the image
-                if self.should_image_notify():
-                    try:
-                        self.notifier.send_file(notification)
+                if not self.should_image_notify(force=force):
+                    self.logger.debug(f"Received image publish command but already published - not publishing")
+                    return
+                try:
+                    self.notifier.send_file(notification)
+                    if not force:
+                        # Force means camera received direct capture command - no DB entry to update
                         self.mark_latest_entry_notified()
-                    except:
-                        self.logger.exception("Exception attempting to send PushBullet image notification")
+                except:
+                    self.logger.exception("Exception attempting to send PushBullet image notification")
 
     def mark_latest_entry_notified(self):
         """
@@ -195,11 +200,15 @@ class PushBulletController(BaseController):
         # Notify if not all entries are CLOSED
         return last_two[0] != last_two[1]
 
-    def should_image_notify(self) -> bool:
+    def should_image_notify(self, force: bool = False) -> bool:
         """
         Check if an image notification should be sent
         @rtype: bool
         """
+        # If force, must publish
+        if force:
+            return True
+
         # If no DB, no way to check if notification has already been sent
         if not self.db_enabled:
             return True
