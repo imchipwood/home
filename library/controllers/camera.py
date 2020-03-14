@@ -5,12 +5,14 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import json
-from threading import Thread
+from threading import Thread, Lock
 
 from library.communication.mqtt import MQTTError, get_mqtt_error_message
 from library.controllers import BaseController, get_logger
 from library.data import DatabaseKeys
 from library.sensors.camera import Camera
+
+mutex = Lock()
 
 
 class PiCameraController(BaseController):
@@ -239,7 +241,7 @@ class PiCameraController(BaseController):
         """
         Simple method for capturing an image with PiCamera
         """
-        with Camera(self.config, self.debug) as camera:
+        with mutex, Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
             self.publish()
             self.update_database_entry()
