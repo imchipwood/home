@@ -21,7 +21,7 @@ except (ImportError, RuntimeError, ModuleNotFoundError):  # pragma: no cover
 class ConfigKeys:
     PIN = "gpio_pin"
     TOGGLE_DELAY = "gpio_toggle_delay"
-    TOGGLE_DIRECTION = "gpio_toggle_direction"
+    ACTIVE_DIRECTION = "gpio_active_direction"
 
 
 class GPIODriverConfig(BaseConfiguration):
@@ -65,13 +65,13 @@ class GPIODriverConfig(BaseConfiguration):
         return self.config.get(ConfigKeys.TOGGLE_DELAY)
 
     @property
-    def toggle_direction(self) -> int:
+    def active_direction(self) -> int:
         """
-        Get which direction to toggle in
-        @return: which direction to toggle
+        Get whether or not GPIO is defined as active LOW or active HIGH
+        @return: active LOW (GPIO.LOW) or active HIGH (GPIO.HIGH)
         @rtype: int
         """
-        return self.config.get(ConfigKeys.TOGGLE_DIRECTION, GPIO.HIGH)
+        return GPIO.HIGH if self.config.get(ConfigKeys.ACTIVE_DIRECTION, "HIGH").upper() == "HIGH" else GPIO.LOW
 
     @property
     def mqtt_topic(self):

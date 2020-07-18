@@ -2,7 +2,7 @@
   "log": "/home/cpw/dev/logs/gpioDriver.log",
   "gpio_pin": 17,
   "gpio_toggle_delay": 1.0,
-  "gpio_toggle_direction": 1,
+  "gpio_active_direction": "HIGH",
   "mqtt": {
     "client_id": "pi_test_door_control",
     "topics": {

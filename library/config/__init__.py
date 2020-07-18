@@ -1,9 +1,13 @@
 import json
 import os
-from typing import List
+from typing import List, Type, TypeVar, Union
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR
 from library.data.database import Column
+
+
+CONFIG_TYPE = TypeVar("CONFIG_TYPE", bound="Base")
+CONTROLLER_TYPE = TypeVar("CONTROLLER_TYPE", bound="Base")
 
 
 class SENSORCLASSES:
@@ -216,6 +220,7 @@ class ConfigurationHandler(BaseConfiguration):
     from library.config.gpio_monitor import GPIOMonitorConfig
     from library.config.camera import CameraConfig
     from library.config.pushbullet import PushbulletConfig
+    from library.config.mqtt import MQTTConfig
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
@@ -233,7 +238,7 @@ class ConfigurationHandler(BaseConfiguration):
         SENSORCLASSES.PUSHBULLET: PushbulletConfig,
     }
 
-    def __init__(self, config_path, debug=False):
+    def __init__(self, config_path: str, debug: bool = False):
         """
         @param config_path: path to top-level configuration JSON file
         @type config_path: str
@@ -252,7 +257,6 @@ class ConfigurationHandler(BaseConfiguration):
         """
         Get the full path to the base MQTT configuration file
         @return: path to the base MQTT configuration file
-        @rtype: str
         """
         config_path = self.config.get(ConfigKeys.MQTT)
         if not config_path:
@@ -262,13 +266,12 @@ class ConfigurationHandler(BaseConfiguration):
         else:
             return self.normalize_config_path(config_path)
 
-    def get_sensor_mqtt_config(self, sensor):
+    def get_sensor_mqtt_config(self, sensor) -> Union[MQTTConfig, None]:
         """
         Get the MQTT config class for the given sensor
         @param sensor: target sensor
         @type sensor: str
         @return: MQTT configuration object with sensor settings
-        @rtype: MQTTConfig
         """
         from library.config.mqtt import MQTTConfig
         if sensor in self.sensor_paths:
@@ -276,13 +279,12 @@ class ConfigurationHandler(BaseConfiguration):
         else:
             return None  # pragma: no cover
 
-    def get_sensor_config(self, sensor):
+    def get_sensor_config(self, sensor) -> Type[CONFIG_TYPE]:
         """
         Get the config class for the particular
         @param sensor: target sensor
         @type sensor: str
         @return: the sensor config object for the given sensor if supported
-        @rtype: library.config.BaseConfiguration
         """
         if sensor in self.SENSOR_CONFIG_CLASS_MAP and sensor in self.sensor_paths:
             return self.SENSOR_CONFIG_CLASS_MAP[sensor](
@@ -293,13 +295,12 @@ class ConfigurationHandler(BaseConfiguration):
         else:
             return None  # pragma: no cover
 
-    def get_sensor_controller(self, sensor):
+    def get_sensor_controller(self, sensor) -> Type[CONTROLLER_TYPE]:
         """
         Get the sensor object for the given sensor
         @param sensor: target sensor
         @type sensor: str
         @return: sensor object
-        @rtype: library.controllers.BaseController
         """
         if sensor in self.SENSOR_CLASS_MAP:
             if sensor not in self.sensors:
@@ -311,7 +312,7 @@ class ConfigurationHandler(BaseConfiguration):
     # endregion Sensors
     # region BuiltIns
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         @rtype: str
         """
@@ -335,7 +336,7 @@ class ConfigurationHandler(BaseConfiguration):
         if self._current_sensor < len(self.sensors):
             sensor = self.sensorTypes[self._current_sensor]
             self._current_sensor += 1
-            return self.get_sensor_controller(sensor)
+            yield self.get_sensor_controller(sensor)
         else:
             raise StopIteration
 

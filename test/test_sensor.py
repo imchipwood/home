@@ -2,7 +2,7 @@ from library.config import ConfigurationHandler, SENSORCLASSES
 from library.config.camera import CameraConfig
 from library.config.environment import EnvironmentConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
-from library.config.gpio_driver import GPIODriverConfig
+from library.config.gpio_driver import GPIODriverConfig, ConfigKeys
 from library.sensors.camera import Camera
 from library.sensors.environment import EnvironmentSensor
 from library.sensors.gpio_monitor import GPIOMonitor, GPIO
@@ -10,6 +10,13 @@ from library.sensors.gpio_driver import GPIODriver
 
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
+
+MOCK_GPIO_STATE = None
+
+
+def mock_gpio_write(direction):
+    global MOCK_GPIO_STATE
+    MOCK_GPIO_STATE = direction
 
 
 class TestEnvironmentSensor:
@@ -74,12 +81,40 @@ class TestGPIOMonitorSensor:
 
 class TestGPIODriverSensor:
 
-    def test_sensor(self):
+    def test_sensor_write(self, monkeypatch):
+        global MOCK_GPIO_STATE
         config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_DRIVER)  # type: GPIODriverConfig
         sensor = GPIODriver(config=config)
+        monkeypatch.setattr(sensor, "write", mock_gpio_write)
+
         assert sensor.pin == 17
+
         sensor.write(GPIO.HIGH)
+        assert MOCK_GPIO_STATE == GPIO.HIGH
+
         sensor.write(GPIO.LOW)
+        assert MOCK_GPIO_STATE == GPIO.LOW
+
+        sensor.cleanup()
+
+    def test_sensor_active_direction(self, monkeypatch):
+        global MOCK_GPIO_STATE
+        config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_DRIVER)  # type: GPIODriverConfig
+        sensor = GPIODriver(config=config)
+        monkeypatch.setattr(sensor, "write", mock_gpio_write)
+
+        sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = "HIGH"
+        sensor.write_on()
+        assert MOCK_GPIO_STATE == GPIO.HIGH
+        sensor.write_off()
+        assert MOCK_GPIO_STATE == GPIO.LOW
+
+        sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = "LOW"
+        sensor.write_on()
+        assert MOCK_GPIO_STATE == GPIO.LOW
+        sensor.write_off()
+        assert MOCK_GPIO_STATE == GPIO.HIGH
+
         sensor.cleanup()
 
 

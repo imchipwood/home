@@ -10,6 +10,7 @@ import pytest
 from library import GarageDoorStates
 from library.communication.mqtt import MQTTClient
 from library.config import ConfigurationHandler, SENSORCLASSES, PubSubKeys
+from library.config.gpio_driver import ConfigKeys as GPIODriverConfigKeys
 from library.config.mqtt import MQTTConfig
 from library.data import DatabaseKeys
 from library.data.database import get_database_path
@@ -342,11 +343,13 @@ class TestGPIODriverController:
         """
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
         """ @type: library.controllers.gpio_driver.GPIODriverController """
-        # monkeypatch.setattr(controller.sensor, "write", mock_gpio_write)
+
         controller.start()
         assert controller.running
+
         wait_n_seconds(0.25)
         assert controller.running
+
         controller.running = False
         start = time.time()
         while time.time() - start < MAX_WAIT_SECONDS:
@@ -361,10 +364,12 @@ class TestGPIODriverController:
         """ @type: library.controllers.gpio_driver.GPIODriverController """
         monkeypatch.setattr(controller.sensor, "write", mock_gpio_write)
 
+        controller.sensor.config.config[GPIODriverConfigKeys.ACTIVE_DIRECTION] = "HIGH"
         controller.toggle_loop()
         assert MOCK_GPIO_STATE == GPIO.LOW
 
-        controller.toggle_loop(direction=GPIO.LOW)
+        controller.sensor.config.config[GPIODriverConfigKeys.ACTIVE_DIRECTION] = "LOW"
+        controller.toggle_loop()
         assert MOCK_GPIO_STATE == GPIO.HIGH
 
     def test_should_toggle_from_command(self):

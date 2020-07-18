@@ -141,11 +141,7 @@ class GPIODriverController(BaseController):
             return
 
         if self.should_toggle_from_command(msg.topic, message_data):
-            kwargs = {
-                "toggle_delay": self.config.toggle_delay,
-                "direction": self.config.toggle_direction
-            }
-            thread = Thread(target=self.toggle_loop, kwargs=kwargs)
+            thread = Thread(target=self.toggle_loop)
             thread.start()
 
     def should_toggle_from_command(self, message_topic, message_data) -> bool:
@@ -186,21 +182,11 @@ class GPIODriverController(BaseController):
     #         if latest_timestamp is not None:
     #             self.db.update_record(latest_timestamp, DatabaseKeys.TOGGLED, int(True))
 
-    def toggle_loop(self, toggle_delay=0.3, direction=GPIO.HIGH):
+    def toggle_loop(self):
         """
-
-        @param toggle_delay: how much to delay between each GPIO write
-        @type toggle_delay: float
-        @param direction: which direction to toggle in
-        @type direction: int
+        Toggle the GPIO
         """
-        base = GPIO.LOW if direction == GPIO.HIGH else GPIO.HIGH
-        toggle = GPIO.HIGH if direction == GPIO.HIGH else GPIO.LOW
-        self.sensor.write(base)
-        time.sleep(toggle_delay)
-        self.sensor.write(toggle)
-        time.sleep(toggle_delay)
-        self.sensor.write(base)
+        self.sensor.toggle()
 
     def cleanup(self):
         """

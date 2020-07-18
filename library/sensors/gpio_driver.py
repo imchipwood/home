@@ -5,6 +5,7 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import logging
+import time
 
 from library.controllers import get_logger
 
@@ -35,11 +36,37 @@ class GPIODriver:
         super()
         self.config = config
         self.logger = get_logger(__name__, debug, config.log)
-        GPIO.setmode(GPIO.BCM)
+
         self.pin = self.config.pin
         self.logger.debug(f"Setting up GPIO on pin {self.pin}")
+
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
-        self.write(GPIO.LOW if self.config.toggle_direction == GPIO.HIGH else GPIO.HIGH)
+        self.write_off()
+
+    @property
+    def is_active_high(self) -> bool:
+        """
+        Check if GPIO is defined as active high
+        @rtype: bool
+        """
+        return self.config.active_direction == GPIO.HIGH
+
+    @property
+    def off_state(self) -> int:
+        """
+        Get state for GPIO OFF based on active low/high
+        @rtype: int
+        """
+        return GPIO.LOW if self.is_active_high else GPIO.HIGH
+
+    @property
+    def on_state(self) -> int:
+        """
+        Get state for GPIO ON based on active low/high
+        @rtype: int
+        """
+        return GPIO.HIGH if self.is_active_high else GPIO.LOW
 
     def write(self, direction: int):
         """
@@ -48,6 +75,28 @@ class GPIODriver:
         @type direction: int
         """
         GPIO.output(self.pin, direction)
+
+    def write_off(self):
+        """
+        Set GPIO to OFF state
+        """
+        self.write(self.off_state)
+
+    def write_on(self):
+        """
+        Set GPIO to ON state
+        """
+        self.write(self.on_state)
+
+    def toggle(self):
+        """
+        Toggle based on config settings
+        """
+        self.write_off()
+        time.sleep(self.config.toggle_delay)
+        self.write_on()
+        time.sleep(self.config.toggle_delay)
+        self.write_off()
 
     def cleanup(self):
         """
