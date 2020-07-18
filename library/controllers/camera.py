@@ -224,26 +224,31 @@ class PiCameraController(BaseController):
         @param force: whether or not to force publishing of the image
         @type force: bool
         """
-        if self.mqtt:
-            for name, topic in self.config.mqtt_config.topics_publish.items():
-                if PubSubKeys.FORCE in topic.raw_payload:
-                    raw_payload = topic.raw_payload
-                    force_publish = True if force else False
-                    raw_payload[PubSubKeys.FORCE] = force_publish
-                    payload = topic.payload(**raw_payload)
-                else:
-                    payload = topic.raw_payload
-                self.logger.info(f"Publish to {name}: {topic.raw_payload}")
-                self.mqtt.single(str(topic), payload=payload, qos=2)
+        if not self.mqtt:
+            return
+
+        for name, topic in self.config.mqtt_config.topics_publish.items():
+            if PubSubKeys.FORCE in topic.raw_payload:
+                raw_payload = topic.raw_payload
+                force_publish = True if force else False
+                raw_payload[PubSubKeys.FORCE] = force_publish
+                payload = topic.payload(**raw_payload)
+            else:
+                payload = topic.raw_payload
+
+            self.logger.info(f"Publish to {name}: {topic.raw_payload}")
+            self.mqtt.single(str(topic), payload=payload, retain=False, qos=2)
 
     def update_database_entry(self):
         """
         Update the latest database entry to indicate capturing has happened
         """
-        if self.db_enabled:
-            latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-            if latest_timestamp is not None:
-                self.db.update_record(latest_timestamp, DatabaseKeys.CAPTURED, int(True))
+        if not self.db_enabled:
+            return
+
+        latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
+        if latest_timestamp is not None:
+            self.db.update_record(latest_timestamp, DatabaseKeys.CAPTURED, int(True))
 
     # endregion MQTT
     # region Camera
