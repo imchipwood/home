@@ -378,6 +378,35 @@ class TestGPIODriverController:
         topic.payload = {"control": "HELLO"}
         assert controller.get_gpio_command_from_message(topic.topic, topic.payload) is None
 
+    @pytest.mark.usefixtures("mock_get_gpio_command_from_message", "mock_toggle_loop")
+    @pytest.mark.parametrize("command", [
+        GPIODriverCommands.TOGGLE,
+        GPIODriverCommands.ON,
+        GPIODriverCommands.OFF
+    ])
+    def test_mqtt(self, command):
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
+        """ @type: library.controllers.gpio_driver.GPIODriverController """
+
+        topics = [x.name for x in controller.config.mqtt_topic]
+        client = get_mqtt_client(controller.config.mqtt_config, topics)
+
+        controller.setup()
+        topic = controller.config.mqtt_topic[0]
+        payload = {PubSubKeys.CONTROL: command}
+        controller.mqtt.single(topic.name, payload, qos=2)
+
+        i = 0
+        delay_time = 0.001
+        while not MESSAGE:
+            time.sleep(delay_time)
+            i += 1
+            if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
+                assert False, "Wait time exceeded!"
+        controller.stop()
+        client.disconnect()
+        assert MESSAGE
+
 
 class TestGPIOMonitorController:
 
