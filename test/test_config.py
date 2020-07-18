@@ -1,6 +1,6 @@
 import json
-from inspect import ismethod
 import os
+from inspect import ismethod
 
 import pytest
 
@@ -18,7 +18,6 @@ from library.controllers.gpio_driver import GPIODriverController
 from library.controllers.gpio_monitor import GPIOMonitorController
 from library.controllers.pushbullet import PushBulletController
 
-# CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config", "pytest.json")
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 

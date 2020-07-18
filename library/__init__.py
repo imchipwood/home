@@ -16,6 +16,11 @@ class GarageDoorStates:
 
 class GPIODriverCommands:
     TOGGLE = "TOGGLE"
+    ON = "ON"
+    OFF = "OFF"
+
+
+class GPIODriverActiveDirection:
     HIGH = "HIGH"
     LOW = "LOW"
 

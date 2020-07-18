@@ -5,6 +5,8 @@ Author: Charles "Chip" Wood
         github.com/imchipwood
 """
 import logging
+
+from library import GPIODriverActiveDirection
 from library.config import BaseConfiguration
 
 try:
@@ -71,7 +73,8 @@ class GPIODriverConfig(BaseConfiguration):
         @return: active LOW (GPIO.LOW) or active HIGH (GPIO.HIGH)
         @rtype: int
         """
-        return GPIO.HIGH if self.config.get(ConfigKeys.ACTIVE_DIRECTION, "HIGH").upper() == "HIGH" else GPIO.LOW
+        direction = self.config.get(ConfigKeys.ACTIVE_DIRECTION, GPIODriverActiveDirection.HIGH).upper()
+        return GPIO.HIGH if direction == GPIODriverActiveDirection.HIGH else GPIO.LOW
 
     @property
     def mqtt_topic(self):

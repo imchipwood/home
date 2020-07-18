@@ -104,3 +104,9 @@ class GPIODriver:
         """
         self.logger.debug("GPIO cleanup - removing event detection")
         GPIO.cleanup(self.pin)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cleanup()

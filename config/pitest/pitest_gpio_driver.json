@@ -9,7 +9,7 @@
       "home-assistant/test/door/control": {
         "pubsub": "subscribe",
         "payload": {
-          "control": "TOGGLE"
+          "control": "TOGGLE|ON|OFF"
         }
       }
     }

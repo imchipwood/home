@@ -7,10 +7,9 @@ from typing import List
 
 import pytest
 
-from library import GarageDoorStates
+from library import GarageDoorStates, GPIODriverCommands
 from library.communication.mqtt import MQTTClient
 from library.config import ConfigurationHandler, SENSORCLASSES, PubSubKeys
-from library.config.gpio_driver import ConfigKeys as GPIODriverConfigKeys
 from library.config.mqtt import MQTTConfig
 from library.data import DatabaseKeys
 from library.data.database import get_database_path
@@ -34,8 +33,6 @@ MOCK_GPIO_INPUT = 0
 MAX_WAIT_SECONDS = 2.5
 MAX_ENV_WAIT_SECONDS = MAX_WAIT_SECONDS * 3
 
-MOCK_GPIO_STATE = None
-
 
 @pytest.fixture
 def mock_get_latest_db_entry(mocker):
@@ -58,8 +55,8 @@ def mock_should_capture_from_command(mocker):
 
 
 @pytest.fixture
-def mock_should_toggle_from_command(mocker):
-    mocker.patch("library.controllers.gpio_driver.GPIODriverController.should_toggle_from_command", return_value=True)
+def mock_get_gpio_command_from_message(mocker):
+    mocker.patch("library.controllers.gpio_driver.GPIODriverController.get_gpio_command_from_message", return_value=GPIODriverCommands.TOGGLE)
 
 
 @pytest.fixture
@@ -70,6 +67,16 @@ def mock_capture_loop(mocker):
 @pytest.fixture
 def mock_toggle_loop(mocker):
     mocker.patch("library.controllers.gpio_driver.GPIODriverController.toggle_loop", return_value=None)
+
+
+@pytest.fixture
+def mock_gpio_on_loop(mocker):
+    mocker.patch("library.controllers.gpio_driver.GPIODriverController.gpio_on_loop", return_value=None)
+
+
+@pytest.fixture
+def mock_gpio_off_loop(mocker):
+    mocker.patch("library.controllers.gpio_driver.GPIODriverController.gpio_off_loop", return_value=None)
 
 
 class TestTopic:
@@ -134,11 +141,6 @@ def mock_gpio_read():
     global MOCK_GPIO_INPUT
     MOCK_GPIO_INPUT = 1 if MOCK_GPIO_INPUT == 0 else 0
     return bool(MOCK_GPIO_INPUT)
-
-
-def mock_gpio_write(direction):
-    global MOCK_GPIO_STATE
-    MOCK_GPIO_STATE = direction
 
 
 def wait_n_seconds(n):
@@ -336,7 +338,7 @@ class TestCameraController:
 
 class TestGPIODriverController:
 
-    @pytest.mark.usefixtures("mock_should_toggle_from_command")
+    @pytest.mark.usefixtures("mock_get_gpio_command_from_message")
     def test_thread(self):
         """
         Test that the thread starts and stops properly
@@ -357,30 +359,24 @@ class TestGPIODriverController:
                 break
         assert not controller.thread.is_alive()
 
-    @pytest.mark.usefixtures("mock_should_toggle_from_command")
-    def test_toggle(self, monkeypatch):
-        global MOCK_GPIO_STATE
-        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
-        """ @type: library.controllers.gpio_driver.GPIODriverController """
-        monkeypatch.setattr(controller.sensor, "write", mock_gpio_write)
-
-        controller.sensor.config.config[GPIODriverConfigKeys.ACTIVE_DIRECTION] = "HIGH"
-        controller.toggle_loop()
-        assert MOCK_GPIO_STATE == GPIO.LOW
-
-        controller.sensor.config.config[GPIODriverConfigKeys.ACTIVE_DIRECTION] = "LOW"
-        controller.toggle_loop()
-        assert MOCK_GPIO_STATE == GPIO.HIGH
-
-    def test_should_toggle_from_command(self):
+    def test_get_gpio_command_from_message(self):
+        """
+        Test that MQTT payloads result in expected commands
+        """
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
         """ @type: library.controllers.gpio_driver.GPIODriverController """
 
         topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "TOGGLE"}, True)
-        assert controller.should_toggle_from_command(topic.topic, topic.payload)
+        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.TOGGLE
+
+        topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "ON"}, True)
+        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.ON
+
+        topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "OFF"}, True)
+        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.OFF
 
         topic.payload = {"control": "HELLO"}
-        assert not controller.should_toggle_from_command(topic.topic, topic.payload)
+        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) is None
 
 
 class TestGPIOMonitorController:

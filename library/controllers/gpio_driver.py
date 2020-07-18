@@ -6,15 +6,14 @@ Author: Charles "Chip" Wood
 """
 import json
 import logging
-import time
 from threading import Thread
 
-from library.communication.mqtt import MQTTClient, get_mqtt_error_message, MQTTError
-from library.config import PubSubKeys
 from library import GPIODriverCommands
+from library.communication.mqtt import get_mqtt_error_message, MQTTError
+from library.config import PubSubKeys
 from library.controllers import BaseController, get_logger
-from library.data import DatabaseKeys
-from library.data.database import Database
+# from library.data import DatabaseKeys
+# from library.data.database import Database
 from library.sensors.gpio_driver import GPIODriver
 
 try:
@@ -140,11 +139,18 @@ class GPIODriverController(BaseController):
             self.logger.warning(f"Some error while converting string payload to dict: {e}")
             return
 
-        if self.should_toggle_from_command(msg.topic, message_data):
+        command = self.get_gpio_command_from_message(msg.topic, message_data)
+        if command == GPIODriverCommands.TOGGLE:
             thread = Thread(target=self.toggle_loop)
             thread.start()
+        elif command == GPIODriverCommands.ON:
+            thread = Thread(target=self.gpio_on_loop)
+            thread.start()
+        elif command == GPIODriverCommands.OFF:
+            thread = Thread(target=self.gpio_off_loop)
+            thread.start()
 
-    def should_toggle_from_command(self, message_topic, message_data) -> bool:
+    def get_gpio_command_from_message(self, message_topic, message_data) -> str or None:
         """
         Check if the message indicates a capture command
         @param message_topic: topic message came from
@@ -152,11 +158,10 @@ class GPIODriverController(BaseController):
         @param message_data: message data as dict
         @type message_data: dict
         @return: whether or not to capture
-        @rtype: bool or str
         """
         topic = self.config.mqtt_config.topics_subscribe.get(message_topic)
         if not topic:
-            return False
+            return None
 
         # has_toggled = False
         # if self.db_enabled:
@@ -166,12 +171,12 @@ class GPIODriverController(BaseController):
         #         has_toggled = bool(last_entry[DatabaseKeys.TOGGLED])
 
         command = message_data.get(PubSubKeys.CONTROL)
-        if command == GPIODriverCommands.TOGGLE:
-            self.logger.info("Received toggle command")
-            return True
+        if command in [GPIODriverCommands.TOGGLE, GPIODriverCommands.ON, GPIODriverCommands.OFF]:
+            self.logger.info(f"Received command: {command}")
+            return command
 
         self.logger.debug(f"Not toggling for latest message: {message_topic} - {message_data}")
-        return False
+        return None
 
     # def update_database_entry(self):
     #     """
@@ -187,6 +192,18 @@ class GPIODriverController(BaseController):
         Toggle the GPIO
         """
         self.sensor.toggle()
+
+    def gpio_on_loop(self):
+        """
+        Set GPIO to ON
+        """
+        self.sensor.write_on()
+
+    def gpio_off_loop(self):
+        """
+        Set GPIO to OFF
+        """
+        self.sensor.write_off()
 
     def cleanup(self):
         """

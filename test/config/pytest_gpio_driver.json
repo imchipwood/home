@@ -9,7 +9,7 @@
       "home-assistant/pytest/gpio_driver": {
         "pubsub": "subscribe",
         "payload": {
-          "control": "TOGGLE"
+          "control": "TOGGLE|ON|OFF"
         }
       }
     }
