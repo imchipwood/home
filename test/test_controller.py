@@ -28,7 +28,6 @@ CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
 MESSAGE = None
-MESSAGE_RECEIVED = False
 MOCK_GPIO_INPUT = 0
 MAX_WAIT_SECONDS = 2.5
 MAX_ENV_WAIT_SECONDS = MAX_WAIT_SECONDS * 3
@@ -65,18 +64,33 @@ def mock_capture_loop(mocker):
 
 
 @pytest.fixture
-def mock_toggle_loop(mocker):
-    mocker.patch("library.controllers.gpio_driver.GPIODriverController.toggle_loop", return_value=None)
+def mock_gpiodriver_toggle(mocker):
+
+    def setMessage():
+        global MESSAGE
+        MESSAGE = GPIODriverCommands.TOGGLE
+
+    mocker.patch("library.sensors.gpio_driver.GPIODriver.toggle", side_effect=setMessage)
 
 
 @pytest.fixture
-def mock_gpio_on_loop(mocker):
-    mocker.patch("library.controllers.gpio_driver.GPIODriverController.gpio_on_loop", return_value=None)
+def mock_gpiodriver_write_on(mocker):
+
+    def setMessage():
+        global MESSAGE
+        MESSAGE = GPIODriverCommands.ON
+
+    mocker.patch("library.sensors.gpio_driver.GPIODriver.write_on", side_effect=setMessage)
 
 
 @pytest.fixture
-def mock_gpio_off_loop(mocker):
-    mocker.patch("library.controllers.gpio_driver.GPIODriverController.gpio_off_loop", return_value=None)
+def mock_gpiodriver_write_off(mocker):
+
+    def setMessage():
+        global MESSAGE
+        MESSAGE = GPIODriverCommands.OFF
+
+    mocker.patch("library.sensors.gpio_driver.GPIODriver.write_off", side_effect=setMessage)
 
 
 class TestTopic:
@@ -378,7 +392,7 @@ class TestGPIODriverController:
         topic.payload = {"control": "HELLO"}
         assert controller.get_gpio_command_from_message(topic.topic, topic.payload) is None
 
-    @pytest.mark.usefixtures("mock_get_gpio_command_from_message", "mock_toggle_loop")
+    @pytest.mark.usefixtures("mock_gpiodriver_toggle", "mock_gpiodriver_write_on", "mock_gpiodriver_write_off")
     @pytest.mark.parametrize("command", [
         GPIODriverCommands.TOGGLE,
         GPIODriverCommands.ON,
@@ -388,24 +402,20 @@ class TestGPIODriverController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
         """ @type: library.controllers.gpio_driver.GPIODriverController """
 
-        topics = [x.name for x in controller.config.mqtt_topic]
-        client = get_mqtt_client(controller.config.mqtt_config, topics)
-
         controller.setup()
         topic = controller.config.mqtt_topic[0]
         payload = {PubSubKeys.CONTROL: command}
-        controller.mqtt.single(topic.name, payload, qos=2)
+        controller.mqtt.single(topic.name, payload, qos=0)
 
         i = 0
         delay_time = 0.001
-        while not MESSAGE:
+        while MESSAGE != command:
             time.sleep(delay_time)
             i += 1
             if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
                 assert False, "Wait time exceeded!"
-        controller.stop()
-        client.disconnect()
-        assert MESSAGE
+
+        controller.cleanup()
 
 
 class TestGPIOMonitorController:
