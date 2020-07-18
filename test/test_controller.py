@@ -180,7 +180,11 @@ class TestEnvironmentController:
         def mock_publish(humidity, temperature, units):
             return
 
+        def mock_read():
+            return 75.0, 40.0
+
         monkeypatch.setattr(self.controller, "publish", mock_publish)
+        monkeypatch.setattr(self.controller.sensor, "read", mock_read)
 
         self.controller.sensor.reset_readings()
         self.controller.start()

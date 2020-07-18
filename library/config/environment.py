@@ -66,13 +66,13 @@ class EnvironmentConfig(BaseConfiguration):
         return self.config.get(ConfigKeys.UNITS)
 
     @property
-    def period(self) -> int:
+    def period(self) -> float:
         """
         Get the period for reading the sensor
-        @return: period in seconds. Default: 300
-        @rtype: int
+        @return: period in seconds. Default: 300 seconds (5 minutes)
+        @rtype: float
         """
-        return int(self.config.get(ConfigKeys.PERIOD, 5 * 60))
+        return self.config.get(ConfigKeys.PERIOD) or 300
 
     @property
     def mqtt_topic(self):
