@@ -103,12 +103,14 @@ class BaseConfiguration:
         ]
         for potential_dir in potential_dirs:
             # BASE_CONFIG_DIR could not be set yet
-            if potential_dir:
-                # if the path exists, save the base dir for next time and return it
-                potential_path = os.path.join(potential_dir, config_path)
-                if os.path.exists(potential_path):
-                    BaseConfiguration.BASE_CONFIG_DIR = potential_dir
-                    return potential_path
+            if not potential_dir:
+                continue
+
+            # if the path exists, save the base dir for next time and return it
+            potential_path = os.path.join(potential_dir, config_path)
+            if os.path.exists(potential_path):
+                BaseConfiguration.BASE_CONFIG_DIR = potential_dir
+                return potential_path
 
         # Can't figure out path - exit
         raise OSError(f"Could not find config file {config_path} at base dir {BaseConfiguration.BASE_CONFIG_DIR}")  # pragma: no cover
@@ -262,8 +264,8 @@ class ConfigurationHandler(BaseConfiguration):
             return ""
         elif os.path.exists(config_path):
             return config_path
-        else:
-            return self.normalize_config_path(config_path)
+
+        return self.normalize_config_path(config_path)
 
     def get_sensor_mqtt_config(self, sensor) -> Union[MQTTConfig, None]:
         """
@@ -275,8 +277,8 @@ class ConfigurationHandler(BaseConfiguration):
         from library.config.mqtt import MQTTConfig
         if sensor in self.sensor_paths:
             return MQTTConfig(self.mqtt_config_path, self.get_sensor_path(sensor), self.debug)
-        else:
-            return None  # pragma: no cover
+
+        return None  # pragma: no cover
 
     def get_sensor_config(self, sensor) -> Type[CONFIG_TYPE]:
         """
@@ -285,14 +287,14 @@ class ConfigurationHandler(BaseConfiguration):
         @type sensor: str
         @return: the sensor config object for the given sensor if supported
         """
-        if sensor in self.SENSOR_CONFIG_CLASS_MAP and sensor in self.sensor_paths:
-            return self.SENSOR_CONFIG_CLASS_MAP[sensor](
-                self.sensor_paths[sensor],
-                self.get_sensor_mqtt_config(sensor),
-                self.debug
-            )
-        else:
-            return None  # pragma: no cover
+        if not (sensor in self.SENSOR_CONFIG_CLASS_MAP and sensor in self.sensor_paths):
+            return None
+
+        return self.SENSOR_CONFIG_CLASS_MAP[sensor](
+            self.sensor_paths[sensor],
+            self.get_sensor_mqtt_config(sensor),
+            self.debug
+        )
 
     def get_sensor_controller(self, sensor) -> Type[CONTROLLER_TYPE]:
         """
@@ -301,12 +303,12 @@ class ConfigurationHandler(BaseConfiguration):
         @type sensor: str
         @return: sensor object
         """
-        if sensor in self.SENSOR_CLASS_MAP:
-            if sensor not in self.sensors:
-                self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor), self.debug)
-            return self.sensors[sensor]
-        else:
-            return None  # pragma: no cover
+        if sensor not in self.SENSOR_CLASS_MAP:
+            return None
+
+        if sensor not in self.sensors:
+            self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor), self.debug)
+        return self.sensors[sensor]
 
     # endregion Sensors
     # region BuiltIns
@@ -332,11 +334,11 @@ class ConfigurationHandler(BaseConfiguration):
         @return: sensor controller
         @rtype: library.controllers.BaseController
         """
-        if self._current_sensor < len(self.sensors):
-            sensor = self.sensorTypes[self._current_sensor]
-            self._current_sensor += 1
-            yield self.get_sensor_controller(sensor)
-        else:
+        if self._current_sensor >= len(self.sensors):
             raise StopIteration
+
+        sensor = self.sensorTypes[self._current_sensor]
+        self._current_sensor += 1
+        yield self.get_sensor_controller(sensor)
 
         # endregion BuiltIns

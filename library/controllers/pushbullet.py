@@ -82,12 +82,14 @@ class PushBulletController(BaseController):
         """
         Simply connect to MQTT
         """
-        if self.config.mqtt_topic:
-            self.logger.debug("in connect_mqtt")
-            self.mqtt.connect()
-            self.thread = Thread(target=self.loop)
-            self.thread.daemon = True
-            self.thread.start()
+        if not self.config.mqtt_topic:
+            return
+
+        self.logger.debug("in connect_mqtt")
+        self.mqtt.connect()
+        self.thread = Thread(target=self.loop)
+        self.thread.daemon = True
+        self.thread.start()
 
     def on_connect(self, client, userdata, flags, rc):
         """
@@ -129,51 +131,55 @@ class PushBulletController(BaseController):
             return
 
         topic = self.mqtt.config.topics_subscribe.get(msg.topic)
-        if topic:
-            state = message_data.get(PubSubKeys.STATE)
-            force = message_data.get(PubSubKeys.FORCE, False)
-            notification = self.config.notify.get(state)
-            self.logger.debug(f"Received '{state}': {notification}")
+        if not topic:
+            return
 
-            if not self.notifier:  # pragma: no cover
-                self.logger.warning("No PushBullet connection - trying again")
-                try:
-                    self.notifier = PushBulletNotify(self.config.api_key)
-                except MaxRetryError:
-                    return
+        state = message_data.get(PubSubKeys.STATE)
+        force = message_data.get(PubSubKeys.FORCE, False)
+        notification = self.config.notify.get(state)
+        self.logger.debug(f"Received '{state}': {notification}")
 
-            if state == GarageDoorStates.CLOSED:
-                # Message from GPIO monitor saying CLOSED
-                if self.db_enabled and not self.should_text_notify():  # pragma: no cover
-                    self.logger.debug(f"Latest state '{state}' has not changed recently - will not send notification")
-                    return
-                try:
-                    self.notifier.send_text(msg.topic, notification)
+        if not self.notifier:  # pragma: no cover
+            self.logger.warning("No PushBullet connection - trying again")
+            try:
+                self.notifier = PushBulletNotify(self.config.api_key)
+            except MaxRetryError:
+                return
+
+        if state == GarageDoorStates.CLOSED:
+            # Message from GPIO monitor saying CLOSED
+            if self.db_enabled and not self.should_text_notify():  # pragma: no cover
+                self.logger.debug(f"Latest state '{state}' has not changed recently - will not send notification")
+                return
+            try:
+                self.notifier.send_text(msg.topic, notification)
+                self.mark_latest_entry_notified()
+            except:
+                self.logger.exception("Exception attempting to send PushBullet text notification")
+
+        elif state == PubSubKeys.PUBLISH:
+            # Message is from camera saying to publish the image
+            if not self.should_image_notify(force=force):
+                self.logger.debug(f"Received image publish command but already published - not publishing")
+                return
+            try:
+                self.notifier.send_file(notification)
+                if not force:
+                    # Force means camera received direct capture command - no DB entry to update
                     self.mark_latest_entry_notified()
-                except:
-                    self.logger.exception("Exception attempting to send PushBullet text notification")
-
-            elif state == PubSubKeys.PUBLISH:
-                # Message is from camera saying to publish the image
-                if not self.should_image_notify(force=force):
-                    self.logger.debug(f"Received image publish command but already published - not publishing")
-                    return
-                try:
-                    self.notifier.send_file(notification)
-                    if not force:
-                        # Force means camera received direct capture command - no DB entry to update
-                        self.mark_latest_entry_notified()
-                except:
-                    self.logger.exception("Exception attempting to send PushBullet image notification")
+            except:
+                self.logger.exception("Exception attempting to send PushBullet image notification")
 
     def mark_latest_entry_notified(self):
         """
         Mark the latest entry as "notified"
         """
-        if self.db_enabled:
-            latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-            if latest_timestamp:
-                self.db.update_record(latest_timestamp, DatabaseKeys.NOTIFIED, int(True))
+        if not self.db_enabled:
+            return
+
+        latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
+        if latest_timestamp:
+            self.db.update_record(latest_timestamp, DatabaseKeys.NOTIFIED, int(True))
 
     def should_text_notify(self) -> bool:
         """

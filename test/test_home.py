@@ -14,5 +14,4 @@ def test_execute():
     start = time()
     while time() - start < 5 and thread.is_alive():
         pass
-    # thread.terminate()
     assert not thread.is_alive()

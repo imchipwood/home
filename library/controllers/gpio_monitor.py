@@ -100,22 +100,23 @@ class GPIOMonitorController(BaseController):
         self.logger.debug(f"{self.config.mqtt_config.client_id} state changed: {self}")
 
         # Check if the state should be published
-        if self.should_publish():
+        if not self.should_publish():
+            return
 
-            self.add_entry_to_database()
+        self.add_entry_to_database()
 
-            # Publish to all topics
-            for topic in self.config.mqtt_topic:
+        # Publish to all topics
+        for topic in self.config.mqtt_topic:
 
-                # Convert state to MQTT payload and attempt to publish
-                payload = topic.payload(state=str(self))
-                self.logger.info(f"Publishing to {topic}: {payload}")
-                try:
-                    self.mqtt.single(topic=str(topic), payload=payload, qos=2)
-                    self.logger.debug(f"Published to {topic}")
-                except:
-                    self.logger.exception(f"Failed to publish to topic {topic.name}:\n\t{payload}")
-                    raise
+            # Convert state to MQTT payload and attempt to publish
+            payload = topic.payload(state=str(self))
+            self.logger.info(f"Publishing to {topic}: {payload}")
+            try:
+                self.mqtt.single(topic=str(topic), payload=payload, qos=2)
+                self.logger.debug(f"Published to {topic}")
+            except:
+                self.logger.exception(f"Failed to publish to topic {topic.name}:\n\t{payload}")
+                raise
 
     def should_publish(self) -> bool:
         """
@@ -123,20 +124,20 @@ class GPIOMonitorController(BaseController):
         @rtype: bool
         """
         # Default is to publish
-        should_publish = True
+        if not self.config.db_name:
+            return True
 
-        if self.config.db_name:
-            # Database exists - check previous state against current
-            # and check if previous entry is old
-            last_state = self.get_latest_db_entry()
-            is_recent = self.is_latest_entry_recent(15)
+        # Database exists - check previous state against current
+        # and check if previous entry is old
+        last_state = self.get_latest_db_entry()
+        is_recent = self.is_latest_entry_recent(15)
 
-            # Only publish if the state changed or the previous reading is old
-            state_changed = last_state != str(self)
-            should_publish = state_changed or not is_recent
-            _is_recent = str(is_recent).rjust(5, " ")
-            _state_changed = str(state_changed).rjust(5, " ")
-            self.logger.debug(f"Recent: {_is_recent}, State changed: {_state_changed}")
+        # Only publish if the state changed or the previous reading is old
+        state_changed = last_state != str(self)
+        should_publish = state_changed or not is_recent
+        _is_recent = str(is_recent).rjust(5, " ")
+        _state_changed = str(state_changed).rjust(5, " ")
+        self.logger.debug(f"Recent: {_is_recent}, State changed: {_state_changed}")
 
         return should_publish
 
@@ -144,13 +145,15 @@ class GPIOMonitorController(BaseController):
         """
         Add the current state to the database
         """
-        if self.config.db_name:
-            with Database(self.config.db_name, self.config.db_columns) as db:
-                # Create the entry
-                data = [int(time.time()), str(self), int(False), int(False)]
-                self.logger.debug(f"Adding data to db: {data}")
-                db.add_data(data)
-                db.delete_all_except_last_n_records(2)
+        if not self.config.db_name:
+            return
+
+        with Database(self.config.db_name, self.config.db_columns) as db:
+            # Create the entry
+            data = [int(time.time()), str(self), int(False), int(False)]
+            self.logger.debug(f"Adding data to db: {data}")
+            db.add_data(data)
+            db.delete_all_except_last_n_records(2)
 
     # endregion Communication
 

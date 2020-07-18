@@ -30,24 +30,6 @@ class PiCameraController(BaseController):
         self.logger = get_logger(__name__, debug, config.log)
 
         self.thread = Thread(target=self.loop)
-        self._last_capture_timestamp = 0
-
-    @property
-    def last_capture_timestamp(self) -> float or int:
-        """
-        Last time a picture was taken
-        @rtype: float or int
-        """
-        return self._last_capture_timestamp
-
-    @last_capture_timestamp.setter
-    def last_capture_timestamp(self, timestamp: float or int):
-        """
-        Set the last capture time
-        @param timestamp: new capture timestamp
-        @type timestamp: float or int
-        """
-        self._last_capture_timestamp = timestamp
 
     # region Threading
 

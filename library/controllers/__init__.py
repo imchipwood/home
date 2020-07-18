@@ -3,12 +3,12 @@ import os
 from abc import ABC, abstractmethod
 from multiprocessing import Process
 from time import time
-from typing import List
+from typing import List, Union
 
 from library import setup_logging
 from library.communication.mqtt import MQTTClient
-from library.data.database import Database, DatabaseEntry
 from library.data import DatabaseKeys
+from library.data.database import Database, DatabaseEntry
 
 RUNNING = False
 
@@ -125,25 +125,27 @@ class BaseController(ABC):
         db.setup()
         return db
 
-    def get_latest_db_entry(self, column_name: str or None = DatabaseKeys.STATE) -> int or float or str:
+    def get_latest_db_entry(self, column_name: str or None = DatabaseKeys.STATE) -> Union[int, float, str, DatabaseEntry, None]:
         """
         Get the latest value from the database
         @param column_name: (Optional) target column name, if None, returns whole row
         @type column_name: str or None
-        @rtype: int or float or str or DatabaseEntry
         """
-        latest = None
-        if self.config.db_name:
-            self.logger.debug(f"Opening DB {self.config.db_name}")
-            with self.db as db:
-                record = db.get_latest_record()
-                if record:
-                    if column_name:
-                        latest = record[column_name]
-                        self.logger.debug(f"Latest db entry at column {column_name}: {latest}")
-                    else:
-                        latest = record
-                        self.logger.debug(f"Latest db entry: {latest}")
+        if not self.config.db_name:
+            return None
+
+        self.logger.debug(f"Opening DB {self.config.db_name}")
+        with self.db as db:
+            record = db.get_latest_record()
+            if not record:
+                return None
+
+            if column_name:
+                latest = record[column_name]
+                self.logger.debug(f"Latest db entry at column {column_name}: {latest}")
+            else:
+                latest = record
+                self.logger.debug(f"Latest db entry: {latest}")
         return latest
 
     def get_last_two_db_entries(self, column_name: str or None = DatabaseKeys.STATE) -> List:
@@ -154,19 +156,23 @@ class BaseController(ABC):
         @return: list of values from last two entries
         @rtype: list
         """
-        entries = []
-        if self.config.db_name:
-            self.logger.debug(f"Opening DB {self.config.db_name}")
-            with self.db as db:
-                records = db.get_last_n_records(2)
-                if len(records) == 2:
-                    if column_name:
-                        entries = [record[column_name] for record in records]
-                        self.logger.debug(f"Latest two db entries at column {column_name}: {entries}")
-                    else:
-                        entries = records
-                        self.logger.debug(f"Latest two db entries: {entries}")
-        return entries
+        if not self.config.db_name:
+            return []
+
+        self.logger.debug(f"Opening DB {self.config.db_name}")
+        with self.db as db:
+            records = db.get_last_n_records(2)
+            if len(records) != 2:
+                return []
+
+            if column_name:
+                entries = [record[column_name] for record in records]
+                self.logger.debug(f"Latest two db entries at column {column_name}: {entries}")
+            else:
+                entries = records
+                self.logger.debug(f"Latest two db entries: {entries}")
+
+            return entries
 
     def is_latest_entry_recent(self, delta_time: int = 60) -> bool:
         """

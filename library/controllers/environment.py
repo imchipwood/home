@@ -65,21 +65,23 @@ class EnvironmentController(BaseController):
 
             # Read at the desired frequency
             now = float(timeit.default_timer())
-            if now - last_time > self.config.period:
-                last_time = now
+            if now - last_time <= self.config.period:
+                continue
 
-                # Do the readings
-                try:
-                    humidity, temperature = self.sensor.read_n_times(5)
-                except SensorError as e:
-                    self.logger.error(str(e))
-                    continue
-                except:
-                    self.logger.exception("Some error while reading sensor")
-                    continue
+            last_time = now
 
-                # Publish
-                self.publish(humidity, temperature, self.sensor.units)
+            # Do the readings
+            try:
+                humidity, temperature = self.sensor.read_n_times(5)
+            except SensorError as e:
+                self.logger.error(str(e))
+                continue
+            except:
+                self.logger.exception("Some error while reading sensor")
+                continue
+
+            # Publish
+            self.publish(humidity, temperature, self.sensor.units)
 
     # endregion Threading
     # region Communication

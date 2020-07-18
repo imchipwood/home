@@ -46,20 +46,22 @@ class Formatters:
         @param actual_value: payload value passed by sensor or controller
         @return: actual_value as formatted string or original actual_value if string not expected
         """
+        if not isinstance(expected_value, str):
+            return actual_value
+
         value = actual_value
-        if isinstance(expected_value, str):
-            if "{" in expected_value:
-                # value won't change if expected_value is not a string formatter
-                new_value = expected_value.format(actual_value)
-                if new_value != expected_value:
-                    value = new_value
+        if "{" in expected_value:
+            # value won't change if expected_value is not a string formatter
+            new_value = expected_value.format(actual_value)
+            if new_value != expected_value:
+                value = new_value
+        else:
+            # Free-form string?
+            valid_values = expected_value.split("|")
+            if expected_value == "" or actual_value in valid_values:
+                value = actual_value
             else:
-                # Free-form string?
-                valid_values = expected_value.split("|")
-                if expected_value == "" or actual_value in valid_values:
-                    value = actual_value
-                else:
-                    value = None
+                value = None
 
         return value
 
@@ -168,27 +170,27 @@ class Topic:
         @rtype: str or dict
         """
         # Are we publishing or subscribing?
-        if self.is_publish:
-            new_payload = {}
-
-            # Convert all the values
-            for expected_key, expected_val in self.raw_payload.items():
-                # convert the value
-                actual_val = kwargs.get(expected_key)
-                actual_val = self.convert_payload_type(expected_val, actual_val)
-
-                # Check we got the correct value
-                if actual_val is None or actual_val == "":
-                    raise Exception(f"Missing payload key '{expected_key}'!")
-
-                new_payload[expected_key] = actual_val
-
-            # Convert the payload to a string
-            return json.dumps(new_payload)
-
-        else:
-            # Simply convert it to a string - let the controller figure out what to do with it
+        if not self.is_publish:
+            # Publishing - convert it to a string & let the controller figure out what to do with it
             return self.raw_payload
+
+        # subscribing
+        new_payload = {}
+
+        # Convert all the values
+        for expected_key, expected_val in self.raw_payload.items():
+            # convert the value
+            actual_val = kwargs.get(expected_key)
+            actual_val = self.convert_payload_type(expected_val, actual_val)
+
+            # Check we got the correct value
+            if actual_val is None or actual_val == "":
+                raise Exception(f"Missing payload key '{expected_key}'!")
+
+            new_payload[expected_key] = actual_val
+
+        # Convert the payload to a string
+        return json.dumps(new_payload)
 
     @staticmethod
     def convert_payload_type(expected_value, actual_value):

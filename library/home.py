@@ -22,9 +22,8 @@ def execute(config_path, stop=lambda: False, debug=False):
 
         # Infinite loop while threads run
         logging.info("Sensor threads launched - looping forever")
-        while True:
-            if stop():
-                break
+        while not stop():
+            pass
 
     except KeyboardInterrupt:
         logging.info("KeyboardInterrupt - exiting gracefully")

@@ -54,16 +54,18 @@ def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     logger.addHandler(stream_handler)
 
     # set up file handler logger - always debug level
-    if log_path:
-        logger.info(f"Logging to file: {log_path}")
-        file_handler = logging.FileHandler(log_path)
-        file_handler.setLevel(logging.DEBUG)
-
-        # file logging formatting
-        file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        file_formatter = logging.Formatter(file_format)
-        file_handler.setFormatter(file_formatter)
-        logger.addHandler(file_handler)
-    else:
+    if not log_path:
         logger.warning("No log file path specified - file logging disabled")
+        return logger
+
+    logger.info(f"Logging to file: {log_path}")
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setLevel(logging.DEBUG)
+
+    # file logging formatting
+    file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file_formatter = logging.Formatter(file_format)
+    file_handler.setFormatter(file_formatter)
+    logger.addHandler(file_handler)
+
     return logger

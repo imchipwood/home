@@ -12,8 +12,6 @@ from library import GPIODriverCommands
 from library.communication.mqtt import get_mqtt_error_message, MQTTError
 from library.config import PubSubKeys
 from library.controllers import BaseController, get_logger
-# from library.data import DatabaseKeys
-# from library.data.database import Database
 from library.sensors.gpio_driver import GPIODriver
 
 try:
@@ -80,10 +78,12 @@ class GPIODriverController(BaseController):
         self.logger.info("Shutting down GPIO Driver MQTT connection")
         super().stop()
         try:
-            if self.mqtt:
-                self.mqtt.loop_stop()
-                result = self.mqtt.disconnect()
-                self.logger.debug(f"Disconnect result: {result}")
+            if not self.mqtt:
+                return
+
+            self.mqtt.loop_stop()
+            result = self.mqtt.disconnect()
+            self.logger.debug(f"Disconnect result: {result}")
         except:
             self.logger.exception("Exception while disconnecting from MQTT - ignoring")
 
@@ -163,13 +163,6 @@ class GPIODriverController(BaseController):
         if not topic:
             return None
 
-        # has_toggled = False
-        # if self.db_enabled:
-        #     latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-        #     if latest_timestamp is not None:
-        #         last_entry = self.db.get_record(latest_timestamp)
-        #         has_toggled = bool(last_entry[DatabaseKeys.TOGGLED])
-
         command = message_data.get(PubSubKeys.CONTROL)
         if command in [GPIODriverCommands.TOGGLE, GPIODriverCommands.ON, GPIODriverCommands.OFF]:
             self.logger.info(f"Received command: {command}")
@@ -177,15 +170,6 @@ class GPIODriverController(BaseController):
 
         self.logger.debug(f"Not toggling for latest message: {message_topic} - {message_data}")
         return None
-
-    # def update_database_entry(self):
-    #     """
-    #     Update the latest database entry to indicate capturing has happened
-    #     """
-    #     if self.db_enabled:
-    #         latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-    #         if latest_timestamp is not None:
-    #             self.db.update_record(latest_timestamp, DatabaseKeys.TOGGLED, int(True))
 
     def toggle_loop(self):
         """

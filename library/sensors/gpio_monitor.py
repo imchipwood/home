@@ -46,10 +46,7 @@ class GPIOMonitor:
         GPIO Pull direction
         @rtype: int
         """
-        if self.config.pull_up_down.lower() == "down":
-            return GPIO.PUD_DOWN
-        else:
-            return GPIO.PUD_UP
+        return GPIO.PUD_DOWN if self.config.pull_up_down.lower() == "down" else GPIO.PUD_UP
 
     def read(self) -> bool:
         """

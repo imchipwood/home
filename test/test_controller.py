@@ -271,7 +271,6 @@ class TestCameraController:
         topic_open = TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True)
         with controller.db as db:
             # Set up for test
-            controller.last_capture_timestamp = -999
             db.delete_all_except_last_n_records(0)
 
             # No records - capture
