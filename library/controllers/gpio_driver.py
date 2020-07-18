@@ -142,7 +142,8 @@ class GPIODriverController(BaseController):
 
         if self.should_toggle_from_command(msg.topic, message_data):
             kwargs = {
-                "toggle_delay": self.config.toggle_delay
+                "toggle_delay": self.config.toggle_delay,
+                "direction": self.config.toggle_direction
             }
             thread = Thread(target=self.toggle_loop, kwargs=kwargs)
             thread.start()
