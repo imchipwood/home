@@ -14,6 +14,12 @@ class GarageDoorStates:
     CLOSED = "Closed"
 
 
+class GPIODriverCommands:
+    TOGGLE = "TOGGLE"
+    HIGH = "HIGH"
+    LOW = "LOW"
+
+
 def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     """
     Set up logging stream and file handlers

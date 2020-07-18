@@ -2,9 +2,11 @@ from library.config import ConfigurationHandler, SENSORCLASSES
 from library.config.camera import CameraConfig
 from library.config.environment import EnvironmentConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
+from library.config.gpio_driver import GPIODriverConfig
 from library.sensors.camera import Camera
 from library.sensors.environment import EnvironmentSensor
 from library.sensors.gpio_monitor import GPIOMonitor, GPIO
+from library.sensors.gpio_driver import GPIODriver
 
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
@@ -67,6 +69,17 @@ class TestGPIOMonitorSensor:
         )
         assert sensor.pull_up_down in [GPIO.PUD_UP, GPIO.PUD_DOWN]
         sensor.read()
+        sensor.cleanup()
+
+
+class TestGPIODriverSensor:
+
+    def test_sensor(self):
+        config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_DRIVER)  # type: GPIODriverConfig
+        sensor = GPIODriver(config=config)
+        assert sensor.pin == 17
+        sensor.write(GPIO.HIGH)
+        sensor.write(GPIO.LOW)
         sensor.cleanup()
 
 

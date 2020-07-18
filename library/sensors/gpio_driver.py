@@ -1,5 +1,5 @@
 """
-Simple GPIO input class
+Simple GPIO output class
 Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
@@ -19,16 +19,16 @@ except (ImportError, RuntimeError, ModuleNotFoundError):  # pragma: no cover
     from library.mock.mock_gpio import GPIO
 
 
-class GPIOMonitor:
+class GPIODriver:
     """
-    Simple GPIO monitoring class
+    Simple GPIO output class
     """
 
     def __init__(self, config, debug=False):
         """
-        Constructor for GPIO_Monitor
-        @param config: configuration object for GPIO monitoring
-        @type config: library.config.gpio_monitor.GPIOMonitorConfig
+        Constructor for GPIODriver
+        @param config: configuration object for GPIO driving
+        @type config: library.config.gpio_driver.GPIODriverConfig
         @param debug: debug print enable flag
         @type debug: bool
         """
@@ -38,25 +38,16 @@ class GPIOMonitor:
         GPIO.setmode(GPIO.BCM)
         self.pin = self.config.pin
         self.logger.debug(f"Setting up GPIO on pin {self.pin}")
-        GPIO.setup(self.pin, GPIO.IN, pull_up_down=self.pull_up_down)
+        GPIO.setup(self.pin, GPIO.OUT)
+        self.write(GPIO.LOW if self.config.toggle_direction == GPIO.HIGH else GPIO.HIGH)
 
-    @property
-    def pull_up_down(self) -> int:
+    def write(self, direction: int):
         """
-        GPIO Pull direction
-        @rtype: int
+        Write to the GPIO pin
+        @param direction: GPIO.HIGH or GPIO.LOW
+        @type direction: int
         """
-        if self.config.pull_up_down.lower() == "down":
-            return GPIO.PUD_DOWN
-        else:
-            return GPIO.PUD_UP
-
-    def read(self) -> bool:
-        """
-        Read the GPIO pin
-        @rtype: bool
-        """
-        return bool(GPIO.input(self.pin))
+        GPIO.output(self.pin, direction)
 
     def cleanup(self):
         """

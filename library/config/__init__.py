@@ -40,6 +40,7 @@ class PubSubKeys:
     SUBSCRIBE = "subscribe"
     PUBLISH = "publish"
     CAPTURE = "capture"
+    CONTROL = "control"
     FORCE = "force"
     BOTH = "both"
     PAYLOAD = "payload"
@@ -206,10 +207,12 @@ class ConfigurationHandler(BaseConfiguration):
     # Import all the sensor-specific controller objects
     from library.controllers.camera import PiCameraController
     from library.controllers.environment import EnvironmentController
+    from library.controllers.gpio_driver import GPIODriverController
     from library.controllers.gpio_monitor import GPIOMonitorController
     from library.controllers.pushbullet import PushBulletController
     # Import all the sensor-specific configuration objects
     from library.config.environment import EnvironmentConfig
+    from library.config.gpio_driver import GPIODriverConfig
     from library.config.gpio_monitor import GPIOMonitorConfig
     from library.config.camera import CameraConfig
     from library.config.pushbullet import PushbulletConfig
@@ -217,15 +220,15 @@ class ConfigurationHandler(BaseConfiguration):
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
         SENSORCLASSES.ENVIRONMENT: EnvironmentController,
+        SENSORCLASSES.GPIO_DRIVER: GPIODriverController,
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorController,
-        SENSORCLASSES.GPIO_DRIVER: None,
         SENSORCLASSES.CAMERA: PiCameraController,
         SENSORCLASSES.PUSHBULLET: PushBulletController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
         SENSORCLASSES.ENVIRONMENT: EnvironmentConfig,
+        SENSORCLASSES.GPIO_DRIVER: GPIODriverConfig,
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorConfig,
-        SENSORCLASSES.GPIO_DRIVER: None,
         SENSORCLASSES.CAMERA: CameraConfig,
         SENSORCLASSES.PUSHBULLET: PushbulletConfig,
     }

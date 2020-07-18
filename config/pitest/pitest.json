@@ -1,6 +1,7 @@
 {
   "sensors": {
     "gpio_monitor": "pitest_gpio_monitor.json",
+    "gpio_driver": "pitest_gpio_driver.json",
     "camera": "pitest_camera.json",
     "environment": "pitest_environment.json",
     "pushbullet": "pitest_pushbullet.json"

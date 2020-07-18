@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 import timeit
@@ -13,6 +14,16 @@ from library.config.mqtt import MQTTConfig
 from library.data import DatabaseKeys
 from library.data.database import get_database_path
 
+try:
+    import RPi.GPIO as GPIO
+except (ImportError, RuntimeError, ModuleNotFoundError):  # pragma: no cover
+    from library.sensors import IS_TEAMCITY
+
+    if IS_TEAMCITY:
+        raise
+    logging.warning("Failed to import RPi.GPIO - using mock library")
+    from library.mock.mock_gpio import GPIO
+
 CONFIG_PATH = "pytest.json"
 CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 
@@ -21,6 +32,8 @@ MESSAGE_RECEIVED = False
 MOCK_GPIO_INPUT = 0
 MAX_WAIT_SECONDS = 2.5
 MAX_ENV_WAIT_SECONDS = MAX_WAIT_SECONDS * 3
+
+MOCK_GPIO_STATE = None
 
 
 @pytest.fixture
@@ -44,8 +57,18 @@ def mock_should_capture_from_command(mocker):
 
 
 @pytest.fixture
+def mock_should_toggle_from_command(mocker):
+    mocker.patch("library.controllers.gpio_driver.GPIODriverController.should_toggle_from_command", return_value=True)
+
+
+@pytest.fixture
 def mock_capture_loop(mocker):
     mocker.patch("library.controllers.camera.PiCameraController.capture_loop", return_value=None)
+
+
+@pytest.fixture
+def mock_toggle_loop(mocker):
+    mocker.patch("library.controllers.gpio_driver.GPIODriverController.toggle_loop", return_value=None)
 
 
 class TestTopic:
@@ -110,6 +133,11 @@ def mock_gpio_read():
     global MOCK_GPIO_INPUT
     MOCK_GPIO_INPUT = 1 if MOCK_GPIO_INPUT == 0 else 0
     return bool(MOCK_GPIO_INPUT)
+
+
+def mock_gpio_write(direction):
+    global MOCK_GPIO_STATE
+    MOCK_GPIO_STATE = direction
 
 
 def wait_n_seconds(n):
@@ -303,6 +331,51 @@ class TestCameraController:
         controller.stop()
         client.disconnect()
         assert MESSAGE
+
+
+class TestGPIODriverController:
+
+    @pytest.mark.usefixtures("mock_should_toggle_from_command")
+    def test_thread(self):
+        """
+        Test that the thread starts and stops properly
+        """
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
+        """ @type: library.controllers.gpio_driver.GPIODriverController """
+        # monkeypatch.setattr(controller.sensor, "write", mock_gpio_write)
+        controller.start()
+        assert controller.running
+        wait_n_seconds(0.25)
+        assert controller.running
+        controller.running = False
+        start = time.time()
+        while time.time() - start < MAX_WAIT_SECONDS:
+            if not controller.thread.is_alive():
+                break
+        assert not controller.thread.is_alive()
+
+    @pytest.mark.usefixtures("mock_should_toggle_from_command")
+    def test_toggle(self, monkeypatch):
+        global MOCK_GPIO_STATE
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
+        """ @type: library.controllers.gpio_driver.GPIODriverController """
+        monkeypatch.setattr(controller.sensor, "write", mock_gpio_write)
+
+        controller.toggle_loop()
+        assert MOCK_GPIO_STATE == GPIO.LOW
+
+        controller.toggle_loop(direction=GPIO.LOW)
+        assert MOCK_GPIO_STATE == GPIO.HIGH
+
+    def test_should_toggle_from_command(self):
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
+        """ @type: library.controllers.gpio_driver.GPIODriverController """
+
+        topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "TOGGLE"}, True)
+        assert controller.should_toggle_from_command(topic.topic, topic.payload)
+
+        topic.payload = {"control": "HELLO"}
+        assert not controller.should_toggle_from_command(topic.topic, topic.payload)
 
 
 class TestGPIOMonitorController:

@@ -1,9 +1,8 @@
 {
-  "log": "/home/cpw/dev/logs/gpioControl.log",
-  "gpio": {
-    "pin": 17,
-    "toggle_delay": 0.3
-  },
+  "log": "/home/cpw/dev/logs/gpioDriver.log",
+  "gpio_pin": 17,
+  "gpio_toggle_delay": 1.0,
+  "gpio_toggle_direction": 1,
   "mqtt": {
     "client_id": "pi_test_door_control",
     "topics": {
