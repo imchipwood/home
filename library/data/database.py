@@ -17,9 +17,9 @@ def get_database_path(name: str) -> str:
     @rtype: str
     """
     data_dir = os.path.join(HOME_DIR, "data")
-    database_path = os.path.join(data_dir, name + ".sqlite3")
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
+    database_path = os.path.join(data_dir, os.path.basename(name) + ".sqlite3")
     return database_path
 
 
@@ -33,7 +33,13 @@ def connect_to_database(path_or_name: str) -> sqlite3.Connection:
     """
     if ".sqlite3" not in path_or_name.lower():
         path_or_name = get_database_path(path_or_name)
-    con = sqlite3.connect(path_or_name)
+
+    try:
+        con = sqlite3.connect(path_or_name)
+    except Exception as e:
+        logging.exception(f"Failed to connect to DB @ {path_or_name}")
+        raise e
+
     return con
 
 
