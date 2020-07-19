@@ -1,3 +1,5 @@
+import pytest
+
 from library import GPIODriverActiveDirection
 from library.config import ConfigurationHandler, SENSORCLASSES
 from library.config.camera import CameraConfig
@@ -15,9 +17,13 @@ CONFIGURATION_HANDLER = ConfigurationHandler(CONFIG_PATH, debug=True)
 MOCK_GPIO_STATE = None
 
 
-def mock_gpio_write(direction):
-    global MOCK_GPIO_STATE
-    MOCK_GPIO_STATE = direction
+@pytest.fixture
+def mock_gpio_write(mocker):
+    def mock_write(direction):
+        global MOCK_GPIO_STATE
+        MOCK_GPIO_STATE = direction
+
+    mocker.patch("library.sensors.gpio_driver.GPIODriver.write", side_effect=mock_write)
 
 
 class TestEnvironmentSensor:
@@ -82,47 +88,69 @@ class TestGPIOMonitorSensor:
 
 class TestGPIODriverSensor:
 
-    def test_sensor_write(self, monkeypatch):
+    @pytest.mark.usefixtures("mock_gpio_write")
+    def test_sensor_write(self):
         """
         Test that GPIODriver.write works as expected
         """
         global MOCK_GPIO_STATE
         config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_DRIVER)  # type: GPIODriverConfig
         sensor = GPIODriver(config=config)
-        monkeypatch.setattr(sensor, "write", mock_gpio_write)
 
-        assert sensor.pin == 17
+        try:
+            assert sensor.pin == 17
 
-        sensor.write(GPIO.HIGH)
-        assert MOCK_GPIO_STATE == GPIO.HIGH
+            sensor.write(GPIO.HIGH)
+            assert MOCK_GPIO_STATE == GPIO.HIGH
 
-        sensor.write(GPIO.LOW)
-        assert MOCK_GPIO_STATE == GPIO.LOW
+            sensor.write(GPIO.LOW)
+            assert MOCK_GPIO_STATE == GPIO.LOW
 
-        sensor.cleanup()
+        finally:
+            sensor.cleanup()
 
-    def test_sensor_active_direction(self, monkeypatch):
+    @pytest.mark.usefixtures("mock_gpio_write")
+    def test_sensor_active_direction(self):
         """
         Test that GPIODriver.write_on/off write values based on active high/low
         """
         global MOCK_GPIO_STATE
         config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_DRIVER)  # type: GPIODriverConfig
         sensor = GPIODriver(config=config)
-        monkeypatch.setattr(sensor, "write", mock_gpio_write)
 
-        sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = GPIODriverActiveDirection.HIGH
-        sensor.write_on()
-        assert MOCK_GPIO_STATE == GPIO.HIGH
-        sensor.write_off()
-        assert MOCK_GPIO_STATE == GPIO.LOW
+        try:
+            sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = GPIODriverActiveDirection.HIGH
+            sensor.write_on()
+            assert MOCK_GPIO_STATE == GPIO.HIGH
+            sensor.write_off()
+            assert MOCK_GPIO_STATE == GPIO.LOW
 
-        sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = GPIODriverActiveDirection.LOW
-        sensor.write_on()
-        assert MOCK_GPIO_STATE == GPIO.LOW
-        sensor.write_off()
-        assert MOCK_GPIO_STATE == GPIO.HIGH
+            sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = GPIODriverActiveDirection.LOW
+            sensor.write_on()
+            assert MOCK_GPIO_STATE == GPIO.LOW
+            sensor.write_off()
+            assert MOCK_GPIO_STATE == GPIO.HIGH
 
-        sensor.cleanup()
+        finally:
+            sensor.cleanup()
+
+    @pytest.mark.usefixtures("mock_gpio_write")
+    def test_sensor_toggle(self, monkeypatch):
+        global MOCK_GPIO_STATE
+        config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.GPIO_DRIVER)  # type: GPIODriverConfig
+        sensor = GPIODriver(config=config)
+
+        try:
+            sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = GPIODriverActiveDirection.HIGH
+            sensor.toggle()
+            assert MOCK_GPIO_STATE == GPIO.LOW
+
+            sensor.config.config[ConfigKeys.ACTIVE_DIRECTION] = GPIODriverActiveDirection.LOW
+            sensor.toggle()
+            assert MOCK_GPIO_STATE == GPIO.HIGH
+
+        finally:
+            sensor.cleanup()
 
 
 class TestCamera:
