@@ -448,11 +448,6 @@ class TestGPIODriverController:
         global GPIO_TOGGLE_RECEIVED
         global GPIO_ON_RECEIVED
         global GPIO_OFF_RECEIVED
-        commands = [
-            GPIODriverCommands.TOGGLE,
-            GPIODriverCommands.ON,
-            GPIODriverCommands.OFF
-        ]
 
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
         """ @type: library.controllers.gpio_driver.GPIODriverController """
@@ -464,6 +459,7 @@ class TestGPIODriverController:
             controller.setup()
             topic = controller.config.mqtt_topic[0]
 
+            commands = [GPIODriverCommands.TOGGLE, GPIODriverCommands.ON, GPIODriverCommands.OFF]
             for command in commands:
                 payload = {PubSubKeys.CONTROL: command}
                 client.single(
@@ -475,15 +471,14 @@ class TestGPIODriverController:
                     port=controller.config.mqtt_config.port
                 )
 
-            i = 0
-            delay_time = 0.001
-            target_commands = [GPIO_TOGGLE_RECEIVED, GPIO_ON_RECEIVED, GPIO_OFF_RECEIVED]
-            while not all(target_commands):
-                time.sleep(delay_time)
-                i += 1
-                if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
-                    missed_commands = [x for x in target_commands if not x]
-                    assert False, f"Wait time exceeded - missed commands: {missed_commands}!"
+            start = timeit.default_timer()
+            while not all([GPIO_TOGGLE_RECEIVED, GPIO_ON_RECEIVED, GPIO_OFF_RECEIVED]) and \
+                    (timeit.default_timer()) - start <= MAX_WAIT_SECONDS:
+                pass
+
+            mqtt_outputs = [GPIO_TOGGLE_RECEIVED, GPIO_ON_RECEIVED, GPIO_OFF_RECEIVED]
+            missed_commands = [x[0] for x in zip(commands, mqtt_outputs) if not x[1]]
+            assert not missed_commands, f"Wait time exceeded - missed commands: {missed_commands}!"
 
         finally:
             client.disconnect()
