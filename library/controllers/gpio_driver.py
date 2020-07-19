@@ -62,6 +62,8 @@ class GPIODriverController(BaseController):
         self.logger.debug(f"Connect result: {result}")
         self.mqtt.loop_start()
 
+        self.sensor.initialize()
+
     def start(self):
         """
         Camera won't actually do threading - instead, we'll subscribe to an MQTT topic

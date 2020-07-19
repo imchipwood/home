@@ -40,6 +40,12 @@ class GPIODriver:
         self.pin = self.config.pin
         self.logger.debug(f"Setting up GPIO on pin {self.pin}")
 
+        self.initialize()
+
+    def initialize(self):
+        """
+        Setup GPIO
+        """
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
         self.write_off()
@@ -106,6 +112,7 @@ class GPIODriver:
         GPIO.cleanup(self.pin)
 
     def __enter__(self):
+        self.initialize()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

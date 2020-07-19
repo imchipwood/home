@@ -439,6 +439,7 @@ class TestGPIODriverController:
 
             topic.payload = {"control": "HELLO"}
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) is None
+
         finally:
             controller.cleanup()
 
