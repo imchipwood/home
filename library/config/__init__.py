@@ -1,12 +1,9 @@
 import json
 import os
-from typing import List, Type, TypeVar, Union
+from typing import List, Type, Union
 
-from library import CONFIG_DIR, TEST_CONFIG_DIR
+from library import CONFIG_DIR, TEST_CONFIG_DIR, CONFIG_TYPE, CONTROLLER_TYPE
 from library.data.database import Column
-
-CONFIG_TYPE = TypeVar("CONFIG_TYPE", bound="Base")
-CONTROLLER_TYPE = TypeVar("CONTROLLER_TYPE", bound="Base")
 
 
 class SENSORCLASSES:

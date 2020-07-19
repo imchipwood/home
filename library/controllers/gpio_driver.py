@@ -194,6 +194,8 @@ class GPIODriverController(BaseController):
         Gracefully exit
         """
         super().cleanup()
+        self.sensor.cleanup()
+        self.logger.info("Cleanup complete")
 
     def __repr__(self) -> str:
         """

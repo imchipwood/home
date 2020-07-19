@@ -3,25 +3,24 @@ import os
 from abc import ABC, abstractmethod
 from multiprocessing import Process
 from time import time
-from typing import List, Union
+from typing import List, Union, TypeVar
 
-from library import setup_logging
+from library import setup_logging, CONFIG_TYPE
 from library.communication.mqtt import MQTTClient
-from library.data import DatabaseKeys
-from library.data.database import Database, DatabaseEntry
+from library.data import DatabaseEntry, DatabaseKeys
 
 RUNNING = False
 
 
-def get_logger(name, debug_flag, log_path) -> logging.Logger:
+def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Logger:
     """
     Get a logging.Logger
     @param name: name of logger
     @type name: str
     @param debug_flag: debug_flag flag to enable
     @type debug_flag: bool
-    @param log_path: log file path
-    @type log_path: str
+    @param log_path: optional log file path
+    @type log_path: str or None
     @return: Logger with file have
     @rtype: logging.Logger
     """
@@ -41,14 +40,14 @@ def get_logger(name, debug_flag, log_path) -> logging.Logger:
 class BaseController(ABC):
     """Base class for all controllers to extend"""
 
-    def __init__(self, config, debug=False):
+    def __init__(self, config, debug: bool = False):
         super()
 
         self.debug = debug
-        self.config = config
+        self.config = config  # type: TypeVar[CONFIG_TYPE]
 
         self._mqtt = None
-        self.logger = None
+        self.logger = None  # type: logging.Logger
         self.thread = None  # type: Process
 
     @property
@@ -116,11 +115,12 @@ class BaseController(ABC):
         return self.config.db_name and self.config.db_columns
 
     @property
-    def db(self) -> Database:
+    def db(self):
         """
         Get the Database object for this controller
         @rtype: Database
         """
+        from library.data.database import Database
         db = Database(self.config.db_name, self.config.db_columns)
         db.setup()
         return db
@@ -183,8 +183,4 @@ class BaseController(ABC):
         @rtype: bool
         """
         latest = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-        if latest is None:
-            # No recent entry
-            return True
-
-        return time() - latest < delta_time
+        return time() - latest < delta_time if latest else None

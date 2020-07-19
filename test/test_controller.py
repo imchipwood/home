@@ -32,6 +32,12 @@ MOCK_GPIO_INPUT = 0
 MAX_WAIT_SECONDS = 2.5
 MAX_ENV_WAIT_SECONDS = MAX_WAIT_SECONDS * 3
 
+MOCK_TEXT_SENT = None
+MOCK_FILE_SENT = None
+GPIO_ON_RECEIVED = None
+GPIO_OFF_RECEIVED = None
+GPIO_TOGGLE_RECEIVED = None
+
 
 @pytest.fixture
 def mock_get_latest_db_entry(mocker):
@@ -67,8 +73,9 @@ def mock_capture_loop(mocker):
 def mock_gpiodriver_toggle(mocker):
 
     def setMessage():
-        global MESSAGE
-        MESSAGE = GPIODriverCommands.TOGGLE
+        global GPIO_TOGGLE_RECEIVED
+        GPIO_TOGGLE_RECEIVED = GPIODriverCommands.TOGGLE
+        print(f"Received command: {GPIO_TOGGLE_RECEIVED}")
 
     mocker.patch("library.sensors.gpio_driver.GPIODriver.toggle", side_effect=setMessage)
 
@@ -77,8 +84,9 @@ def mock_gpiodriver_toggle(mocker):
 def mock_gpiodriver_write_on(mocker):
 
     def setMessage():
-        global MESSAGE
-        MESSAGE = GPIODriverCommands.ON
+        global GPIO_ON_RECEIVED
+        GPIO_ON_RECEIVED = GPIODriverCommands.ON
+        print(f"Received command: {GPIO_ON_RECEIVED}")
 
     mocker.patch("library.sensors.gpio_driver.GPIODriver.write_on", side_effect=setMessage)
 
@@ -87,8 +95,9 @@ def mock_gpiodriver_write_on(mocker):
 def mock_gpiodriver_write_off(mocker):
 
     def setMessage():
-        global MESSAGE
-        MESSAGE = GPIODriverCommands.OFF
+        global GPIO_OFF_RECEIVED
+        GPIO_OFF_RECEIVED = GPIODriverCommands.OFF
+        print(f"Received command: {GPIO_OFF_RECEIVED}")
 
     mocker.patch("library.sensors.gpio_driver.GPIODriver.write_off", side_effect=setMessage)
 
@@ -170,32 +179,34 @@ def wait_n_seconds(n):
 
 
 class TestEnvironmentController:
-    controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.ENVIRONMENT)
-    """ @type: library.controllers.environment.EnvironmentController """
 
     def test_thread(self, monkeypatch):
         """
         Test that the thread starts and stops properly
         """
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.ENVIRONMENT)
+        """ @type: library.controllers.environment.EnvironmentController """
+
         def mock_publish(humidity, temperature, units):
             return
 
         def mock_read():
             return 75.0, 40.0
 
-        monkeypatch.setattr(self.controller, "publish", mock_publish)
-        monkeypatch.setattr(self.controller.sensor, "read", mock_read)
+        monkeypatch.setattr(controller, "publish", mock_publish)
+        monkeypatch.setattr(controller.sensor, "read", mock_read)
 
-        self.controller.sensor.reset_readings()
-        self.controller.start()
-        assert self.controller.running
+        controller.sensor.reset_readings()
+        controller.start()
+        assert controller.running
+
         wait_n_seconds(0.1)
-        self.controller.cleanup()
-        assert not self.controller.running
+        controller.cleanup()
+        assert not controller.running
 
         i = 0
         delay_time = 0.001
-        while self.controller.thread.is_alive() or self.controller.sensor.humidity == -999.0:
+        while controller.thread.is_alive() or controller.sensor.humidity == -999.0:
             time.sleep(delay_time)
             i += 1
             if i > MAX_ENV_WAIT_SECONDS * (1.0 / delay_time):
@@ -205,19 +216,27 @@ class TestEnvironmentController:
         """
         Test that publish method actually publishes data
         """
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.ENVIRONMENT)
+        """ @type: library.controllers.environment.EnvironmentController """
+
         global MESSAGE
         MESSAGE = False
-        topics = [x.name for x in self.controller.config.mqtt_topic]
-        client = get_mqtt_client(self.controller.config.mqtt_config, topics)
-        self.controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
+
+        topics = [x.name for x in controller.config.mqtt_topic]
+        client = get_mqtt_client(controller.config.mqtt_config, topics)
+        controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
+
         i = 0
         delay_time = 0.001
-        while not MESSAGE:
-            time.sleep(delay_time)
-            i += 1
-            if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
-                assert False, "Wait time exceeded!"
-        client.disconnect()
+        try:
+            while not MESSAGE:
+                time.sleep(delay_time)
+                i += 1
+                if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
+                    assert False, "Wait time exceeded!"
+        finally:
+            client.disconnect()
+            controller.cleanup()
         assert MESSAGE
 
 
@@ -234,13 +253,14 @@ class TestCameraController:
         controller.start()
         assert controller.running
         wait_n_seconds(0.25)
+
         assert controller.running
-        controller.running = False
+        controller.cleanup()
+
         start = time.time()
-        while time.time() - start < MAX_WAIT_SECONDS:
-            if not controller.thread.is_alive():
-                break
-        assert not controller.thread.is_alive()
+        while controller.thread.is_alive() and time.time() - start < MAX_WAIT_SECONDS:
+            pass
+        assert not controller.thread.is_alive(), "Thread didn't stop!"
 
     @pytest.mark.usefixtures("mock_should_capture_from_command")
     @pytest.mark.parametrize(
@@ -259,11 +279,16 @@ class TestCameraController:
 
         config = controller.config
         """ @type: library.config.camera.CameraConfig """
+
         expected_path = config.capture_path
         if os.path.exists(expected_path):
             os.remove(expected_path)
-        controller.capture_loop(force=force_cmd)
-        assert os.path.exists(expected_path)
+
+        try:
+            controller.capture_loop(force=force_cmd)
+            assert os.path.exists(expected_path)
+        finally:
+            controller.cleanup()
 
     def test_should_capture_from_command_db(self):
         """
@@ -273,29 +298,32 @@ class TestCameraController:
         """ @type: library.controllers.camera.PiCameraController"""
 
         topic_open = TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True)
-        with controller.db as db:
-            # Set up for test
-            db.delete_all_except_last_n_records(0)
+        try:
+            with controller.db as db:
+                # Set up for test
+                db.delete_all_except_last_n_records(0)
 
-            # No records - capture
-            assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                # No records - capture
+                assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
 
-            # One record with captured=False - capture
-            db.add_data([0, GarageDoorStates.OPEN, int(False), int(False)])
-            assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
-            db.delete_all_except_last_n_records(0)
+                # One record with captured=False - capture
+                db.add_data([0, GarageDoorStates.OPEN, int(False), int(False)])
+                assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                db.delete_all_except_last_n_records(0)
 
-            # One record with captured=True - do not capture
-            db.add_data([0, GarageDoorStates.OPEN, int(True), int(False)])
-            assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
-            db.delete_all_except_last_n_records(0)
+                # One record with captured=True - do not capture
+                db.add_data([0, GarageDoorStates.OPEN, int(True), int(False)])
+                assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                db.delete_all_except_last_n_records(0)
 
-            # Multiple records - capture then don't
-            db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
-            db.add_data([1, GarageDoorStates.OPEN, int(False), int(False)])
-            assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
-            controller.update_database_entry()
-            assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                # Multiple records - capture then don't
+                db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
+                db.add_data([1, GarageDoorStates.OPEN, int(False), int(False)])
+                assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                controller.update_database_entry()
+                assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+        finally:
+            controller.cleanup()
 
     @pytest.mark.usefixtures("mock_db_enabled_camera")
     @pytest.mark.parametrize(
@@ -322,7 +350,10 @@ class TestCameraController:
         """ @type: library.controllers.camera.PiCameraController"""
         controller.db.delete_all_except_last_n_records(0)
 
-        assert controller.should_capture_from_command(topic.topic, topic.payload) == topic.capture
+        try:
+            assert controller.should_capture_from_command(topic.topic, topic.payload) == topic.capture
+        finally:
+            controller.cleanup()
 
     @pytest.mark.usefixtures("mock_should_capture_from_command", "mock_capture_loop")
     def test_mqtt(self):
@@ -340,16 +371,25 @@ class TestCameraController:
         controller.setup()
         topic = controller.config.mqtt_topic[0]
         payload = topic.payload()
-        controller.mqtt.single(topic.name, payload, qos=2)
+        client.single(
+            topic.name,
+            payload,
+            retain=False,
+            qos=2,
+            hostname=controller.config.mqtt_config.broker,
+            port=controller.config.mqtt_config.port
+        )
         i = 0
         delay_time = 0.001
-        while not MESSAGE:
-            time.sleep(delay_time)
-            i += 1
-            if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
-                assert False, "Wait time exceeded!"
-        controller.stop()
-        client.disconnect()
+        try:
+            while not MESSAGE:
+                time.sleep(delay_time)
+                i += 1
+                if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
+                    assert False, "Wait time exceeded!"
+        finally:
+            controller.cleanup()
+            client.disconnect()
         assert MESSAGE
 
 
@@ -363,18 +403,22 @@ class TestGPIODriverController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
         """ @type: library.controllers.gpio_driver.GPIODriverController """
 
-        controller.start()
-        assert controller.running
+        try:
+            controller.start()
+            assert controller.running
 
-        wait_n_seconds(0.25)
-        assert controller.running
+            wait_n_seconds(0.25)
+            assert controller.running
 
-        controller.running = False
-        start = time.time()
-        while time.time() - start < MAX_WAIT_SECONDS:
-            if not controller.thread.is_alive():
-                break
-        assert not controller.thread.is_alive()
+            controller.cleanup()
+            assert not controller.running
+
+            start = time.time()
+            while controller.thread.is_alive() and time.time() - start < MAX_WAIT_SECONDS:
+                pass
+            assert not controller.thread.is_alive(), "Thread didn't stop!"
+        finally:
+            controller.cleanup()
 
     def test_get_gpio_command_from_message(self):
         """
@@ -383,42 +427,66 @@ class TestGPIODriverController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
         """ @type: library.controllers.gpio_driver.GPIODriverController """
 
-        topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "TOGGLE"}, True)
-        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.TOGGLE
+        try:
+            topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "TOGGLE"}, True)
+            assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.TOGGLE
 
-        topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "ON"}, True)
-        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.ON
+            topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "ON"}, True)
+            assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.ON
 
-        topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "OFF"}, True)
-        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.OFF
+            topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "OFF"}, True)
+            assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.OFF
 
-        topic.payload = {"control": "HELLO"}
-        assert controller.get_gpio_command_from_message(topic.topic, topic.payload) is None
+            topic.payload = {"control": "HELLO"}
+            assert controller.get_gpio_command_from_message(topic.topic, topic.payload) is None
+        finally:
+            controller.cleanup()
 
     @pytest.mark.usefixtures("mock_gpiodriver_toggle", "mock_gpiodriver_write_on", "mock_gpiodriver_write_off")
-    @pytest.mark.parametrize("command", [
-        GPIODriverCommands.TOGGLE,
-        GPIODriverCommands.ON,
-        GPIODriverCommands.OFF
-    ])
-    def test_mqtt(self, command):
+    def test_mqtt(self):
+        global GPIO_TOGGLE_RECEIVED
+        global GPIO_ON_RECEIVED
+        global GPIO_OFF_RECEIVED
+        commands = [
+            GPIODriverCommands.TOGGLE,
+            GPIODriverCommands.ON,
+            GPIODriverCommands.OFF
+        ]
+
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_DRIVER)
         """ @type: library.controllers.gpio_driver.GPIODriverController """
 
-        controller.setup()
-        topic = controller.config.mqtt_topic[0]
-        payload = {PubSubKeys.CONTROL: command}
-        controller.mqtt.single(topic.name, payload, qos=0)
+        topics = [x.name for x in controller.config.mqtt_topic]
+        client = get_mqtt_client(controller.config.mqtt_config, topics)
 
-        i = 0
-        delay_time = 0.001
-        while MESSAGE != command:
-            time.sleep(delay_time)
-            i += 1
-            if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
-                assert False, "Wait time exceeded!"
+        try:
+            controller.setup()
+            topic = controller.config.mqtt_topic[0]
 
-        controller.cleanup()
+            for command in commands:
+                payload = {PubSubKeys.CONTROL: command}
+                client.single(
+                    topic.name,
+                    payload,
+                    retain=False,
+                    qos=0,
+                    hostname=controller.config.mqtt_config.broker,
+                    port=controller.config.mqtt_config.port
+                )
+
+            i = 0
+            delay_time = 0.001
+            target_commands = [GPIO_TOGGLE_RECEIVED, GPIO_ON_RECEIVED, GPIO_OFF_RECEIVED]
+            while not all(target_commands):
+                time.sleep(delay_time)
+                i += 1
+                if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
+                    missed_commands = [x for x in target_commands if not x]
+                    assert False, f"Wait time exceeded - missed commands: {missed_commands}!"
+
+        finally:
+            client.disconnect()
+            controller.cleanup()
 
 
 class TestGPIOMonitorController:
@@ -427,67 +495,76 @@ class TestGPIOMonitorController:
         """
         Test that the thread starts and stops properly
         """
-        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_MONITOR)
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_MONITOR)
         """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
-        monkeypatch.setattr(self.controller.sensor, "read", mock_gpio_read)
-        self.controller.start()
-        assert self.controller.running
+        monkeypatch.setattr(controller.sensor, "read", mock_gpio_read)
+        controller.start()
+        assert controller.running
         wait_n_seconds(0.1)
-        self.controller.stop()
-        assert not self.controller.running
-        self.controller.cleanup()
+        controller.cleanup()
+        try:
+            assert not controller.running
+        finally:
+            controller.cleanup()
 
     def test_database(self, monkeypatch):
         """
         Test that the database methods work
         """
-        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_MONITOR)
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_MONITOR)
         """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
-        monkeypatch.setattr(self.controller.sensor, "read", mock_gpio_read)
+        monkeypatch.setattr(controller.sensor, "read", mock_gpio_read)
 
-        # clear the database
-        with self.controller.db as db:
-            db.delete_all_except_last_n_records(0)
+        try:
+            # clear the database
+            with controller.db as db:
+                db.delete_all_except_last_n_records(0)
 
-        # Set the state to add an entry
-        self.controller.state = not self.controller.state
-        latest_state = self.controller.get_latest_db_entry(DatabaseKeys.STATE)
-        assert latest_state == self.controller.get_state_as_string(self.controller.state)
+            # Set the state to add an entry
+            controller.state = not controller.state
+            latest_state = controller.get_latest_db_entry(DatabaseKeys.STATE)
+            assert latest_state == controller.get_state_as_string(controller.state)
 
-        # Wait long enough for a unique timestamp for second entry
-        latest_time = self.controller.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-        while int(time.time()) - latest_time < 1:
-            pass
-        self.controller.state = not self.controller.state
+            # Wait long enough for a unique timestamp for second entry
+            latest_time = controller.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
+            while int(time.time()) - latest_time < 1:
+                pass
+            controller.state = not controller.state
 
-        # Check entries
-        assert self.controller.get_latest_db_entry() == str(self.controller)
-        last_two = self.controller.get_last_two_db_entries()
-        assert last_two[0] == self.controller.get_state_as_string(self.controller.state)
-        assert last_two[1] == self.controller.get_state_as_string(not self.controller.state)
+            # Check entries
+            assert controller.get_latest_db_entry() == str(controller)
+            last_two = controller.get_last_two_db_entries()
+            assert last_two[0] == controller.get_state_as_string(controller.state)
+            assert last_two[1] == controller.get_state_as_string(not controller.state)
+        finally:
+            controller.cleanup()
 
     def test_publish(self, monkeypatch):
         """
         Test that publish method works
         """
-        self.controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_MONITOR)
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.GPIO_MONITOR)
         """ @type: library.controllers.gpio_monitor.GPIOMonitorController"""
-        monkeypatch.setattr(self.controller.sensor, "read", mock_gpio_read)
+        monkeypatch.setattr(controller.sensor, "read", mock_gpio_read)
 
         global MESSAGE
         MESSAGE = False
-        topics = [x.name for x in self.controller.config.mqtt_topic]
-        client = get_mqtt_client(self.controller.config.mqtt_config, topics)
+        topics = [x.name for x in controller.config.mqtt_topic]
+        client = get_mqtt_client(controller.config.mqtt_config, topics)
 
-        self.controller.publish()
-        i = 0
-        delay_time = 0.001
-        while not MESSAGE:
-            wait_n_seconds(delay_time)
-            i += 1
-            if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
-                raise Exception("Wait time exceeded!")
-        client.disconnect()
+        try:
+            controller.publish()
+            i = 0
+            delay_time = 0.001
+
+            while not MESSAGE:
+                wait_n_seconds(delay_time)
+                i += 1
+                if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
+                    raise Exception("Wait time exceeded!")
+        finally:
+            controller.cleanup()
+            client.disconnect()
         assert MESSAGE
 
 
@@ -501,24 +578,21 @@ class TestPushBulletController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
         """ @type: library.controllers.pushbullet.PushBulletController"""
 
-        global MESSAGE
-        global text_sent
-        global file_sent
-        text_sent, file_sent = False, False
+        global MESSAGE, MOCK_TEXT_SENT, MOCK_FILE_SENT
+        MESSAGE, MOCK_TEXT_SENT, MOCK_FILE_SENT = False, False, False
 
-        MESSAGE = False
         topics = [x.name for x in controller.config.mqtt_topic]
         client = get_mqtt_client(controller.config.mqtt_config, topics)
 
         def mock_send_file(file_path):
-            global file_sent
-            file_sent = True
+            global MOCK_FILE_SENT
+            MOCK_FILE_SENT = True
             print("SEND FILE")
             print(f"Fake uploaded {file_path}")
 
         def mock_send_text(title, body):
-            global text_sent
-            text_sent = True
+            global MOCK_TEXT_SENT
+            MOCK_TEXT_SENT = True
             print("SEND TEXT")
             print(f"Fake pushed: {title}: {body}")
 
@@ -536,22 +610,32 @@ class TestPushBulletController:
         payload_capture = topic_publish.payload()
         payload_capture[PubSubKeys.FORCE] = True
         payload_capture = json.dumps(payload_capture)
-        controller.start()
 
-        for payload in [payload_closed, payload_capture]:
-            controller.mqtt.single(topic_state.name, payload, qos=2)
-            wait_n_seconds(2)
+        try:
+            controller.start()
 
-        start = timeit.default_timer()
-        now = start
-        while not (text_sent and file_sent) and now - start < MAX_WAIT_SECONDS:
-            now = timeit.default_timer()
+            for topic, payload in [(topic_state.name, payload_closed), (topic_publish.name, payload_capture)]:
+                client.single(
+                    topic,
+                    payload,
+                    retain=False,
+                    qos=2,
+                    hostname=controller.config.mqtt_config.broker,
+                    port=controller.config.mqtt_config.port
+                )
 
-        if not text_sent or not file_sent:
-            raise Exception(f"Messages not received! file: {file_sent}, text: {text_sent}")
+            start = timeit.default_timer()
+            now = start
+            while not (MOCK_TEXT_SENT and MOCK_FILE_SENT) and now - start < MAX_WAIT_SECONDS * 10:
+                now = timeit.default_timer()
 
-        controller.stop()
-        client.disconnect()
+            if not MOCK_TEXT_SENT or not MOCK_FILE_SENT:
+                raise Exception(f"Messages not received! file: {MOCK_FILE_SENT}, text: {MOCK_TEXT_SENT}")
+
+        finally:
+            controller.stop()
+            client.disconnect()
+
         assert MESSAGE
 
     def test_should_text_notify(self):
@@ -561,64 +645,72 @@ class TestPushBulletController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
         """ @type: library.controllers.pushbullet.PushBulletController"""
 
-        # clear DB entries
-        with controller.db as db:
-            db.delete_all_except_last_n_records(0)
+        try:
+            # clear DB entries
+            with controller.db as db:
+                db.delete_all_except_last_n_records(0)
 
-            # Notify if no DB entries
-            assert controller.should_text_notify()
+                # Notify if no DB entries
+                assert controller.should_text_notify()
 
-            # Notify if last entry is old
-            db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
-            assert controller.should_text_notify()
-            db.delete_all_except_last_n_records(0)
+                # Notify if last entry is old
+                db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
+                assert controller.should_text_notify()
+                db.delete_all_except_last_n_records(0)
 
-            # Notify if only one DB entry
-            cur_time = int(time.time())
-            i = 0
-            db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
-            assert controller.should_text_notify()
+                # Notify if only one DB entry
+                cur_time = int(time.time())
+                i = 0
+                db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
+                assert controller.should_text_notify()
 
-            # Don't notify if last two entries are "CLOSED"
-            i += 1
-            db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
-            assert not controller.should_text_notify()
+                # Don't notify if last two entries are "CLOSED"
+                i += 1
+                db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
+                assert not controller.should_text_notify()
 
-            # Don't notify if last entry is "OPEN"
-            i += 1
-            db.add_data([cur_time + i, GarageDoorStates.OPEN, int(False), int(False)])
-            assert not controller.should_text_notify()
+                # Don't notify if last entry is "OPEN"
+                i += 1
+                db.add_data([cur_time + i, GarageDoorStates.OPEN, int(False), int(False)])
+                assert not controller.should_text_notify()
 
-            # Notify if last entry is CLOSED and previous two are not both CLOSED or OPEN
-            i += 1
-            db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
-            assert controller.should_text_notify()
+                # Notify if last entry is CLOSED and previous two are not both CLOSED or OPEN
+                i += 1
+                db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
+                assert controller.should_text_notify()
+
+        finally:
+            controller.cleanup()
 
     def test_should_image_notify(self):
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
         """ @type: library.controllers.pushbullet.PushBulletController"""
 
-        # clear DB entries
-        with controller.db as db:
-            db.delete_all_except_last_n_records(0)
+        try:
+            # clear DB entries
+            with controller.db as db:
+                db.delete_all_except_last_n_records(0)
 
-            # Notify if no entries
-            assert controller.should_image_notify()
+                # Notify if no entries
+                assert controller.should_image_notify()
 
-            # Don't notify if latest entry is closed
-            db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
-            assert not controller.should_image_notify()
-            db.delete_all_except_last_n_records(0)
+                # Don't notify if latest entry is closed
+                db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
+                assert not controller.should_image_notify()
+                db.delete_all_except_last_n_records(0)
 
-            # Notify if last entry is open and no notification
-            i = 0
-            db.add_data([i, GarageDoorStates.OPEN, int(False), int(False)])
-            assert controller.should_image_notify()
+                # Notify if last entry is open and no notification
+                i = 0
+                db.add_data([i, GarageDoorStates.OPEN, int(False), int(False)])
+                assert controller.should_image_notify()
 
-            # Don't notify if last entry is open but has been notified
-            i += 1
-            db.add_data([i, GarageDoorStates.OPEN, int(False), int(True)])
-            assert not controller.should_image_notify()
+                # Don't notify if last entry is open but has been notified
+                i += 1
+                db.add_data([i, GarageDoorStates.OPEN, int(False), int(True)])
+                assert not controller.should_image_notify()
 
-            # Notify if force no matter what
-            assert controller.should_image_notify(force=True)
+                # Notify if force no matter what
+                assert controller.should_image_notify(force=True)
+
+        finally:
+            controller.cleanup()

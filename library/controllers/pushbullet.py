@@ -49,10 +49,17 @@ class PushBulletController(BaseController):
         """
         self.logger.debug("Starting PushBullet MQTT connection")
         super().start()
-        self.mqtt.on_connect = self.on_connect
-        self.mqtt.on_subscribe = self.on_subscribe
         self.mqtt.on_message = self.on_message
-        self.connect_mqtt()
+        self.mqtt.on_subscribe = self.on_subscribe
+        self.mqtt.on_connect = self.on_connect
+
+        if not self.config.mqtt_topic:
+            return
+
+        self.mqtt.connect()
+        self.thread = Thread(target=self.loop)
+        self.thread.daemon = True
+        self.thread.start()
 
     def stop(self):
         """
@@ -78,19 +85,6 @@ class PushBulletController(BaseController):
     # endregion Threading
     # region MQTT
 
-    def connect_mqtt(self):
-        """
-        Simply connect to MQTT
-        """
-        if not self.config.mqtt_topic:
-            return
-
-        self.logger.debug("in connect_mqtt")
-        self.mqtt.connect()
-        self.thread = Thread(target=self.loop)
-        self.thread.daemon = True
-        self.thread.start()
-
     def on_connect(self, client, userdata, flags, rc):
         """
         Event handler for MQTT connection
@@ -105,9 +99,10 @@ class PushBulletController(BaseController):
             raise MQTTError(f"on_connect 'rc' failure - {message}")
 
         # Nothing wrong with RC - subscribe to topic
-        self.logger.info("Connection successful")
+        topics = [x.name for x in self.config.mqtt_topic]
+        self.logger.info(f"Connection successful - subscribing to {topics}")
         # Subscribe to all topics simultaneously
-        self.mqtt.subscribe([(x.name, 2) for x in self.config.mqtt_topic])
+        self.mqtt.subscribe([(x, 2) for x in topics])
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         """

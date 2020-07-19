@@ -1,9 +1,11 @@
-import json
+import logging
 import os
 import sqlite3
 from typing import List
 
 from library import HOME_DIR
+from library.controllers import get_logger
+from library.data import Column, DatabaseEntry
 
 
 def get_database_path(name: str) -> str:
@@ -21,7 +23,7 @@ def get_database_path(name: str) -> str:
     return database_path
 
 
-def connect_to_database(name: str) -> sqlite3.Connection:
+def connect_to_database(path_or_name: str) -> sqlite3.Connection:
     """
     Connect to target database
     @param name: name of database
@@ -29,88 +31,45 @@ def connect_to_database(name: str) -> sqlite3.Connection:
     @return: open database connection
     @rtype: sqlite3.Connection
     """
-    con = sqlite3.connect(get_database_path(name))
+    if ".sqlite3" not in path_or_name.lower():
+        path_or_name = get_database_path(path_or_name)
+    con = sqlite3.connect(path_or_name)
     return con
 
 
-class Column:
-    def __init__(self, col_name: str, col_type: str, col_key: str):
-        """
-        Initialize a database column object
-        @param col_name: name of column
-        @type col_name: str
-        @param col_type: data type of column
-        @type col_type: str
-        @param col_key: column key type
-        @type col_key: str
-        """
-        super()
-        self.name = col_name
-        self.type = col_type
-        self.key = col_key
-
-    @property
-    def primary(self) -> bool:
-        """
-        Check if this is a primary key column
-        @return: whether or not this is a primary key column
-        @rtype: bool
-        """
-        return self.key.upper() == "PRIMARY KEY"
-
-    def __repr__(self) -> str:
-        """
-        @rtype: str
-        """
-        return f"{self.name} {self.type} {self.key}"
-
-
-class DatabaseEntry:
-    def __init__(self, columns: List[Column], entry):
-        super()
-        self.columns = columns
-        self.entry = entry
-        self._values = {}
-
-    @property
-    def values(self):
-        """
-        @return: dict of values
-        @rtype: dict[str, int or float or str]
-        """
-        if not self._values:
-            for i in range(len(self.entry)):
-                self._values[self.columns[i].name] = self.entry[i]
-        return self._values
-
-    def __getitem__(self, item) -> int or float or str:
-        return self.values.get(item)
-
-    def __repr__(self) -> str:
-        return json.dumps(self._values)
-
-
 class Database:
-    def __init__(self, name: str, columns: List[Column]):
+    def __init__(self, name: str, columns: List[Column], path: str = None, logger: logging.Logger = None):
         """
         Initialize a database with a table
-        @param name: name of database
+        @param name: name of database or table within database
         @type name: str
         @param columns: list of columns to use in tables
         @type columns: list[Column]
+        @param path: optional direct path to DB file
+        @type path: str or None
+        @param logger: optional logger to print debug info to file
+        @type logger: logging.Logger or None
         """
         super()
         self.name = name
+        self.path = path
         self.columns = columns
-        self.con = None
-        self.cur = None
+        self.con = None  # type: sqlite3.Connection
+        self.cur = None  # type: sqlite3.Cursor
+        self.logger = logger or get_logger(__name__, True, None)
+
+    def connect(self):
+        """
+        Connect to the database
+        """
+        self.con = connect_to_database(self.path or self.name)
+        self.cur = self.con.cursor()
 
     def setup(self):
         """
         Set up the database with a table
         """
-        self.con = connect_to_database(self.name)
-        self.cur = self.con.cursor()
+        self.connect()
         if not self.does_table_exist(self.name):
             self.create_table(self.name, self.columns)
 
@@ -158,9 +117,24 @@ AND name='{table_name}';
         """
         assert table_name, "Must define table name"
         assert columns and all([isinstance(x, Column) for x in columns]), "Must define columns"
-        print(f"Creating table {table_name}")
+        self.logger.debug(f"Creating table {table_name}")
         query = f"CREATE TABLE {table_name} ({', '.join([str(x) for x in columns])})"
         self.cur.execute(query)
+
+    def add_data_multiple(self, data_to_add: List[List] or List[tuple]):
+        """
+        Add multiple rows the table at once
+        @param data_to_add: multiple rows in a list
+        """
+        query = f"""
+INSERT INTO {self.name} (
+  {self.columns_str}
+) VALUES (
+  {', '.join(['?' for x in data_to_add[0]])}
+)
+"""
+        self.cur.executemany(query, data_to_add)
+        self.con.commit()
 
     def add_data(self, data_to_add: List):
         """
@@ -215,7 +189,7 @@ WHERE {self.primary_column_name} = {primary_key_value}
         @return: list of DatabaseEntry objects
         @rtype: list[DatabaseEntry]
         """
-        return [DatabaseEntry(self.columns, result) for result in results]
+        return [self.convert_query_result_to_database_entry(result) for result in results]
 
     def get_record(self, primary_key_value: int or float or str) -> DatabaseEntry:
         """
@@ -233,7 +207,7 @@ WHERE {self.primary_column_name} = {primary_key_value}
     def get_latest_record(self) -> DatabaseEntry:
         """
         Get the latest record from the table
-        @return: list of values from last record
+        @return: last record in the table
         @rtype: DatabaseEntry
         """
         primary = [x.name for x in self.columns if x.primary][0]
