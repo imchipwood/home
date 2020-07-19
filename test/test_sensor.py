@@ -56,7 +56,7 @@ class TestEnvironmentSensor:
 
         mocker.spy(self.sensor, "read")
 
-        num_reads = 5
+        num_reads = 2
         humidity, temperature = self.sensor.read_n_times(num_reads)
         assert humidity != -999
         assert temperature != -999
