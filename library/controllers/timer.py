@@ -55,6 +55,8 @@ class TimerController(BaseController):
             return
         self.logger.debug(f"{self.config.mqtt_config.client_id} publishing")
 
+        self.add_entry_to_database()
+
         for topic in self.config.mqtt_topic:
 
             payload = topic.payload(**topic.raw_payload)
