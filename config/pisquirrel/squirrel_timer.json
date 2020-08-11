@@ -1,0 +1,40 @@
+{
+  "frequency": 0.1,
+  "mqtt": {
+    "client_id": "squirrel_timer",
+    "topics": {
+      "home-assistant/squirrel/camera": {
+        "pubsub": "publish",
+        "payload": {
+          "capture": "CAPTURE",
+          "delay": 0
+        }
+      }
+    }
+  },
+  "db": {
+    "name": "squirrel_monitor",
+    "columns": [
+      {
+        "col_name": "timestamp",
+        "col_type": "integer",
+        "col_key": "PRIMARY KEY"
+      },
+      {
+        "col_name": "state",
+        "col_type": "text",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "captured",
+        "col_type": "integer",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "notified",
+        "col_type": "integer",
+        "col_key": "NOT NULL"
+      }
+    ]
+  }
+}
