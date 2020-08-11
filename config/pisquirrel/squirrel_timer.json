@@ -1,4 +1,5 @@
 {
+  "log": "/home/cpw/dev/logs/squirreltimer.log",
   "frequency": 0.02,
   "mqtt": {
     "client_id": "squirrel_timer",
