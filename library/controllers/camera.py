@@ -231,6 +231,7 @@ class PiCameraController(BaseController):
 
         latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
         if latest_timestamp is not None:
+            self.logger.info(f"Updating DB record @ timestamp {latest_timestamp} to {DatabaseKeys.CAPTURED} = {int(True)}")
             self.db.update_record(latest_timestamp, DatabaseKeys.CAPTURED, int(True))
 
     # endregion MQTT

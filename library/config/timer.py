@@ -20,7 +20,7 @@ class TimerConfig(BaseConfiguration):
         Default frequency of 0.1Hz
         @rtype: float
         """
-        return self.config.get(TimerKeys.FREQUENCY, 0.1)
+        return self.config.get(TimerKeys.FREQUENCY, 0.02)
 
     @property
     def period(self) -> float:
