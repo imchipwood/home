@@ -1,5 +1,5 @@
 {
-  "frequency": 0.1,
+  "frequency": 0.02,
   "mqtt": {
     "client_id": "squirrel_timer",
     "topics": {
