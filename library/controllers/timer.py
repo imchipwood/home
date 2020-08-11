@@ -37,6 +37,12 @@ class TimerController(BaseController):
         self.logger.info("Stopping timer thread")
         super().stop()
 
+    def cleanup(self):
+        """
+        Stop threads and do any other cleanup required
+        """
+        self.stop()
+
     def loop(self):
         last_time = time.time()
         while self.running:
