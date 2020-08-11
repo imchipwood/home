@@ -6,7 +6,7 @@
       "home-assistant/squirrel/camera": {
         "pubsub": "publish",
         "payload": {
-          "capture": "CAPTURE",
+          "state": "OPEN",
           "delay": 0
         }
       }
