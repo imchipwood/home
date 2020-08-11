@@ -22,7 +22,7 @@
       "home-assistant/squirrel/camera": {
         "pubsub": "subscribe",
         "payload": {
-          "capture": "CAPTURE",
+          "state": "OPEN",
           "delay": 0
         }
       }
