@@ -48,6 +48,7 @@ class TimerController(BaseController):
         while self.running:
             current_time = time.time()
             if current_time - last_time > self.config.period:
+                last_time = current_time
                 self.publish()
 
     def publish(self):
