@@ -56,7 +56,8 @@ class TimerController(BaseController):
         self.logger.debug(f"{self.config.mqtt_config.client_id} publishing")
 
         for topic in self.config.mqtt_topic:
-            payload = topic.payload()
+
+            payload = topic.payload(**topic.raw_payload)
             self.logger.info(f"Publishing to {topic}: {payload}")
 
             try:
