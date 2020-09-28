@@ -1,4 +1,5 @@
-FROM arm32v7/python:3.7-buster
+#FROM arm32v7/python:3.7-buster
+FROM raspbian/stretch
 
 RUN apt-get update -y
 RUN apt-get install -y mosquitto mosquitto-dev python3-dev python3.7 python3.7-dev python3.7-venv python3-cffi libffi-dev git
