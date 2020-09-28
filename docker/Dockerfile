@@ -1,4 +1,4 @@
-#FROM arm32v7/python:3.7-buster
+# FROM arm32v7/python:3.7-buster
 FROM raspbian/stretch
 
 RUN apt-get update -y
