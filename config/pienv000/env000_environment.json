@@ -1,0 +1,20 @@
+{
+  "log": "/home/cpw/dev/logs/environment.log",
+  "sensor_type": 22,
+  "pin": 4,
+  "units": "fahrenheit",
+  "period": 30,
+  "mqtt": {
+    "client_id": "env000_environment",
+    "topics": {
+      "home-assistant/env/000/environment": {
+        "pubsub": "publish",
+        "payload": {
+          "temperature": "{:0.2f}",
+          "humidity": "{:0.2f}",
+          "units": ""
+        }
+      }
+    }
+  }
+}
