@@ -2,6 +2,7 @@
 FROM raspbian/stretch
 
 RUN apt-get update -y
+RUN apt-get upgrade -y
 RUN apt-get install -y mosquitto mosquitto-dev python3-dev python3-cffi libffi-dev git
 
 RUN git clone -b master https://c9f6f0fd23e6517a617cab69cb2e85ee9ae6cf9d:x-oauth-basic@github.com/imchipwood/home.git /home/
