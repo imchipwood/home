@@ -1,6 +1,7 @@
 FROM arm32v7/python:3.7-buster
 
-RUN apt-get update && apt-get install -y mosquitto mosquitto-dev python3-dev python3.7 python3.7-dev python3.7-venv python3-cffi libffi-dev git
+RUN apt-get update
+RUN apt-get install -y mosquitto mosquitto-dev python3-dev python3.7 python3.7-dev python3.7-venv python3-cffi libffi-dev git
 
 RUN git clone -b master https://c9f6f0fd23e6517a617cab69cb2e85ee9ae6cf9d:x-oauth-basic@github.com/imchipwood/home.git /home/
 WORKDIR /home
