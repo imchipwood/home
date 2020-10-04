@@ -42,6 +42,7 @@ WORKDIR /
 COPY installPython.sh /usr/local/bin/
 COPY dotfile_setup.sh /usr/local/bin/
 RUN installPython.sh
+RUN dotfile_setup.sh
 
 RUN git clone -b ${branchname} https://c9f6f0fd23e6517a617cab69cb2e85ee9ae6cf9d:x-oauth-basic@github.com/imchipwood/home.git ${WARD}
 WORKDIR ${WARD}
