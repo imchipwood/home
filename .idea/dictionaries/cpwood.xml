@@ -2,6 +2,7 @@
   <dictionary name="cpwood">
     <words>
       <w>mqtt</w>
+      <w>pushbullet</w>
     </words>
   </dictionary>
 </component>
