@@ -8,4 +8,4 @@ services:
       context: ./home
       args:
         branchname: docker
-        cfgfilename: env000.json
+        cfgfilename: env000
