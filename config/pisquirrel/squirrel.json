@@ -1,0 +1,7 @@
+{
+  "sensors": {
+    "camera": "squirrel_camera.json",
+    "timer": "squirrel_timer.json"
+  },
+  "mqtt": "squirrel_mqtt.json"
+}

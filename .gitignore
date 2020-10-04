@@ -1,7 +1,7 @@
 **.pyc
 */cpw*
 #.idea
-#.idea/workspace.xml
+.idea/workspace.xml
 #.idea/inspectionProfiles
 .idea/misc.xml
 .idea/*CACHE*
