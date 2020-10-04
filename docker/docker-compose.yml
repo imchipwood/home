@@ -1,0 +1,5 @@
+home:
+  build: home
+  restart: always
+  container_name: home
+  privileged: true
