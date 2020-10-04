@@ -1,8 +1,11 @@
-home:
-  build: home
-    args:
-      branchname: docker
-      cfgfilename: env000.json
-  restart: always
-  container_name: home
-  privileged: true
+version: "3.6"
+services:
+  home:
+    container_name: home
+    restart: always
+    privileged: true
+    build:
+      context: ./home
+      args:
+        branchname: docker
+        cfgfilename: env000.json
