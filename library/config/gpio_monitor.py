@@ -67,7 +67,7 @@ class GPIOMonitorConfig(BaseConfiguration):
         @return: whether or not GPIO is pull-up or pull-down
         @rtype: str
         """
-        return self.config.get(ConfigKeys.PULL_UP_DOWN)
+        return self.config.get(ConfigKeys.PULL_UP_DOWN, "")
 
     @property
     def mqtt_topic(self):
