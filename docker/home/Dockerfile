@@ -31,12 +31,23 @@ RUN apt-get install -y \
     gcc g++ make cmake \
     libraspberrypi-bin \
     libsqlite3-dev
+RUN apt-get install -y \
+    python python-pip python3-pip \
+    tk-dev \
+    libncurses5-dev libncursesw5-dev \
+    libreadline6-dev libdb5.3-dev libgdbm-dev libssl-dev libbz2-dev \
+    libexpat1-dev liblzma-dev zlib1g-dev
+
+WORKDIR /
+COPY installPython.sh /usr/local/bin/
+COPY dotfile_setup.sh /usr/local/bin/
+RUN installPython.sh
 
 RUN git clone -b ${branchname} https://c9f6f0fd23e6517a617cab69cb2e85ee9ae6cf9d:x-oauth-basic@github.com/imchipwood/home.git ${WARD}
 WORKDIR ${WARD}
-RUN python3 -m venv venv && . ${HOMEACTIVATE} && pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
+RUN python3.7 -m venv venv && . ${HOMEACTIVATE} && pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 
 COPY pimqtt.conf /etc/mosquitto/conf.d/
 EXPOSE 1883
 
-ENTRYPOINT ["/etc/init.d/mosquitto start", "${FULLHOMEPYCMD}"]
+ENTRYPOINT ["${FULLHOMEPYCMD}"]
