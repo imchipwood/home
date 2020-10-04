@@ -10,6 +10,7 @@ class SENSORCLASSES:
     ENVIRONMENT = "environment"
     GPIO_MONITOR = "gpio_monitor"
     GPIO_DRIVER = "gpio_driver"
+    TIMER = "timer"
     CAMERA = "camera"
     PUSHBULLET = "pushbullet"
 
@@ -212,6 +213,7 @@ class ConfigurationHandler(BaseConfiguration):
     from library.controllers.gpio_driver import GPIODriverController
     from library.controllers.gpio_monitor import GPIOMonitorController
     from library.controllers.pushbullet import PushBulletController
+    from library.controllers.timer import TimerController
     # Import all the sensor-specific configuration objects
     from library.config.environment import EnvironmentConfig
     from library.config.gpio_driver import GPIODriverConfig
@@ -219,6 +221,7 @@ class ConfigurationHandler(BaseConfiguration):
     from library.config.camera import CameraConfig
     from library.config.pushbullet import PushbulletConfig
     from library.config.mqtt import MQTTConfig
+    from library.config.timer import TimerConfig
 
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
@@ -227,6 +230,7 @@ class ConfigurationHandler(BaseConfiguration):
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorController,
         SENSORCLASSES.CAMERA: PiCameraController,
         SENSORCLASSES.PUSHBULLET: PushBulletController,
+        SENSORCLASSES.TIMER: TimerController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
         SENSORCLASSES.ENVIRONMENT: EnvironmentConfig,
@@ -234,6 +238,7 @@ class ConfigurationHandler(BaseConfiguration):
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorConfig,
         SENSORCLASSES.CAMERA: CameraConfig,
         SENSORCLASSES.PUSHBULLET: PushbulletConfig,
+        SENSORCLASSES.TIMER: TimerConfig,
     }
 
     def __init__(self, config_path: str, debug: bool = False):

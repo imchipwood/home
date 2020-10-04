@@ -85,6 +85,10 @@ class Camera(PiCamera):
         if not output:
             output = self.capture_path
 
+        # use timestamp if output supports formatting
+        if "{}" in output:
+            output = output.format(time.time())
+
         if not os.path.exists(os.path.dirname(output)):
             # Ensure the output directory actually exists
             os.makedirs(os.path.dirname(output))  # pragma: no cover

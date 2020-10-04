@@ -1,7 +1,9 @@
+import timeit
 from threading import Thread
-from time import time
 
 from library.home import execute
+
+MAX_THREAD_TIMEOUT = 5.0
 
 
 def test_execute():
@@ -9,9 +11,12 @@ def test_execute():
     stop_threads = False
     thread = Thread(target=execute, args=(config_path, lambda: stop_threads, True))
     thread.start()
+
     stop_threads = True
     thread.join(timeout=0.1)
-    start = time()
-    while time() - start < 5 and thread.is_alive():
+
+    start = timeit.default_timer()
+    while thread.is_alive() and timeit.default_timer() - start < MAX_THREAD_TIMEOUT:
         pass
+
     assert not thread.is_alive()
