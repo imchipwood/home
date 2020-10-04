@@ -51,5 +51,5 @@ RUN python3.7 -m venv venv && . ${HOMEACTIVATE} && pip install --upgrade pip set
 COPY pimqtt.conf /etc/mosquitto/conf.d/
 EXPOSE 1883
 
-CMD /etc/init.d/mosquitto start
-ENTRYPOINT ${WARD}/venv/bin/python -B home.py ${WARD}/config/pidocker/${CFGFILEPATH}
+#CMD /etc/init.d/mosquitto start
+ENTRYPOINT /etc/init.d/mosquitto start && ${WARD}/venv/bin/python -B home.py ${WARD}/config/pidocker/${CFGFILEPATH}
