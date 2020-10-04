@@ -34,7 +34,7 @@ RUN apt-get install -y \
 
 RUN git clone -b ${branchname} https://c9f6f0fd23e6517a617cab69cb2e85ee9ae6cf9d:x-oauth-basic@github.com/imchipwood/home.git ${WARD}
 WORKDIR ${WARD}
-RUN python3 -m venv venv && ${HOMEACTIVATE} && pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
+RUN python3 -m venv venv && . ${HOMEACTIVATE} && pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 
 COPY pimqtt.conf /etc/mosquitto/conf.d/
 EXPOSE 1883
