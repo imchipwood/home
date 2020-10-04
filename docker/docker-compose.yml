@@ -3,3 +3,6 @@ home:
   restart: always
   container_name: home
   privileged: true
+  args:
+    branchname: docker
+    cfgfilename: env000.json
