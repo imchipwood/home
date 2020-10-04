@@ -30,7 +30,7 @@ RUN apt-get install -y \
     build-essential \
     gcc g++ make cmake \
     libraspberrypi-bin \
-    libsqlite3-dev \
+    libsqlite3-dev
 
 RUN git clone -b ${branchname} https://c9f6f0fd23e6517a617cab69cb2e85ee9ae6cf9d:x-oauth-basic@github.com/imchipwood/home.git ${WARD}
 WORKDIR ${WARD}
