@@ -1,0 +1,7 @@
+{
+  "sensors": {
+    "camera": "garage_door_camera.json",
+    "pushbullet": "garage_door_pushbullet.json"
+  },
+  "mqtt": "garage_door_mqtt.json"
+}
