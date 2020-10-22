@@ -9,13 +9,13 @@
   "mqtt": {
     "client_id": "pi_test_door_pushbullet",
     "topics": {
-      "home-assistant/test/door/state": {
+      "hass/test/door/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Closed"
         }
       },
-      "home-assistant/test/door/camera_publish": {
+      "hass/test/door/publish": {
         "pubsub": "subscribe",
         "payload": {
           "state": "publish",

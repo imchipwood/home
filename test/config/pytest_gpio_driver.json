@@ -6,7 +6,7 @@
   "mqtt": {
     "client_id": "pytest_gpio_driver",
     "topics": {
-      "home-assistant/pytest/gpio_driver": {
+      "hass/pytest/gpio/driver": {
         "pubsub": "subscribe",
         "payload": {
           "control": "TOGGLE|ON|OFF"

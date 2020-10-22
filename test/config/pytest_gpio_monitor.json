@@ -6,7 +6,7 @@
   "mqtt": {
     "client_id": "pytest_gpio_monitor",
     "topics": {
-      "home-assistant/pytest/gpio_monitor/state": {
+      "hass/pytest/gpio/state": {
         "pubsub": "publish",
         "payload": {
           "state": "Open|Closed"

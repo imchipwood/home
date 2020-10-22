@@ -7,7 +7,7 @@
   "mqtt": {
     "client_id": "pi_media",
     "topics": {
-      "home-assistant/pytest/environment": {
+      "hass/pytest/env": {
         "pubsub": "publish",
         "payload": {
           "temperature": "{:0.2f}",

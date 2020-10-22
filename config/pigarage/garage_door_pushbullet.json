@@ -9,13 +9,13 @@
   "mqtt": {
     "client_id": "garage_door_pushbullet",
     "topics": {
-      "home-assistant/garage/state": {
+      "hass/door/garage/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Closed"
         }
       },
-      "home-assistant/garage/camera_publish": {
+      "hass/camera/garage/publish": {
         "pubsub": "subscribe",
         "payload": {
           "state": "publish",

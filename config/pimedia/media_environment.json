@@ -7,7 +7,7 @@
   "mqtt": {
     "client_id": "media_environment",
     "topics": {
-      "home-assistant/media/environment": {
+      "hass/env/000": {
         "pubsub": "publish",
         "payload": {
           "temperature": "{:0.2f}",

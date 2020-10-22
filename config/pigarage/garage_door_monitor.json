@@ -6,7 +6,7 @@
   "mqtt": {
     "client_id": "garage_door_monitor",
     "topics": {
-      "home-assistant/garage/state": {
+      "hass/door/garage/state": {
         "pubsub": "publish",
         "payload": {
           "state": "Open|Closed"

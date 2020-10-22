@@ -7,7 +7,7 @@
   "mqtt": {
     "client_id": "garage_door_control",
     "topics": {
-      "home-assistant/garage/control": {
+      "hass/door/garage/control": {
         "pubsub": "subscribe",
         "payload": {
           "control": "TOGGLE"

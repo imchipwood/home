@@ -297,7 +297,7 @@ class TestCameraController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.CAMERA)
         """ @type: library.controllers.camera.PiCameraController"""
 
-        topic_open = TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True)
+        topic_open = TestTopic("hass/pytest/gpio/state", {"state": GarageDoorStates.OPEN}, True)
         try:
             with controller.db as db:
                 # Set up for test
@@ -329,16 +329,16 @@ class TestCameraController:
     @pytest.mark.parametrize(
         "topic",
         [
-            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.OPEN}, True),
-            TestTopic("home-assistant/pytest/gpio_monitor/state", {"state": GarageDoorStates.CLOSED}, False),
-            TestTopic("home-assistant/pytest/camera", {"capture": True, "delay": 1.0}, PubSubKeys.FORCE),
-            TestTopic("home-assistant/pytest/camera", {"delay": 1.0}, False),
-            TestTopic("home-assistant/pytest/camera", {"capture": False}, False),
-            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "True"}, False),
-            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "False"}, False),
-            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "Force"}, False),
-            TestTopic("home-assistant/pytest/camera", {"capture": False, "force": "Force", "delay": 1.0}, False),
-            TestTopic("home-assistant/pytest/camera", {"capture": True, "force": "Force", "delay": 1.0}, PubSubKeys.FORCE),
+            TestTopic("hass/pytest/gpio/state", {"state": GarageDoorStates.OPEN}, True),
+            TestTopic("hass/pytest/gpio/state", {"state": GarageDoorStates.CLOSED}, False),
+            TestTopic("hass/pytest/camera", {"capture": True, "delay": 1.0}, PubSubKeys.FORCE),
+            TestTopic("hass/pytest/camera", {"delay": 1.0}, False),
+            TestTopic("hass/pytest/camera", {"capture": False}, False),
+            TestTopic("hass/pytest/camera", {"capture": False, "force": "True"}, False),
+            TestTopic("hass/pytest/camera", {"capture": False, "force": "False"}, False),
+            TestTopic("hass/pytest/camera", {"capture": False, "force": "Force"}, False),
+            TestTopic("hass/pytest/camera", {"capture": False, "force": "Force", "delay": 1.0}, False),
+            TestTopic("hass/pytest/camera", {"capture": True, "force": "Force", "delay": 1.0}, PubSubKeys.FORCE),
             TestTopic("fake_topic", {"capture": False}, False),
         ]
     )
@@ -428,13 +428,13 @@ class TestGPIODriverController:
         """ @type: library.controllers.gpio_driver.GPIODriverController """
 
         try:
-            topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "TOGGLE"}, True)
+            topic = TestTopic("hass/pytest/gpio/driver", {"control": "TOGGLE"}, True)
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.TOGGLE
 
-            topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "ON"}, True)
+            topic = TestTopic("hass/pytest/gpio/driver", {"control": "ON"}, True)
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.ON
 
-            topic = TestTopic("home-assistant/pytest/gpio_driver", {"control": "OFF"}, True)
+            topic = TestTopic("hass/pytest/gpio/driver", {"control": "OFF"}, True)
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.OFF
 
             topic.payload = {"control": "HELLO"}

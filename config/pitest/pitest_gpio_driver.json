@@ -6,7 +6,7 @@
   "mqtt": {
     "client_id": "pi_test_door_control",
     "topics": {
-      "home-assistant/test/door/control": {
+      "hass/test/door/control": {
         "pubsub": "subscribe",
         "payload": {
           "control": "TOGGLE|ON|OFF"

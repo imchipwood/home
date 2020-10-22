@@ -6,7 +6,7 @@
   "mqtt": {
     "client_id": "pi_test_door_monitor",
     "topics": {
-      "home-assistant/test/door/state": {
+      "hass/test/door/state": {
         "pubsub": "publish",
         "payload": {
           "state": "Open|Closed"

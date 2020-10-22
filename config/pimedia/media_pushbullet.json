@@ -9,7 +9,7 @@
   "mqtt": {
     "client_id": "pi_media_pushbullet",
     "topics": {
-      "home-assistant/media/environment": {
+      "hass/env/000": {
         "pubsub": "subscribe",
         "payload": {
           "temperature": "",

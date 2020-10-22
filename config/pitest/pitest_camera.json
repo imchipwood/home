@@ -19,20 +19,20 @@
   "mqtt": {
     "client_id": "pi_test_door_camera",
     "topics": {
-      "home-assistant/test/door/state": {
+      "hass/test/door/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Open"
         }
       },
-      "home-assistant/test/door/camera": {
+      "hass/test/camera/capture": {
         "pubsub": "subscribe",
         "payload": {
           "capture": "CAPTURE",
           "delay": 0
         }
       },
-      "home-assistant/test/door/camera_publish": {
+      "hass/test/door/publish": {
         "pubsub": "publish",
         "payload": {
           "state": "publish",

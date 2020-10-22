@@ -19,20 +19,20 @@
   "mqtt": {
     "client_id": "garage_door_camera",
     "topics": {
-      "home-assistant/garage/state": {
+      "hass/door/garage/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Open"
         }
       },
-      "home-assistant/garage/camera": {
+      "hass/camera/garage/capture": {
         "pubsub": "subscribe",
         "payload": {
           "capture": "CAPTURE",
           "delay": 0
         }
       },
-      "home-assistant/garage/camera_publish": {
+      "hass/camera/garage/publish": {
         "pubsub": "publish",
         "payload": {
           "state": "publish",

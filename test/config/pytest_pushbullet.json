@@ -7,13 +7,13 @@
   "mqtt": {
     "client_id": "pytest_pushbullet",
     "topics": {
-      "home-assistant/pytest/gpio_monitor/state": {
+      "hass/pytest/gpio/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Closed"
         }
       },
-      "home-assistant/pytest/camera_publish": {
+      "hass/pytest/camera/publish": {
         "pubsub": "subscribe",
         "payload": {
           "state": "publish",

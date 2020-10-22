@@ -19,20 +19,20 @@
   "mqtt": {
     "client_id": "test_camera",
     "topics": {
-      "home-assistant/pytest/gpio_monitor/state": {
+      "hass/pytest/gpio/state": {
         "pubsub": "subscribe",
         "payload": {
           "state": "Open"
         }
       },
-      "home-assistant/pytest/camera": {
+      "hass/pytest/camera": {
         "pubsub": "subscribe",
         "payload": {
           "capture": "CAPTURE",
           "delay": 0
         }
       },
-      "home-assistant/pytest/camera_publish": {
+      "hass/pytest/camera/publish": {
         "pubsub": "publish",
         "payload": {
           "state": "publish",
