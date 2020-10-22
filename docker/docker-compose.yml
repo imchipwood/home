@@ -9,3 +9,7 @@ services:
       args:
         branchname: docker
         cfgfilename: env000
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "3"
