@@ -7,7 +7,7 @@ services:
     build:
       context: ./home
       args:
-        branchname: docker
+        branchname: typehints
         cfgfilename: env005
     logging:
       options:
