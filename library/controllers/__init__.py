@@ -5,7 +5,7 @@ from multiprocessing import Process
 from time import time
 from typing import List, Union, TypeVar
 
-from library import setup_logging, CONFIG_TYPE
+from library import setup_logging, CONFIG_TYPE, CONTROLLER_TYPE
 from library.communication.mqtt import MQTTClient
 from library.data import DatabaseEntry, DatabaseKeys
 
@@ -40,7 +40,7 @@ def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Lo
 class BaseController(ABC):
     """Base class for all controllers to extend"""
 
-    def __init__(self, config, debug: bool = False):
+    def __init__(self: CONTROLLER_TYPE, config: CONFIG_TYPE, debug: bool = False):
         super()
 
         self.debug = debug

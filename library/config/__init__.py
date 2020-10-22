@@ -52,7 +52,7 @@ class BaseConfiguration:
     # By assuming the
     BASE_CONFIG_DIR = None
 
-    def __init__(self, config_path, debug=False):
+    def __init__(self: CONFIG_TYPE, config_path: str, debug: bool = False):
         """
         @param config_path: path to configuration file
         @type config_path: str

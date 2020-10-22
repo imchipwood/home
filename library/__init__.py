@@ -10,8 +10,8 @@ CONFIG_DIRS = [CONFIG_DIR, TEST_CONFIG_DIR]
 LOG_DIR = os.path.join(HOME_DIR, "log")
 
 
-CONFIG_TYPE = TypeVar("CONFIG_TYPE", bound="Base")
-CONTROLLER_TYPE = TypeVar("CONTROLLER_TYPE", bound="Base")
+CONFIG_TYPE = TypeVar('CONFIG_TYPE', bound='BaseConfiguration')
+CONTROLLER_TYPE = TypeVar('CONTROLLER_TYPE', bound='BaseController')
 
 
 class GarageDoorStates:
