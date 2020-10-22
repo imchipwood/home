@@ -1,6 +1,6 @@
 {
   "sensors": {
-    "environment": "env000_environment.json"
+    "environment": "env005_environment.json"
   },
   "mqtt": "mqtt.json"
 }

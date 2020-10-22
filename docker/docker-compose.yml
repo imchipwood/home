@@ -8,7 +8,7 @@ services:
       context: ./home
       args:
         branchname: docker
-        cfgfilename: env000
+        cfgfilename: env005
     logging:
       options:
         max-size: "1m"

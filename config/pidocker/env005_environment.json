@@ -5,9 +5,9 @@
   "units": "fahrenheit",
   "period": 30,
   "mqtt": {
-    "client_id": "env000_environment",
+    "client_id": "env005_environment",
     "topics": {
-      "hass/env/000": {
+      "hass/env/005": {
         "pubsub": "publish",
         "payload": {
           "temperature": "{:0.2f}",
