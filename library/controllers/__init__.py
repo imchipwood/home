@@ -25,7 +25,7 @@ def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Lo
     @rtype: logging.Logger
     """
     # Set up logging
-    logging.getLogger().setLevel(logging.DEBUG)
+    # logging.getLogger().setLevel(logging.DEBUG)
     if log_path and not os.path.exists(os.path.dirname(log_path)):
         os.makedirs(os.path.dirname(log_path))
     logger = setup_logging(
@@ -33,7 +33,7 @@ def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Lo
         logging_level=debug_flag,
         log_path=log_path
     )
-    logger.info("Logger initialized")
+    logger.debug("Logger initialized")
     return logger
 
 

@@ -60,10 +60,10 @@ def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
 
     # set up file handler logger - always debug level
     if not log_path:
-        logger.warning("No log file path specified - file logging disabled")
+        # logger.warning("No log file path specified - file logging disabled")
         return logger
 
-    logger.info(f"Logging to file: {log_path}")
+    # logger.info(f"Logging to file: {log_path}")
     file_handler = logging.FileHandler(log_path)
     file_handler.setLevel(logging.DEBUG)
 
