@@ -183,10 +183,11 @@ class PiCameraController(BaseController):
                     return False
 
             else:
+                self.logger.debug(f"No entry for id {convo_id}, searching for latest entry")
                 last_entry = self.get_latest_db_entry()
                 if last_entry and last_entry[DatabaseKeys.STATE] == GarageDoorStates.OPEN:
                     has_captured = bool(last_entry[DatabaseKeys.CAPTURED])
-                    self.logger.info(f"Latest db entry: {last_entry}")
+                    self.logger.info(f"Found most recent entry: {last_entry}")
 
         # Check
         if message_data.get(PubSubKeys.CAPTURE):
