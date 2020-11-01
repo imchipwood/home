@@ -148,6 +148,7 @@ class PushBulletController(BaseController):
                 self.logger.debug(f"Latest state '{state}' has not changed recently - will not send notification")
                 return
             try:
+                self.logger.debug(f"Sending text notification for state {state} from id {convo_id}")
                 self.notifier.send_text(msg.topic, notification)
                 self.mark_entry_notified(convo_id=convo_id)
             except:
@@ -159,6 +160,7 @@ class PushBulletController(BaseController):
                 self.logger.debug(f"Received image publish command but already published - not publishing")
                 return
             try:
+                self.logger.debug(f"Sending image notification for state {state} from id {convo_id}")
                 self.notifier.send_file(notification)
                 if not force:
                     # Force means camera received direct capture command - no DB entry to update
