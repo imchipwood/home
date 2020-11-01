@@ -1,18 +1,48 @@
 {
   "log": "/home/cpw/dev/logs/control.log",
-  "gpio": {
-    "pin": 17,
-    "toggle_delay": 0.3
-  },
+  "gpio_pin": "17",
+  "gpio_toggle_delay": 0.3,
+  "gpio_active_direction": "HIGH",
   "mqtt": {
     "client_id": "garage_door_control",
     "topics": {
       "hass/door/garage/control": {
         "pubsub": "subscribe",
         "payload": {
-          "control": "TOGGLE"
+          "control": "TOGGLE",
+          "convo_id": ""
         }
       }
     }
+  },
+  "db": {
+    "name": "garage_door_monitor",
+    "columns": [
+      {
+        "col_name": "timestamp",
+        "col_type": "integer",
+        "col_key": "PRIMARY KEY"
+      },
+      {
+        "col_name": "state",
+        "col_type": "text",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "convo_id",
+        "col_type": "text",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "captured",
+        "col_type": "integer",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "notified",
+        "col_type": "integer",
+        "col_key": "NOT NULL"
+      }
+    ]
   }
 }

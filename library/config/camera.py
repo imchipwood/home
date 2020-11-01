@@ -8,7 +8,7 @@ from typing import List
 
 import ephem
 
-from library.config import BaseConfiguration
+from library.config import BaseConfiguration, BaseConfigKeys
 
 
 class ConfigKeys:
@@ -16,7 +16,7 @@ class ConfigKeys:
     ISO = "iso"
     ISO_DAY = "day"
     ISO_NIGHT = "night"
-    DELAY = "delay"
+    DELAY = BaseConfigKeys.DELAY
     RESOLUTION = "resolution"
     ROTATION = "rotation"
     BRIGHTNESS = "brightness"
@@ -47,7 +47,7 @@ class CameraConfig(BaseConfiguration):
 
         # Update the base configuration for easy dumping later
         if mqtt_config:
-            self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
+            self.config.get(BaseConfigKeys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
     def settings(self) -> dict:

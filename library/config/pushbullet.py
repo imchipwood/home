@@ -4,7 +4,7 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-from library.config import BaseConfiguration
+from library.config import BaseConfiguration, BaseConfigKeys
 
 
 class ConfigKeys:
@@ -28,7 +28,7 @@ class PushbulletConfig(BaseConfiguration):
 
         # Update the base configuration for easy dumping later
         if mqtt_config:
-            self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
+            self.config.get(BaseConfigKeys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
     def api_key(self) -> str:

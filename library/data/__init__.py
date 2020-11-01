@@ -3,7 +3,9 @@ from typing import List
 
 
 class DatabaseKeys:
-    STATE = "state"
+    from library.config import PubSubKeys
+    STATE = PubSubKeys.STATE
+    ID = PubSubKeys.ID
     TIMESTAMP = "timestamp"
     CAPTURED = "captured"
     TOGGLED = "toggled"
@@ -65,6 +67,9 @@ class DatabaseEntry:
             for i in range(len(self.entry)):
                 self._values[self.columns[i].name] = self.entry[i]
         return self._values
+
+    def get(self, item: str, default_val=None) -> int or float or str:
+        return self.values.get(item, default_val)
 
     def __getitem__(self, item) -> int or float or str:
         return self.values.get(item)

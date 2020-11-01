@@ -1,7 +1,7 @@
 {
   "log": "/tmp/environment.log",
   "sensor_type": 22,
-  "pin": 4,
+  "gpio_pin": 4,
   "units": "fahrenheit",
   "period": 0.5,
   "mqtt": {

@@ -10,6 +10,7 @@ import os
 import time
 
 from library.controllers import get_logger
+from library.sensors import SensorBase
 
 try:
     from picamera import PiCamera
@@ -22,7 +23,7 @@ except ImportError:  # pragma: no cover
     from library.mock.mock_picamera import PiCamera
 
 
-class Camera(PiCamera):
+class Camera(PiCamera, SensorBase):
     def __init__(self, config, debug=False):
         """
         @param config: configuration object for PiCamera

@@ -1,7 +1,7 @@
 {
   "log": "/tmp/gpio_driver.log",
   "gpio_pin": 17,
-  "gpio_toggle_delay": 0.1,
+  "gpio_toggle_delay": 0.0,
   "gpio_active_direction": "HIGH",
   "mqtt": {
     "client_id": "pytest_gpio_driver",

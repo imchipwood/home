@@ -7,6 +7,7 @@ Author: Charles "Chip" Wood
 import logging
 
 from library.controllers import get_logger
+from library.sensors import SensorBase
 
 try:
     import RPi.GPIO as GPIO
@@ -19,7 +20,7 @@ except (ImportError, RuntimeError, ModuleNotFoundError):  # pragma: no cover
     from library.mock.mock_gpio import GPIO
 
 
-class GPIOMonitor:
+class GPIOMonitor(SensorBase):
     """
     Simple GPIO monitoring class
     """
@@ -32,7 +33,7 @@ class GPIOMonitor:
         @param debug: debug print enable flag
         @type debug: bool
         """
-        super()
+        super().__init__()
         self.config = config
         self.logger = get_logger(__name__, debug, config.log)
         GPIO.setmode(GPIO.BCM)

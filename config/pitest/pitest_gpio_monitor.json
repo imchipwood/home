@@ -9,7 +9,8 @@
       "hass/test/door/state": {
         "pubsub": "publish",
         "payload": {
-          "state": "Open|Closed"
+          "state": "Open|Closed",
+          "convo_id": ""
         }
       }
     }
@@ -24,6 +25,11 @@
       },
       {
         "col_name": "state",
+        "col_type": "text",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "convo_id",
         "col_type": "text",
         "col_key": "NOT NULL"
       },

@@ -6,10 +6,11 @@ Author: Charles "Chip" Wood
 """
 import json
 from threading import Thread, Lock
+from time import time
 
+from library import GarageDoorStates
 from library.communication.mqtt import MQTTError, get_mqtt_error_message
 from library.config import PubSubKeys
-from library.config.camera import ConfigKeys
 from library.controllers import BaseController, get_logger
 from library.data import DatabaseKeys
 from library.sensors.camera import Camera
@@ -131,20 +132,30 @@ class PiCameraController(BaseController):
 
         # Check if it indicated a capture
         should_capture = self.should_capture_from_command(msg.topic, message_data)
+        convo_id = message_data.get(PubSubKeys.ID)
+        force_capture = should_capture == PubSubKeys.FORCE
+
+        if force_capture and convo_id is None:
+            convo_id = Camera.get_id()
+
         if should_capture is not False:
             # If no delay in message, pass in None - this will force camera to use
             # the delay defined in the config
             kwargs = {
-                ConfigKeys.DELAY: message_data.get(ConfigKeys.DELAY, None),
+                PubSubKeys.DELAY: message_data.get(
+                    PubSubKeys.DELAY,
+                    None
+                ),
                 PubSubKeys.FORCE: message_data.get(
                     PubSubKeys.FORCE,
-                    True if should_capture == PubSubKeys.FORCE else False
-                )
+                    should_capture == PubSubKeys.FORCE
+                ),
+                PubSubKeys.ID: convo_id
             }
             thread = Thread(target=self.capture_loop, kwargs=kwargs)
             thread.start()
 
-    def should_capture_from_command(self, message_topic, message_data) -> bool or str:
+    def should_capture_from_command(self, message_topic: str, message_data: dict) -> bool or str:
         """
         Check if the message indicates a capture command
         @param message_topic: topic message came from
@@ -161,12 +172,20 @@ class PiCameraController(BaseController):
 
         # Check the database to see if capturing already occurred for latest entry
         has_captured = False
+        convo_id = message_data.get(DatabaseKeys.ID)
         if self.db_enabled:
-            latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-            if latest_timestamp is not None:
-                last_entry = self.db.get_record(latest_timestamp)
-                has_captured = bool(last_entry[DatabaseKeys.CAPTURED])
-                self.logger.info(f"Latest db entry: {has_captured}")
+            target_entry = self.get_entry_for_id(convo_id)
+            if target_entry:
+                has_captured = bool(target_entry[DatabaseKeys.CAPTURED])
+                if has_captured:
+                    self.logger.debug(f"Already captured for id {convo_id} - not capturing")
+                    return False
+
+            else:
+                last_entry = self.get_latest_db_entry()
+                if last_entry:
+                    has_captured = bool(last_entry[DatabaseKeys.CAPTURED])
+                    self.logger.info(f"Latest db entry: {has_captured}")
 
         # Check
         if message_data.get(PubSubKeys.CAPTURE):
@@ -201,11 +220,13 @@ class PiCameraController(BaseController):
         self.logger.debug(f"Not capturing for latest message: {message_topic} - {message_data}")
         return False
 
-    def publish(self, force=False):
+    def publish(self, force: bool = False, convo_id: str = ""):
         """
         Broadcast that an image was taken
         @param force: whether or not to force publishing of the image
         @type force: bool
+        @param convo_id: unique ID for this particular conversation
+        @type convo_id: str
         """
         if not self.mqtt:
             return
@@ -215,6 +236,7 @@ class PiCameraController(BaseController):
                 raw_payload = topic.raw_payload
                 force_publish = True if force else False
                 raw_payload[PubSubKeys.FORCE] = force_publish
+                raw_payload[PubSubKeys.ID] = convo_id
                 payload = topic.payload(**raw_payload)
             else:
                 payload = topic.raw_payload
@@ -222,29 +244,53 @@ class PiCameraController(BaseController):
             self.logger.info(f"Publish to {name}: {topic.raw_payload}")
             self.mqtt.single(str(topic), payload=payload, retain=False, qos=2)
 
-    def update_database_entry(self):
+    def update_database_entry(self, convo_id: str):
         """
         Update the latest database entry to indicate capturing has happened
+        @param convo_id: conversation ID to update
+        @type convo_id: str
         """
         if not self.db_enabled:
             return
 
-        latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-        if latest_timestamp is not None:
-            self.logger.info(f"Updating DB record @ timestamp {latest_timestamp} to {DatabaseKeys.CAPTURED} = {int(True)}")
-            self.db.update_record(latest_timestamp, DatabaseKeys.CAPTURED, int(True))
+        target_entry = self.get_entry_for_id(convo_id)
+        if target_entry:
+            timestamp = target_entry[DatabaseKeys.TIMESTAMP]
+            self.logger.info(
+                f"Updating DB record @ {timestamp} ({convo_id}): {DatabaseKeys.CAPTURED} = {int(True)}")
+            self.db.update_record(timestamp, DatabaseKeys.CAPTURED, int(True))
+
+        else:
+            timestamp = int(time())
+            captured = int(True)
+            latest_entry = self.db.get_latest_record()
+            if latest_entry[DatabaseKeys.TIMESTAMP] != timestamp:
+                raw_data = {
+                    DatabaseKeys.TIMESTAMP: timestamp,
+                    DatabaseKeys.STATE: GarageDoorStates.CLOSED,
+                    DatabaseKeys.ID: convo_id,
+                    DatabaseKeys.CAPTURED: captured,
+                    DatabaseKeys.NOTIFIED: int(False)
+                }
+                data = self.db.format_data_for_insertion(**raw_data)
+
+                self.logger.info(f"No entry for {convo_id} - adding new record: {data}")
+                self.db.add_data(data)
+            else:
+                self.logger.info(f"Latest record matches current timestamp... updating anyway?")
+                self.db.update_record(timestamp, DatabaseKeys.CAPTURED, captured)
 
     # endregion MQTT
     # region Camera
 
-    def capture_loop(self, delay=0, force=False):
+    def capture_loop(self, delay: float = 0, convo_id: str = "", force: bool = False):
         """
         Simple method for capturing an image with PiCamera
         """
         with mutex, Camera(self.config, self.debug) as camera:
             camera.capture(delay=delay)
-            self.publish(force=force)
-            self.update_database_entry()
+            self.publish(force=force, convo_id=convo_id)
+            self.update_database_entry(convo_id)
 
     # endregion Camera
 

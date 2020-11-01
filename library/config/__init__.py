@@ -3,7 +3,6 @@ import os
 from typing import List, Type, Union
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR, CONFIG_TYPE, CONTROLLER_TYPE
-from library.data.database import Column
 
 
 class SENSORCLASSES:
@@ -15,7 +14,7 @@ class SENSORCLASSES:
     PUSHBULLET = "pushbullet"
 
 
-class ConfigKeys:
+class BaseConfigKeys:
     MQTT = "mqtt"
     SENSORS = "sensors"
     LOG = "log"
@@ -25,6 +24,8 @@ class ConfigKeys:
     TOPICS = "topics"
     PUBLISH = "publish"
     SUBSCRIBE = "subscribe"
+    DELAY = "delay"
+    PIN = "gpio_pin"
     DB = "db"
     DB_NAME = "name"
     DB_COLUMNS = "columns"
@@ -38,18 +39,23 @@ class PubSubKeys:
     Simple class to avoid using raw strings all over the place
     """
     PUBSUB = "pubsub"
-    SUBSCRIBE = "subscribe"
-    PUBLISH = "publish"
+    SUBSCRIBE = BaseConfigKeys.SUBSCRIBE
+    PUBLISH = BaseConfigKeys.PUBLISH
     CAPTURE = "capture"
     CONTROL = "control"
+    DELAY = BaseConfigKeys.DELAY
     FORCE = "force"
     BOTH = "both"
     PAYLOAD = "payload"
     STATE = "state"
+    ID = "convo_id"
 
 
 class BaseConfiguration:
-    # By assuming the
+    """
+    Base configuration class for all sensor/controller configs to derive from
+    """
+    from library.data.database import Column
     BASE_CONFIG_DIR = None
 
     def __init__(self: CONFIG_TYPE, config_path: str, debug: bool = False):
@@ -60,7 +66,6 @@ class BaseConfiguration:
         @type debug: bool
         """
         super()
-        self.config_keys = ConfigKeys
         self.debug = debug
 
         self._config_path = ""
@@ -155,7 +160,7 @@ class BaseConfiguration:
         @return: dict of sensor config paths
         @rtype: dict[str, str]
         """
-        return self.config.get(ConfigKeys.SENSORS)
+        return self.config.get(BaseConfigKeys.SENSORS)
 
     def get_sensor_path(self, sensor) -> str:
         """
@@ -173,7 +178,7 @@ class BaseConfiguration:
         @return: Path to log file
         @rtype: str
         """
-        return self.config.get(ConfigKeys.LOG, "")
+        return self.config.get(BaseConfigKeys.LOG, "")
 
     @property
     def db_name(self) -> str:
@@ -181,10 +186,10 @@ class BaseConfiguration:
         @return: database name
         @rtype: str
         """
-        column_data = self.config.get(ConfigKeys.DB)
+        column_data = self.config.get(BaseConfigKeys.DB)
         if not column_data:
             return ""
-        return column_data.get(ConfigKeys.DB_NAME)
+        return column_data.get(BaseConfigKeys.DB_NAME)
 
     @property
     def db_columns(self) -> List[Column]:
@@ -192,15 +197,16 @@ class BaseConfiguration:
         @return: list of database column objects
         @rtype: list[Column]
         """
-        column_data = self.config.get(ConfigKeys.DB)
+        from library.data.database import Column
+        column_data = self.config.get(BaseConfigKeys.DB)
         if not column_data:
             return []
         columns = []
-        for column_dict in column_data.get(ConfigKeys.DB_COLUMNS, []):
+        for column_dict in column_data.get(BaseConfigKeys.DB_COLUMNS, []):
             column = Column(
-                column_dict.get(ConfigKeys.DB_COLUMN_NAME, ""),
-                column_dict.get(ConfigKeys.DB_COLUMN_TYPE, ""),
-                column_dict.get(ConfigKeys.DB_COLUMN_KEY, ""),
+                column_dict.get(BaseConfigKeys.DB_COLUMN_NAME, ""),
+                column_dict.get(BaseConfigKeys.DB_COLUMN_TYPE, ""),
+                column_dict.get(BaseConfigKeys.DB_COLUMN_KEY, ""),
             )
             columns.append(column)
         return columns
@@ -250,7 +256,7 @@ class ConfigurationHandler(BaseConfiguration):
         """
         super().__init__(config_path, debug)
         self._current_sensor = 0
-        self.sensorTypes = list(self.config.get(ConfigKeys.SENSORS, {}))
+        self.sensorTypes = list(self.config.get(BaseConfigKeys.SENSORS, {}))
         self.sensors = {}
 
     # region Sensors
@@ -261,7 +267,7 @@ class ConfigurationHandler(BaseConfiguration):
         Get the full path to the base MQTT configuration file
         @return: path to the base MQTT configuration file
         """
-        config_path = self.config.get(ConfigKeys.MQTT)
+        config_path = self.config.get(BaseConfigKeys.MQTT)
         if not config_path:
             return ""
         elif os.path.exists(config_path):
@@ -327,7 +333,7 @@ class ConfigurationHandler(BaseConfiguration):
         @return: sensor controllers iteratively
         """
         self._current_sensor = 0
-        for sensor in self.config.get(ConfigKeys.SENSORS, {}):
+        for sensor in self.config.get(BaseConfigKeys.SENSORS, {}):
             yield self.get_sensor_controller(sensor)
 
     def __next__(self):  # pragma: no cover

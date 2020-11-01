@@ -22,7 +22,8 @@
       "hass/door/garage/state": {
         "pubsub": "subscribe",
         "payload": {
-          "state": "Open"
+          "state": "Open",
+          "convo_id": ""
         }
       },
       "hass/camera/garage/capture": {
@@ -36,6 +37,7 @@
         "pubsub": "publish",
         "payload": {
           "state": "publish",
+          "convo_id": "",
           "force": "True|False"
         }
       }
@@ -48,6 +50,11 @@
         "col_name": "timestamp",
         "col_type": "integer",
         "col_key": "PRIMARY KEY"
+      },
+      {
+        "col_name": "convo_id",
+        "col_type": "text",
+        "col_key": "NOT NULL"
       },
       {
         "col_name": "state",

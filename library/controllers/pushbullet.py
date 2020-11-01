@@ -131,8 +131,9 @@ class PushBulletController(BaseController):
 
         state = message_data.get(PubSubKeys.STATE)
         force = message_data.get(PubSubKeys.FORCE, False)
+        convo_id = message_data.get(PubSubKeys.ID)
         notification = self.config.notify.get(state)
-        self.logger.debug(f"Received '{state}': {notification}")
+        self.logger.debug(f"From {convo_id} - '{state}': {notification}")
 
         if not self.notifier:  # pragma: no cover
             self.logger.warning("No PushBullet connection - trying again")
@@ -143,50 +144,73 @@ class PushBulletController(BaseController):
 
         if state == GarageDoorStates.CLOSED:
             # Message from GPIO monitor saying CLOSED
-            if self.db_enabled and not self.should_text_notify():  # pragma: no cover
+            if self.db_enabled and not self.should_text_notify(convo_id=convo_id):  # pragma: no cover
                 self.logger.debug(f"Latest state '{state}' has not changed recently - will not send notification")
                 return
             try:
                 self.notifier.send_text(msg.topic, notification)
-                self.mark_latest_entry_notified()
+                self.mark_entry_notified(convo_id=convo_id)
             except:
                 self.logger.exception("Exception attempting to send PushBullet text notification")
 
         elif state == PubSubKeys.PUBLISH:
             # Message is from camera saying to publish the image
-            if not self.should_image_notify(force=force):
+            if not self.should_image_notify(force=force, convo_id=convo_id):
                 self.logger.debug(f"Received image publish command but already published - not publishing")
                 return
             try:
                 self.notifier.send_file(notification)
                 if not force:
                     # Force means camera received direct capture command - no DB entry to update
-                    self.mark_latest_entry_notified()
+                    self.mark_entry_notified(convo_id=convo_id)
             except:
                 self.logger.exception("Exception attempting to send PushBullet image notification")
 
-    def mark_latest_entry_notified(self):
+    def mark_entry_notified(self, convo_id: str):
         """
         Mark the latest entry as "notified"
+        @param convo_id: target entry ID
+        @type convo_id: str
         """
         if not self.db_enabled:
             return
 
-        latest_timestamp = self.get_latest_db_entry(DatabaseKeys.TIMESTAMP)
-        if latest_timestamp:
-            self.db.update_record(latest_timestamp, DatabaseKeys.NOTIFIED, int(True))
+        target_entry = self.get_entry_for_id(convo_id)
+        if target_entry:
+            timestamp = target_entry[DatabaseKeys.TIMESTAMP]
+            self.db.update_record(timestamp, DatabaseKeys.NOTIFIED, int(True))
 
-    def should_text_notify(self) -> bool:
+    def should_text_notify(self, convo_id: str) -> bool:
         """
         Check if a text notification should be sent
+        @param convo_id: conversation ID
+        @type convo_id: str
         @rtype: bool
         """
-        latest_entry = self.get_latest_db_entry(None)
-        if latest_entry[DatabaseKeys.NOTIFIED]:
+        # Check if entry for ID exists
+        target_entry = self.get_entry_for_id(convo_id)
+        if target_entry:
+            if target_entry[DatabaseKeys.NOTIFIED] \
+                    or target_entry[DatabaseKeys.STATE] == GarageDoorStates.OPEN:
+                # Already notified or wrong state - don't notify
+                return False
+
+            # State must be CLOSED and not notified yet
+            return True
+
+        # Check the latest entry
+        latest_entry = self.get_latest_db_entry()
+        if not latest_entry:
+            # No entries - notify
+            return True
+
+        # Don't notify if latest entry has been notified already or state is OPEN
+        if latest_entry[DatabaseKeys.NOTIFIED] \
+                or latest_entry[DatabaseKeys.STATE] == GarageDoorStates.OPEN:
             return False
 
         # Notify if last entry is old
-        if not self.is_latest_entry_recent(self.RECENT_ENTRY_THRESHOLD):
+        if not self.is_entry_recent(latest_entry, self.RECENT_ENTRY_THRESHOLD):
             return True
 
         # Notify if there aren't two entries
@@ -201,7 +225,7 @@ class PushBulletController(BaseController):
         # Notify if not all entries are CLOSED
         return last_two[0] != last_two[1]
 
-    def should_image_notify(self, force: bool = False) -> bool:
+    def should_image_notify(self, convo_id: str, force: bool = False) -> bool:
         """
         Check if an image notification should be sent
         @rtype: bool
@@ -214,12 +238,23 @@ class PushBulletController(BaseController):
         if not self.db_enabled:
             return True
 
+        # Check if ID matches existing record
+        target_entry = self.get_entry_for_id(convo_id)
+        if target_entry:
+            if target_entry[DatabaseKeys.NOTIFIED] \
+                    or target_entry[DatabaseKeys.STATE] == GarageDoorStates.CLOSED:
+                # Already notified or wrong state - don't notify
+                return False
+
+            # State must be OPEN and not notified yet
+            return True
+
         # If there are no entries, notify
-        if self.get_latest_db_entry(DatabaseKeys.TIMESTAMP) is None:
+        latest_entry = self.get_latest_db_entry(None)
+        if latest_entry is None:
             return True
 
         # If last entry is "closed", don't notify
-        latest_entry = self.get_latest_db_entry(None)
         if latest_entry[DatabaseKeys.STATE] == GarageDoorStates.CLOSED:
             return False
         else:

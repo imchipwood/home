@@ -7,7 +7,7 @@ Author: Charles "Chip" Wood
 import logging
 
 from library import GPIODriverActiveDirection
-from library.config import BaseConfiguration
+from library.config import BaseConfiguration, BaseConfigKeys
 
 try:
     import RPi.GPIO as GPIO
@@ -21,7 +21,7 @@ except (ImportError, RuntimeError, ModuleNotFoundError):  # pragma: no cover
 
 
 class ConfigKeys:
-    PIN = "gpio_pin"
+    PIN = BaseConfigKeys.PIN
     TOGGLE_DELAY = "gpio_toggle_delay"
     ACTIVE_DIRECTION = "gpio_active_direction"
 
@@ -46,7 +46,7 @@ class GPIODriverConfig(BaseConfiguration):
 
         # Update the base configuration for easy dumping later
         if mqtt_config:
-            self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
+            self.config.get(BaseConfigKeys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
     def pin(self) -> int:

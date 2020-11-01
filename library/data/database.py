@@ -4,7 +4,6 @@ import sqlite3
 from typing import List
 
 from library import HOME_DIR
-from library.controllers import get_logger
 from library.data import Column, DatabaseEntry
 
 
@@ -56,6 +55,7 @@ class Database:
         @param logger: optional logger to print debug info to file
         @type logger: logging.Logger or None
         """
+        from library.controllers import get_logger
         super()
         self.name = name
         self.path = path
@@ -126,6 +126,22 @@ AND name='{table_name}';
         self.logger.debug(f"Creating table {table_name}")
         query = f"CREATE TABLE {table_name} ({', '.join([str(x) for x in columns])})"
         self.cur.execute(query)
+
+    def format_data_for_insertion(self, **kwargs) -> List:
+        """
+        Take keyword args and format them for db insertion
+        @param kwargs: keyword args
+        @type kwargs: dict
+        @return: list of values for insertion
+        @rtype: List
+        """
+        formatted_data = []
+        for column in self.columns:
+            val = kwargs.get(column.name, None)
+            if val is None:
+                raise Exception(f"Data for {column.name} was not passed in!")
+            formatted_data.append(val)
+        return formatted_data
 
     def add_data_multiple(self, data_to_add: List[List] or List[tuple]):
         """

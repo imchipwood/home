@@ -1,4 +1,5 @@
 import os
+import random
 
 IS_TEAMCITY = os.environ.get("IS_TEAMCITY", "FALSE") == "TRUE"
 
@@ -16,3 +17,26 @@ def avg(l):
 
 class SensorError(Exception):
     pass
+
+
+class SensorBase:
+    """
+    Base sensor class
+    """
+    random = random.Random()
+
+    def __init__(self):
+        """
+        Constructor for base sensor class
+        """
+        super()
+        self.random.seed()
+
+    @classmethod
+    def get_id(cls) -> str:
+        """
+        Get a new random ID
+        @return: new random ID as a string
+        @rtype: str
+        """
+        return str(int(cls.random.random() * 2 ** 32))

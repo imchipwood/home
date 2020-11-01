@@ -12,13 +12,15 @@
       "hass/door/garage/state": {
         "pubsub": "subscribe",
         "payload": {
-          "state": "Closed"
+          "state": "Closed",
+          "convo_id": ""
         }
       },
       "hass/camera/garage/publish": {
         "pubsub": "subscribe",
         "payload": {
           "state": "publish",
+          "convo_id": "",
           "force": "True|False"
         }
       }
@@ -34,6 +36,11 @@
       },
       {
         "col_name": "state",
+        "col_type": "text",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "convo_id",
         "col_type": "text",
         "col_key": "NOT NULL"
       },

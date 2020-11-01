@@ -8,7 +8,7 @@ import json
 import re
 import socket
 
-from library.config import BaseConfiguration, ConfigKeys, PubSubKeys
+from library.config import BaseConfiguration, BaseConfigKeys, PubSubKeys
 
 
 def get_ip_address():
@@ -238,7 +238,7 @@ class MQTTBaseConfig(BaseConfiguration):
         @return: MQTT broker URL
         @rtype: str
         """
-        return self.config.get(self.config_keys.BROKER, get_ip_address())
+        return self.config.get(BaseConfigKeys.BROKER, get_ip_address())
 
     @property
     def port(self) -> int:
@@ -247,7 +247,7 @@ class MQTTBaseConfig(BaseConfiguration):
         @return: MQTT broker port
         @rtype: int
         """
-        return self.config.get(self.config_keys.PORT, 1883)
+        return self.config.get(BaseConfigKeys.PORT, 1883)
 
 
 class MQTTConfig(MQTTBaseConfig):
@@ -267,7 +267,7 @@ class MQTTConfig(MQTTBaseConfig):
         """
         super().__init__(config_path, debug)
         sensor_config_path = self.normalize_config_path(sensor_config_path)
-        self.config.update(self.load_config(sensor_config_path).get(ConfigKeys.MQTT))
+        self.config.update(self.load_config(sensor_config_path).get(BaseConfigKeys.MQTT))
 
     @property
     def client_id(self) -> str:
@@ -276,7 +276,7 @@ class MQTTConfig(MQTTBaseConfig):
         @return: MQTT client ID
         @rtype: str
         """
-        return self.config.get(ConfigKeys.CLIENT_ID, "")
+        return self.config.get(BaseConfigKeys.CLIENT_ID, "")
 
     @client_id.setter
     def client_id(self, client_id):
@@ -285,7 +285,7 @@ class MQTTConfig(MQTTBaseConfig):
         @param client_id: new client ID
         @type client_id: str
         """
-        self.config[ConfigKeys.CLIENT_ID] = client_id
+        self.config[BaseConfigKeys.CLIENT_ID] = client_id
 
     @property
     def topics(self):
@@ -294,7 +294,7 @@ class MQTTConfig(MQTTBaseConfig):
         @return: dictionary of all topics keyed by topic name
         @rtype: dict[str, Topic]
         """
-        all_topics = self.config.get(ConfigKeys.TOPICS, {})
+        all_topics = self.config.get(BaseConfigKeys.TOPICS, {})
         topics = {}
         for topic, info in all_topics.items():
             topics[topic] = Topic(topic, info)

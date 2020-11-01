@@ -8,6 +8,7 @@ import logging
 from typing import Tuple
 
 from library.controllers import get_logger
+from library.sensors import SensorBase
 
 try:
     import Adafruit_DHT
@@ -22,7 +23,7 @@ except ImportError:  # pragma: no cover
 from library.sensors import avg, SensorError
 
 
-class EnvironmentSensor:
+class EnvironmentSensor(SensorBase):
     """
     Basic wrapper around Adafruit's DHT module with support for
     setting temperature units (Celsius, Fahrenheit) and averaging
@@ -43,7 +44,7 @@ class EnvironmentSensor:
         @param debug: Flag to enable/disable debug prints
         @type debug: bool
         """
-        super()
+        super().__init__()
 
         self.config = config
         self.debug = debug

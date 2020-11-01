@@ -8,6 +8,7 @@ import logging
 import time
 
 from library.controllers import get_logger
+from library.sensors import SensorBase
 
 try:
     import RPi.GPIO as GPIO
@@ -20,7 +21,7 @@ except (ImportError, RuntimeError, ModuleNotFoundError):  # pragma: no cover
     from library.mock.mock_gpio import GPIO
 
 
-class GPIODriver:
+class GPIODriver(SensorBase):
     """
     Simple GPIO output class
     """
@@ -33,7 +34,7 @@ class GPIODriver:
         @param debug: debug print enable flag
         @type debug: bool
         """
-        super()
+        super().__init__()
         self.config = config
         self.logger = get_logger(__name__, debug, config.log)
 

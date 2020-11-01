@@ -4,12 +4,12 @@ Author: Charles "Chip" Wood
         imchipwood@gmail.com
         github.com/imchipwood
 """
-from library.config import BaseConfiguration
+from library.config import BaseConfiguration, BaseConfigKeys
 
 
 class ConfigKeys:
     SENSOR_TYPE = "sensor_type"
-    PIN = "pin"
+    PIN = BaseConfigKeys.PIN
     UNITS = "units"
     PERIOD = "period"
 
@@ -36,7 +36,7 @@ class EnvironmentConfig(BaseConfiguration):
 
         # Update the base configuration for easy dumping later
         if mqtt_config:
-            self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
+            self.config.get(BaseConfigKeys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
     def sensor_type(self) -> int:

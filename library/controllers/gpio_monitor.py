@@ -7,6 +7,7 @@ Author: Charles "Chip" Wood
 import time
 from threading import Thread
 
+from library.data import DatabaseKeys
 from library import GarageDoorStates
 from library.communication.mqtt import MQTTClient
 from library.controllers import BaseController, get_logger
@@ -103,13 +104,13 @@ class GPIOMonitorController(BaseController):
         if not self.should_publish():
             return
 
-        self.add_entry_to_database()
+        convo_id = self.add_entry_to_database()
 
         # Publish to all topics
         for topic in self.config.mqtt_topic:
 
             # Convert state to MQTT payload and attempt to publish
-            payload = topic.payload(state=str(self))
+            payload = topic.payload(state=str(self), convo_id=convo_id)
             self.logger.info(f"Publishing to {topic}: {payload}")
             try:
                 self.mqtt.single(topic=str(topic), payload=payload, qos=2)
@@ -129,8 +130,13 @@ class GPIOMonitorController(BaseController):
 
         # Database exists - check previous state against current
         # and check if previous entry is old
-        last_state = self.get_latest_db_entry()
-        is_recent = self.is_latest_entry_recent(15)
+        last_entry = self.get_latest_db_entry()
+        if last_entry:
+            last_state = last_entry[DatabaseKeys.STATE]
+            is_recent = self.is_entry_recent(last_entry, 15)
+        else:
+            last_state = None
+            is_recent = None
 
         # Only publish if the state changed or the previous reading is old
         state_changed = last_state != str(self)
@@ -141,19 +147,30 @@ class GPIOMonitorController(BaseController):
 
         return should_publish
 
-    def add_entry_to_database(self):
+    def add_entry_to_database(self) -> str:
         """
         Add the current state to the database
+        @return: new ID to use for this conversation
+        @rtype: str
         """
-        if not self.config.db_name:
-            return
+        convo_id = self.sensor.get_id()
 
-        with Database(self.config.db_name, self.config.db_columns) as db:
-            # Create the entry
-            data = [int(time.time()), str(self), int(False), int(False)]
-            self.logger.debug(f"Adding data to db: {data}")
-            db.add_data(data)
-            db.delete_all_except_last_n_records(2)
+        if self.config.db_name:
+            with Database(self.config.db_name, self.config.db_columns) as db:
+                # Create the entry
+                raw_data = {
+                    DatabaseKeys.TIMESTAMP: int(time.time()),
+                    DatabaseKeys.STATE: str(self),
+                    DatabaseKeys.ID: convo_id,
+                    DatabaseKeys.CAPTURED: int(False),
+                    DatabaseKeys.NOTIFIED: int(False)
+                }
+                data = db.format_data_for_insertion(**raw_data)
+                self.logger.debug(f"Adding data to db: {data}")
+                db.add_data(data)
+                db.delete_all_except_last_n_records(2)
+
+        return convo_id
 
     # endregion Communication
 

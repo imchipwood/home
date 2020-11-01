@@ -143,12 +143,16 @@ def get_mqtt_client(mqtt_config: MQTTConfig, topics: List[str]) -> MQTTClient:
         print("TEST_MQTT: CONNECTED, subscribing now")
         client.subscribe([(x, 0) for x in topics])
 
+    def on_subscribe(client, userdata, mid, granted_qos):
+        print(f"TEST_MQTT: (SUBSCRIBE) client: {client._client_id}, mid {mid}, granted_qos: {granted_qos}")
+
     def on_message(client, userdata, msg):
         payload = msg.payload.decode("utf-8")
         print(f"TEST_MQTT: Received payload: {payload}, QOS: {msg.qos}")
         global MESSAGE
         MESSAGE = True
 
+    mqtt_client.on_subscribe = on_subscribe
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
     mqtt_client.connect(host=mqtt_config.broker, port=mqtt_config.port)
@@ -284,8 +288,10 @@ class TestCameraController:
         if os.path.exists(expected_path):
             os.remove(expected_path)
 
+        convo_id = "1234567890"
+
         try:
-            controller.capture_loop(force=force_cmd)
+            controller.capture_loop(force=force_cmd, convo_id=convo_id)
             assert os.path.exists(expected_path)
         finally:
             controller.cleanup()
@@ -297,7 +303,10 @@ class TestCameraController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.CAMERA)
         """ @type: library.controllers.camera.PiCameraController"""
 
-        topic_open = TestTopic("hass/pytest/gpio/state", {"state": GarageDoorStates.OPEN}, True)
+        convo_id = "1234567890"
+        convo_id2 = "0987654321"
+        topic_open = TestTopic("hass/pytest/gpio/state", {PubSubKeys.STATE: GarageDoorStates.OPEN, PubSubKeys.ID: convo_id}, True)
+        topic_open2 = TestTopic("hass/pytest/gpio/state", {PubSubKeys.STATE: GarageDoorStates.OPEN, PubSubKeys.ID: convo_id2}, True)
         try:
             with controller.db as db:
                 # Set up for test
@@ -307,21 +316,32 @@ class TestCameraController:
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
 
                 # One record with captured=False - capture
-                db.add_data([0, GarageDoorStates.OPEN, int(False), int(False)])
+                db.add_data([0, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
                 db.delete_all_except_last_n_records(0)
 
                 # One record with captured=True - do not capture
-                db.add_data([0, GarageDoorStates.OPEN, int(True), int(False)])
+                db.add_data([0, GarageDoorStates.OPEN, convo_id, int(True), int(False)])
                 assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
                 db.delete_all_except_last_n_records(0)
 
                 # Multiple records - capture then don't
-                db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
-                db.add_data([1, GarageDoorStates.OPEN, int(False), int(False)])
+                db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                db.add_data([1, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
-                controller.update_database_entry()
+                controller.update_database_entry(convo_id)
                 assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                db.delete_all_except_last_n_records(0)
+
+                # Multiple records with different IDs - test each ID
+                db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                db.add_data([1, GarageDoorStates.OPEN, convo_id2, int(False), int(False)])
+                assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                controller.update_database_entry(convo_id)
+                assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+                assert controller.should_capture_from_command(topic_open2.topic, topic_open2.payload)
+                controller.update_database_entry(convo_id2)
+                assert not controller.should_capture_from_command(topic_open2.topic, topic_open2.payload)
         finally:
             controller.cleanup()
 
@@ -329,17 +349,17 @@ class TestCameraController:
     @pytest.mark.parametrize(
         "topic",
         [
-            TestTopic("hass/pytest/gpio/state", {"state": GarageDoorStates.OPEN}, True),
-            TestTopic("hass/pytest/gpio/state", {"state": GarageDoorStates.CLOSED}, False),
-            TestTopic("hass/pytest/camera", {"capture": True, "delay": 1.0}, PubSubKeys.FORCE),
-            TestTopic("hass/pytest/camera", {"delay": 1.0}, False),
-            TestTopic("hass/pytest/camera", {"capture": False}, False),
-            TestTopic("hass/pytest/camera", {"capture": False, "force": "True"}, False),
-            TestTopic("hass/pytest/camera", {"capture": False, "force": "False"}, False),
-            TestTopic("hass/pytest/camera", {"capture": False, "force": "Force"}, False),
-            TestTopic("hass/pytest/camera", {"capture": False, "force": "Force", "delay": 1.0}, False),
-            TestTopic("hass/pytest/camera", {"capture": True, "force": "Force", "delay": 1.0}, PubSubKeys.FORCE),
-            TestTopic("fake_topic", {"capture": False}, False),
+            TestTopic("hass/pytest/gpio/state", {PubSubKeys.STATE: GarageDoorStates.OPEN}, True),
+            TestTopic("hass/pytest/gpio/state", {PubSubKeys.STATE: GarageDoorStates.CLOSED}, False),
+            TestTopic("hass/pytest/camera", {PubSubKeys.CAPTURE: True, PubSubKeys.DELAY: 1.0}, PubSubKeys.FORCE),
+            TestTopic("hass/pytest/camera", {PubSubKeys.DELAY: 1.0}, False),
+            TestTopic("hass/pytest/camera", {PubSubKeys.CAPTURE: False}, False),
+            TestTopic("hass/pytest/camera", {PubSubKeys.CAPTURE: False, PubSubKeys.FORCE: "True"}, False),
+            TestTopic("hass/pytest/camera", {PubSubKeys.CAPTURE: False, PubSubKeys.FORCE: "False"}, False),
+            TestTopic("hass/pytest/camera", {PubSubKeys.CAPTURE: False, PubSubKeys.FORCE: "Force"}, False),
+            TestTopic("hass/pytest/camera", {PubSubKeys.CAPTURE: False, PubSubKeys.FORCE: "Force", PubSubKeys.DELAY: 1.0}, False),
+            TestTopic("hass/pytest/camera", {PubSubKeys.CAPTURE: True, PubSubKeys.FORCE: "Force", PubSubKeys.DELAY: 1.0}, PubSubKeys.FORCE),
+            TestTopic("fake_topic", {PubSubKeys.CAPTURE: False}, False),
         ]
     )
     def test_should_capture_from_command_nodb(self, topic):
@@ -428,16 +448,16 @@ class TestGPIODriverController:
         """ @type: library.controllers.gpio_driver.GPIODriverController """
 
         try:
-            topic = TestTopic("hass/pytest/gpio/driver", {"control": "TOGGLE"}, True)
+            topic = TestTopic("hass/pytest/gpio/driver", {PubSubKeys.CONTROL: GPIODriverCommands.TOGGLE}, True)
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.TOGGLE
 
-            topic = TestTopic("hass/pytest/gpio/driver", {"control": "ON"}, True)
+            topic = TestTopic("hass/pytest/gpio/driver", {PubSubKeys.CONTROL: GPIODriverCommands.ON}, True)
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.ON
 
-            topic = TestTopic("hass/pytest/gpio/driver", {"control": "OFF"}, True)
+            topic = TestTopic("hass/pytest/gpio/driver", {PubSubKeys.CONTROL: GPIODriverCommands.OFF}, True)
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) == GPIODriverCommands.OFF
 
-            topic.payload = {"control": "HELLO"}
+            topic.payload = {PubSubKeys.CONTROL: "HELLO"}
             assert controller.get_gpio_command_from_message(topic.topic, topic.payload) is None
 
         finally:
@@ -473,7 +493,7 @@ class TestGPIODriverController:
 
             start = timeit.default_timer()
             while not all([GPIO_TOGGLE_RECEIVED, GPIO_ON_RECEIVED, GPIO_OFF_RECEIVED]) and \
-                    (timeit.default_timer()) - start <= MAX_WAIT_SECONDS:
+                    timeit.default_timer() - start <= MAX_WAIT_SECONDS:
                 pass
 
             mqtt_outputs = [GPIO_TOGGLE_RECEIVED, GPIO_ON_RECEIVED, GPIO_OFF_RECEIVED]
@@ -528,7 +548,7 @@ class TestGPIOMonitorController:
             controller.state = not controller.state
 
             # Check entries
-            assert controller.get_latest_db_entry() == str(controller)
+            assert controller.get_latest_db_entry(DatabaseKeys.STATE) == str(controller)
             last_two = controller.get_last_two_db_entries()
             assert last_two[0] == controller.get_state_as_string(controller.state)
             assert last_two[1] == controller.get_state_as_string(not controller.state)
@@ -592,10 +612,13 @@ class TestPushBulletController:
             print("SEND TEXT")
             print(f"Fake pushed: {title}: {body}")
 
-        def mock_should_image_notify(force=True):
+        def mock_should_text_notify(convo_id):
+            return True
+
+        def mock_should_image_notify(convo_id, force=True):
             return force
 
-        monkeypatch.setattr(controller, "should_text_notify", lambda: True)
+        monkeypatch.setattr(controller, "should_text_notify", mock_should_text_notify)
         monkeypatch.setattr(controller, "should_image_notify", mock_should_image_notify)
         monkeypatch.setattr(controller.notifier, "send_file", mock_send_file)
         monkeypatch.setattr(controller.notifier, "send_text", mock_send_text)
@@ -641,39 +664,51 @@ class TestPushBulletController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
         """ @type: library.controllers.pushbullet.PushBulletController"""
 
+        convo_id = "1234567890"
+        convo_id2 = "0987654321"
         try:
             # clear DB entries
             with controller.db as db:
                 db.delete_all_except_last_n_records(0)
 
                 # Notify if no DB entries
-                assert controller.should_text_notify()
+                assert controller.should_text_notify(convo_id)
 
-                # Notify if last entry is old
-                db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
-                assert controller.should_text_notify()
+                # Notify if target entry has not been notified
+                db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                db.add_data([1, GarageDoorStates.CLOSED, convo_id2, int(False), int(False)])
+                assert controller.should_text_notify(convo_id)
+
+                # Don't notify if target entry is notified
+                controller.mark_entry_notified(convo_id)
+                assert not controller.should_text_notify(convo_id)
+
+                # Same test for second convo ID
+                assert controller.should_text_notify(convo_id2)
+                controller.mark_entry_notified(convo_id2)
+                assert not controller.should_text_notify(convo_id2)
                 db.delete_all_except_last_n_records(0)
 
                 # Notify if only one DB entry
                 cur_time = int(time.time())
                 i = 0
-                db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
-                assert controller.should_text_notify()
+                db.add_data([cur_time + i, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                assert controller.should_text_notify(convo_id2)
 
                 # Don't notify if last two entries are "CLOSED"
                 i += 1
-                db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
-                assert not controller.should_text_notify()
+                db.add_data([cur_time + i, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                assert not controller.should_text_notify(convo_id2)
 
                 # Don't notify if last entry is "OPEN"
                 i += 1
-                db.add_data([cur_time + i, GarageDoorStates.OPEN, int(False), int(False)])
-                assert not controller.should_text_notify()
+                db.add_data([cur_time + i, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
+                assert not controller.should_text_notify(convo_id2)
 
                 # Notify if last entry is CLOSED and previous two are not both CLOSED or OPEN
                 i += 1
-                db.add_data([cur_time + i, GarageDoorStates.CLOSED, int(False), int(False)])
-                assert controller.should_text_notify()
+                db.add_data([cur_time + i, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                assert controller.should_text_notify(convo_id2)
 
         finally:
             controller.cleanup()
@@ -682,31 +717,34 @@ class TestPushBulletController:
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
         """ @type: library.controllers.pushbullet.PushBulletController"""
 
+        convo_id = "1234567890"
+        # convo_id2 = "0987654321"
         try:
             # clear DB entries
             with controller.db as db:
                 db.delete_all_except_last_n_records(0)
 
                 # Notify if no entries
-                assert controller.should_image_notify()
+                assert controller.should_image_notify(convo_id)
 
-                # Don't notify if latest entry is closed
-                db.add_data([0, GarageDoorStates.CLOSED, int(False), int(False)])
-                assert not controller.should_image_notify()
+                # Don't notify if target entry is closed
+                db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                assert not controller.should_image_notify(convo_id)
                 db.delete_all_except_last_n_records(0)
 
-                # Notify if last entry is open and no notification
+                # Notify if target entry is open and no notification
                 i = 0
-                db.add_data([i, GarageDoorStates.OPEN, int(False), int(False)])
-                assert controller.should_image_notify()
+                db.add_data([i, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
+                assert controller.should_image_notify(convo_id)
 
-                # Don't notify if last entry is open but has been notified
-                i += 1
-                db.add_data([i, GarageDoorStates.OPEN, int(False), int(True)])
-                assert not controller.should_image_notify()
+                # Don't notify if target entry is open but has been notified
+                controller.mark_entry_notified(convo_id)
+                # i += 1
+                # db.add_data([i, GarageDoorStates.OPEN, convo_id, int(False), int(True)])
+                assert not controller.should_image_notify(convo_id)
 
                 # Notify if force no matter what
-                assert controller.should_image_notify(force=True)
+                assert controller.should_image_notify(convo_id, force=True)
 
         finally:
             controller.cleanup()

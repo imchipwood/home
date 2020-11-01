@@ -12,7 +12,7 @@ class TimerConfig(BaseConfiguration):
 
         self.mqtt_config = mqtt_config
         if mqtt_config:
-            self.config.get(self.config_keys.MQTT, {}).update(self.mqtt_config.config)
+            self.config.get(BaseConfigKeys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
     def frequency(self) -> float:
