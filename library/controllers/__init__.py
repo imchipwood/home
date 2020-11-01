@@ -33,7 +33,7 @@ def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Lo
         logging_level=debug_flag,
         log_path=log_path
     )
-    logger.debug("Logger initialized")
+    # logger.debug("Logger initialized")
     return logger
 
 

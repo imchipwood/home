@@ -73,4 +73,6 @@ def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
+    logger.propagate = False
+
     return logger
