@@ -176,6 +176,7 @@ class PiCameraController(BaseController):
         if self.db_enabled:
             target_entry = self.get_entry_for_id(convo_id)
             if target_entry:
+                self.logger.debug(f"Found entry for id {convo_id}: {target_entry}")
                 has_captured = bool(target_entry[DatabaseKeys.CAPTURED])
                 if has_captured:
                     self.logger.debug(f"Already captured for id {convo_id} - not capturing")

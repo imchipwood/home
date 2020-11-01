@@ -6,6 +6,7 @@ Author: Charles "Chip" Wood
 """
 import json
 from threading import Thread
+from time import time
 
 from urllib3.exceptions import MaxRetryError
 
@@ -150,7 +151,7 @@ class PushBulletController(BaseController):
             try:
                 self.logger.debug(f"Sending text notification for state {state} from id {convo_id}")
                 self.notifier.send_text(msg.topic, notification)
-                self.mark_entry_notified(convo_id=convo_id)
+                self.mark_entry_notified(convo_id=convo_id, state=state)
             except:
                 self.logger.exception("Exception attempting to send PushBullet text notification")
 
@@ -164,23 +165,43 @@ class PushBulletController(BaseController):
                 self.notifier.send_file(notification)
                 if not force:
                     # Force means camera received direct capture command - no DB entry to update
-                    self.mark_entry_notified(convo_id=convo_id)
+                    self.mark_entry_notified(convo_id=convo_id, state=state)
             except:
                 self.logger.exception("Exception attempting to send PushBullet image notification")
 
-    def mark_entry_notified(self, convo_id: str):
+    def mark_entry_notified(self, convo_id: str, state: str):
         """
         Mark the latest entry as "notified"
         @param convo_id: target entry ID
         @type convo_id: str
+        @param state: state in case no entry found
+        @type state: str
         """
         if not self.db_enabled:
             return
 
         target_entry = self.get_entry_for_id(convo_id)
+        notified = int(True)
         if target_entry:
             timestamp = target_entry[DatabaseKeys.TIMESTAMP]
-            self.db.update_record(timestamp, DatabaseKeys.NOTIFIED, int(True))
+            self.logger.debug(f"Updating DB entry for id '{convo_id}': {DatabaseKeys.NOTIFIED} = True")
+            self.db.update_record(timestamp, DatabaseKeys.NOTIFIED, notified)
+
+        else:
+            timestamp = int(time())
+            state_to_log = state
+            if state != GarageDoorStates.CLOSED:
+                state_to_log = GarageDoorStates.OPEN
+            raw_data = {
+                DatabaseKeys.TIMESTAMP: timestamp,
+                DatabaseKeys.STATE: state_to_log,
+                DatabaseKeys.ID: convo_id,
+                DatabaseKeys.CAPTURED: int(True),
+                DatabaseKeys.NOTIFIED: notified
+            }
+            data = self.db.format_data_for_insertion(**raw_data)
+            self.logger.debug(f"Didn't find DB entry for id '{convo_id}' - adding {data}")
+            self.db.add_data(data)
 
     def should_text_notify(self, convo_id: str) -> bool:
         """
@@ -197,35 +218,8 @@ class PushBulletController(BaseController):
                 # Already notified or wrong state - don't notify
                 return False
 
-            # State must be CLOSED and not notified yet
-            return True
-
-        # Check the latest entry
-        latest_entry = self.get_latest_db_entry()
-        if not latest_entry:
-            # No entries - notify
-            return True
-
-        # Don't notify if latest entry has been notified already or state is OPEN
-        if latest_entry[DatabaseKeys.NOTIFIED] \
-                or latest_entry[DatabaseKeys.STATE] == GarageDoorStates.OPEN:
-            return False
-
-        # Notify if last entry is old
-        if not self.is_entry_recent(latest_entry, self.RECENT_ENTRY_THRESHOLD):
-            return True
-
-        # Notify if there aren't two entries
-        last_two = self.get_last_two_db_entries(PubSubKeys.STATE)
-        if len(last_two) != 2:
-            return True
-
-        # Don't notify if last entry is OPEN
-        if last_two[0] == GarageDoorStates.OPEN:
-            return False
-
-        # Notify if not all entries are CLOSED
-        return last_two[0] != last_two[1]
+        # No entry for this ID - publish!
+        return True
 
     def should_image_notify(self, convo_id: str, force: bool = False) -> bool:
         """
@@ -248,20 +242,8 @@ class PushBulletController(BaseController):
                 # Already notified or wrong state - don't notify
                 return False
 
-            # State must be OPEN and not notified yet
-            return True
-
-        # If there are no entries, notify
-        latest_entry = self.get_latest_db_entry(None)
-        if latest_entry is None:
-            return True
-
-        # If last entry is "closed", don't notify
-        if latest_entry[DatabaseKeys.STATE] == GarageDoorStates.CLOSED:
-            return False
-        else:
-            # Last entry is OPEN - has it already been notified?
-            return not latest_entry[DatabaseKeys.NOTIFIED]
+        # No entry for this ID - publish!
+        return True
 
     # endregion MQTT
 

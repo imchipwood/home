@@ -342,6 +342,13 @@ class TestCameraController:
                 assert controller.should_capture_from_command(topic_open2.topic, topic_open2.payload)
                 controller.update_database_entry(convo_id2)
                 assert not controller.should_capture_from_command(topic_open2.topic, topic_open2.payload)
+
+                # Multiple records with different IDs - new ID comes in
+                db.delete_all_except_last_n_records(0)
+                db.add_data([0, GarageDoorStates.CLOSED, "123", int(False), int(False)])
+                db.add_data([1, GarageDoorStates.OPEN, "456", int(False), int(False)])
+                assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
+
         finally:
             controller.cleanup()
 
@@ -666,6 +673,7 @@ class TestPushBulletController:
 
         convo_id = "1234567890"
         convo_id2 = "0987654321"
+        convo_id3 = "0987654320"
         try:
             # clear DB entries
             with controller.db as db:
@@ -676,39 +684,22 @@ class TestPushBulletController:
 
                 # Notify if target entry has not been notified
                 db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
-                db.add_data([1, GarageDoorStates.CLOSED, convo_id2, int(False), int(False)])
                 assert controller.should_text_notify(convo_id)
 
-                # Don't notify if target entry is notified
-                controller.mark_entry_notified(convo_id)
+                # Don't notify if target entry is marked notified
+                controller.mark_entry_notified(convo_id, GarageDoorStates.CLOSED)
                 assert not controller.should_text_notify(convo_id)
 
-                # Same test for second convo ID
-                assert controller.should_text_notify(convo_id2)
-                controller.mark_entry_notified(convo_id2)
-                assert not controller.should_text_notify(convo_id2)
-                db.delete_all_except_last_n_records(0)
-
-                # Notify if only one DB entry
-                cur_time = int(time.time())
-                i = 0
-                db.add_data([cur_time + i, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                # Notify if entry doesn't exist
                 assert controller.should_text_notify(convo_id2)
 
-                # Don't notify if last two entries are "CLOSED"
-                i += 1
-                db.add_data([cur_time + i, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                # Don't notify if target entry is marked notified
+                controller.mark_entry_notified(convo_id2, GarageDoorStates.CLOSED)
                 assert not controller.should_text_notify(convo_id2)
 
-                # Don't notify if last entry is "OPEN"
-                i += 1
-                db.add_data([cur_time + i, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
-                assert not controller.should_text_notify(convo_id2)
-
-                # Notify if last entry is CLOSED and previous two are not both CLOSED or OPEN
-                i += 1
-                db.add_data([cur_time + i, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
-                assert controller.should_text_notify(convo_id2)
+                # Don't notify if target entry is for OPEN door
+                db.add_data([1, GarageDoorStates.OPEN, convo_id3, int(False), int(False)])
+                assert not controller.should_text_notify(convo_id3)
 
         finally:
             controller.cleanup()
@@ -738,7 +729,7 @@ class TestPushBulletController:
                 assert controller.should_image_notify(convo_id)
 
                 # Don't notify if target entry is open but has been notified
-                controller.mark_entry_notified(convo_id)
+                controller.mark_entry_notified(convo_id, GarageDoorStates.OPEN)
                 # i += 1
                 # db.add_data([i, GarageDoorStates.OPEN, convo_id, int(False), int(True)])
                 assert not controller.should_image_notify(convo_id)
