@@ -277,6 +277,7 @@ class PiCameraController(BaseController):
 
                 self.logger.info(f"No entry for {convo_id} - adding new record: {data}")
                 self.db.add_data(data)
+                self.db.delete_all_except_last_n_records(10)
             else:
                 self.logger.info(f"Latest record matches current timestamp... updating anyway?")
                 self.db.update_record(timestamp, DatabaseKeys.CAPTURED, captured)

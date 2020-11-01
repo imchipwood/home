@@ -202,6 +202,7 @@ class PushBulletController(BaseController):
             data = self.db.format_data_for_insertion(**raw_data)
             self.logger.debug(f"Didn't find DB entry for id '{convo_id}' - adding {data}")
             self.db.add_data(data)
+            self.db.delete_all_except_last_n_records(10)
 
     def should_text_notify(self, convo_id: str) -> bool:
         """
