@@ -186,7 +186,7 @@ class PiCameraController(BaseController):
                 last_entry = self.get_latest_db_entry()
                 if last_entry:
                     has_captured = bool(last_entry[DatabaseKeys.CAPTURED])
-                    self.logger.info(f"Latest db entry: {has_captured}")
+                    self.logger.info(f"Latest db entry: {last_entry}")
 
         # Check
         if message_data.get(PubSubKeys.CAPTURE):
