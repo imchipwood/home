@@ -271,7 +271,7 @@ class PiCameraController(BaseController):
             if latest_entry[DatabaseKeys.TIMESTAMP] != timestamp:
                 raw_data = {
                     DatabaseKeys.TIMESTAMP: timestamp,
-                    DatabaseKeys.STATE: GarageDoorStates.CLOSED,
+                    DatabaseKeys.STATE: GarageDoorStates.OPEN,
                     DatabaseKeys.ID: convo_id,
                     DatabaseKeys.CAPTURED: captured,
                     DatabaseKeys.NOTIFIED: int(False)
