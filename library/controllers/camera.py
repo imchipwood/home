@@ -184,7 +184,7 @@ class PiCameraController(BaseController):
 
             else:
                 last_entry = self.get_latest_db_entry()
-                if last_entry:
+                if last_entry and last_entry[DatabaseKeys.STATE] == GarageDoorStates.OPEN:
                     has_captured = bool(last_entry[DatabaseKeys.CAPTURED])
                     self.logger.info(f"Latest db entry: {last_entry}")
 
