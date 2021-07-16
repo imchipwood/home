@@ -37,6 +37,7 @@ RUN apt-get install -y \
     libncurses5-dev libncursesw5-dev \
     libreadline6-dev libdb5.3-dev libgdbm-dev libssl-dev libbz2-dev \
     libexpat1-dev liblzma-dev zlib1g-dev
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 WORKDIR /
 COPY installPython.sh /usr/local/bin/
