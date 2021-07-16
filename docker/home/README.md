@@ -18,10 +18,10 @@ set simultaneous builds to `1`
 # branch filters
 ## master
 -:*
-+:master
++:refs/heads/master
 ## other
 +:*
--:master
+-:refs/heads/master
 ```
 
 ## build steps
