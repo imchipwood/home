@@ -2,7 +2,7 @@ FROM raspbian/stretch
 #FROM arm32v7/python:3.7-buster
 
 ARG branchname=master
-ARG cfgfilename=env005
+ARG cfgfilename=grow_tent
 
 ENV PIDOCKERHOMENAME=PI_${branchname}_${cfgfilename}
 
@@ -45,7 +45,7 @@ COPY dotfile_setup.sh /usr/local/bin/
 RUN installPython.sh
 RUN dotfile_setup.sh
 
-RUN git clone -b ${branchname} https://c9f6f0fd23e6517a617cab69cb2e85ee9ae6cf9d:x-oauth-basic@github.com/imchipwood/home.git ${WARD}
+RUN git clone -b ${branchname} https://github.com/imchipwood/home.git ${WARD}
 WORKDIR ${WARD}
 RUN python3.7 -m venv venv && . ${HOMEACTIVATE} && pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 
@@ -53,4 +53,4 @@ COPY pimqtt.conf /etc/mosquitto/conf.d/
 EXPOSE 1883
 
 #CMD /etc/init.d/mosquitto start
-ENTRYPOINT /etc/init.d/mosquitto start && ${WARD}/venv/bin/python -B home.py ${WARD}/config/pidocker/${CFGFILEPATH}
+ENTRYPOINT /etc/init.d/mosquitto start && ${WARD}/venv/bin/python -B home.py ${WARD}/config/pigrowtent/${CFGFILEPATH}
