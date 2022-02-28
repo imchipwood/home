@@ -4,7 +4,6 @@ Author: github.com/imchipwood
 """
 from typing import List
 
-from config.mqtt import Topic
 from library.config import BaseConfiguration, BaseConfigKeys
 
 
@@ -32,7 +31,7 @@ class MqttEnvironmentConfig(BaseConfiguration):
             self.config.get(BaseConfigKeys.MQTT, {}).update(self.mqtt_config.config)
 
     @property
-    def mqtt_topic(self) -> List[Topic]:
+    def mqtt_topic(self):
         """
         Get the MQTT topic(s) to subscribe to for environment data
         @return: topic(s) to subscribe to
