@@ -268,7 +268,7 @@ class PiCameraController(BaseController):
             timestamp = int(time())
             captured = int(True)
             latest_entry = self.db.get_latest_record()
-            if latest_entry[DatabaseKeys.TIMESTAMP] != timestamp:
+            if latest_entry and latest_entry[DatabaseKeys.TIMESTAMP] != timestamp:
                 raw_data = {
                     DatabaseKeys.TIMESTAMP: timestamp,
                     DatabaseKeys.STATE: GarageDoorStates.OPEN,
