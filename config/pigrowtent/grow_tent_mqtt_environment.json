@@ -1,0 +1,49 @@
+{
+  "log": "/home/cpw/dev/logs/mqtt_environment.log",
+  "mqtt": {
+    "client_id": "grow_tent_mqtt_environment",
+    "topics": {
+      "hass/env/004": {
+        "pubsub": "subscribe",
+        "payload": {
+          "temperature": "{:0.2f}",
+          "humidity": "{:0.2f}",
+          "units": ""
+        }
+      },
+      "hass/env/005": {
+        "pubsub": "subscribe",
+        "payload": {
+          "temperature": "{:0.2f}",
+          "humidity": "{:0.2f}",
+          "units": ""
+        }
+      }
+    }
+  },
+  "db": {
+    "name": "grow_tent_mqtt_environment",
+    "columns": [
+      {
+        "col_name": "timestamp",
+        "col_type": "integer",
+        "col_key": "PRIMARY KEY"
+      },
+      {
+        "col_name": "sensor_name",
+        "col_type": "text",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "temperature",
+        "col_type": "real",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "humidity",
+        "col_type": "real",
+        "col_key": "NOT NULL"
+      }
+    ]
+  }
+}

@@ -7,6 +7,7 @@ from library import CONFIG_DIR, TEST_CONFIG_DIR, CONFIG_TYPE, CONTROLLER_TYPE
 
 class SENSORCLASSES:
     ENVIRONMENT = "environment"
+    MQTT_ENVIRONMENT = "mqtt_environment"
     GPIO_MONITOR = "gpio_monitor"
     GPIO_DRIVER = "gpio_driver"
     TIMER = "timer"
@@ -216,12 +217,14 @@ class ConfigurationHandler(BaseConfiguration):
     # Import all the sensor-specific controller objects
     from library.controllers.camera import PiCameraController
     from library.controllers.environment import EnvironmentController
+    from library.controllers.mqtt_environment import MqttEnvironmentController
     from library.controllers.gpio_driver import GPIODriverController
     from library.controllers.gpio_monitor import GPIOMonitorController
     from library.controllers.pushbullet import PushBulletController
     from library.controllers.timer import TimerController
     # Import all the sensor-specific configuration objects
     from library.config.environment import EnvironmentConfig
+    from library.config.mqtt_environment import MqttEnvironmentConfig
     from library.config.gpio_driver import GPIODriverConfig
     from library.config.gpio_monitor import GPIOMonitorConfig
     from library.config.camera import CameraConfig
@@ -232,6 +235,7 @@ class ConfigurationHandler(BaseConfiguration):
     # TODO: Update these as they're developed
     SENSOR_CLASS_MAP = {
         SENSORCLASSES.ENVIRONMENT: EnvironmentController,
+        SENSORCLASSES.MQTT_ENVIRONMENT: MqttEnvironmentController,
         SENSORCLASSES.GPIO_DRIVER: GPIODriverController,
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorController,
         SENSORCLASSES.CAMERA: PiCameraController,
@@ -240,6 +244,7 @@ class ConfigurationHandler(BaseConfiguration):
     }
     SENSOR_CONFIG_CLASS_MAP = {
         SENSORCLASSES.ENVIRONMENT: EnvironmentConfig,
+        SENSORCLASSES.MQTT_ENVIRONMENT: MqttEnvironmentConfig,
         SENSORCLASSES.GPIO_DRIVER: GPIODriverConfig,
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorConfig,
         SENSORCLASSES.CAMERA: CameraConfig,
