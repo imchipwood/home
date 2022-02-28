@@ -8,12 +8,14 @@ from library import TEST_CONFIG_DIR
 from library.config import ConfigurationHandler, SENSORCLASSES, BaseConfiguration
 from library.config.camera import CameraConfig
 from library.config.environment import EnvironmentConfig
+from library.config.mqtt_environment import MqttEnvironmentConfig
 from library.config.gpio_driver import GPIODriverConfig
 from library.config.gpio_monitor import GPIOMonitorConfig
 from library.config.mqtt import MQTTConfig
 from library.config.pushbullet import PushbulletConfig
 from library.controllers.camera import PiCameraController
 from library.controllers.environment import EnvironmentController
+from library.controllers.mqtt_environment import MqttEnvironmentController
 from library.controllers.gpio_driver import GPIODriverController
 from library.controllers.gpio_monitor import GPIOMonitorController
 from library.controllers.pushbullet import PushBulletController
@@ -47,6 +49,7 @@ class TestConfigurationHandler:
 
     @pytest.mark.parametrize("target_type,expected_class", [
         (SENSORCLASSES.ENVIRONMENT, EnvironmentConfig),
+        (SENSORCLASSES.MQTT_ENVIRONMENT, MqttEnvironmentConfig),
         (SENSORCLASSES.GPIO_DRIVER, GPIODriverConfig),
         (SENSORCLASSES.GPIO_MONITOR, GPIOMonitorConfig),
         (SENSORCLASSES.CAMERA, CameraConfig),
@@ -70,6 +73,7 @@ class TestConfigurationHandler:
 
     @pytest.mark.parametrize("target_type,expected_class", [
         (SENSORCLASSES.ENVIRONMENT, EnvironmentController),
+        (SENSORCLASSES.MQTT_ENVIRONMENT, MqttEnvironmentController),
         (SENSORCLASSES.CAMERA, PiCameraController),
         (SENSORCLASSES.GPIO_DRIVER, GPIODriverController),
         (SENSORCLASSES.GPIO_MONITOR, GPIOMonitorController),

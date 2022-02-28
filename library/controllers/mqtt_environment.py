@@ -6,6 +6,7 @@ instead of reading sensors connected to the RPi directly
 
 import json
 from threading import Thread
+import time
 
 from library.communication.mqtt import get_mqtt_error_message, MQTTError
 from library.controllers import BaseController, get_logger
@@ -118,7 +119,17 @@ class MqttEnvironmentController(BaseController):
             self.logger.warning(f"Some error while converting string payload to dict: {e}")
             return
 
-        # TODO: store payload in database
+        # write to database
+        with self.db as db:
+            timestamp = int(time.time())
+            temperature = message_data.get('temperature')
+            humidity = message_data.get('humidity')
+            unique_id = message_data.get('id')
+
+            # do not write if ID is not unique - could be a retained message
+            if db.get_last_n_records(1) and db.get_record(unique_id):
+                return
+            db.add_data([timestamp, unique_id, msg.topic, temperature, humidity])
 
     # endregion MQTT
 

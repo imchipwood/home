@@ -8,7 +8,8 @@
         "payload": {
           "temperature": "{:0.2f}",
           "humidity": "{:0.2f}",
-          "units": ""
+          "units": "",
+          "id": ""
         }
       },
       "hass/pytest/env/005": {
@@ -16,7 +17,8 @@
         "payload": {
           "temperature": "{:0.2f}",
           "humidity": "{:0.2f}",
-          "units": ""
+          "units": "",
+          "id": ""
         }
       }
     }
@@ -27,6 +29,11 @@
       {
         "col_name": "timestamp",
         "col_type": "integer",
+        "col_key": "NOT NULL"
+      },
+      {
+        "col_name": "id",
+        "col_type": "text",
         "col_key": "PRIMARY KEY"
       },
       {

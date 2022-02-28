@@ -226,11 +226,11 @@ WHERE {self.primary_column_name} = {primary_key_value}
         result = self.cur.fetchone()
         return self.convert_query_result_to_database_entry(result)
 
-    def get_latest_record(self) -> DatabaseEntry:
+    def get_latest_record(self) -> DatabaseEntry or None:
         """
         Get the latest record from the table
         @return: last record in the table
-        @rtype: DatabaseEntry
+        @rtype: DatabaseEntry or None
         """
         primary = [x.name for x in self.columns if x.primary][0]
         others = [x.name for x in self.columns if x.name != primary]
@@ -238,6 +238,8 @@ WHERE {self.primary_column_name} = {primary_key_value}
         query = f"SELECT MAX({self.primary_column_name}), {others_str} FROM {self.name}"
         self.cur.execute(query)
         result = self.cur.fetchone()
+        if all([x is None for x in result]):
+            return None
         return self.convert_query_result_to_database_entry(result)
 
     def get_all_records(self) -> List[DatabaseEntry]:

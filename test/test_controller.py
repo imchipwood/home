@@ -244,6 +244,69 @@ class TestEnvironmentController:
         assert MESSAGE
 
 
+class TestMqttEnvironmentController:
+    def test_thread(self):
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.MQTT_ENVIRONMENT)
+        """ @type: library.controllers.mqtt_environment.MqttEnvironmentController """
+
+        controller.start()
+        assert controller.running
+        wait_n_seconds(0.25)
+
+        assert controller.running
+        controller.cleanup()
+
+        start = time.time()
+        while controller.thread.is_alive() and time.time() - start < MAX_WAIT_SECONDS:
+            pass
+        assert not controller.thread.is_alive(), "Thread didn't stop!"
+
+    def test_mqtt(self):
+        """
+        Test that MQTT topic subscription works and published messages are received
+        """
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.MQTT_ENVIRONMENT)
+        """ @type: library.controllers.mqtt_environment.MqttEnvironmentController """
+
+        global MESSAGE
+        MESSAGE = False
+        topics = [x.name for x in controller.config.mqtt_topic]
+        client = get_mqtt_client(controller.config.mqtt_config, topics)
+
+        # clear db
+        with controller.db as db:
+            db.delete_all_except_last_n_records(0)
+
+        controller.setup()
+        topic = controller.config.mqtt_topic[0]
+        payload = topic.payload()
+        client.single(
+            topic.name,
+            payload,
+            retain=False,
+            qos=2,
+            hostname=controller.config.mqtt_config.broker,
+            port=controller.config.mqtt_config.port
+        )
+        i = 0
+        delay_time = 0.001
+        try:
+            while not MESSAGE:
+                time.sleep(delay_time)
+                i += 1
+                if i > MAX_WAIT_SECONDS * (1.0 / delay_time):
+                    assert False, "Wait time exceeded!"
+        finally:
+            controller.cleanup()
+            client.disconnect()
+        assert MESSAGE
+
+        # also check db has a new entry
+        with controller.db as db:
+            entry = db.get_latest_record()
+            assert entry, "expected entry in database"
+
+
 class TestCameraController:
 
     @pytest.mark.usefixtures("mock_should_capture_from_command")
