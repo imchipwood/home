@@ -1,22 +1,24 @@
 version: "3.6"
 services:
-  home:
-    container_name: home
-    restart: always
-    privileged: true
-    build:
-      context: ./home
-      args:
-        branchname: grow_monitor
-        cfgfilename: grow_monitor
-    logging:
-      options:
-        max-size: "1m"
-        max-file: "3"
+#  home:
+#    container_name: home
+#    restart: always
+#    privileged: true
+#    build:
+#      context: ./home
+#      args:
+#        branchname: grow_monitor
+#        cfgfilename: grow_monitor
+#    logging:
+#      options:
+#        max-size: "1m"
+#        max-file: "3"
   home_grow:
     container_name: home_grow
     restart: always
     privileged: true
+    ports:
+      - "1883:1883"
     build:
       context: ./grow_monitor
       args:
