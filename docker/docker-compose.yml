@@ -7,6 +7,19 @@ services:
     build:
       context: ./home
       args:
+        branchname: grow_monitor
+        cfgfilename: grow_monitor
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "3"
+  home_grow:
+    container_name: home_grow
+    restart: always
+    privileged: true
+    build:
+      context: ./grow_monitor
+      args:
         branchname: grow_tent
         cfgfilename: grow_tent
     logging:

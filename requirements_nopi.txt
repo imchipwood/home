@@ -5,6 +5,5 @@ pushbullet.py==0.11.0
 pyephem==3.7.6.0
 pytest==3.9.1
 pytest-mock==2.0.0
-RPi.GPIO>=0.7.0
 setuptools>=18.5
 teamcity-messages==1.25
