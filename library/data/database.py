@@ -55,14 +55,14 @@ class Database:
         @param logger: optional logger to print debug info to file
         @type logger: logging.Logger or None
         """
-        from library.controllers import get_logger
+        # from library.controllers import get_logger
         super()
         self.name = name
         self.path = path
         self.columns = columns
         self.con = None  # type: sqlite3.Connection
         self.cur = None  # type: sqlite3.Cursor
-        self.logger = logger or get_logger(__name__, False, None)
+        # self.logger = logger or get_logger(__name__, False, None)
 
     def connect(self):
         """
@@ -123,7 +123,7 @@ AND name='{table_name}';
         """
         assert table_name, "Must define table name"
         assert columns and all([isinstance(x, Column) for x in columns]), "Must define columns"
-        self.logger.debug(f"Creating table {table_name}")
+        # self.logger.debug(f"Creating table {table_name}")
         query = f"CREATE TABLE {table_name} ({', '.join([str(x) for x in columns])})"
         self.cur.execute(query)
 
