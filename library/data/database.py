@@ -62,7 +62,7 @@ class Database:
         self.columns = columns
         self.con = None  # type: sqlite3.Connection
         self.cur = None  # type: sqlite3.Cursor
-        self.logger = logger or get_logger(__name__, True, None)
+        self.logger = logger or get_logger(__name__, False, None)
 
     def connect(self):
         """
