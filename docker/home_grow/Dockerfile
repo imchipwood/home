@@ -58,4 +58,5 @@ RUN echo "cfg name: ${CFGFILEPATH}"
 ENV FULLHOMEPYCMD=". ${HOMEACTIVATE} && python -B home.py ${CFGFILEPATH}"
 RUN echo "Full cmd: ${FULLHOMEPYCMD}"
 
-ENTRYPOINT /etc/init.d/mosquitto start && ${WARD}/venv/bin/python -B home.py ${WARD}/config/${CFGFILEPATH}
+# make sure mosquitto is running, make sure repo is up to date, and run the dang thing
+ENTRYPOINT /etc/init.d/mosquitto start && git pull origin ${branchname} && ${WARD}/venv/bin/python -B home.py ${WARD}/config/${CFGFILEPATH}
