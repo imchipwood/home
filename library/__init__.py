@@ -43,11 +43,12 @@ def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
     @rtype: logging.Logger
     """
     log_level_str = "DEBUG" if logging_level else "INFO"
+    log_level_int = logging.DEBUG if logging_level else logging.INFO
     logger.info(f"Logging level: {log_level_str}")
 
     # stdout stream handler
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG if logging_level else logging.INFO)
+    stream_handler.setLevel(log_level_int)
 
     # stdout logging formatting
     stdout_format = "[%(asctime)s] %(name)s - %(levelname)s - %(message)s"
