@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import os
 from typing import TypeVar
 
@@ -65,7 +66,8 @@ def setup_logging(logger, logging_level=False, log_path=None) -> logging.Logger:
         return logger
 
     # logger.info(f"Logging to file: {log_path}")
-    file_handler = logging.FileHandler(log_path)
+    # use a rotating file handler to nuke files after a few days - keeps three backups
+    file_handler = TimedRotatingFileHandler(log_path, 'D', 1, 3)
     file_handler.setLevel(logging.DEBUG)
 
     # file logging formatting
