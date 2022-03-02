@@ -17,8 +17,8 @@ services:
     container_name: home_grow
     restart: always
     privileged: true
-#    ports:
-#      - "1883:1883"
+    ports:
+      - 1883
     build:
       context: ./home_grow
       args:

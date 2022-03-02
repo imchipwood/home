@@ -29,7 +29,8 @@ RUN apt-get install -y \
     tk-dev \
     libncurses5-dev libncursesw5-dev \
     libreadline6-dev libdb5.3-dev libgdbm-dev libssl-dev libbz2-dev \
-    libexpat1-dev liblzma-dev zlib1g-dev
+    libexpat1-dev liblzma-dev zlib1g-dev \
+    sqlite3
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 # end static_setup
 
