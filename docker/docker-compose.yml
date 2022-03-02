@@ -22,7 +22,7 @@ services:
     build:
       context: ./home_grow
       args:
-        branchname: grow_tent
+        branchname: master
         cfgfilename: grow_tent
     logging:
       options:
