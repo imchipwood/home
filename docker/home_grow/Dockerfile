@@ -43,7 +43,7 @@ WORKDIR /
 COPY installPython.sh /usr/local/bin/
 COPY dotfile_setup.sh /usr/local/bin/
 RUN installPython.sh
-RUN dotfile_setup.sh
+RUN #dotfile_setup.sh
 
 WORKDIR ${WARD}
 RUN python3.7 -m venv venv && . ${HOMEACTIVATE} && pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements_nopi.txt
