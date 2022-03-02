@@ -29,19 +29,19 @@ def mock_upload_file(f, file_name, file_type=None):
     return {"file_type": file_type, "file_url": "http://some.fake/url", "file_name": file_name}
 
 
-class TestPushBulletCommunication:
-
-    def test_pushbullet(self, monkeypatch):
-        """
-        Test send file/text methods
-        """
-        config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.PUSHBULLET)  # type: PushbulletConfig
-        pb = PushBulletNotify(config.api_key)
-
-        monkeypatch.setattr(pb, "push_note", mock_push_note)
-        monkeypatch.setattr(pb, "push_file", mock_push_file)
-        monkeypatch.setattr(pb, "upload_file", mock_upload_file)
-
-        file_path = os.path.join(TEST_CONFIG_DIR, "pytest_mqtt.json")
-        pb.send_file(file_path)
-        pb.send_text("test title", "test message")
+# class TestPushBulletCommunication:
+#
+#     def test_pushbullet(self, monkeypatch):
+#         """
+#         Test send file/text methods
+#         """
+#         config = CONFIGURATION_HANDLER.get_sensor_config(SENSORCLASSES.PUSHBULLET)  # type: PushbulletConfig
+#         pb = PushBulletNotify(config.api_key)
+#
+#         monkeypatch.setattr(pb, "push_note", mock_push_note)
+#         monkeypatch.setattr(pb, "push_file", mock_push_file)
+#         monkeypatch.setattr(pb, "upload_file", mock_upload_file)
+#
+#         file_path = os.path.join(TEST_CONFIG_DIR, "pytest_mqtt.json")
+#         pb.send_file(file_path)
+#         pb.send_text("test title", "test message")

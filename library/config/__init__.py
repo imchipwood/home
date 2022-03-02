@@ -239,7 +239,7 @@ class ConfigurationHandler(BaseConfiguration):
         SENSORCLASSES.GPIO_DRIVER: GPIODriverController,
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorController,
         SENSORCLASSES.CAMERA: PiCameraController,
-        SENSORCLASSES.PUSHBULLET: PushBulletController,
+        # SENSORCLASSES.PUSHBULLET: PushBulletController,
         SENSORCLASSES.TIMER: TimerController,
     }
     SENSOR_CONFIG_CLASS_MAP = {
@@ -248,7 +248,7 @@ class ConfigurationHandler(BaseConfiguration):
         SENSORCLASSES.GPIO_DRIVER: GPIODriverConfig,
         SENSORCLASSES.GPIO_MONITOR: GPIOMonitorConfig,
         SENSORCLASSES.CAMERA: CameraConfig,
-        SENSORCLASSES.PUSHBULLET: PushbulletConfig,
+        # SENSORCLASSES.PUSHBULLET: PushbulletConfig,
         SENSORCLASSES.TIMER: TimerConfig,
     }
 

@@ -29,9 +29,11 @@ ALT_CONFIGURATION_HANDLER = ConfigurationHandler(ALT_CONFIG_PATH, debug=True)
 
 def teardown_module():
     for sensor in CONFIGURATION_HANDLER:
-        sensor.cleanup()
+        if sensor:
+            sensor.cleanup()
     for sensor in ALT_CONFIGURATION_HANDLER:
-        sensor.cleanup()
+        if sensor:
+            sensor.cleanup()
 
 
 class TestConfigurationHandler:
@@ -53,7 +55,7 @@ class TestConfigurationHandler:
         (SENSORCLASSES.GPIO_DRIVER, GPIODriverConfig),
         (SENSORCLASSES.GPIO_MONITOR, GPIOMonitorConfig),
         (SENSORCLASSES.CAMERA, CameraConfig),
-        (SENSORCLASSES.PUSHBULLET, PushbulletConfig),
+        # (SENSORCLASSES.PUSHBULLET, PushbulletConfig),
     ])
     def test_get_sensor_config(self, target_type, expected_class):
         """
@@ -77,7 +79,7 @@ class TestConfigurationHandler:
         (SENSORCLASSES.CAMERA, PiCameraController),
         (SENSORCLASSES.GPIO_DRIVER, GPIODriverController),
         (SENSORCLASSES.GPIO_MONITOR, GPIOMonitorController),
-        (SENSORCLASSES.PUSHBULLET, PushBulletController),
+        # (SENSORCLASSES.PUSHBULLET, PushBulletController),
     ])
     def test_get_sensor_controller(self, target_type, expected_class):
         """

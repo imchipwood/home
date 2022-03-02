@@ -126,8 +126,8 @@ class MqttEnvironmentController(BaseController):
             humidity = message_data.get('humidity')
             unique_id = message_data.get('id')
 
-            # formatted = f"{msg.topic} @ {timestamp}: {temperature:5.2f}f, {humidity:5.2f}%, {unique_id}"
-            # self.logger.info(formatted)
+            formatted = f"{msg.topic} @ {timestamp}: {temperature}f, {humidity}%, {unique_id}"
+            self.logger.info(formatted)
 
             # do not write if ID is not unique - could be a retained message
             if db.get_last_n_records(1) and db.get_record(unique_id):
