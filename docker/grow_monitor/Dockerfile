@@ -58,5 +58,7 @@ ENV FULLHOMEPYCMD=". ${HOMEACTIVATE} && python -B home.py ${CFGFILEPATH}"
 RUN echo "Full cmd: ${FULLHOMEPYCMD}"
 
 RUN /etc/init.d/mosquitto start
+CMD ["/etc/init.d/mosquitto start", "${WARD}/venv/bin/python -B home.py ${WARD}/config/${CFGFILEPATH}"]
+#ENTRYPOINT /etc/init.d/mosquitto start
 #ENTRYPOINT /etc/init.d/mosquitto start && ${WARD}/venv/bin/python -B home.py ${WARD}/config/${CFGFILEPATH}
-ENTRYPOINT ${WARD}/venv/bin/python -B home.py ${WARD}/config/${CFGFILEPATH}
+#ENTRYPOINT ${WARD}/venv/bin/python -B home.py ${WARD}/config/${CFGFILEPATH}
