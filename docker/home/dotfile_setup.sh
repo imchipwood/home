@@ -2,7 +2,7 @@
 cd ~
 mkdir dev
 cd dev
-git clone https://imchipwood:EgE0p1TwyiDMC5ke@github.com/imchipwood/dotfiles.git unix
+git clone git@github.com/imchipwood/dotfiles.git unix
 cd unix
 git checkout -t origin/rpi_teamcity
 cd ~
