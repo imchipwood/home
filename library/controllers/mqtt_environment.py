@@ -120,18 +120,25 @@ class MqttEnvironmentController(BaseController):
             self.logger.warning(f"Some error while converting string payload to dict: {e}")
             return
 
-        # write to database
-        with self.db as db:
-            timestamp = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-            temperature = message_data.get('temperature')
-            humidity = message_data.get('humidity')
-            unique_id = message_data.get('id')
+        try:
+            # write to database
+            with self.db as db:
+                timestamp = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+                temperature = message_data.get('temperature')
+                humidity = message_data.get('humidity')
+                unique_id = message_data.get('id')
 
-            formatted = f"{msg.topic} @ {timestamp}: {temperature}f, {humidity}%, {unique_id}"
-            self.logger.info(formatted)
+                formatted = f"{msg.topic} @ {timestamp}: {temperature}f, {humidity}%, {unique_id}"
+                self.logger.info(formatted)
 
-            # do not write if ID is not unique - could be a retained message
-            db.add_data([timestamp, msg.topic, temperature, humidity])
+                # do not write if ID is not unique - could be a retained message
+                db.add_data([timestamp, msg.topic, temperature, humidity])
+        except Exception as e:
+            # it's possible for on_message to fire for two messages nearly simultaneously
+            # and wind up with the same timestamp, which is the DBs primary key.
+            # this could crash the thread
+            # just catch it and log it to prevent crashes
+            self.logger.exception(str(e))
 
     # endregion MQTT
 
