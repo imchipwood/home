@@ -20,7 +20,7 @@ services:
 #    ports:
 #      - "1883:1883"
     build:
-      context: ./grow_monitor
+      context: ./home_grow
       args:
         branchname: grow_tent
         cfgfilename: grow_tent
