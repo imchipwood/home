@@ -7,6 +7,7 @@ instead of reading sensors connected to the RPi directly
 import json
 from threading import Thread
 import time
+import datetime
 
 from library.communication.mqtt import get_mqtt_error_message, MQTTError
 from library.controllers import BaseController, get_logger
@@ -121,7 +122,7 @@ class MqttEnvironmentController(BaseController):
 
         # write to database
         with self.db as db:
-            timestamp = int(time.time())
+            timestamp = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
             temperature = message_data.get('temperature')
             humidity = message_data.get('humidity')
             unique_id = message_data.get('id')
@@ -130,9 +131,7 @@ class MqttEnvironmentController(BaseController):
             self.logger.info(formatted)
 
             # do not write if ID is not unique - could be a retained message
-            if db.get_last_n_records(1) and db.get_record(unique_id):
-                return
-            db.add_data([timestamp, unique_id, msg.topic, temperature, humidity])
+            db.add_data([timestamp, msg.topic, temperature, humidity])
 
     # endregion MQTT
 

@@ -28,11 +28,6 @@
     "columns": [
       {
         "col_name": "timestamp",
-        "col_type": "integer",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "id",
         "col_type": "text",
         "col_key": "PRIMARY KEY"
       },
