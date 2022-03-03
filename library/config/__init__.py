@@ -214,43 +214,18 @@ class BaseConfiguration:
 
 
 class ConfigurationHandler(BaseConfiguration):
-    # Import all the sensor-specific controller objects
-    from library.controllers.camera import PiCameraController
-    from library.controllers.environment import EnvironmentController
-    from library.controllers.mqtt_environment import MqttEnvironmentController
-    from library.controllers.gpio_driver import GPIODriverController
-    from library.controllers.gpio_monitor import GPIOMonitorController
-    from library.controllers.pushbullet import PushBulletController
-    from library.controllers.timer import TimerController
-    # Import all the sensor-specific configuration objects
-    from library.config.environment import EnvironmentConfig
-    from library.config.mqtt_environment import MqttEnvironmentConfig
-    from library.config.gpio_driver import GPIODriverConfig
-    from library.config.gpio_monitor import GPIOMonitorConfig
-    from library.config.camera import CameraConfig
-    from library.config.pushbullet import PushbulletConfig
-    from library.config.mqtt import MQTTConfig
-    from library.config.timer import TimerConfig
 
     # TODO: Update these as they're developed
-    SENSOR_CLASS_MAP = {
-        SENSORCLASSES.ENVIRONMENT: EnvironmentController,
-        SENSORCLASSES.MQTT_ENVIRONMENT: MqttEnvironmentController,
-        SENSORCLASSES.GPIO_DRIVER: GPIODriverController,
-        SENSORCLASSES.GPIO_MONITOR: GPIOMonitorController,
-        SENSORCLASSES.CAMERA: PiCameraController,
-        # SENSORCLASSES.PUSHBULLET: PushBulletController,
-        SENSORCLASSES.TIMER: TimerController,
-    }
-    SENSOR_CONFIG_CLASS_MAP = {
-        SENSORCLASSES.ENVIRONMENT: EnvironmentConfig,
-        SENSORCLASSES.MQTT_ENVIRONMENT: MqttEnvironmentConfig,
-        SENSORCLASSES.GPIO_DRIVER: GPIODriverConfig,
-        SENSORCLASSES.GPIO_MONITOR: GPIOMonitorConfig,
-        SENSORCLASSES.CAMERA: CameraConfig,
-        # SENSORCLASSES.PUSHBULLET: PushbulletConfig,
-        SENSORCLASSES.TIMER: TimerConfig,
-    }
+    SENSOR_CLASS_LIST = [
+        SENSORCLASSES.ENVIRONMENT,
+        SENSORCLASSES.MQTT_ENVIRONMENT,
+        SENSORCLASSES.GPIO_MONITOR,
+        SENSORCLASSES.GPIO_DRIVER,
+        SENSORCLASSES.CAMERA,
+        # SENSORCLASSES.PUSHBULLET,
+        SENSORCLASSES.TIMER
+    ]
+    from library.config.mqtt import MQTTConfig
 
     def __init__(self, config_path: str, debug: bool = False):
         """
@@ -300,10 +275,34 @@ class ConfigurationHandler(BaseConfiguration):
         @type sensor: str
         @return: the sensor config object for the given sensor if supported
         """
-        if not (sensor in self.SENSOR_CONFIG_CLASS_MAP and sensor in self.sensor_paths):
+        if not (sensor in self.SENSOR_CLASS_LIST and sensor in self.sensor_paths):
             return None
 
-        return self.SENSOR_CONFIG_CLASS_MAP[sensor](
+        if sensor == SENSORCLASSES.ENVIRONMENT:
+            from library.config.environment import EnvironmentConfig
+            sensor_cfg_cls = EnvironmentConfig
+        elif sensor == SENSORCLASSES.CAMERA:
+            from library.config.camera import CameraConfig
+            sensor_cfg_cls = CameraConfig
+        elif sensor == SENSORCLASSES.TIMER:
+            from library.config.timer import TimerConfig
+            sensor_cfg_cls = TimerConfig
+        elif sensor == SENSORCLASSES.MQTT_ENVIRONMENT:
+            from library.config.mqtt_environment import MqttEnvironmentConfig
+            sensor_cfg_cls = MqttEnvironmentConfig
+        elif sensor == SENSORCLASSES.GPIO_DRIVER:
+            from library.config.gpio_driver import GPIODriverConfig
+            sensor_cfg_cls = GPIODriverConfig
+        elif sensor == SENSORCLASSES.GPIO_MONITOR:
+            from library.config.gpio_monitor import GPIOMonitorConfig
+            sensor_cfg_cls = GPIOMonitorConfig
+        # elif sensor == SENSORCLASSES.PUSHBULLET:
+        #     from library.config.pushbullet import PushbulletConfig
+        #     sensor_cfg_cls = PushbulletConfig
+        else:
+            raise Exception(f"did not recognize sensor type {sensor}")
+
+        return sensor_cfg_cls(
             self.sensor_paths[sensor],
             self.get_sensor_mqtt_config(sensor),
             self.debug
@@ -316,11 +315,36 @@ class ConfigurationHandler(BaseConfiguration):
         @type sensor: str
         @return: sensor object
         """
-        if sensor not in self.SENSOR_CLASS_MAP:
+        if sensor not in self.SENSOR_CLASS_LIST:
             return None
 
-        if sensor not in self.sensors:
-            self.sensors[sensor] = self.SENSOR_CLASS_MAP[sensor](self.get_sensor_config(sensor), self.debug)
+        if sensor in self.sensors:
+            return self.sensors[sensor]
+
+        # reduce need to import classes UNLESS that class is actually going to be used
+        if sensor == SENSORCLASSES.ENVIRONMENT:
+            from library.controllers.environment import EnvironmentController
+            sensor_cls = EnvironmentController
+        elif sensor == SENSORCLASSES.CAMERA:
+            from library.controllers.camera import PiCameraController
+            sensor_cls = PiCameraController
+        elif sensor == SENSORCLASSES.TIMER:
+            from library.controllers.timer import TimerController
+            sensor_cls = TimerController
+        elif sensor == SENSORCLASSES.MQTT_ENVIRONMENT:
+            from library.controllers.mqtt_environment import MqttEnvironmentController
+            sensor_cls = MqttEnvironmentController
+        elif sensor == SENSORCLASSES.GPIO_DRIVER:
+            from library.controllers.gpio_driver import GPIODriverController
+            sensor_cls = GPIODriverController
+        elif sensor == SENSORCLASSES.GPIO_MONITOR:
+            from library.controllers.gpio_monitor import GPIOMonitorController
+            sensor_cls = GPIOMonitorController
+        else:
+            # apparently actually NOT in the map...
+            raise Exception(f"did not recognize sensor type {sensor}")
+
+        self.sensors[sensor] = sensor_cls(self.get_sensor_config(sensor), self.debug)
         return self.sensors[sensor]
 
     # endregion Sensors
