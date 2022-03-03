@@ -78,7 +78,7 @@ class MqttEnvironmentController(BaseController):
         except KeyboardInterrupt:
             self.logger.debug("KeyboardInterrupt, ignoring")
         finally:
-            self.stop()
+            self.cleanup()
 
     # region MQTT
 
@@ -126,12 +126,13 @@ class MqttEnvironmentController(BaseController):
                 timestamp = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
                 temperature = message_data.get('temperature')
                 humidity = message_data.get('humidity')
+                msg_id = message_data.get('id', msg.topic)
 
-                formatted = f"{msg.topic} @ {timestamp}: {temperature}f, {humidity}%"
+                formatted = f"{msg_id} @ {timestamp}: {temperature}f, {humidity}%"
                 self.logger.info(formatted)
 
                 # do not write if ID is not unique - could be a retained message
-                db.add_data([timestamp, msg.topic, temperature, humidity])
+                db.add_data([timestamp, msg_id, temperature, humidity])
         except Exception as e:
             # it's possible for on_message to fire for two messages nearly simultaneously
             # and wind up with the same timestamp, which is the DBs primary key.

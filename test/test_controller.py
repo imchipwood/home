@@ -13,6 +13,7 @@ from library.config import ConfigurationHandler, SENSORCLASSES, PubSubKeys
 from library.config.mqtt import MQTTConfig
 from library.data import DatabaseKeys
 from library.data.database import get_database_path
+from util import fix_mqtt_topic_subscribe_name
 
 try:
     import RPi.GPIO as GPIO
@@ -280,9 +281,10 @@ class TestMqttEnvironmentController:
 
         controller.setup()
         topic = controller.config.mqtt_topic[0]
+        topic_name = fix_mqtt_topic_subscribe_name(topic)
         payload = topic.payload()
         client.single(
-            topic.name,
+            topic_name,
             payload,
             retain=False,
             qos=2,
@@ -461,9 +463,10 @@ class TestCameraController:
 
         controller.setup()
         topic = controller.config.mqtt_topic[0]
+        topic_name = fix_mqtt_topic_subscribe_name(topic)
         payload = topic.payload()
         client.single(
-            topic.name,
+            topic_name,
             payload,
             retain=False,
             qos=2,

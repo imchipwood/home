@@ -3,16 +3,7 @@
   "mqtt": {
     "client_id": "test_mqtt_environment",
     "topics": {
-      "hass/pytest/env/004": {
-        "pubsub": "subscribe",
-        "payload": {
-          "temperature": "{:0.2f}",
-          "humidity": "{:0.2f}",
-          "units": "",
-          "id": ""
-        }
-      },
-      "hass/pytest/env/005": {
+      "hass/pytest/env/#": {
         "pubsub": "subscribe",
         "payload": {
           "temperature": "{:0.2f}",

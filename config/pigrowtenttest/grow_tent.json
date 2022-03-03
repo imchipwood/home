@@ -1,0 +1,6 @@
+{
+  "sensors": {
+    "mqtt_environment": "grow_tent_mqtt_environment.json"
+  },
+  "mqtt": "grow_tent_mqtt.json"
+}

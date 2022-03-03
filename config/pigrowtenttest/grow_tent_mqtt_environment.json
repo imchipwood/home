@@ -1,7 +1,7 @@
 {
-  "log": "/home/cpw/dev/logs/mqtt_environment.log",
+  "log": "/mnt/md0/dev/logs/mqtt_environment.log",
   "mqtt": {
-    "client_id": "grow_tent_mqtt_environment",
+    "client_id": "test_grow_tent_mqtt_environment",
     "topics": {
       "hass/env/#": {
         "pubsub": "subscribe",
