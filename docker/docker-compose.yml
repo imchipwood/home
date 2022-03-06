@@ -1,18 +1,21 @@
 version: "3.6"
 services:
-#  home:
-#    container_name: home
-#    restart: always
-#    privileged: true
-#    build:
-#      context: ./home
-#      args:
-#        branchname: grow_monitor
-#        cfgfilename: grow_monitor
-#    logging:
-#      options:
-#        max-size: "1m"
-#        max-file: "3"
+  home_base:
+    build:
+      context: ./home_base
+  home:
+    container_name: home
+    restart: always
+    privileged: true
+    build:
+      context: ./home
+      args:
+        branchname: grow_monitor
+        cfgfilename: grow_monitor
+    logging:
+      options:
+        max-size: "1m"
+        max-file: "3"
   home_grow:
     container_name: home_grow
     restart: always
@@ -22,7 +25,8 @@ services:
     build:
       context: ./home_grow
       args:
-        branchname: master
+        branchname: dependency_reduction
+        cfgfilefolder: pigrowtent
         cfgfilename: grow_tent
     logging:
       options:
