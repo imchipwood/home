@@ -156,7 +156,7 @@ class GPIOMonitorController(BaseController):
         convo_id = self.sensor.get_id()
 
         if self.config.db_name:
-            with Database(self.config.db_name, self.config.db_columns) as db:
+            with Database(self.config.db_name, self.config.db_columns, self.config.db_path) as db:
                 # Create the entry
                 raw_data = {
                     DatabaseKeys.TIMESTAMP: int(time.time()),

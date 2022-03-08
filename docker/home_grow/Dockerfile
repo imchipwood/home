@@ -1,44 +1,6 @@
 # dockerfile for monitoring grow tent
 FROM imchipwoodnt/home_base:amd64
 
-## begin static_setup
-#
-#ENV WARD=/home_docker
-#RUN echo "Working dir: ${WARD}"
-#
-#ENV HOMEACTIVATE=${WARD}/venv/bin/activate
-#
-#ARG DEBIAN_FRONTEND=noninteractive
-#
-#RUN apt-get update -y && \
-#    apt-get upgrade -y
-#RUN apt-get install -y \
-#    wget \
-#    curl \
-#    mosquitto mosquitto-clients \
-#    python3 python3-dev python3-cffi libffi-dev python3-venv \
-#    git
-#RUN apt-get install -y \
-#    build-essential \
-#    gcc g++ make cmake \
-#    libsqlite3-dev
-#RUN apt-get install -y \
-#    python python3-pip \
-#    tk-dev \
-#    libncurses5-dev libncursesw5-dev \
-#    libreadline6-dev libdb5.3-dev libgdbm-dev libssl-dev libbz2-dev \
-#    libexpat1-dev liblzma-dev zlib1g-dev \
-#    sqlite3
-#RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-#
-#WORKDIR /
-#COPY installPython.sh /usr/local/bin/
-#COPY dotfile_setup.sh /usr/local/bin/
-#RUN installPython.sh
-##RUN dotfile_setup.sh
-#
-## end static_setup
-
 ARG branchname
 ARG cfgfilefolder
 ARG cfgfilename

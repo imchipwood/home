@@ -22,6 +22,8 @@ services:
     privileged: true
     ports:
       - 1883
+    volumes:
+      - D:\home:/home_volumes
     build:
       context: ./home_grow
       args:

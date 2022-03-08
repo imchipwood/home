@@ -16,6 +16,7 @@
   },
   "db": {
     "name": "grow_tent_mqtt_environment",
+    "path": "/home_volumes/grow_tent_mqtt_environment.sqlite3",
     "columns": [
       {
         "col_name": "timestamp",

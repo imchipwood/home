@@ -77,7 +77,7 @@ class TimerController(BaseController):
         if not self.config.db_name:
             return
 
-        with Database(self.config.db_name, self.config.db_columns) as db:
+        with Database(self.config.db_name, self.config.db_columns, self.config.db_path) as db:
             # Create the entry
             data = [int(time.time()), GarageDoorStates.OPEN, int(False), int(False)]
             self.logger.debug(f"Adding data to db: {data}")

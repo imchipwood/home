@@ -123,7 +123,7 @@ class BaseController(ABC):
         @rtype: Database
         """
         from library.data.database import Database
-        db = Database(self.config.db_name, self.config.db_columns)
+        db = Database(self.config.db_name, self.config.db_columns, self.config.db_path)
         db.setup()
         return db
 

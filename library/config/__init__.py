@@ -28,6 +28,7 @@ class BaseConfigKeys:
     DELAY = "delay"
     PIN = "gpio_pin"
     DB = "db"
+    DB_PATH = "path"
     DB_NAME = "name"
     DB_COLUMNS = "columns"
     DB_COLUMN_NAME = "col_name"
@@ -211,6 +212,16 @@ class BaseConfiguration:
             )
             columns.append(column)
         return columns
+
+    @property
+    def db_path(self) -> str:
+        """
+        @return: path to database (optional)
+        @rtype: str
+        """
+        from library.data.database import get_database_path
+        db_data = self.config.get(BaseConfigKeys.DB, {})
+        return db_data.get(BaseConfigKeys.DB_PATH, get_database_path(self.db_name))
 
 
 class ConfigurationHandler(BaseConfiguration):
