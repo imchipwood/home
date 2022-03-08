@@ -4,10 +4,12 @@ FROM imchipwoodnt/home_base:amd64
 ARG branchname
 ARG cfgfilefolder
 ARG cfgfilename
+RUN echo "Branch: ${branchname}, folder: ${cfgfilefolder}, name: ${cfgfilename}"
 
 RUN git clone -b ${branchname} https://github.com/imchipwood/home.git ${WARD}
 
 WORKDIR ${WARD}
+ENV HOMEACTIVATE=${WARD}/venv/bin/activate
 RUN python3.7 -m venv venv && . ${HOMEACTIVATE} && pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements_nopi.txt
 
 COPY pimqtt.conf /etc/mosquitto/conf.d/
