@@ -13,7 +13,7 @@ class DatabaseKeys:
 
 
 class Column:
-    def __init__(self, col_name: str, col_type: str, col_key: str):
+    def __init__(self, col_name: str, col_type: str, col_key: str, foreign_table: str = None):
         """
         Initialize a database column object
         @param col_name: name of column
@@ -22,11 +22,14 @@ class Column:
         @type col_type: str
         @param col_key: column key type
         @type col_key: str
+        @param foreign_table: optional related table - column name must be identical
+        @type foreign_table: str
         """
         super()
         self.name = col_name
         self.type = col_type
         self.key = col_key
+        self.foreign_table = foreign_table
 
     @property
     def primary(self) -> bool:
@@ -41,7 +44,10 @@ class Column:
         """
         @rtype: str
         """
-        return f"{self.name} {self.type} {self.key}"
+        base = f"{self.name} {self.type} {self.key}"
+        if self.foreign_table:
+            base += f", FOREIGN KEY({self.name}) REFERENCES {self.foreign_table}({self.name})"
+        return base
 
 
 class DatabaseEntry:

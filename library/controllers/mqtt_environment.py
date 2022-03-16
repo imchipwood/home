@@ -123,7 +123,9 @@ class MqttEnvironmentController(BaseController):
         try:
             # write to database
             with self.db as db:
-                timestamp = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+                # ISO8601 format: YYYY-MM-DD HH:MM:SS.SSS
+                tmp_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f").split(".")
+                timestamp = tmp_timestamp[0] + "." + tmp_timestamp[1][:3]
                 temperature = message_data.get('temperature')
                 humidity = message_data.get('humidity')
                 msg_id = message_data.get('id', msg.topic)
@@ -131,7 +133,6 @@ class MqttEnvironmentController(BaseController):
                 formatted = f"{msg_id} @ {timestamp}: {temperature}f, {humidity}%"
                 self.logger.info(formatted)
 
-                # do not write if ID is not unique - could be a retained message
                 db.add_data([timestamp, msg_id, temperature, humidity])
         except Exception as e:
             # it's possible for on_message to fire for two messages nearly simultaneously

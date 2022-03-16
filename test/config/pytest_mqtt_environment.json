@@ -2,6 +2,7 @@
   "log": "/tmp/mqtt_environment.log",
   "mqtt": {
     "client_id": "test_mqtt_environment",
+    "table_name": "test_mqtt_environment",
     "topics": {
       "hass/pytest/env/#": {
         "pubsub": "subscribe",
@@ -15,28 +16,58 @@
     }
   },
   "db": {
-    "name": "test_mqtt_environment",
     "path": "/tmp/some_db.sqlite3",
-    "columns": [
+    "tables": [
       {
-        "col_name": "timestamp",
-        "col_type": "text",
-        "col_key": "PRIMARY KEY"
+        "name": "test_mqtt_environment",
+        "columns": [
+          {
+            "col_name": "timestamp",
+            "col_type": "text",
+            "col_key": "PRIMARY KEY"
+          },
+          {
+            "col_name": "sensor_name",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "temperature",
+            "col_type": "real",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "humidity",
+            "col_type": "real",
+            "col_key": "NOT NULL"
+          }
+        ]
       },
       {
-        "col_name": "sensor_name",
-        "col_type": "text",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "temperature",
-        "col_type": "real",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "humidity",
-        "col_type": "real",
-        "col_key": "NOT NULL"
+        "name": "test_mqtt_metadata",
+        "columns": [
+          {
+            "col_name": "id",
+            "col_type": "text",
+            "col_key": "PRIMARY KEY",
+            "foreign_table_key": "test_mqtt_environment"
+          },
+          {
+            "col_name": "date_added",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "sensor_name",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "sensor_type",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          }
+        ]
       }
     ]
   }

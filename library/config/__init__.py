@@ -28,6 +28,7 @@ class BaseConfigKeys:
     DELAY = "delay"
     PIN = "gpio_pin"
     DB = "db"
+    DB_TABLES = "tables"
     DB_PATH = "path"
     DB_NAME = "name"
     DB_COLUMNS = "columns"
@@ -213,7 +214,6 @@ class BaseConfiguration:
             columns.append(column)
         return columns
 
-    @property
     def db_path(self) -> str:
         """
         @return: path to database (optional)

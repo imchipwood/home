@@ -5,6 +5,7 @@
   "gpio_active_direction": "HIGH",
   "mqtt": {
     "client_id": "pytest_gpio_driver",
+    "table_name": "test_door",
     "topics": {
       "hass/pytest/gpio/driver": {
         "pubsub": "subscribe",
@@ -15,27 +16,31 @@
     }
   },
   "db": {
-    "name": "test_door",
-    "columns": [
+    "tables": [
       {
-        "col_name": "timestamp",
-        "col_type": "integer",
-        "col_key": "PRIMARY KEY"
-      },
-      {
-        "col_name": "state",
-        "col_type": "text",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "captured",
-        "col_type": "integer",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "notified",
-        "col_type": "integer",
-        "col_key": "NOT NULL"
+        "name": "test_door",
+        "columns": [
+          {
+            "col_name": "timestamp",
+            "col_type": "integer",
+            "col_key": "PRIMARY KEY"
+          },
+          {
+            "col_name": "state",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "captured",
+            "col_type": "integer",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "notified",
+            "col_type": "integer",
+            "col_key": "NOT NULL"
+          }
+        ]
       }
     ]
   }
