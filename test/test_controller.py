@@ -9,9 +9,8 @@ import pytest
 
 from library import GarageDoorStates, GPIODriverCommands
 from library.communication.mqtt import MQTTClient
-from library.config import ConfigurationHandler, SENSORCLASSES, PubSubKeys
+from library.config import ConfigurationHandler, SENSORCLASSES, PubSubKeys, DatabaseKeys
 from library.config.mqtt import MQTTConfig
-from library.data import DatabaseKeys
 from library.data.database import get_database_path
 from util import fix_mqtt_topic_subscribe_name
 

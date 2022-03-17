@@ -13,9 +13,8 @@ from urllib3.exceptions import MaxRetryError
 from library import GarageDoorStates
 from library.communication.mqtt import MQTTError, get_mqtt_error_message
 from library.communication.pushbullet import PushBulletNotify
-from library.config import PubSubKeys
+from library.config import PubSubKeys, DatabaseKeys
 from library.controllers import BaseController, get_logger
-from library.data import DatabaseKeys
 
 
 class PushBulletController(BaseController):

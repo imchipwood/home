@@ -7,7 +7,8 @@ from typing import List, Union
 
 from library import setup_logging, CONFIG_TYPE, CONTROLLER_TYPE
 from library.communication.mqtt import MQTTClient
-from library.data import DatabaseEntry, DatabaseKeys
+from library.config import DatabaseKeys
+from library.data import DatabaseEntry
 
 RUNNING = False
 

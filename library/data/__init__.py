@@ -2,16 +2,6 @@ import json
 from typing import List
 
 
-class DatabaseKeys:
-    from library.config import PubSubKeys
-    STATE = PubSubKeys.STATE
-    ID = PubSubKeys.ID
-    TIMESTAMP = "timestamp"
-    CAPTURED = "captured"
-    TOGGLED = "toggled"
-    NOTIFIED = "notified"
-
-
 class Column:
     def __init__(self, col_name: str, col_type: str, col_key: str, foreign_table: str = None):
         """
@@ -44,10 +34,17 @@ class Column:
         """
         @rtype: str
         """
-        base = f"{self.name} {self.type} {self.key}"
+        return f"{self.name} {self.type} {self.key}"
+
+    def get_table_reference(self) -> str:
+        """
+        Get the database table creation string for referencing another table
+        @return: string representation of table reference
+        @rtype: str
+        """
         if self.foreign_table:
-            base += f", FOREIGN KEY({self.name}) REFERENCES {self.foreign_table}({self.name})"
-        return base
+            return f", FOREIGN KEY({self.name}) REFERENCES {self.foreign_table}({self.name})"
+        return ""
 
 
 class DatabaseEntry:

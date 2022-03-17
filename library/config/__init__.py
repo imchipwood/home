@@ -3,6 +3,7 @@ import os
 from typing import List, Type, Union
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR, CONFIG_TYPE, CONTROLLER_TYPE
+# from library.data.database import
 
 
 class SENSORCLASSES:
@@ -52,6 +53,16 @@ class PubSubKeys:
     PAYLOAD = "payload"
     STATE = "state"
     ID = "convo_id"
+
+
+class DatabaseKeys:
+    from library.config import PubSubKeys
+    STATE = PubSubKeys.STATE
+    ID = PubSubKeys.ID
+    TIMESTAMP = "timestamp"
+    CAPTURED = "captured"
+    TOGGLED = "toggled"
+    NOTIFIED = "notified"
 
 
 class BaseConfiguration:
@@ -183,6 +194,19 @@ class BaseConfiguration:
         """
         return self.config.get(BaseConfigKeys.LOG, "")
 
+    # @property
+    # def db_table_names(self) -> List[str]:
+    #     """
+    #     @return: List of database table names
+    #     @rtype: list[str]
+    #     """
+    #     db_data = self.config.get(BaseConfigKeys.DB)
+    #     if not db_data:
+    #         return list()
+    #     return db_data.get(BaseConfigKeys.DB_TABLES, list())
+
+    # def get_db_table(self, table_name: str) :
+
     @property
     def db_name(self) -> str:
         """
@@ -221,7 +245,11 @@ class BaseConfiguration:
         """
         from library.data.database import get_database_path
         db_data = self.config.get(BaseConfigKeys.DB, {})
-        return db_data.get(BaseConfigKeys.DB_PATH, get_database_path(self.db_name))
+        db_path = db_data.get(BaseConfigKeys.DB_PATH)
+        if db_path:
+            return db_path
+        # TODO: fallback path may not be the best idea?
+        return get_database_path(os.path.basename(self._config_path))
 
 
 class ConfigurationHandler(BaseConfiguration):
