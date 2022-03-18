@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Dict
 
 import pytest
 
@@ -20,6 +20,12 @@ DB1_COLUMNS = [
     Column("state", "string", "NOT NULL"),
     Column("notified", "integer", "NOT NULL")
 ]
+TABLE0 = {
+    DB0_NAME: DB0_COLUMNS
+}
+TABLE1 = {
+    DB1_NAME: DB1_COLUMNS
+}
 
 
 def arrange_data_for_insert(data_to_add: List[int or str]) -> List[tuple]:
@@ -41,85 +47,90 @@ def teardown_module():
     remove_dbs()
 
 
-@pytest.mark.parametrize("name,columns", [
-    (DB0_NAME, DB0_COLUMNS),
-    (DB1_NAME, DB1_COLUMNS)
+@pytest.mark.parametrize("name,table_dict", [
+    (DB0_NAME, TABLE0),
+    (DB1_NAME, TABLE1)
 ])
-def test_create_table(name: str, columns: List[Column]):
+def test_create_table(name: str, table_dict: Dict[str, List[Column]]):
     """
     Test creating table works
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: list[Column]
+    @param table_dict: list of columns to add to table
+    @type table_dict: list[Column]
     """
-    with Database(name, columns, DB_PATH) as db:
+    with Database(name, table_dict, DB_PATH) as db:
         assert os.path.exists(DB_PATH)
-        assert db.does_table_exist(name)
+        table = db.get_table(name)
+        assert table.does_table_exist(name)
 
 
-@pytest.mark.parametrize("name,columns,data_to_add", [
-    (DB0_NAME, DB0_COLUMNS, 0),
-    (DB1_NAME, DB1_COLUMNS, "hello")
+@pytest.mark.parametrize("name,table_dict,data_to_add", [
+    (DB0_NAME, TABLE0, 0),
+    (DB1_NAME, TABLE1, "hello")
 ])
-def test_add_to_table(name: str, columns: List[Column], data_to_add: int or str):
+def test_add_to_table(name: str, table_dict: Dict[str, List[Column]], data_to_add: int or str):
     """
     Test adding info to tables work
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: List[Column]
+    @param table_dict: Dict of list of columns to add to table
+    @type table_dict: Dict[str, List[Column]]
     @param data_to_add: data to add to table
     @type data_to_add: int or str
     """
-    with Database(name, columns, DB_PATH) as db:
-        db.add_data([0, data_to_add, int(False)])
+    with Database(name, table_dict, DB_PATH) as db:
+        table = db.get_table(name)
+        table.add_data([0, data_to_add, int(False)])
 
-        assert len(db.get_all_records()) == 1
+        assert len(table.get_all_records()) == 1
 
 
-@pytest.mark.parametrize("name,columns,data_to_add", [
-    (DB0_NAME, DB0_COLUMNS, [0, 1, 0, 1, 0]),
-    (DB1_NAME, DB1_COLUMNS, ["Hi", "There", "You"])
+@pytest.mark.parametrize("name,table_dict,data_to_add", [
+    (DB0_NAME, TABLE0, [0, 1, 0, 1, 0]),
+    (DB1_NAME, TABLE1, ["Hi", "There", "You"])
 ])
-def test_add_data_multiple(name: str, columns: List[Column], data_to_add: int or str):
+def test_add_data_multiple(name: str, table_dict: Dict[str, List[Column]], data_to_add: int or str):
     """
     Test adding multiple entries to a table at once works
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: List[Column]
+    @param table_dict: list of columns to add to table
+    @type table_dict: List[Column]
     @param data_to_add: data to add to table
     @type data_to_add: list[int or str]
     """
-    with Database(name, columns, DB_PATH) as db:
+    with Database(name, table_dict, DB_PATH) as db:
+        table = db.get_table(name)
         data = arrange_data_for_insert(data_to_add)
-        db.add_data_multiple(data)
+        table.add_data_multiple(data)
 
-        assert len(db.get_all_records()) == len(data_to_add)
+        assert len(table.get_all_records()) == len(data_to_add)
 
 
-@pytest.mark.parametrize("name,columns,data_to_add", [
-    (DB0_NAME, DB0_COLUMNS, [0, 0, 0, 1, 1]),
-    (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
+@pytest.mark.parametrize("name,table_dict,data_to_add", [
+    (DB0_NAME, TABLE0, [0, 0, 0, 1, 1]),
+    (DB1_NAME, TABLE1, ["a", "b", "c", "d", "e"])
 ])
-def test_get_last_n_records(name, columns, data_to_add):
+def test_get_last_n_records(name, table_dict, data_to_add):
     """
     Test getting last n records from table works
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: List[Column]
+    @param table_dict: list of columns to add to table
+    @type table_dict: Dict[str, List[Column]]
     @param data_to_add: data to add to table
     @type data_to_add: list[int or str]
     """
-    with Database(name, columns, DB_PATH) as db:
+    with Database(name, table_dict, DB_PATH) as db:
+        table = db.get_table(name)
         data = arrange_data_for_insert(data_to_add)
-        db.add_data_multiple(data)
+        table.add_data_multiple(data)
 
-        assert len(db.get_last_n_records(1)) == 1
-        assert len(db.get_last_n_records(2)) == 2
-        last_3 = db.get_last_n_records(3)
+        columns = table.columns
+        assert len(table.get_last_n_records(1)) == 1
+        assert len(table.get_last_n_records(2)) == 2
+        last_3 = table.get_last_n_records(3)
         assert last_3[0][columns[0].name] == 4
         assert last_3[0][columns[1].name] == data_to_add[-1]
         assert last_3[1][columns[0].name] == 3
@@ -128,100 +139,105 @@ def test_get_last_n_records(name, columns, data_to_add):
         assert last_3[2][columns[1].name] == data_to_add[-3]
 
 
-@pytest.mark.parametrize("name,columns,data_to_add", [
-    (DB0_NAME, DB0_COLUMNS, [0, 0, 0, 1, 1]),
-    (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
+@pytest.mark.parametrize("name,table_dict,data_to_add", [
+    (DB0_NAME, TABLE0, [0, 0, 0, 1, 1]),
+    (DB1_NAME, TABLE1, ["a", "b", "c", "d", "e"])
 ])
-def test_get_latest_record(name, columns, data_to_add):
+def test_get_latest_record(name, table_dict, data_to_add):
     """
     Test getting latest table record works
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: List[Column]
+    @param table_dict: list of columns to add to table
+    @type table_dict: Dict[str, List[Column]]
     @param data_to_add: data to add to table
     @type data_to_add: list[int or str]
     """
-    with Database(name, columns, DB_PATH) as db:
+    with Database(name, table_dict, DB_PATH) as db:
+        table = db.get_table(name)
         data = arrange_data_for_insert(data_to_add)
-        db.add_data_multiple(data)
+        table.add_data_multiple(data)
 
-        latest = db.get_latest_record()
+        columns = table.columns
+        latest = table.get_latest_record()
         assert latest[columns[0].name] == 4
         assert latest[columns[1].name] == data_to_add[-1]
 
 
-@pytest.mark.parametrize("name,columns,data_to_add", [
-    (DB0_NAME, DB0_COLUMNS, [0, 1, 1]),
-    (DB1_NAME, DB1_COLUMNS, ["a", "c", "e"])
+@pytest.mark.parametrize("name,table_dict,data_to_add", [
+    (DB0_NAME, TABLE0, [0, 1, 1]),
+    (DB1_NAME, TABLE1, ["a", "c", "e"])
 ])
-def test_delete_all_except_last_n_records(name, columns, data_to_add):
+def test_delete_all_except_last_n_records(name, table_dict, data_to_add):
     """
     Test removing all but last N records from table works
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: List[Column]
+    @param table_dict: dict of columns to add to table
+    @type table_dict: Dict[str, List[Column]]
     @param data_to_add: data to add to table
     @type data_to_add: list[int or str]
     """
-    with Database(name, columns, DB_PATH) as db:
+    with Database(name, table_dict, DB_PATH) as db:
+        table = db.get_table(name)
         data = arrange_data_for_insert(data_to_add)
-        db.add_data_multiple(data)
+        table.add_data_multiple(data)
 
         for i in range(len(data_to_add), 0, -1):
-            db.delete_all_except_last_n_records(i)
-            assert len(db.get_all_records()) == i
+            table.delete_all_except_last_n_records(i)
+            assert len(table.get_all_records()) == i
 
 
-@pytest.mark.parametrize("name,columns,data_to_add", [
-    (DB0_NAME, DB0_COLUMNS, [0, 0, 0, 1, 1]),
-    (DB1_NAME, DB1_COLUMNS, ["a", "b", "c", "d", "e"])
+@pytest.mark.parametrize("name,table_dict,data_to_add", [
+    (DB0_NAME, TABLE0, [0, 0, 0, 1, 1]),
+    (DB1_NAME, TABLE1, ["a", "b", "c", "d", "e"])
 ])
-def test_get_record(name, columns, data_to_add):
+def test_get_record(name, table_dict, data_to_add):
     """
     Test removing all but last N records from table works
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: List[Column]
+    @param table_dict: list of columns to add to table
+    @type table_dict: Dict[str, List[Column]]
     @param data_to_add: data to add to table
     @type data_to_add: list[int or str]
     """
-    with Database(name, columns, DB_PATH) as db:
+    with Database(name, table_dict, DB_PATH) as db:
+        table = db.get_table(name)
         data = arrange_data_for_insert(data_to_add)
-        db.add_data_multiple(data)
+        table.add_data_multiple(data)
 
-        primary_column_name = [x.name for x in columns if x.primary][0]
+        primary_column_name = [x.name for x in table.columns if x.primary][0]
 
         for primary_key_value in [2, 3]:
-            entry = db.get_record(primary_key_value)
+            entry = table.get_record(primary_key_value)
             assert entry[primary_column_name] == primary_key_value
             assert entry["state"] == data_to_add[primary_key_value]
             assert not entry["notified"]
 
 
-@pytest.mark.parametrize("name,columns,data_to_add", [
-    (DB0_NAME, DB0_COLUMNS, [0, 0, 0]),
-    (DB1_NAME, DB1_COLUMNS, ["a", "b", "c"])
+@pytest.mark.parametrize("name,table_dict,data_to_add", [
+    (DB0_NAME, TABLE0, [0, 0, 0]),
+    (DB1_NAME, TABLE1, ["a", "b", "c"])
 ])
-def test_update_record(name, columns, data_to_add):
+def test_update_record(name, table_dict, data_to_add):
     """
     Test updating a record works
     @param name: name of table
     @type name: str
-    @param columns: list of columns to add to table
-    @type columns: List[Column]
+    @param table_dict: list of columns to add to table
+    @type table_dict: Dict[str, List[Column]]
     @param data_to_add: data to add to table
     @type data_to_add: list[int or str]
     """
-    with Database(name, columns, DB_PATH) as db:
+    with Database(name, table_dict, DB_PATH) as db:
+        table = db.get_table(name)
         data = arrange_data_for_insert(data_to_add)
-        db.add_data_multiple(data)
+        table.add_data_multiple(data)
 
         for primary_key_value in [2]:
-            entry = db.get_record(primary_key_value)
+            entry = table.get_record(primary_key_value)
             assert not entry["notified"]
-            db.update_record(primary_key_value, "notified", int(True))
-            entry = db.get_record(primary_key_value)
+            table.update_record(primary_key_value, "notified", int(True))
+            entry = table.get_record(primary_key_value)
             assert entry["notified"]
