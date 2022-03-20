@@ -26,6 +26,7 @@ class BaseConfigKeys:
     TOPICS = "topics"
     PUBLISH = "publish"
     SUBSCRIBE = "subscribe"
+    TABLE_NAME = "table_name"  # which table to write data received over mqtt to
     DELAY = "delay"
     PIN = "gpio_pin"
     DB = "db"
