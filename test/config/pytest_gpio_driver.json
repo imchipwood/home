@@ -16,6 +16,7 @@
     }
   },
   "db": {
+    "path": "/tmp/some_db.sqlite3",
     "tables": [
       {
         "name": "test_door",
@@ -27,6 +28,11 @@
           },
           {
             "col_name": "state",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "convo_id",
             "col_type": "text",
             "col_key": "NOT NULL"
           },

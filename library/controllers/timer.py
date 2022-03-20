@@ -77,8 +77,10 @@ class TimerController(BaseController):
         if not self.config.db_name:
             return
 
-        # TODO: self.config.db_columns needs to know context of table name
-        with Database(self.config.db_name, self.config.db_columns, self.config.db_path) as db:
+        table_name = self.config.mqtt_config.db_table_name
+        if not table_name:
+            return
+        with Database(self.config.db_name, self.config.db_tables, self.config.db_path) as db:
             # Create the entry
             data = [int(time.time()), GarageDoorStates.OPEN, int(False), int(False)]
             self.logger.debug(f"Adding data to db: {data}")

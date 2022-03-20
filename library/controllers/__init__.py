@@ -41,17 +41,18 @@ def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Lo
 
 class BaseController(ABC):
     """Base class for all controllers to extend"""
-    from library.data.database import Database
+    from library.data.database import Database, Table
+    from library.config import BaseConfiguration
 
-    def __init__(self: CONTROLLER_TYPE, config: CONFIG_TYPE, debug: bool = False):
+    def __init__(self: CONTROLLER_TYPE, config: CONFIG_TYPE or BaseConfiguration, debug: bool = False):
         super()
 
         self.debug = debug
-        self.config = config  # type: CONFIG_TYPE
+        self.config = config  # type: CONFIG_TYPE or BaseConfiguration
 
         self._mqtt = None
-        self.logger = None  # type: logging.Logger
-        self.thread = None  # type: Process
+        self.logger = None  # type: logging.Logger or None
+        self.thread = None  # type: Process or None
 
     @property
     def running(self) -> bool:
@@ -115,7 +116,7 @@ class BaseController(ABC):
         Check if a database is available
         @rtype: bool
         """
-        return self.config.db_name and self.config.db_columns
+        return self.config.db_enabled
 
     @property
     def db(self) -> Database:
@@ -124,9 +125,30 @@ class BaseController(ABC):
         @rtype: Database
         """
         from library.data.database import Database
-        db = Database(self.config.db_name, self.config.db_columns, self.config.db_path)
-        db.setup()
+        db = Database(
+            self.config.db_name,
+            self.config.db_tables,
+            self.config.db_path)
+        db.connect()
         return db
+
+    @property
+    def db_table(self) -> Table:
+        """
+        Get the table for writing/reading mqtt data
+        @return: Table
+        @rtype: Table
+        """
+        return self.db.get_table(self.db_table_name)
+
+    @property
+    def db_table_name(self) -> str:
+        """
+        Get the table name for writing/reading mqtt data
+        @return: name of database table
+        @rtype: str
+        """
+        return self.config.mqtt_config.db_table_name
 
     def get_entry_for_id(self, convo_id: str) -> Union[DatabaseEntry, None]:
         """
@@ -141,7 +163,8 @@ class BaseController(ABC):
 
         self.logger.debug(f"Opening DB {self.config.db_name}")
         with self.db as db:
-            records = db.get_all_records()
+            table = db.get_table(self.db_table_name)
+            records = table.get_all_records()
             if not records:
                 return None
 
@@ -165,7 +188,8 @@ class BaseController(ABC):
 
         self.logger.debug(f"Opening DB {self.config.db_name}")
         with self.db as db:
-            record = db.get_latest_record()
+            table = db.get_table(self.db_table_name)
+            record = table.get_latest_record()
             if not record or all([x is None for x in record.entry]):
                 return None
 
@@ -190,7 +214,8 @@ class BaseController(ABC):
 
         self.logger.debug(f"Opening DB {self.config.db_name}")
         with self.db as db:
-            records = db.get_last_n_records(2)
+            table = db.get_table(self.db_table_name)
+            records = table.get_last_n_records(2)
             if len(records) != 2:
                 return []
 

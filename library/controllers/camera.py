@@ -266,12 +266,12 @@ class PiCameraController(BaseController):
             timestamp = target_entry[DatabaseKeys.TIMESTAMP]
             self.logger.info(
                 f"Updating DB record @ {timestamp} ({convo_id}): {DatabaseKeys.CAPTURED} = {int(True)}")
-            self.db.update_record(timestamp, DatabaseKeys.CAPTURED, int(True))
+            self.db_table.update_record(timestamp, DatabaseKeys.CAPTURED, int(True))
 
         else:
             timestamp = int(time())
             captured = int(True)
-            latest_entry = self.db.get_latest_record()
+            latest_entry = self.db_table.get_latest_record()
             if latest_entry and latest_entry[DatabaseKeys.TIMESTAMP] != timestamp:
                 raw_data = {
                     DatabaseKeys.TIMESTAMP: timestamp,
@@ -280,14 +280,14 @@ class PiCameraController(BaseController):
                     DatabaseKeys.CAPTURED: captured,
                     DatabaseKeys.NOTIFIED: int(False)
                 }
-                data = self.db.format_data_for_insertion(**raw_data)
+                data = self.db_table.format_data_for_insertion(**raw_data)
 
                 self.logger.info(f"No entry for {convo_id} - adding new record: {data}")
-                self.db.add_data(data)
-                self.db.delete_all_except_last_n_records(10)
+                self.db_table.add_data(data)
+                self.db_table.delete_all_except_last_n_records(10)
             else:
                 self.logger.info(f"Latest record matches current timestamp... updating anyway?")
-                self.db.update_record(timestamp, DatabaseKeys.CAPTURED, captured)
+                self.db_table.update_record(timestamp, DatabaseKeys.CAPTURED, captured)
 
     # endregion MQTT
     # region Camera

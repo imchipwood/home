@@ -45,6 +45,7 @@
     }
   },
   "db": {
+    "path": "/tmp/some_db.sqlite3",
     "tables": [
       {
         "name": "test_door",

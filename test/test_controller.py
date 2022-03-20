@@ -276,7 +276,7 @@ class TestMqttEnvironmentController:
 
         # clear db
         with controller.db as db:
-            db.delete_all_except_last_n_records(0)
+            db.get_table(controller.db_table_name).delete_all_except_last_n_records(0)
 
         controller.setup()
         topic = controller.config.mqtt_topic[0]
@@ -305,7 +305,7 @@ class TestMqttEnvironmentController:
 
         # also check db has a new entry
         with controller.db as db:
-            entry = db.get_latest_record()
+            entry = db.get_table(controller.db_table_name).get_latest_record()
             assert entry, "expected entry in database"
 
 
@@ -373,34 +373,36 @@ class TestCameraController:
         topic_open = TestTopic("hass/pytest/gpio/state", {PubSubKeys.STATE: GarageDoorStates.OPEN, PubSubKeys.ID: convo_id}, True)
         topic_open2 = TestTopic("hass/pytest/gpio/state", {PubSubKeys.STATE: GarageDoorStates.OPEN, PubSubKeys.ID: convo_id2}, True)
         try:
+            table_name = controller.config.mqtt_config.db_table_name
             with controller.db as db:
                 # Set up for test
-                db.delete_all_except_last_n_records(0)
+                table = db.get_table(table_name)
+                table.delete_all_except_last_n_records(0)
 
                 # No records - capture
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
 
                 # One record with captured=False - capture
-                db.add_data([0, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
+                table.add_data([0, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
-                db.delete_all_except_last_n_records(0)
+                table.delete_all_except_last_n_records(0)
 
                 # One record with captured=True - do not capture
-                db.add_data([0, GarageDoorStates.OPEN, convo_id, int(True), int(False)])
+                table.add_data([0, GarageDoorStates.OPEN, convo_id, int(True), int(False)])
                 assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
-                db.delete_all_except_last_n_records(0)
+                table.delete_all_except_last_n_records(0)
 
                 # Multiple records - capture then don't
-                db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
-                db.add_data([1, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
+                table.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                table.add_data([1, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
                 controller.update_database_entry(convo_id)
                 assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
-                db.delete_all_except_last_n_records(0)
+                table.delete_all_except_last_n_records(0)
 
                 # Multiple records with different IDs - test each ID
-                db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
-                db.add_data([1, GarageDoorStates.OPEN, convo_id2, int(False), int(False)])
+                table.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                table.add_data([1, GarageDoorStates.OPEN, convo_id2, int(False), int(False)])
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
                 controller.update_database_entry(convo_id)
                 assert not controller.should_capture_from_command(topic_open.topic, topic_open.payload)
@@ -409,9 +411,9 @@ class TestCameraController:
                 assert not controller.should_capture_from_command(topic_open2.topic, topic_open2.payload)
 
                 # Multiple records with different IDs - new ID comes in
-                db.delete_all_except_last_n_records(0)
-                db.add_data([0, GarageDoorStates.CLOSED, "123", int(False), int(False)])
-                db.add_data([1, GarageDoorStates.OPEN, "456", int(False), int(False)])
+                table.delete_all_except_last_n_records(0)
+                table.add_data([0, GarageDoorStates.CLOSED, "123", int(False), int(False)])
+                table.add_data([1, GarageDoorStates.OPEN, "456", int(False), int(False)])
                 assert controller.should_capture_from_command(topic_open.topic, topic_open.payload)
 
         finally:
@@ -440,7 +442,7 @@ class TestCameraController:
         """
         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.CAMERA)
         """ @type: library.controllers.camera.PiCameraController"""
-        controller.db.delete_all_except_last_n_records(0)
+        controller.db_table.delete_all_except_last_n_records(0)
 
         try:
             assert controller.should_capture_from_command(topic.topic, topic.payload) == topic.capture
@@ -607,7 +609,7 @@ class TestGPIOMonitorController:
         try:
             # clear the database
             with controller.db as db:
-                db.delete_all_except_last_n_records(0)
+                db.get_table(controller.db_table_name).delete_all_except_last_n_records(0)
 
             # Set the state to add an entry
             controller.state = not controller.state
