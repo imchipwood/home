@@ -16,32 +16,37 @@
     }
   },
   "db": {
-    "name": "garage_door_monitor",
-    "columns": [
+    "path": "/home/cpw/dev/home/data/garage_door_monitor.sqlite3",
+    "tables": [
       {
-        "col_name": "timestamp",
-        "col_type": "integer",
-        "col_key": "PRIMARY KEY"
-      },
-      {
-        "col_name": "state",
-        "col_type": "text",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "convo_id",
-        "col_type": "text",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "captured",
-        "col_type": "integer",
-        "col_key": "NOT NULL"
-      },
-      {
-        "col_name": "notified",
-        "col_type": "integer",
-        "col_key": "NOT NULL"
+        "name": "garage_door_monitor",
+        "columns": [
+          {
+            "col_name": "timestamp",
+            "col_type": "integer",
+            "col_key": "PRIMARY KEY"
+          },
+          {
+            "col_name": "state",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "convo_id",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "captured",
+            "col_type": "integer",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "notified",
+            "col_type": "integer",
+            "col_key": "NOT NULL"
+          }
+        ]
       }
     ]
   }
