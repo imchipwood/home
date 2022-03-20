@@ -24,6 +24,9 @@ except (ImportError, RuntimeError, ModuleNotFoundError):  # pragma: no cover
     logging.warning("Failed to import RPi.GPIO - using mock library")
     from library.mock.mock_gpio import GPIO
 
+if False:
+    from library.config.gpio_driver import GPIODriverConfig
+
 
 class GPIODriverController(BaseController):
 
@@ -35,6 +38,8 @@ class GPIODriverController(BaseController):
         @type debug: bool
         """
         super().__init__(config, debug)
+
+        self.config = config  # type: GPIODriverConfig
 
         self.logger = get_logger(__name__, debug, config.log)
 

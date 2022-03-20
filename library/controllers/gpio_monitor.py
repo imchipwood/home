@@ -14,6 +14,9 @@ from library.controllers import BaseController, get_logger
 from library.data.database import Database
 from library.sensors.gpio_monitor import GPIOMonitor
 
+if False:
+    from library.config.gpio_monitor import GPIOMonitorConfig
+
 
 class GPIOMonitorController(BaseController):
     """
@@ -29,6 +32,8 @@ class GPIOMonitorController(BaseController):
         @type debug: bool
         """
         super().__init__(config, debug)
+
+        self.config = config  # type: GPIOMonitorConfig
 
         self.logger = get_logger(__name__, debug, config.log)
 

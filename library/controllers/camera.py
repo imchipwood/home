@@ -16,6 +16,9 @@ from library.sensors.camera import Camera
 
 mutex = Lock()
 
+if False:
+    from library.config.camera import CameraConfig
+
 
 class PiCameraController(BaseController):
     def __init__(self, config, debug=False):
@@ -26,6 +29,8 @@ class PiCameraController(BaseController):
         @type debug: bool
         """
         super().__init__(config=config, debug=debug)
+        
+        self.config = config  # type: CameraConfig
 
         self.logger = get_logger(__name__, debug, config.log)
 

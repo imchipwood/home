@@ -12,6 +12,9 @@ import datetime
 from library.communication.mqtt import get_mqtt_error_message, MQTTError
 from library.controllers import BaseController, get_logger
 
+if False:
+    from library.config.mqtt_environment import MqttEnvironmentConfig
+
 
 class MqttEnvironmentController(BaseController):
     """
@@ -20,6 +23,8 @@ class MqttEnvironmentController(BaseController):
     """
     def __init__(self, config, debug=False):
         super().__init__(config, debug)
+
+        self.config = config  # type: MqttEnvironmentConfig
 
         self.logger = get_logger(__name__, debug, config.log)
 

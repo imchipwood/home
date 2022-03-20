@@ -16,6 +16,9 @@ from library.communication.pushbullet import PushBulletNotify
 from library.config import PubSubKeys, DatabaseKeys
 from library.controllers import BaseController, get_logger
 
+if False:
+    from library.config.pushbullet import PushbulletConfig
+
 
 class PushBulletController(BaseController):
     """
@@ -33,6 +36,8 @@ class PushBulletController(BaseController):
         @type debug: bool
         """
         super().__init__(config, debug)
+
+        self.config = config  # type: PushbulletConfig
 
         self.logger = get_logger(__name__, debug, config.log)
         try:
