@@ -38,6 +38,12 @@ class BaseConfigKeys:
     DB_COLUMN_NAME = "col_name"
     DB_COLUMN_TYPE = "col_type"
     DB_COLUMN_KEY = "col_key"
+    DB_FOREIGN_TABLE_KEY = "foreign_table_key"
+
+    DB_SERVER = "server"
+    DB_DATABASE = "database"
+    DB_USERNAME = "username"
+    DB_PASSWORD = "password"
 
 
 class PubSubKeys:
@@ -272,6 +278,7 @@ class BaseConfiguration:
                     column_dict.get(BaseConfigKeys.DB_COLUMN_NAME, ""),
                     column_dict.get(BaseConfigKeys.DB_COLUMN_TYPE, ""),
                     column_dict.get(BaseConfigKeys.DB_COLUMN_KEY, ""),
+                    column_dict.get(BaseConfigKeys.DB_FOREIGN_TABLE_KEY),
                 )
                 columns.append(column)
             tables[table_name] = columns
@@ -293,23 +300,43 @@ class BaseConfiguration:
                 column_dict.get(BaseConfigKeys.DB_COLUMN_NAME, ""),
                 column_dict.get(BaseConfigKeys.DB_COLUMN_TYPE, ""),
                 column_dict.get(BaseConfigKeys.DB_COLUMN_KEY, ""),
+                column_dict.get(BaseConfigKeys.DB_FOREIGN_TABLE_KEY)
             )
             columns.append(column)
         return columns
 
     @property
-    def db_path(self) -> str:
+    def db_server(self) -> str:
         """
-        @return: path to database (optional)
+        @return: server path (with port)
         @rtype: str
         """
-        from library.data.database import get_database_path
-        db_data = self.config.get(BaseConfigKeys.DB, {})
-        db_path = db_data.get(BaseConfigKeys.DB_PATH)
-        if db_path:
-            return db_path
-        # TODO: fallback path may not be the best idea?
-        return get_database_path(os.path.basename(self._config_path))
+        return self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_SERVER)
+
+    @property
+    def db_database_name(self) -> str:
+        """
+        @return: database name
+        @rtype: str
+        """
+        return self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_DATABASE)
+
+    @property
+    def db_username(self) -> str:
+        """
+        @return: username
+        @rtype: str
+        """
+        return self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_USERNAME)
+
+    @property
+    def db_password(self) -> str:
+        """
+        @return: database password
+        @rtype: str
+        """
+        password = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_PASSWORD, "")
+        return os.environ.get(password[1:], "") if password.startswith("$") else password
 
 
 class ConfigurationHandler(BaseConfiguration):

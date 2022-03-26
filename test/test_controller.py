@@ -114,15 +114,19 @@ class TestTopic:
 def setup_module():
     for sensor in CONFIGURATION_HANDLER:
         if sensor and sensor.db_enabled:
-            path = get_database_path(sensor.db.name)
-            if os.path.exists(path):
-                os.remove(path)
+            with sensor.db as db:
+                for table in list(reversed(db.tables.values())):
+                    table.drop()
 
 
 def teardown_module():
     for sensor in CONFIGURATION_HANDLER:
         if sensor:
             sensor.cleanup()
+            if sensor.db_enabled:
+                with sensor.db as db:
+                    for table in list(reversed(db.tables.values())):
+                        table.drop()
 
 
 def get_mqtt_client(mqtt_config: MQTTConfig, topics: List[str]) -> MQTTClient:

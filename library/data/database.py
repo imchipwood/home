@@ -1,7 +1,7 @@
 import datetime
 import logging
 import os
-import sqlite3
+import pyodbc
 from typing import List, Dict
 
 from library import HOME_DIR
@@ -23,28 +23,55 @@ def get_database_path(name: str) -> str:
     return database_path
 
 
-def connect_to_database(path_or_name: str) -> sqlite3.Connection:
-    """
-    Connect to target database
-    @param name: name of database
-    @type name: str
-    @return: open database connection
-    @rtype: sqlite3.Connection
-    """
-    if ".sqlite3" not in path_or_name.lower():
-        path_or_name = get_database_path(path_or_name)
+# def connect_to_database(path_or_name: str) -> sqlite3.Connection:
+#     """
+#     Connect to target database
+#     @param name: name of database
+#     @type name: str
+#     @return: open database connection
+#     @rtype: sqlite3.Connection
+#     """
+#     if ".sqlite3" not in path_or_name.lower():
+#         path_or_name = get_database_path(path_or_name)
+#
+#     try:
+#         con = sqlite3.connect(path_or_name)
+#     except Exception as e:
+#         logging.exception(f"Failed to connect to DB @ {path_or_name}")
+#         raise e
+#
+#     return con
 
+
+def connect_to_database_server(server_location: str, database_name: str, user: str, pw: str) -> pyodbc.Connection:
+    """
+    Connect to an SQL server
+    @param server_location: server path
+    @type server_location: str
+    @param database_name: name of database
+    @type database_name: str
+    @param user: username
+    @type user: str
+    @param pw: password
+    @type pw: str
+    @return: connection to database
+    @rtype: pyodbc.Connection
+    """
+    connector = f"DRIVER={{SQL Server}};" \
+                f"SERVER={server_location};" \
+                f"DATABASE={database_name};" \
+                f"UID={user};" \
+                f"PWD={pw}"
     try:
-        con = sqlite3.connect(path_or_name)
-    except Exception as e:
-        logging.exception(f"Failed to connect to DB @ {path_or_name}")
-        raise e
-
-    return con
+        connection = pyodbc.connect(connector)
+        return connection
+    except:
+        logging.exception(f"Failed to connect to db {server_location}, {database_name} as '{user}'")
+        raise
 
 
 class Table:
-    def __init__(self, connection: sqlite3.Connection, name: str, columns: List[Column]):
+    def __init__(self, connection: pyodbc.Connection, name: str, columns: List[Column]):
         super()
         self.connection = connection
         self.cursor = self.connection.cursor()
@@ -68,9 +95,7 @@ class Table:
         @rtype: bool
         """
         query = f"""
-SELECT name FROM sqlite_master
-WHERE type='table'
-AND name='{table_name}';
+SELECT name FROM sys.tables WHERE name='{table_name}';
 """
         self.cursor.execute(query)
         result = self.cursor.fetchone()
@@ -219,10 +244,10 @@ WHERE {self.primary_column_name} = {primary_key_value}
         primary = [x.name for x in self.columns if x.primary][0]
         others = [x.name for x in self.columns if x.name != primary]
         others_str = ", ".join(others)
-        query = f"SELECT MAX({self.primary_column_name}), {others_str} FROM {self.name}"
+        query = f"SELECT TOP 1 {primary}, {others_str} FROM {self.name} ORDER BY {primary} DESC"
         self.cursor .execute(query)
         result = self.cursor.fetchone()
-        if all([x is None for x in result]):
+        if result is None:
             return None
         return self.convert_query_result_to_database_entry(result)
 
@@ -247,12 +272,9 @@ WHERE {self.primary_column_name} = {primary_key_value}
         """
         primary = [x.name for x in self.columns if x.primary][0]
         query = f"""
-SELECT * FROM (
-  SELECT * 
-  FROM {self.name}
-  ORDER BY {primary} DESC
-  LIMIT {n}
-) ORDER BY {primary} DESC
+SELECT TOP {n} * 
+FROM {self.name}
+ORDER BY {primary} DESC
 """
         self.cursor.execute(query)
         results = self.cursor.fetchall()
@@ -267,38 +289,54 @@ SELECT * FROM (
         primary = [x.name for x in self.columns if x.primary][0]
         query = f"""
 DELETE FROM {self.name}
-  WHERE {primary} <= (
-    SELECT {primary}
-    FROM (
-      SELECT {primary}
-      FROM {self.name}
-      ORDER BY {primary} DESC
-      LIMIT 1 OFFSET {n}
-    )
-  )
+  WHERE {primary} NOT IN (
+    SELECT TOP {n} {primary}
+    FROM {self.name}
+    ORDER BY {primary} DESC
+  ) 
 """
         self.cursor.execute(query)
         self.connection.commit()
 
+    def drop(self):
+        """
+        Delete the table
+        """
+        foreign_keys = {x.name for x in self.columns if x.foreign_table}
+        # if any(foreign_keys):
+        #     for key in foreign_keys:
+        #         self.cursor.execute(f"ALTER TABLE {self.name} DROP CONSTRAINT {key}")
+        #         self.cursor.execute()
+        self.cursor.execute(f"DROP TABLE IF EXISTS {self.name}")
+        self.cursor.commit()
+
 
 class Database:
-    def __init__(self, name: str, tables: Dict[str, List[Column]], path: str = None):
+
+    def __init__(self, tables: Dict[str, List[Column]], server, database, username, password):
         """
         Initialize a database with a table
-        @param name: name of database or table within database
-        @type name: str
         @param tables: dictionary of table name to columns
         @type tables: dict[str, list[Column]]
-        @param path: optional direct path to DB file
-        @type path: str or None
+        @param server: path to server
+        @type server: str
+        @param database: database name
+        @type database: str
+        @param username: username to connect to db
+        @type username: str
+        @param password: password to connect to db
+        @type password:
         """
         # from library.controllers import get_logger
         super()
-        self.name = name
-        self.path = path
         self.table_definitions = tables
-        self.tables = {}
-        self.connection = None  # type: sqlite3.Connection
+        self.tables = {}  # type: dict[str, Table]
+        self.connection = None  # type: pyodbc.Connection
+
+        self.server = server
+        self.database = database
+        self.username = username
+        self.__password = password
 
     def create_tables(self):
         """
@@ -323,7 +361,12 @@ class Database:
         """
         Connect to the database
         """
-        self.connection = connect_to_database(self.path or self.name)
+        self.connection = connect_to_database_server(
+            self.server,
+            self.database,
+            self.username,
+            self.__password
+        )
         self.create_tables()
 
     def __enter__(self):
@@ -347,27 +390,39 @@ if __name__ == "__main__":
     table2_name = "table2"
     table1 = {
         table1_name: [
-            Column("timestamp", "text", "PRIMARY KEY"),
-            Column("state", "integer", "NOT NULL"),
-            Column("id", "text", "NOT NULL", table2_name)
+            Column("timestamp", "datetime", "PRIMARY KEY"),
+            Column("state", "int", "NOT NULL"),
+            Column("id", "varchar(50)", "NOT NULL", table2_name)
         ]
     }
     table2 = {
         table2_name: [
-            Column("id", "text", "PRIMARY KEY", "table1"),
+            Column("id", "varchar(50)", "PRIMARY KEY"),
             Column("meta", "text", "NOT NULL")
         ]
     }
     db_tables = OrderedDict()
-    db_tables.update(table1)
     db_tables.update(table2)
-    db_path = get_database_path(db_name)
-    if os.path.exists(db_path):
-        try:
-            os.remove(db_path)
-        except:
-            pass
-    with Database(db_name, db_tables) as db:
+    db_tables.update(table1)
+
+    server = 'localhost,1433'
+    database = 'model'
+    username = 'sa'
+    password = 'Ch1ck#nG0ose'
+
+    with Database(db_tables, server, database, username, password) as db:
+
+        table2 = db.get_table(table2_name)
+        for i in range(3):
+            data = [str(i), f"some metadata for {i}"]
+            print(f"Adding to table2: {data}")
+            table2.add_data(data)
+
+        # all_records = table2.get_all_records()
+        # sorted_records = sorted(all_records, key=lambda x: x[0])
+        # print(all_records)
+        # print(sorted_records)
+
         for _ in range(10):
             for i in range(3):
                 tmp_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f").split(".")
@@ -382,16 +437,5 @@ if __name__ == "__main__":
         # print(all_records)
         # print(sorted_records)
         # print(db.get_last_n_records(2))
-
-        print()
-        table2 = db.get_table(table2_name)
-        for i in range(3):
-            data = [str(i), f"some metadata for {i}"]
-            print(f"Adding to table2: {data}")
-            table2.add_data(data)
-        # all_records = table2.get_all_records()
-        # sorted_records = sorted(all_records, key=lambda x: x[0])
-        # print(all_records)
-        # print(sorted_records)
 
     print("done")

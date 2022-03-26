@@ -45,7 +45,10 @@
     }
   },
   "db": {
-    "path": "/tmp/some_db.sqlite3",
+    "server": "localhost,1433",
+    "database": "tempdb",
+    "username": "sa",
+    "password": "$SQL_PASSWORD",
     "tables": [
       {
         "name": "test_door",

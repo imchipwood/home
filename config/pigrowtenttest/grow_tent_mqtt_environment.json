@@ -19,38 +19,12 @@
     "path": "/home_volumes/grow_tent_mqtt_environment_test.sqlite3",
     "tables": [
       {
-        "name": "grow_tent_mqtt_environment_test",
-        "columns": [
-          {
-            "col_name": "timestamp",
-            "col_type": "text",
-            "col_key": "PRIMARY KEY"
-          },
-          {
-            "col_name": "id",
-            "col_type": "text",
-            "col_key": "NOT NULL",
-            "foreign_table_key": "grow_tent_mqtt_metadata_test"
-          },
-          {
-            "col_name": "temperature",
-            "col_type": "real",
-            "col_key": "NOT NULL"
-          },
-          {
-            "col_name": "humidity",
-            "col_type": "real",
-            "col_key": "NOT NULL"
-          }
-        ]
-      },
-      {
         "name": "grow_tent_mqtt_metadata_test",
         "columns": [
           {
             "col_name": "id",
-            "col_type": "text",
-            "col_key": "PRIMARY KEY",
+            "col_type": "varchar(50)",
+            "col_key": "PRIMARY KEY"
           },
           {
             "col_name": "date_added",
@@ -65,6 +39,32 @@
           {
             "col_name": "sensor_type",
             "col_type": "text",
+            "col_key": "NOT NULL"
+          }
+        ]
+      },
+      {
+        "name": "grow_tent_mqtt_environment_test",
+        "columns": [
+          {
+            "col_name": "timestamp",
+            "col_type": "datetime",
+            "col_key": "PRIMARY KEY"
+          },
+          {
+            "col_name": "id",
+            "col_type": "varchar(50)",
+            "col_key": "NOT NULL",
+            "foreign_table_key": "grow_tent_mqtt_metadata_test"
+          },
+          {
+            "col_name": "temperature",
+            "col_type": "real",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "humidity",
+            "col_type": "real",
             "col_key": "NOT NULL"
           }
         ]

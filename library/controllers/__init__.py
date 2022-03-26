@@ -126,9 +126,12 @@ class BaseController(ABC):
         """
         from library.data.database import Database
         db = Database(
-            self.config.db_name,
             self.config.db_tables,
-            self.config.db_path)
+            self.config.db_server,
+            self.config.db_database_name,
+            self.config.db_username,
+            self.config.db_password
+        )
         db.connect()
         return db
 
@@ -183,7 +186,7 @@ class BaseController(ABC):
         @param column_name: (Optional) target column name, if None, returns whole row
         @type column_name: str or None
         """
-        if not self.config.db_name:
+        if not self.config.db_enabled:
             return None
 
         self.logger.debug(f"Opening DB {self.config.db_name}")

@@ -125,18 +125,27 @@ class MqttEnvironmentController(BaseController):
             self.logger.warning(f"Some error while converting string payload to dict: {e}")
             return
 
+        # Get message data ready
+        # ISO8601 format: YYYY-MM-DD HH:MM:SS.SSS
+        tmp_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f").split(".")
+        timestamp = tmp_timestamp[0] + "." + tmp_timestamp[1][:3]
+        temperature = message_data.get('temperature')
+        humidity = message_data.get('humidity')
+        msg_id = message_data.get('id', msg.topic)
+
         try:
             # write to database
             with self.db as db:
-                # ISO8601 format: YYYY-MM-DD HH:MM:SS.SSS
-                tmp_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f").split(".")
-                timestamp = tmp_timestamp[0] + "." + tmp_timestamp[1][:3]
-                temperature = message_data.get('temperature')
-                humidity = message_data.get('humidity')
-                msg_id = message_data.get('id', msg.topic)
+                # first check if there's a corresponding entry in the metadata table (if it exists)
+                if len(db.tables) > 1:
+                    meta_table = list(db.tables.values())[0]
+                    if not meta_table.get_record(meta_table.primary_column_name):
+                        meta_data = [msg_id, timestamp]
+                        meta_data.extend(["" for _ in len(meta_table.columns[2:])])
+                        meta_table.add_data(meta_data)
 
-                formatted = f"{msg_id} @ {timestamp}: {temperature}f, {humidity}%"
-                self.logger.info(formatted)
+                formatted_message = f"{msg_id} @ {timestamp}: {temperature}f, {humidity}%"
+                self.logger.info(formatted_message)
 
                 table_name = self.config.mqtt_config.db_table_name
                 table = db.get_table(table_name)

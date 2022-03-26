@@ -16,19 +16,47 @@
     }
   },
   "db": {
-    "path": "/tmp/some_db.sqlite3",
+    "server": "localhost,1433",
+    "database": "tempdb",
+    "username": "sa",
+    "password": "$SQL_PASSWORD",
     "tables": [
+      {
+        "name": "test_mqtt_metadata",
+        "columns": [
+          {
+            "col_name": "id",
+            "col_type": "varchar(50)",
+            "col_key": "PRIMARY KEY"
+          },
+          {
+            "col_name": "date_added",
+            "col_type": "datetime",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "sensor_name",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          },
+          {
+            "col_name": "sensor_type",
+            "col_type": "text",
+            "col_key": "NOT NULL"
+          }
+        ]
+      },
       {
         "name": "test_mqtt_environment",
         "columns": [
           {
             "col_name": "timestamp",
-            "col_type": "text",
+            "col_type": "datetime",
             "col_key": "PRIMARY KEY"
           },
           {
             "col_name": "id",
-            "col_type": "text",
+            "col_type": "varchar(50)",
             "col_key": "NOT NULL",
             "foreign_table_key": "test_mqtt_metadata"
           },
@@ -40,31 +68,6 @@
           {
             "col_name": "humidity",
             "col_type": "real",
-            "col_key": "NOT NULL"
-          }
-        ]
-      },
-      {
-        "name": "test_mqtt_metadata",
-        "columns": [
-          {
-            "col_name": "id",
-            "col_type": "text",
-            "col_key": "PRIMARY KEY"
-          },
-          {
-            "col_name": "date_added",
-            "col_type": "text",
-            "col_key": "NOT NULL"
-          },
-          {
-            "col_name": "sensor_name",
-            "col_type": "text",
-            "col_key": "NOT NULL"
-          },
-          {
-            "col_name": "sensor_type",
-            "col_type": "text",
             "col_key": "NOT NULL"
           }
         ]
