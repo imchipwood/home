@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import sqlite3
@@ -346,9 +347,9 @@ if __name__ == "__main__":
     table2_name = "table2"
     table1 = {
         table1_name: [
-            Column("timestamp", "integer", "PRIMARY KEY"),
+            Column("timestamp", "text", "PRIMARY KEY"),
             Column("state", "integer", "NOT NULL"),
-            Column("id", "text", "NOT NULL")
+            Column("id", "text", "NOT NULL", table2_name)
         ]
     }
     table2 = {
@@ -367,24 +368,30 @@ if __name__ == "__main__":
         except:
             pass
     with Database(db_name, db_tables) as db:
-        data = [int(time.time()), randint(0, 100), "someid"]
-        print(f"Adding to table1: {data}")
-        table = db.get_table(table1_name)
-        table.add_data(data)
+        for _ in range(10):
+            for i in range(3):
+                tmp_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f").split(".")
+                timestamp = tmp_timestamp[0] + "." + tmp_timestamp[1][:3]
+                data = [timestamp, randint(0, 100), str(i)]
+                print(f"Adding to table1: {data}")
+                table = db.get_table(table1_name)
+                table.add_data(data)
+                time.sleep(0.1)
         all_records = table.get_all_records()
-        sorted_records = sorted(all_records, key=lambda x: x[0])
+        # sorted_records = sorted(all_records, key=lambda x: x[0])
         # print(all_records)
-        print(sorted_records)
+        # print(sorted_records)
         # print(db.get_last_n_records(2))
 
         print()
         table2 = db.get_table(table2_name)
-        data = ["someid", "some metadata"]
-        print(f"Adding to table2: {data}")
-        table2.add_data(data)
-        all_records = table2.get_all_records()
-        sorted_records = sorted(all_records, key=lambda x: x[0])
+        for i in range(3):
+            data = [str(i), f"some metadata for {i}"]
+            print(f"Adding to table2: {data}")
+            table2.add_data(data)
+        # all_records = table2.get_all_records()
+        # sorted_records = sorted(all_records, key=lambda x: x[0])
         # print(all_records)
-        print(sorted_records)
+        # print(sorted_records)
 
     print("done")

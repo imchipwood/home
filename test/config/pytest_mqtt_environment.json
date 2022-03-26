@@ -27,9 +27,10 @@
             "col_key": "PRIMARY KEY"
           },
           {
-            "col_name": "sensor_name",
+            "col_name": "id",
             "col_type": "text",
-            "col_key": "NOT NULL"
+            "col_key": "NOT NULL",
+            "foreign_table_key": "test_mqtt_metadata"
           },
           {
             "col_name": "temperature",
@@ -49,8 +50,7 @@
           {
             "col_name": "id",
             "col_type": "text",
-            "col_key": "PRIMARY KEY",
-            "foreign_table_key": "test_mqtt_environment"
+            "col_key": "PRIMARY KEY"
           },
           {
             "col_name": "date_added",
