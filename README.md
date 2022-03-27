@@ -44,7 +44,16 @@ became clear that using an SQL server instance would be more appropriate.
 I typically run sql server in a docker container:
 
 ```bash
-docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=<your password here> -p 1433:1433 --name sql_server -v D:/dev/home/sql_docker_testing/data:/var/opt/mssql/data -v D:/dev/home/sql_docker_testing/log:/var/opt/mssql/log -v D:/dev/home/sql_docker_testing/secrets:/var/opt/mssql/secrets --restart always -d mcr.microsoft.com/mssql/server:2019-latest
+docker run -e ACCEPT_EULA=Y \
+  -e MSSQL_SA_PASSWORD=<your password here> \
+  -p 1433:1433 \
+  --name sql_server \
+  -v D:/dev/home/sql_docker_testing/data:/var/opt/mssql/data \
+  -v D:/dev/home/sql_docker_testing/log:/var/opt/mssql/log \
+  -v D:/dev/home/sql_docker_testing/secrets:/var/opt/mssql/secrets \
+  --restart always \
+  -d \
+  mcr.microsoft.com/mssql/server:2019-latest
 ```
 
 Note that SQL Server has some password requirements - min 8 chars, must include number, capital letter, and symbol.
