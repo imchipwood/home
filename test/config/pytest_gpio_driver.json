@@ -16,7 +16,7 @@
     }
   },
   "db": {
-    "server": "localhost,1433",
+    "server": "192.168.1.30,1433",
     "database": "tempdb",
     "username": "sa",
     "password": "$SQL_PASSWORD",
