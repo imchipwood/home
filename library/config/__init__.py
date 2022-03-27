@@ -3,7 +3,7 @@ import json
 import os
 from typing import List, Type, Union, Dict
 
-from library import CONFIG_DIR, TEST_CONFIG_DIR, CONFIG_TYPE, CONTROLLER_TYPE
+from library import HOME_DIR, CONFIG_DIR, TEST_CONFIG_DIR, CONFIG_TYPE, CONTROLLER_TYPE
 # from library.data.database import
 
 
@@ -79,6 +79,7 @@ class BaseConfiguration:
     """
     from library.data.database import Column
     BASE_CONFIG_DIR = None
+    _SECRETS_FILE = os.path.join(HOME_DIR, "secrets.json")
 
     def __init__(self: CONFIG_TYPE, config_path: str, debug: bool = False):
         """
@@ -93,12 +94,23 @@ class BaseConfiguration:
         self._config_path = ""
         self._config = {}
         self.config = config_path
+        self._load_secrets()
 
     def __repr__(self) -> str:
         """
         @rtype: str
         """
         return json.dumps(self.config, indent=2)
+
+    def _load_secrets(self):
+        """
+        Load secrets/environment variables from a file
+        """
+        if os.path.exists(self._SECRETS_FILE):
+            with open(self._SECRETS_FILE, 'r') as inf:
+                secrets = json.load(inf)
+                for key, value in secrets.items():
+                    os.environ[key] = value
 
     @classmethod
     def normalize_config_path(cls, config_path) -> str:
