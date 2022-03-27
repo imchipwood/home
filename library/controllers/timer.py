@@ -74,13 +74,13 @@ class TimerController(BaseController):
         """
         Add the current state to the database
         """
-        if not self.config.db_name:
+        if not self.config.db_enabled:
             return
 
         table_name = self.config.mqtt_config.db_table_name
         if not table_name:
             return
-        with Database(self.config.db_name, self.config.db_tables, self.config.db_path) as db:
+        with self.db as db:
             # Create the entry
             data = [int(time.time()), GarageDoorStates.OPEN, int(False), int(False)]
             self.logger.debug(f"Adding data to db: {data}")

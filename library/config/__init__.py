@@ -222,44 +222,6 @@ class BaseConfiguration:
             return ""
         return os.path.splitext(os.path.basename(db_path))[0]
 
-    # def _get_table_definition(self, table_name: str) -> dict:
-    #     """
-    #     Get the dictionary of table information for the given table name
-    #     @param table_name: name of database table
-    #     @type table_name: str
-    #     @return: dictionary of table information
-    #     @rtype: dict
-    #     """
-    #     table_definitions = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_TABLES)
-    #     if not table_definitions:
-    #         return {}
-    #     for table_definition in table_definitions:
-    #         if table_definition.get(BaseConfigKeys.TABLE_NAME) == table_name:
-    #             return table_definition
-    #     return {}
-    #
-    # def get_db_columns_for_table(self, table_name: str) -> Dict[str, List[Column]]:
-    #     """
-    #     Get a list of database Columns for the given table name
-    #     @param table_name: name of database table
-    #     @type table_name: str
-    #     @return: the list of columns for the given table name
-    #     @rtype: dict[str, list[Column]]
-    #     """
-    #     table_definition = self._get_table_definition(table_name)
-    #     if not table_definition:
-    #         return {}
-    #     from library.data.database import Column
-    #     columns = []
-    #     for column_dict in table_definition.get(BaseConfigKeys.DB_COLUMNS, []):
-    #         column = Column(
-    #             column_dict.get(BaseConfigKeys.DB_COLUMN_NAME, ""),
-    #             column_dict.get(BaseConfigKeys.DB_COLUMN_TYPE, ""),
-    #             column_dict.get(BaseConfigKeys.DB_COLUMN_KEY, ""),
-    #         )
-    #         columns.append(column)
-    #     return {table_name: columns}
-
     @property
     def db_tables(self) -> Dict[str, List[Column]]:
         """

@@ -130,7 +130,7 @@ class GPIOMonitorController(BaseController):
         @rtype: bool
         """
         # Default is to publish
-        if not self.config.db_name:
+        if not self.config.db_enabled:
             return True
 
         # Database exists - check previous state against current
@@ -161,8 +161,8 @@ class GPIOMonitorController(BaseController):
         convo_id = self.sensor.get_id()
 
         table_name = self.config.mqtt_config.db_table_name
-        if self.config.db_name and table_name:
-            with Database(self.config.db_name, self.config.db_tables, self.config.db_path) as db:
+        if self.config.db_enabled and table_name:
+            with self.db as db:
                 # Create the entry
                 raw_data = {
                     DatabaseKeys.TIMESTAMP: int(time.time()),

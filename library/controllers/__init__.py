@@ -161,10 +161,10 @@ class BaseController(ABC):
         @return: entry for target convo_id if found, else None
         @rtype: DatabaseEntry or None
         """
-        if not self.config.db_name or convo_id in ["", None]:
+        if not self.config.db_enabled or convo_id in ["", None]:
             return None
 
-        self.logger.debug(f"Opening DB {self.config.db_name}")
+        self.logger.debug(f"Opening DB {self.config.db_database_name}")
         with self.db as db:
             table = db.get_table(self.db_table_name)
             records = table.get_all_records()
@@ -189,7 +189,7 @@ class BaseController(ABC):
         if not self.config.db_enabled:
             return None
 
-        self.logger.debug(f"Opening DB {self.config.db_name}")
+        self.logger.debug(f"Opening DB {self.config.db_enabled}")
         with self.db as db:
             table = db.get_table(self.db_table_name)
             record = table.get_latest_record()
@@ -212,10 +212,10 @@ class BaseController(ABC):
         @return: list of values from last two entries
         @rtype: list
         """
-        if not self.config.db_name:
+        if not self.config.db_enabled:
             return []
 
-        self.logger.debug(f"Opening DB {self.config.db_name}")
+        self.logger.debug(f"Opening DB {self.config.db_database_name}")
         with self.db as db:
             table = db.get_table(self.db_table_name)
             records = table.get_last_n_records(2)

@@ -233,6 +233,8 @@ WHERE {self.primary_column_name} = {primary_key_value}
         query = f"""SELECT * FROM {self.name} WHERE {self.primary_column_name} = {primary_key_value}"""
         self.cursor.execute(query)
         result = self.cursor.fetchone()
+        if not result:
+            return None
         return self.convert_query_result_to_database_entry(result)
 
     def get_latest_record(self) -> DatabaseEntry or None:

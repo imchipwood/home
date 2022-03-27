@@ -136,12 +136,12 @@ class MqttEnvironmentController(BaseController):
         try:
             # write to database
             with self.db as db:
-                # first check if there's a corresponding entry in the metadata table (if it exists)
+                # meta table available?
                 if len(db.tables) > 1:
                     meta_table = list(db.tables.values())[0]
+                    # check if meta table has entry for this primary key
                     if not meta_table.get_record(meta_table.primary_column_name):
-                        meta_data = [msg_id, timestamp]
-                        meta_data.extend(["" for _ in len(meta_table.columns[2:])])
+                        meta_data = [msg_id, timestamp] + ["" for _ in range(len(meta_table.columns[2:]))]
                         meta_table.add_data(meta_data)
 
                 formatted_message = f"{msg_id} @ {timestamp}: {temperature}f, {humidity}%"
