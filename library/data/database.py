@@ -58,7 +58,8 @@ def connect_to_database_server(server_location: str, database_name: str, user: s
     @return: connection to database
     @rtype: pyodbc.Connection
     """
-    linux_driver = "/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.0.so.1.1"
+    # linux_driver = "/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.0.so.1.1"
+    linux_driver = "FreeTDS"
     win_driver = "SQL_SERVER"
     driver = win_driver
     if "linux" in sys.platform:
