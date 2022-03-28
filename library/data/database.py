@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import pyodbc
+import sys
 from typing import List, Dict
 
 from library import HOME_DIR
@@ -57,7 +58,12 @@ def connect_to_database_server(server_location: str, database_name: str, user: s
     @return: connection to database
     @rtype: pyodbc.Connection
     """
-    connector = f"DRIVER={{SQL Server}};" \
+    linux_driver = "/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.0.so.1.1"
+    win_driver = "SQL_SERVER"
+    driver = win_driver
+    if "linux" in sys.platform:
+        driver = linux_driver
+    connector = f"DRIVER={{{driver}}};" \
                 f"SERVER={server_location};" \
                 f"DATABASE={database_name};" \
                 f"UID={user};" \
