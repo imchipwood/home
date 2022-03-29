@@ -58,19 +58,22 @@ def connect_to_database_server(server_location: str, database_name: str, user: s
     @return: connection to database
     @rtype: pyodbc.Connection
     """
-    # linux_driver = "/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.0.so.1.1"
-    linux_driver = "FreeTDS"
+    # linux_driver = "FreeTDS"
+    # linux_driver = "ODBC Driver 17 for SQL Server"
+    linux_driver = "ODBC Driver 18 for SQL Server"
     win_driver = "SQL_SERVER"
     driver = win_driver
     if "linux" in sys.platform:
         driver = linux_driver
-    connector = f"DRIVER={{{driver}}};" \
-                f"SERVER={server_location};" \
-                f"DATABASE={database_name};" \
-                f"UID={user};" \
-                f"PWD={pw}"
     try:
-        connection = pyodbc.connect(connector)
+        connection = pyodbc.connect(
+            driver=f"{{{driver}}}",
+            server=server_location,
+            database=database_name,
+            uid=user,
+            pwd=pw,
+            TrustServerCertificate="yes"
+        )
         return connection
     except:
         logging.exception(f"Failed to connect to db {server_location}, {database_name} as '{user}'")
