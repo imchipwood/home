@@ -4,7 +4,7 @@ from threading import Thread
 
 from library import GarageDoorStates
 from library.controllers import BaseController, get_logger
-from library.data.database import Database
+from library.data.central_database import Database
 
 if False:
     from library.config.timer import TimerConfig

@@ -4,7 +4,7 @@ from typing import List, Dict
 import pytest
 
 from library.data import Column
-from library.data.database import Database, get_database_path
+from library.data.central_database import Database, get_database_path
 
 DB_PATH = get_database_path("TEST_DB")
 

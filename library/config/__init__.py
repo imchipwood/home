@@ -77,7 +77,7 @@ class BaseConfiguration:
     """
     Base configuration class for all sensor/controller configs to derive from
     """
-    from library.data.database import Column
+    from library.data import Column
     BASE_CONFIG_DIR = None
     _SECRETS_FILE = os.path.join(HOME_DIR, "secrets.json")
 
@@ -241,7 +241,7 @@ class BaseConfiguration:
         @return: dictionary of table names to columns
         @rtype: dict[str, list[Column]]
         """
-        from library.data.database import Column
+        from library.data import Column
         table_definitions = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_TABLES)
         tables = OrderedDict()
         for table_definition in table_definitions:
@@ -264,7 +264,7 @@ class BaseConfiguration:
         @return: list of database column objects
         @rtype: list[Column]
         """
-        from library.data.database import Column
+        from library.data import Column
         column_data = self.config.get(BaseConfigKeys.DB)
         if not column_data:
             return []

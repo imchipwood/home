@@ -41,7 +41,7 @@ def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Lo
 
 class BaseController(ABC):
     """Base class for all controllers to extend"""
-    from library.data.database import Database, Table
+    from library.data.central_database import Database, Table
     from library.config import BaseConfiguration
 
     def __init__(self: CONTROLLER_TYPE, config: CONFIG_TYPE or BaseConfiguration, debug: bool = False):
@@ -124,7 +124,7 @@ class BaseController(ABC):
         Get the Database object for this controller
         @rtype: Database
         """
-        from library.data.database import Database
+        from library.data.central_database import Database
         db = Database(
             self.config.db_tables,
             self.config.db_server,
