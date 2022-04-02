@@ -8,10 +8,8 @@ import time
 from threading import Thread
 
 from library import GarageDoorStates
-from library.communication.mqtt import MQTTClient
 from library.config import DatabaseKeys
 from library.controllers import BaseController, get_logger
-from library.data.central_database import Database
 from library.sensors.gpio_monitor import GPIOMonitor
 
 if False:

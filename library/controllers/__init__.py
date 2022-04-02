@@ -41,8 +41,8 @@ def get_logger(name: str, debug_flag: bool, log_path: str or None) -> logging.Lo
 
 class BaseController(ABC):
     """Base class for all controllers to extend"""
-    from library.data.central_database import Database, Table
     from library.config import BaseConfiguration
+    from library.data.database import BaseDatabase, BaseTable
 
     def __init__(self: CONTROLLER_TYPE, config: CONFIG_TYPE or BaseConfiguration, debug: bool = False):
         super()
@@ -119,10 +119,10 @@ class BaseController(ABC):
         return self.config.db_enabled
 
     @property
-    def db(self) -> Database:
+    def db(self) -> BaseDatabase:
         """
         Get the Database object for this controller
-        @rtype: Database
+        @rtype: BaseDatabase
         """
         if self.config.db_type == DBType.CENTRAL:
             from library.data.central_database import Database
@@ -144,11 +144,11 @@ class BaseController(ABC):
         return db
 
     @property
-    def db_table(self) -> Table:
+    def db_table(self) -> BaseTable:
         """
         Get the table for writing/reading mqtt data
         @return: Table
-        @rtype: Table
+        @rtype: BaseTable
         """
         return self.db.get_table(self.db_table_name)
 
