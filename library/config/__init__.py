@@ -34,6 +34,7 @@ class BaseConfigKeys:
     DB = "db"
     DB_TABLES = "tables"
     DB_PATH = "path"
+    DB_TYPE = "type"
     DB_COLUMNS = "columns"
     DB_COLUMN_NAME = "col_name"
     DB_COLUMN_TYPE = "col_type"
@@ -224,6 +225,14 @@ class BaseConfiguration:
         return bool(self.config.get(BaseConfigKeys.DB))
 
     @property
+    def db_type(self) -> str:
+        """
+
+        @return:
+        """
+        return self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_TYPE)
+
+    @property
     def db_name(self) -> str:
         """
         @return: database name
@@ -311,6 +320,14 @@ class BaseConfiguration:
         """
         password = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_PASSWORD, "")
         return os.environ.get(password[1:], "") if password.startswith("$") else password
+
+    @property
+    def db_path(self) -> str:
+        """
+        @return: database path
+        @rtype: str
+        """
+        return self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_PATH)
 
 
 class ConfigurationHandler(BaseConfiguration):

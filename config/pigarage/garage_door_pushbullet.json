@@ -27,6 +27,7 @@
     }
   },
   "db": {
+    "type": "local",
     "path": "/home/cpw/dev/home/data/garage_door_monitor.sqlite3",
     "tables": [
       {

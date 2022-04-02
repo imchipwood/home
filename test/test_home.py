@@ -1,9 +1,15 @@
 import timeit
 from threading import Thread
 
+import pytest
+
+from library import IS_ARM
 from library.home import execute
 
 MAX_THREAD_TIMEOUT = 5.0
+
+if not IS_ARM:
+    pytestmark = pytest.mark.skip("Not running on raspberry pi, can't use camera")
 
 
 def test_execute():

@@ -1,11 +1,12 @@
 import os
+import sys
 from typing import List, Dict
 
 import pytest
 
-from library import HOME_DIR
+from library import HOME_DIR, IS_ARM
 from library.data import Column
-from library.data.central_database import Database, get_database_path
+from library.data.central_database import Database
 
 DB0_NAME = "PITEST_DB0"
 DB1_NAME = "PITEST_DB1"
@@ -35,6 +36,10 @@ server = "localhost,1433"
 database = "tempdb"
 username = "sa"
 password = os.environ.get("SQL_PASSWORD", "")
+
+
+if IS_ARM:
+    pytestmark = pytest.mark.skip("ARM system - no SQL Server driver")
 
 
 def arrange_data_for_insert(data_to_add: List[int or str]) -> List[tuple]:

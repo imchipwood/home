@@ -26,10 +26,9 @@
     }
   },
   "db": {
-    "server": "192.168.1.30,1433",
-    "database": "tempdb",
-    "username": "sa",
-    "password": "$SQL_PASSWORD",
+    "type": "local",
+    "path": "/tmp/some_db.sqlite3",
+    "database": "test_door",
     "tables": [
       {
         "name": "test_door",

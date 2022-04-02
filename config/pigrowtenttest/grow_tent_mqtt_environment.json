@@ -16,7 +16,11 @@
     }
   },
   "db": {
-    "path": "/home_volumes/grow_tent_mqtt_environment_test.sqlite3",
+    "type": "central",
+    "server": "192.168.1.30,1433",
+    "database": "tempdb",
+    "username": "sa",
+    "password": "$SQL_PASSWORD",
     "tables": [
       {
         "name": "grow_tent_mqtt_metadata_test",

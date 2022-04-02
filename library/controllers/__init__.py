@@ -8,7 +8,7 @@ from typing import List, Union
 from library import setup_logging, CONFIG_TYPE, CONTROLLER_TYPE
 from library.communication.mqtt import MQTTClient
 from library.config import DatabaseKeys
-from library.data import DatabaseEntry
+from library.data import DatabaseEntry, DBType
 
 RUNNING = False
 
@@ -124,14 +124,22 @@ class BaseController(ABC):
         Get the Database object for this controller
         @rtype: Database
         """
-        from library.data.central_database import Database
-        db = Database(
-            self.config.db_tables,
-            self.config.db_server,
-            self.config.db_database_name,
-            self.config.db_username,
-            self.config.db_password
-        )
+        if self.config.db_type == DBType.CENTRAL:
+            from library.data.central_database import Database
+            db = Database(
+                self.config.db_tables,
+                self.config.db_server,
+                self.config.db_database_name,
+                self.config.db_username,
+                self.config.db_password
+            )
+        else:
+            from library.data.local_database import Database
+            db = Database(
+                self.config.db_tables,
+                self.config.db_database_name,
+                self.config.db_path
+            )
         db.connect()
         return db
 

@@ -2,6 +2,11 @@ import json
 from typing import List
 
 
+class DBType:
+    LOCAL = "local"
+    CENTRAL = "central"
+
+
 class Column:
     def __init__(self, col_name: str, col_type: str, col_key: str, foreign_table: str = None):
         """

@@ -219,13 +219,8 @@ DELETE FROM {self.name}
         """
         Delete the table
         """
-        foreign_keys = {x.name for x in self.columns if x.foreign_table}
-        # if any(foreign_keys):
-        #     for key in foreign_keys:
-        #         self.cursor.execute(f"ALTER TABLE {self.name} DROP CONSTRAINT {key}")
-        #         self.cursor.execute()
         self.cursor.execute(f"DROP TABLE IF EXISTS {self.name}")
-        self.cursor.commit()
+        self.connection.commit()
 
 
 class Database(BaseDatabase):

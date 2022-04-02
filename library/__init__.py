@@ -2,6 +2,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
 from typing import TypeVar
+import platform
 
 HOME_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 CONFIG_DIR = os.path.join(HOME_DIR, "config")
@@ -9,6 +10,8 @@ TEST_DIR = os.path.join(HOME_DIR, "test")
 TEST_CONFIG_DIR = os.path.join(TEST_DIR, "config")
 CONFIG_DIRS = [CONFIG_DIR, TEST_CONFIG_DIR]
 LOG_DIR = os.path.join(HOME_DIR, "log")
+
+IS_ARM = "arm" in platform.machine().lower()
 
 
 CONFIG_TYPE = TypeVar('CONFIG_TYPE', bound='BaseConfiguration')
