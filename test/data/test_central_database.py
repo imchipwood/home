@@ -3,10 +3,9 @@ from typing import List, Dict
 
 import pytest
 
+from library import HOME_DIR
 from library.data import Column
 from library.data.central_database import Database, get_database_path
-
-DB_PATH = get_database_path("TEST_DB")
 
 DB0_NAME = "PITEST_DB0"
 DB1_NAME = "PITEST_DB1"
@@ -45,17 +44,32 @@ def arrange_data_for_insert(data_to_add: List[int or str]) -> List[tuple]:
 
 
 def remove_dbs():
-    if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
-
-
-def teardown_function(function):
     with Database({}, server, database, username, password) as db:
         cursor = db.connection.cursor()
         for table_name in TABLE_NAMES:
             query = f"DROP TABLE IF EXISTS {table_name};"
             cursor.execute(query)
             db.connection.commit()
+
+
+def setup_module(module):
+    global password
+    tmp_pw = os.environ.get("SQL_PASSWORD")
+    secrets_path = os.path.join(HOME_DIR, "secrets.json")
+    if tmp_pw is None and not os.path.exists(secrets_path):
+        raise Exception("Can't figure out password - not set in environment and no secrets.json found")
+
+    import json
+    with open(secrets_path, 'r') as inf:
+        data = json.load(inf)
+        password = data.get("SQL_PASSWORD")
+
+    if not password:
+        raise Exception("Found secrets.json but no SQL_PASSWORD in it")
+
+
+def teardown_function(function):
+    remove_dbs()
 
 
 def teardown_module():

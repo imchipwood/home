@@ -1,4 +1,5 @@
 -r requirements_nopi.txt
 picamera==1.13
 RPi.GPIO>=0.7.0
+sqlite3==2.6.0
 git+https://github.com/imchipwood/Adafruit_Python_DHT

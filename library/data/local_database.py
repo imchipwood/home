@@ -231,13 +231,13 @@ DELETE FROM {self.name}
 class Database(BaseDatabase):
     TABLE_CLASS = Table
 
-    def __init__(self, name: str, tables: Dict[str, List[Column]], path: str = None):
+    def __init__(self, tables: Dict[str, List[Column]], name: str, path: str = None):
         """
         Initialize a database with a table
-        @param name: name of database or table within database
-        @type name: str
         @param tables: dictionary of table name to columns
         @type tables: dict[str, list[Column]]
+        @param name: name of database or table within database
+        @type name: str
         @param path: optional direct path to DB file
         @type path: str or None
         """
