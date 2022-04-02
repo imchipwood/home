@@ -302,7 +302,14 @@ class BaseConfiguration:
         @return: database name
         @rtype: str
         """
-        return self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_DATABASE)
+        db_name = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_DATABASE)
+        if db_name:
+            return db_name
+
+        if self.db_path:
+            return os.path.splitext(os.path.basename(self.db_path))[0]
+
+        return ""
 
     @property
     def db_username(self) -> str:

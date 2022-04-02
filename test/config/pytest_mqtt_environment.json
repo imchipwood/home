@@ -18,7 +18,6 @@
   "db": {
     "type": "local",
     "path": "/tmp/some_db.sqlite3",
-    "database": "test_env",
     "tables": [
       {
         "name": "test_mqtt_metadata",

@@ -18,7 +18,6 @@
   "db": {
     "type": "local",
     "path": "/tmp/some_db.sqlite3",
-    "database": "test_door",
     "tables": [
       {
         "name": "test_door",
