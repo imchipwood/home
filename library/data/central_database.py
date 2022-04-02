@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import platform
 import pyodbc
 import sys
 from typing import List, Dict
@@ -59,17 +60,21 @@ def connect_to_database_server(server_location: str, database_name: str, user: s
     @return: connection to database
     @rtype: pyodbc.Connection
     """
-    # linux_driver = "/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.0.so.1.1"
-    linux_driver = "FreeTDS"
+    linux_driver = "/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.0.so.1.1"
+    # linux_driver_mint = "FreeTDS"
     win_driver = "SQL SERVER"
     driver = win_driver
+    extra = ""
     if "linux" in sys.platform:
         driver = linux_driver
+        extra = "TrustServerCertificate=yes"
     connector = f"DRIVER={{{driver}}};" \
                 f"SERVER={server_location};" \
                 f"DATABASE={database_name};" \
                 f"UID={user};" \
                 f"PWD={pw}"
+    if extra:
+        connector += f";{extra}"
     try:
         connection = pyodbc.connect(connector)
         return connection
