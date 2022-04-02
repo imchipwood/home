@@ -115,7 +115,7 @@ def setup_module():
     for sensor in CONFIGURATION_HANDLER:
         if sensor and sensor.db_enabled:
             with sensor.db as db:
-                for table in list(reversed(db.tables.values())):
+                for table in reversed(list(db.tables.values())):
                     table.drop()
 
 
@@ -125,7 +125,7 @@ def teardown_module():
             sensor.cleanup()
             if sensor.db_enabled:
                 with sensor.db as db:
-                    for table in list(reversed(db.tables.values())):
+                    for table in reversed(list(db.tables.values())):
                         table.drop()
 
 
