@@ -3,6 +3,7 @@ paho-mqtt==1.2
 paramiko==2.4.2
 pushbullet.py==0.11.0
 pyephem==3.7.6.0
+pysqlite3==0.4.7
 pytest==3.9.1
 pytest-mock==2.0.0
 setuptools>=18.5
