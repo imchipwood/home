@@ -12,6 +12,9 @@ import datetime
 from library.communication.mqtt import get_mqtt_error_message, MQTTError
 from library.controllers import BaseController, get_logger
 
+if False:
+    from library.config.mqtt_environment import MqttEnvironmentConfig
+
 
 class MqttEnvironmentController(BaseController):
     """
@@ -20,6 +23,8 @@ class MqttEnvironmentController(BaseController):
     """
     def __init__(self, config, debug=False):
         super().__init__(config, debug)
+
+        self.config = config  # type: MqttEnvironmentConfig
 
         self.logger = get_logger(__name__, debug, config.log)
 
@@ -133,7 +138,9 @@ class MqttEnvironmentController(BaseController):
                 formatted = f"{msg_id} @ {timestamp}: {temperature}f, {humidity}%"
                 self.logger.info(formatted)
 
-                db.add_data([timestamp, msg_id, temperature, humidity])
+                table_name = self.config.mqtt_config.db_table_name
+                table = db.get_table(table_name)
+                table.add_data([timestamp, msg_id, temperature, humidity])
         except Exception as e:
             # it's possible for on_message to fire for two messages nearly simultaneously
             # and wind up with the same timestamp, which is the DBs primary key.

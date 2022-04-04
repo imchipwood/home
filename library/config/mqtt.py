@@ -325,3 +325,13 @@ class MQTTConfig(MQTTBaseConfig):
             for name, topic in self.topics.items()
             if topic.pubsub in [PubSubKeys.SUBSCRIBE, PubSubKeys.BOTH]
         }
+
+    @property
+    def db_table_name(self) -> str or None:
+        """
+        Get the database table name to write data to
+        @return: database table name for writing
+        @rtype: str or None
+        """
+        # if no database table name is found, do not write data
+        return self.config.get(BaseConfigKeys.TABLE_NAME)

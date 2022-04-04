@@ -13,6 +13,9 @@ from library.controllers import BaseController, get_logger
 from library.sensors import SensorError
 from library.sensors.environment import EnvironmentSensor
 
+if False:
+    from library.config.environment import EnvironmentConfig
+
 
 class EnvironmentController(BaseController):
     """
@@ -28,6 +31,8 @@ class EnvironmentController(BaseController):
         @type debug: bool
         """
         super().__init__(config, debug)
+
+        self.config = config  # type: EnvironmentConfig
 
         self.logger = get_logger(__name__, debug, config.log)
 

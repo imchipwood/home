@@ -1,0 +1,8 @@
+try just this one first
+	windows 11 sdk
+others
+	windows universal c runtime
+	c++ build tools core features
+	msvc v142 - vs 2019 c++ x64/x86 build tool..
+	c++ 2019 redistributable update
+	c++ 2019 redistributable msms

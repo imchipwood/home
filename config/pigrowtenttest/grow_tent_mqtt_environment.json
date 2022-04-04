@@ -16,7 +16,7 @@
     }
   },
   "db": {
-    "path": "/home_volumes/grow_tent_mqtt_environment.sqlite3",
+    "path": "/home_volumes/grow_tent_mqtt_environment_test.sqlite3",
     "tables": [
       {
         "name": "grow_tent_mqtt_environment",

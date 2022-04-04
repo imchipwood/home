@@ -1,6 +1,7 @@
+from collections import OrderedDict
 import json
 import os
-from typing import List, Type, Union
+from typing import List, Type, Union, Dict
 
 from library import CONFIG_DIR, TEST_CONFIG_DIR, CONFIG_TYPE, CONTROLLER_TYPE
 # from library.data.database import
@@ -26,12 +27,13 @@ class BaseConfigKeys:
     TOPICS = "topics"
     PUBLISH = "publish"
     SUBSCRIBE = "subscribe"
+    NAME = "name"               # why did i make this key
+    TABLE_NAME = "table_name"   # which table to write data received over mqtt to
     DELAY = "delay"
     PIN = "gpio_pin"
     DB = "db"
     DB_TABLES = "tables"
     DB_PATH = "path"
-    DB_NAME = "name"
     DB_COLUMNS = "columns"
     DB_COLUMN_NAME = "col_name"
     DB_COLUMN_TYPE = "col_type"
@@ -194,18 +196,14 @@ class BaseConfiguration:
         """
         return self.config.get(BaseConfigKeys.LOG, "")
 
-    # @property
-    # def db_table_names(self) -> List[str]:
-    #     """
-    #     @return: List of database table names
-    #     @rtype: list[str]
-    #     """
-    #     db_data = self.config.get(BaseConfigKeys.DB)
-    #     if not db_data:
-    #         return list()
-    #     return db_data.get(BaseConfigKeys.DB_TABLES, list())
-
-    # def get_db_table(self, table_name: str) :
+    @property
+    def db_enabled(self) -> bool:
+        """
+        Check if database writing/reading is enabled
+        @return: whether db is enabled
+        @rtype: bool
+        """
+        return bool(self.config.get(BaseConfigKeys.DB))
 
     @property
     def db_name(self) -> str:
@@ -213,10 +211,71 @@ class BaseConfiguration:
         @return: database name
         @rtype: str
         """
-        column_data = self.config.get(BaseConfigKeys.DB)
-        if not column_data:
+        db_path = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_PATH)
+        if not db_path:
             return ""
-        return column_data.get(BaseConfigKeys.DB_NAME)
+        return os.path.splitext(os.path.basename(db_path))[0]
+
+    # def _get_table_definition(self, table_name: str) -> dict:
+    #     """
+    #     Get the dictionary of table information for the given table name
+    #     @param table_name: name of database table
+    #     @type table_name: str
+    #     @return: dictionary of table information
+    #     @rtype: dict
+    #     """
+    #     table_definitions = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_TABLES)
+    #     if not table_definitions:
+    #         return {}
+    #     for table_definition in table_definitions:
+    #         if table_definition.get(BaseConfigKeys.TABLE_NAME) == table_name:
+    #             return table_definition
+    #     return {}
+    #
+    # def get_db_columns_for_table(self, table_name: str) -> Dict[str, List[Column]]:
+    #     """
+    #     Get a list of database Columns for the given table name
+    #     @param table_name: name of database table
+    #     @type table_name: str
+    #     @return: the list of columns for the given table name
+    #     @rtype: dict[str, list[Column]]
+    #     """
+    #     table_definition = self._get_table_definition(table_name)
+    #     if not table_definition:
+    #         return {}
+    #     from library.data.database import Column
+    #     columns = []
+    #     for column_dict in table_definition.get(BaseConfigKeys.DB_COLUMNS, []):
+    #         column = Column(
+    #             column_dict.get(BaseConfigKeys.DB_COLUMN_NAME, ""),
+    #             column_dict.get(BaseConfigKeys.DB_COLUMN_TYPE, ""),
+    #             column_dict.get(BaseConfigKeys.DB_COLUMN_KEY, ""),
+    #         )
+    #         columns.append(column)
+    #     return {table_name: columns}
+
+    @property
+    def db_tables(self) -> Dict[str, List[Column]]:
+        """
+
+        @return: dictionary of table names to columns
+        @rtype: dict[str, list[Column]]
+        """
+        from library.data.database import Column
+        table_definitions = self.config.get(BaseConfigKeys.DB, {}).get(BaseConfigKeys.DB_TABLES)
+        tables = OrderedDict()
+        for table_definition in table_definitions:
+            table_name = table_definition.get(BaseConfigKeys.NAME)
+            columns = []
+            for column_dict in table_definition.get(BaseConfigKeys.DB_COLUMNS, []):
+                column = Column(
+                    column_dict.get(BaseConfigKeys.DB_COLUMN_NAME, ""),
+                    column_dict.get(BaseConfigKeys.DB_COLUMN_TYPE, ""),
+                    column_dict.get(BaseConfigKeys.DB_COLUMN_KEY, ""),
+                )
+                columns.append(column)
+            tables[table_name] = columns
+        return tables
 
     @property
     def db_columns(self) -> List[Column]:
@@ -238,6 +297,7 @@ class BaseConfiguration:
             columns.append(column)
         return columns
 
+    @property
     def db_path(self) -> str:
         """
         @return: path to database (optional)

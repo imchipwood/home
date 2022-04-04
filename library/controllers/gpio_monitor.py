@@ -14,6 +14,9 @@ from library.controllers import BaseController, get_logger
 from library.data.database import Database
 from library.sensors.gpio_monitor import GPIOMonitor
 
+if False:
+    from library.config.gpio_monitor import GPIOMonitorConfig
+
 
 class GPIOMonitorController(BaseController):
     """
@@ -29,6 +32,8 @@ class GPIOMonitorController(BaseController):
         @type debug: bool
         """
         super().__init__(config, debug)
+
+        self.config = config  # type: GPIOMonitorConfig
 
         self.logger = get_logger(__name__, debug, config.log)
 
@@ -155,8 +160,9 @@ class GPIOMonitorController(BaseController):
         """
         convo_id = self.sensor.get_id()
 
-        if self.config.db_name:
-            with Database(self.config.db_name, self.config.db_columns, self.config.db_path) as db:
+        table_name = self.config.mqtt_config.db_table_name
+        if self.config.db_name and table_name:
+            with Database(self.config.db_name, self.config.db_tables, self.config.db_path) as db:
                 # Create the entry
                 raw_data = {
                     DatabaseKeys.TIMESTAMP: int(time.time()),
@@ -165,10 +171,11 @@ class GPIOMonitorController(BaseController):
                     DatabaseKeys.CAPTURED: int(False),
                     DatabaseKeys.NOTIFIED: int(False)
                 }
-                data = db.format_data_for_insertion(**raw_data)
+                table = db.get_table(self.config.mqtt_config.db_table_name)
+                data = table.format_data_for_insertion(**raw_data)
                 self.logger.debug(f"Adding data to db: {data}")
-                db.add_data(data)
-                db.delete_all_except_last_n_records(2)
+                table.add_data(data)
+                table.delete_all_except_last_n_records(2)
 
         return convo_id
 

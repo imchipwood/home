@@ -1,6 +1,0 @@
-{
-  "sensors": {
-    "environment": "media_environment.json"
-  },
-  "mqtt": "media_mqtt.json"
-}
