@@ -3,7 +3,7 @@
   "mqtt": {
     "client_id": "grow_tent_mqtt_environment",
     "topics": {
-      "hass/env/#": {
+      "grow/env": {
         "pubsub": "subscribe",
         "payload": {
           "temperature": "{:0.2f}",

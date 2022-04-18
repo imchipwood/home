@@ -22,12 +22,12 @@ services:
     privileged: true
     ports:
       - 1883
-    volumes:
-      - D:\home:/home_volumes
+#    volumes:
+#      - D:\home:/home_volumes
     build:
       context: ./home_grow
       args:
-        branchname: dependency_reduction
+        branchname: master
         cfgfilefolder: pigrowtent
         cfgfilename: grow_tent
     logging:
