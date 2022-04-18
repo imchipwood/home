@@ -20,7 +20,7 @@ RUN apt-get install -y \
     gcc g++ make cmake \
     libsqlite3-dev
 RUN apt-get install -y \
-    python python3-pip \
+    python3-pip \
     tk-dev \
     libncurses5-dev libncursesw5-dev \
     libreadline6-dev libdb5.3-dev libgdbm-dev libssl-dev libbz2-dev \
@@ -28,7 +28,6 @@ RUN apt-get install -y \
     sqlite3
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-WORKDIR /
 COPY installPython.sh /usr/local/bin/
 RUN installPython.sh
 
