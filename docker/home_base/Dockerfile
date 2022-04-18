@@ -32,4 +32,7 @@ WORKDIR /
 COPY installPython.sh /usr/local/bin/
 RUN installPython.sh
 
+RUN apt-get install -y \
+    unixodbc unixodbc-dev
+
 CMD ["echo Base image setup complete"]
