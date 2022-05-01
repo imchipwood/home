@@ -2,6 +2,7 @@
   "log": "/home/cpw/dev/logs/mqtt_environment.log",
   "mqtt": {
     "client_id": "grow_tent_mqtt_environment",
+    "table_name": "grow_tent_mqtt_environment",
     "topics": {
       "grow/env": {
         "pubsub": "subscribe",

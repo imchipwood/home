@@ -148,7 +148,11 @@ class MqttEnvironmentController(BaseController):
                 self.logger.info(formatted_message)
 
                 table_name = self.config.mqtt_config.db_table_name
+                if not table_name:
+                    raise Exception("No table name defined in environment MQTT config")
                 table = db.get_table(table_name)
+                if not table:
+                    raise Exception(f"Could not find table '{table_name}' in db '{self.config.db_name}'")
                 table.add_data([timestamp, msg_id, temperature, humidity])
         except Exception as e:
             # it's possible for on_message to fire for two messages nearly simultaneously

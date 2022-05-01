@@ -83,7 +83,7 @@ def connect_to_database_server(server_location: str, database_name: str, user: s
         raise
 
 
-class Table(BaseTable):
+class CentralTable(BaseTable):
     def __init__(self, connection: pyodbc.Connection, name: str, columns: List[Column]):
         super().__init__(connection, name, columns)
 
@@ -261,7 +261,7 @@ DELETE FROM {self.name}
 
 
 class Database(BaseDatabase):
-    TABLE_CLASS = Table
+    TABLE_CLASS = CentralTable
 
     def __init__(self, tables: Dict[str, List[Column]], server, database, username, password):
         """
