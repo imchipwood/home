@@ -16,3 +16,5 @@ data/*.sqlite3
 util/htmlcov
 pi_image
 secrets.json
+
+.env

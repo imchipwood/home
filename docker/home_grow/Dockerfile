@@ -1,5 +1,5 @@
 # dockerfile for monitoring grow tent
-FROM imchipwoodnt/home_base:amd64
+FROM imchipwoodnt/home_base:latest
 
 ARG branchname
 ARG cfgfilefolder
