@@ -166,7 +166,7 @@ INSERT INTO {self.name} (
         query = f"""
 UPDATE {self.name}
 SET {column_name} = {new_value}
-WHERE {self.primary_column_name} = {primary_key_value}
+WHERE {self.primary_column_name} LIKE '%{primary_key_value}%'
 """
         self.cursor.execute(query)
         self.connection.commit()
@@ -181,7 +181,7 @@ WHERE {self.primary_column_name} = {primary_key_value}
         """
         if isinstance(primary_key_value, str):
             primary_key_value = primary_key_value.replace("\\", "\\\\")
-        query = f"""SELECT * FROM {self.name} WHERE {self.primary_column_name} = {primary_key_value}"""
+        query = f"""SELECT * FROM {self.name} WHERE {self.primary_column_name} LIKE '%{primary_key_value}%'"""
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         if not result:
