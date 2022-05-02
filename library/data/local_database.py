@@ -127,7 +127,7 @@ INSERT INTO {self.name} (
         query = f"""
 UPDATE {self.name}
 SET {column_name} = {new_value}
-WHERE {self.primary_column_name} = {primary_key_value}
+WHERE {self.primary_column_name} = \"{primary_key_value}\"
 """
         self.cursor.execute(query)
         self.connection.commit()
@@ -140,7 +140,7 @@ WHERE {self.primary_column_name} = {primary_key_value}
         @return: DatabaseEntry for the target row
         @rtype: DatabaseEntry
         """
-        query = f"""SELECT * FROM {self.name} WHERE {self.primary_column_name} = {primary_key_value}"""
+        query = f"""SELECT * FROM {self.name} WHERE {self.primary_column_name} = \"{primary_key_value}\""""
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         return self.convert_query_result_to_database_entry(result)
