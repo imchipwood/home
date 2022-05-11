@@ -1,49 +1,12 @@
 import datetime
 import logging
-import os
-import platform
-import pyodbc
 import sys
 from typing import List, Dict
 
-from library import HOME_DIR
+import pyodbc
+
 from library.data import Column, DatabaseEntry
 from library.data.database import BaseTable, BaseDatabase
-
-
-def get_database_path(name: str) -> str:
-    """
-    Get the path to the target database
-    @param name: name of the database
-    @type name: str
-    @return: path to database file
-    @rtype: str
-    """
-    data_dir = os.path.join(HOME_DIR, "data")
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-    database_path = os.path.join(data_dir, os.path.basename(name) + ".sqlite3")
-    return database_path
-
-
-# def connect_to_database(path_or_name: str) -> sqlite3.Connection:
-#     """
-#     Connect to target database
-#     @param name: name of database
-#     @type name: str
-#     @return: open database connection
-#     @rtype: sqlite3.Connection
-#     """
-#     if ".sqlite3" not in path_or_name.lower():
-#         path_or_name = get_database_path(path_or_name)
-#
-#     try:
-#         con = sqlite3.connect(path_or_name)
-#     except Exception as e:
-#         logging.exception(f"Failed to connect to DB @ {path_or_name}")
-#         raise e
-#
-#     return con
 
 
 def connect_to_database_server(server_location: str, database_name: str, user: str, pw: str) -> pyodbc.Connection:
