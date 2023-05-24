@@ -1,60 +1,36 @@
-```bash
-cd docker
-docker-compose build home
-docker run -t --device /dev/gpiomem --name homeenv_005 --privileged -d docker_home:latest
-```
+# home_grow
 
-# teamcity build setup
+Docker image that reads MQTT messages about the grow tent environment 
+and logs them to an SQL database
 
-## general
+*** 
 
-artifact paths: `reports => reports`
+## Dockerfile args
 
-set simultaneous builds to `1`
+### branchname
 
-## triggers
+name of git branch to checkout 
 
-```bash
-# branch filters
-## master
--:*
-+:refs/heads/master
-## other
-+:*
--:refs/heads/master
-```
+### cfgfilefolder
 
-## build steps
+folder name with config folder to find json files
 
-### setup venv
+### cfgfilename
 
-```bash
-[ ! which rustc | grep 'cargo' ] || curl https://sh.rustup.rs -sSf | sh -s -- -y
-[ -d "venv" ] || python3 -m venv venv
-. venv/bin/activate
-pip install --upgrade pip wheel setuptools
-pip install -r requirements.txt
-[ -d "reports" ] || mkdir reports
-```
+name of top level config file to load WITHOUT .json on the end
 
-### run
 
-```bash
-. venv/bin/activate
-coverage run -m pytest
-coverage html
-```
+## Current build args
 
-## failure conditions
+Just use `docker-compose home_grow`, that should handle it
 
-* runs longer than 10 mins
-* any build step exited with error
-* at least one test failed
-* out of memory or crash detected
+***
 
-### parameters
+# Viewing the database
 
-```bash
-env.CRYPTOGRAPHY_DONT_BUILD_RUST=1
-env.IS_TEAMCITY=TRUE
-```
+Use something like VSCode's mssql extension and connect to the database.
+
+The connection parameters mirror what's in the JSON DB configs pretty well:
+
+* `hostname\instance` = `<ip addr>,<port>`
+* the rest pretty much lines up
