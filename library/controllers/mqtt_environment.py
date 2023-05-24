@@ -139,9 +139,11 @@ class MqttEnvironmentController(BaseController):
                 # meta table available?
                 if len(db.tables) > 1:
                     meta_table = list(db.tables.values())[0]
+                    self.logger.debug(f"meta table found: {meta_table.name}")
 
                     # check if meta table has entry for this id
                     if not meta_table.get_record(msg_id):
+                        self.logger.info(f"Meta table entry not found for '{msg_id}' - adding")
                         meta_data = [msg_id, timestamp] + ["" for _ in range(len(meta_table.columns[2:]))]
                         meta_table.add_data(meta_data)
 
