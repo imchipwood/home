@@ -346,7 +346,7 @@ class ConfigurationHandler(BaseConfiguration):
         SENSORCLASSES.GPIO_MONITOR,
         SENSORCLASSES.GPIO_DRIVER,
         SENSORCLASSES.CAMERA,
-        # SENSORCLASSES.PUSHBULLET,
+        SENSORCLASSES.PUSHBULLET,
         SENSORCLASSES.TIMER
     ]
     from library.config.mqtt import MQTTConfig
@@ -420,9 +420,9 @@ class ConfigurationHandler(BaseConfiguration):
         elif sensor == SENSORCLASSES.GPIO_MONITOR:
             from library.config.gpio_monitor import GPIOMonitorConfig
             sensor_cfg_cls = GPIOMonitorConfig
-        # elif sensor == SENSORCLASSES.PUSHBULLET:
-        #     from library.config.pushbullet import PushbulletConfig
-        #     sensor_cfg_cls = PushbulletConfig
+        elif sensor == SENSORCLASSES.PUSHBULLET:
+            from library.config.pushbullet import PushbulletConfig
+            sensor_cfg_cls = PushbulletConfig
         else:
             raise Exception(f"did not recognize sensor type {sensor}")
 
@@ -464,6 +464,9 @@ class ConfigurationHandler(BaseConfiguration):
         elif sensor == SENSORCLASSES.GPIO_MONITOR:
             from library.controllers.gpio_monitor import GPIOMonitorController
             sensor_cls = GPIOMonitorController
+        elif sensor == SENSORCLASSES.PUSHBULLET:
+            from library.controllers.pushbullet import PushBulletController
+            sensor_cls = PushBulletController
         else:
             # apparently actually NOT in the map...
             raise Exception(f"did not recognize sensor type {sensor}")
