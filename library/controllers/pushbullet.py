@@ -189,7 +189,7 @@ class PushBulletController(BaseController):
         if target_entry:
             timestamp = target_entry[DatabaseKeys.TIMESTAMP]
             self.logger.debug(f"Updating DB entry for id '{convo_id}': {DatabaseKeys.NOTIFIED} = True")
-            self.db.update_record(timestamp, DatabaseKeys.NOTIFIED, notified)
+            self.db_table.update_record(timestamp, DatabaseKeys.NOTIFIED, notified)
 
         else:
             timestamp = int(time())
@@ -203,10 +203,10 @@ class PushBulletController(BaseController):
                 DatabaseKeys.CAPTURED: int(True),
                 DatabaseKeys.NOTIFIED: notified
             }
-            data = self.db.format_data_for_insertion(**raw_data)
+            data = self.db_table.format_data_for_insertion(**raw_data)
             self.logger.debug(f"Didn't find DB entry for id '{convo_id}' - adding {data}")
-            self.db.add_data(data)
-            self.db.delete_all_except_last_n_records(10)
+            self.db_table.add_data(data)
+            self.db_table.delete_all_except_last_n_records(10)
 
     def should_text_notify(self, convo_id: str) -> bool:
         """

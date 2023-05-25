@@ -18,6 +18,7 @@
   "capture_path": "/home/cpw/camera/captures/garage.jpg",
   "mqtt": {
     "client_id": "garage_door_camera",
+    "table_name": "garage_door_monitor",
     "topics": {
       "hass/door/garage/state": {
         "pubsub": "subscribe",
@@ -44,8 +45,11 @@
     }
   },
   "db": {
-    "type": "local",
-    "path": "/home/cpw/dev/home/data/garage_door_monitor.sqlite3",
+    "type": "central",
+    "server": "192.168.1.30,1433",
+    "database": "model",
+    "username": "sa",
+    "password": "$SQL_PASSWORD",
     "tables": [
       {
         "name": "garage_door_monitor",

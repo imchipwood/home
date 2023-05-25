@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import sys
 from typing import List, Dict
 
@@ -24,12 +25,19 @@ def connect_to_database_server(server_location: str, database_name: str, user: s
     @rtype: pyodbc.Connection
     """
     linux_driver = "/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.0.so.1.1"
+    linux_driver_pi = "/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so"
     # linux_driver_mint = "FreeTDS"
     win_driver = "SQL SERVER"
     driver = win_driver
     extra = ""
     if "linux" in sys.platform:
-        driver = linux_driver
+        machine = os.uname().machine
+        if "x86" in machine:
+            driver = linux_driver
+        elif "arm" in machine:
+            driver = linux_driver_pi
+        else:
+            raise Exception(f"Unknown machine type '{machine}' - can't determine SQL server driver (odbc)")
         extra = "TrustServerCertificate=yes"
     connector = f"DRIVER={{{driver}}};" \
                 f"SERVER={server_location};" \

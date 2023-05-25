@@ -60,6 +60,28 @@ Note that SQL Server has some password requirements - min 8 chars, must include 
 
 Make sure to specify the server IP address (`localhost` works if running on the same machine) in the config files.
 
+## pydobc on rpi
+
+Need to install some packages first:
+
+```bash
+apt-get install python-pyodbc unixodbc unixodbc-dev freetds-dev tdsodbc
+python -m pip install pyodbc
+
+```
+
+also need to set up `/etc/odbcinst.ini` 
+
+```bash
+sudo cat /etc/odbcinst.ini
+[ODBC Driver 18 for SQL Server]
+Description=Microsoft ODBC Driver 18 for SQL Server
+#Driver=/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.0.so.1.1
+Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so 
+Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
+UsageCount=1
+```
+
 ## Passwords
 
 SQL server requires a password to connect. You can add a file `secrets.json` to the root of the repo and it will load all variables in it into the environment.
