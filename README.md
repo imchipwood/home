@@ -36,6 +36,11 @@ coverage run -m pytest
 coverage html
 ```
 
+# MQTT (Mosquitto)
+
+MQTT is used for communication between devices. Make sure to set up a conf file in `/etc/mosquitto/conf.d` with the
+correct address for the MQTT broker
+
 # WIP - Using with SQL Server
 
 Originally, home was designed to use sqlite databases but as requirements and features have changed, it
