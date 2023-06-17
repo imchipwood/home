@@ -159,7 +159,9 @@ def get_mqtt_client(mqtt_config: MQTTConfig, topics: List[str]) -> MQTTClient:
     mqtt_client.on_subscribe = on_subscribe
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
+    print(f"connecting to mqtt host {mqtt_config.broker}:{mqtt_config.port}")
     mqtt_client.connect(host=mqtt_config.broker, port=mqtt_config.port)
+    print(f"running mqtt_client.loop_start()")
     mqtt_client.loop_start()
     return mqtt_client
 
@@ -231,7 +233,10 @@ class TestEnvironmentController:
         MESSAGE = False
 
         topics = [x.name for x in controller.config.mqtt_topic]
+        print(f"Topics: {topics}")
+        print("Getting mqtt client")
         client = get_mqtt_client(controller.config.mqtt_config, topics)
+        print("Publishing to mqtt")
         controller.publish(temperature=123.123, humidity=50.05, units="Fahrenheit")
 
         i = 0
@@ -662,151 +667,153 @@ class TestGPIOMonitorController:
         assert MESSAGE
 
 
-# class TestPushBulletController:
-#
-#     @pytest.mark.usefixtures("mock_db_enabled_pushbullet")
-#     def test_mqtt(self, monkeypatch):
-#         """
-#         Test that controller subscribes to topics and receives published messages
-#         """
-#         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
-#         """ @type: library.controllers.pushbullet.PushBulletController"""
-#
-#         global MESSAGE, MOCK_TEXT_SENT, MOCK_FILE_SENT
-#         MESSAGE, MOCK_TEXT_SENT, MOCK_FILE_SENT = False, False, False
-#
-#         topics = [x.name for x in controller.config.mqtt_topic]
-#         client = get_mqtt_client(controller.config.mqtt_config, topics)
-#
-#         def mock_send_file(file_path):
-#             global MOCK_FILE_SENT
-#             MOCK_FILE_SENT = True
-#             print("SEND FILE")
-#             print(f"Fake uploaded {file_path}")
-#
-#         def mock_send_text(title, body):
-#             global MOCK_TEXT_SENT
-#             MOCK_TEXT_SENT = True
-#             print("SEND TEXT")
-#             print(f"Fake pushed: {title}: {body}")
-#
-#         def mock_should_text_notify(convo_id):
-#             return True
-#
-#         def mock_should_image_notify(convo_id, force=True):
-#             return force
-#
-#         monkeypatch.setattr(controller, "should_text_notify", mock_should_text_notify)
-#         monkeypatch.setattr(controller, "should_image_notify", mock_should_image_notify)
-#         monkeypatch.setattr(controller.notifier, "send_file", mock_send_file)
-#         monkeypatch.setattr(controller.notifier, "send_text", mock_send_text)
-#
-#         topic_state = controller.config.mqtt_topic[0]
-#         topic_publish = controller.config.mqtt_topic[1]
-#         payload_closed = json.dumps(topic_state.payload())
-#         payload_capture = topic_publish.payload()
-#         payload_capture[PubSubKeys.FORCE] = True
-#         payload_capture = json.dumps(payload_capture)
-#
-#         try:
-#             controller.start()
-#
-#             for topic, payload in [(topic_state.name, payload_closed), (topic_publish.name, payload_capture)]:
-#                 client.single(
-#                     topic,
-#                     payload,
-#                     retain=False,
-#                     qos=2,
-#                     hostname=controller.config.mqtt_config.broker,
-#                     port=controller.config.mqtt_config.port
-#                 )
-#
-#             start = timeit.default_timer()
-#             now = start
-#             while not (MOCK_TEXT_SENT and MOCK_FILE_SENT) and now - start < MAX_WAIT_SECONDS * 10:
-#                 now = timeit.default_timer()
-#
-#             if not MOCK_TEXT_SENT or not MOCK_FILE_SENT:
-#                 raise Exception(f"Messages not received! file: {MOCK_FILE_SENT}, text: {MOCK_TEXT_SENT}")
-#
-#         finally:
-#             controller.stop()
-#             client.disconnect()
-#
-#         assert MESSAGE
-#
-#     def test_should_text_notify(self):
-#         """
-#         Test the should_text_notify method
-#         """
-#         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
-#         """ @type: library.controllers.pushbullet.PushBulletController"""
-#
-#         convo_id = "1234567890"
-#         convo_id2 = "0987654321"
-#         convo_id3 = "0987654320"
-#         try:
-#             # clear DB entries
-#             with controller.db as db:
-#                 db.delete_all_except_last_n_records(0)
-#
-#                 # Notify if no DB entries
-#                 assert controller.should_text_notify(convo_id)
-#
-#                 # Notify if target entry has not been notified
-#                 db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
-#                 assert controller.should_text_notify(convo_id)
-#
-#                 # Don't notify if target entry is marked notified
-#                 controller.mark_entry_notified(convo_id, GarageDoorStates.CLOSED)
-#                 assert not controller.should_text_notify(convo_id)
-#
-#                 # Notify if entry doesn't exist
-#                 assert controller.should_text_notify(convo_id2)
-#
-#                 # Don't notify if target entry is marked notified
-#                 controller.mark_entry_notified(convo_id2, GarageDoorStates.CLOSED)
-#                 assert not controller.should_text_notify(convo_id2)
-#
-#                 # Don't notify if target entry is for OPEN door
-#                 db.add_data([1, GarageDoorStates.OPEN, convo_id3, int(False), int(False)])
-#                 assert not controller.should_text_notify(convo_id3)
-#
-#         finally:
-#             controller.cleanup()
-#
-#     def test_should_image_notify(self):
-#         controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
-#         """ @type: library.controllers.pushbullet.PushBulletController"""
-#
-#         convo_id = "1234567890"
-#         # convo_id2 = "0987654321"
-#         try:
-#             # clear DB entries
-#             with controller.db as db:
-#                 db.delete_all_except_last_n_records(0)
-#
-#                 # Notify if no entries
-#                 assert controller.should_image_notify(convo_id)
-#
-#                 # Don't notify if target entry is closed
-#                 db.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
-#                 assert not controller.should_image_notify(convo_id)
-#                 db.delete_all_except_last_n_records(0)
-#
-#                 # Notify if target entry is open and no notification
-#                 i = 0
-#                 db.add_data([i, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
-#                 assert controller.should_image_notify(convo_id)
-#
-#                 # Don't notify if target entry is open but has been notified
-#                 controller.mark_entry_notified(convo_id, GarageDoorStates.OPEN)
-#                 # i += 1
-#                 # db.add_data([i, GarageDoorStates.OPEN, convo_id, int(False), int(True)])
-#                 assert not controller.should_image_notify(convo_id)
-#
-#                 # Notify if force no matter what
-#                 assert controller.should_image_notify(convo_id, force=True)
-#
-#         finally:
-#             controller.cleanup()
+class TestPushBulletController:
+
+    @pytest.mark.usefixtures("mock_db_enabled_pushbullet")
+    def test_mqtt(self, monkeypatch):
+        """
+        Test that controller subscribes to topics and receives published messages
+        """
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
+        """ @type: library.controllers.pushbullet.PushBulletController"""
+
+        global MESSAGE, MOCK_TEXT_SENT, MOCK_FILE_SENT
+        MESSAGE, MOCK_TEXT_SENT, MOCK_FILE_SENT = False, False, False
+
+        topics = [x.name for x in controller.config.mqtt_topic]
+        client = get_mqtt_client(controller.config.mqtt_config, topics)
+
+        def mock_send_file(file_path):
+            global MOCK_FILE_SENT
+            MOCK_FILE_SENT = True
+            print("SEND FILE")
+            print(f"Fake uploaded {file_path}")
+
+        def mock_send_text(title, body):
+            global MOCK_TEXT_SENT
+            MOCK_TEXT_SENT = True
+            print("SEND TEXT")
+            print(f"Fake pushed: {title}: {body}")
+
+        def mock_should_text_notify(convo_id):
+            return True
+
+        def mock_should_image_notify(convo_id, force=True):
+            return force
+
+        monkeypatch.setattr(controller, "should_text_notify", mock_should_text_notify)
+        monkeypatch.setattr(controller, "should_image_notify", mock_should_image_notify)
+        monkeypatch.setattr(controller.notifier, "send_file", mock_send_file)
+        monkeypatch.setattr(controller.notifier, "send_text", mock_send_text)
+
+        topic_state = controller.config.mqtt_topic[0]
+        topic_publish = controller.config.mqtt_topic[1]
+        payload_closed = json.dumps(topic_state.payload())
+        payload_capture = topic_publish.payload()
+        payload_capture[PubSubKeys.FORCE] = True
+        payload_capture = json.dumps(payload_capture)
+
+        try:
+            controller.start()
+
+            for topic, payload in [(topic_state.name, payload_closed), (topic_publish.name, payload_capture)]:
+                client.single(
+                    topic,
+                    payload,
+                    retain=False,
+                    qos=2,
+                    hostname=controller.config.mqtt_config.broker,
+                    port=controller.config.mqtt_config.port
+                )
+
+            start = timeit.default_timer()
+            now = start
+            while not (MOCK_TEXT_SENT and MOCK_FILE_SENT) and now - start < MAX_WAIT_SECONDS * 10:
+                now = timeit.default_timer()
+
+            if not MOCK_TEXT_SENT or not MOCK_FILE_SENT:
+                raise Exception(f"Messages not received! file: {MOCK_FILE_SENT}, text: {MOCK_TEXT_SENT}")
+
+        finally:
+            controller.stop()
+            client.disconnect()
+
+        assert MESSAGE
+
+    def test_should_text_notify(self):
+        """
+        Test the should_text_notify method
+        """
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
+        """ @type: library.controllers.pushbullet.PushBulletController"""
+
+        convo_id = "1234567890"
+        convo_id2 = "0987654321"
+        convo_id3 = "0987654320"
+        try:
+            # clear DB entries
+            with controller.db as db:
+                table = db.get_table(controller.db_table_name)
+                table.delete_all_except_last_n_records(0)
+
+                # Notify if no DB entries
+                assert controller.should_text_notify(convo_id)
+
+                # Notify if target entry has not been notified
+                table.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                assert controller.should_text_notify(convo_id)
+
+                # Don't notify if target entry is marked notified
+                controller.mark_entry_notified(convo_id, GarageDoorStates.CLOSED)
+                assert not controller.should_text_notify(convo_id)
+
+                # Notify if entry doesn't exist
+                assert controller.should_text_notify(convo_id2)
+
+                # Don't notify if target entry is marked notified
+                controller.mark_entry_notified(convo_id2, GarageDoorStates.CLOSED)
+                assert not controller.should_text_notify(convo_id2)
+
+                # Don't notify if target entry is for OPEN door
+                table.add_data([1, GarageDoorStates.OPEN, convo_id3, int(False), int(False)])
+                assert not controller.should_text_notify(convo_id3)
+
+        finally:
+            controller.cleanup()
+
+    def test_should_image_notify(self):
+        controller = CONFIGURATION_HANDLER.get_sensor_controller(SENSORCLASSES.PUSHBULLET)
+        """ @type: library.controllers.pushbullet.PushBulletController"""
+
+        convo_id = "1234567890"
+        # convo_id2 = "0987654321"
+        try:
+            # clear DB entries
+            with controller.db as db:
+                table = db.get_table(controller.db_table_name)
+                table.delete_all_except_last_n_records(0)
+
+                # Notify if no entries
+                assert controller.should_image_notify(convo_id)
+
+                # Don't notify if target entry is closed
+                table.add_data([0, GarageDoorStates.CLOSED, convo_id, int(False), int(False)])
+                assert not controller.should_image_notify(convo_id)
+                db.get_table(controller.db_table_name).delete_all_except_last_n_records(0)
+
+                # Notify if target entry is open and no notification
+                i = 0
+                table.add_data([i, GarageDoorStates.OPEN, convo_id, int(False), int(False)])
+                assert controller.should_image_notify(convo_id)
+
+                # Don't notify if target entry is open but has been notified
+                controller.mark_entry_notified(convo_id, GarageDoorStates.OPEN)
+                # i += 1
+                # db.add_data([i, GarageDoorStates.OPEN, convo_id, int(False), int(True)])
+                assert not controller.should_image_notify(convo_id)
+
+                # Notify if force no matter what
+                assert controller.should_image_notify(convo_id, force=True)
+
+        finally:
+            controller.cleanup()
